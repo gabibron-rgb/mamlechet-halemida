@@ -7,6 +7,7 @@ import type { Zone } from '../data/items';
 import type { CapacityKey } from '../data/levels';
 import { genId } from '../utils/storage';
 import type { BoxTier } from '../data/boxes';
+import { supabase } from '../lib/supabaseClient';
 
 export type StudentId = string;
 
@@ -40,6 +41,15 @@ export type CompanionState = {
 
 export type StudentState = {
   id: StudentId;
+
+  // id אמיתי מתוך Supabase, אם יש.
+  // אם אין, המשחק עדיין יעבוד מקומית.
+  supabaseId?: string;
+
+  // שם התחברות כמו yoni.
+  // אם אין, ננסה לעדכן לפי שם התלמיד בעברית.
+  loginName?: string;
+
   name: string;
   classId: string;
   points: number;
@@ -71,12 +81,12 @@ type GameStore = {
   updateStudent: (id: StudentId, patch: Partial<StudentState>) => void;
 
   updateInventoryEntry: (
-  studentId: StudentId,
-  inventoryIndex: number,
-  patch: Partial<InventoryEntry>
-) => void;
+    studentId: StudentId,
+    inventoryIndex: number,
+    patch: Partial<InventoryEntry>
+  ) => void;
 
-  addPoints: (id: StudentId, delta: number) => void;
+  addPoints: (id: StudentId, delta: number) => Promise<void>;
   addXp: (id: StudentId, delta: number) => void;
   addInventory: (id: StudentId, itemId: string) => void;
   removeInventory: (id: StudentId, itemId: string) => void;
@@ -94,6 +104,52 @@ type GameStore = {
 
   resetAll: () => void;
 };
+
+function isUuid(value: string | undefined): boolean {
+  if (!value) return false;
+
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value
+  );
+}
+
+async function syncStudentPointsToSupabase(
+  student: StudentState,
+  nextPoints: number
+) {
+  const supabaseId = student.supabaseId ?? (isUuid(student.id) ? student.id : null);
+  const loginName = student.loginName?.trim();
+  const studentName = student.name?.trim();
+
+  let query = supabase.from('students').update({ points: nextPoints }).select('*');
+
+  if (supabaseId) {
+    query = query.eq('id', supabaseId);
+  } else if (loginName) {
+    query = query.eq('login_name', loginName);
+  } else if (studentName) {
+    // פתרון זמני לפיילוט: אם אין loginName/id אמיתי,
+    // נעדכן לפי השם בעברית שמופיע בטבלת students.
+    query = query.eq('name', studentName);
+  } else {
+    console.warn('Cannot sync student to Supabase: missing id/loginName/name', student);
+    return;
+  }
+
+  const { data, error } = await query.maybeSingle();
+
+  if (error) {
+    console.error('Error syncing student points to Supabase:', error);
+    return;
+  }
+
+  if (!data) {
+    console.warn('No matching student found in Supabase for:', student);
+    return;
+  }
+
+  console.log('Synced student points to Supabase:', data);
+}
 
 function defaultStudent(name: string, classId: string): StudentState {
   return {
@@ -137,19 +193,21 @@ export const useGameStore = create<GameStore>()(
 
       createStudent: (name, classId) => {
         const stu = defaultStudent(name, classId);
-        set(state => ({
+
+        set((state) => ({
           students: {
             ...state.students,
             [stu.id]: stu,
           },
         }));
+
         return stu.id;
       },
 
       getStudent: (id) => get().students[id],
 
       updateStudent: (id, patch) =>
-        set(state => {
+        set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
 
@@ -164,51 +222,63 @@ export const useGameStore = create<GameStore>()(
           };
         }),
 
-        updateInventoryEntry: (studentId, inventoryIndex, patch) =>
-  set(state => {
-    const student = state.students[studentId];
-    if (!student) return state;
+      updateInventoryEntry: (studentId, inventoryIndex, patch) =>
+        set((state) => {
+          const student = state.students[studentId];
+          if (!student) return state;
 
-    if (!student.inventory[inventoryIndex]) return state;
+          if (!student.inventory[inventoryIndex]) return state;
 
-    const nextInventory = student.inventory.map((entry, idx) =>
-      idx === inventoryIndex
-        ? {
-            ...entry,
-            ...patch,
-          }
-        : entry
-    );
-
-    return {
-      students: {
-        ...state.students,
-        [studentId]: {
-          ...student,
-          inventory: nextInventory,
-        },
-      },
-    };
-  }),
-
-      addPoints: (id, delta) =>
-        set(state => {
-          const cur = state.students[id];
-          if (!cur) return state;
+          const nextInventory = student.inventory.map((entry, idx) =>
+            idx === inventoryIndex
+              ? {
+                  ...entry,
+                  ...patch,
+                }
+              : entry
+          );
 
           return {
             students: {
               ...state.students,
-              [id]: {
-                ...cur,
-                points: Math.max(0, cur.points + delta),
+              [studentId]: {
+                ...student,
+                inventory: nextInventory,
               },
             },
           };
         }),
 
+      addPoints: async (id, delta) => {
+        let updatedStudent: StudentState | null = null;
+        let nextPoints: number | null = null;
+
+        set((state) => {
+          const cur = state.students[id];
+          if (!cur) return state;
+
+          nextPoints = Math.max(0, cur.points + delta);
+
+          updatedStudent = {
+            ...cur,
+            points: nextPoints,
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [id]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent && nextPoints !== null) {
+          await syncStudentPointsToSupabase(updatedStudent, nextPoints);
+        }
+      },
+
       addXp: (id, delta) =>
-        set(state => {
+        set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
 
@@ -224,7 +294,7 @@ export const useGameStore = create<GameStore>()(
         }),
 
       addInventory: (id, itemId) =>
-        set(state => {
+        set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
 
@@ -253,11 +323,11 @@ export const useGameStore = create<GameStore>()(
         }),
 
       removeInventory: (id, itemId) =>
-        set(state => {
+        set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
 
-          const idx = cur.inventory.findIndex(e => e.itemId === itemId);
+          const idx = cur.inventory.findIndex((e) => e.itemId === itemId);
           if (idx === -1) return state;
 
           const next = [...cur.inventory];
@@ -275,7 +345,7 @@ export const useGameStore = create<GameStore>()(
         }),
 
       unlockTheme: (id, theme) =>
-        set(state => {
+        set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
           if (cur.unlockedThemes.includes(theme)) return state;
@@ -292,7 +362,7 @@ export const useGameStore = create<GameStore>()(
         }),
 
       completeLevelUp: (studentId, payload) =>
-        set(state => {
+        set((state) => {
           const student = state.students[studentId];
           if (!student) return state;
           if ((student.pendingLevelUps ?? 0) <= 0) return state;
@@ -302,19 +372,17 @@ export const useGameStore = create<GameStore>()(
             (capacities[payload.capacityKey] ?? 0) + 1;
 
           const cosmeticEntry: InventoryEntry = {
-  id: `${payload.cosmeticId}_${Date.now()}`,
-  itemId: payload.cosmeticId,
-  kind: 'cosmetic',
-  acquiredAt: Date.now(),
-
-  placedZone: null,
-  placedSlot: null,
-
-  roomX: null,
-  roomY: null,
-  roomScale: 1,
-  roomRotation: 0,
-};
+            id: `${payload.cosmeticId}_${Date.now()}`,
+            itemId: payload.cosmeticId,
+            kind: 'cosmetic',
+            acquiredAt: Date.now(),
+            placedZone: null,
+            placedSlot: null,
+            roomX: null,
+            roomY: null,
+            roomScale: 1,
+            roomRotation: 0,
+          };
 
           return {
             students: {
@@ -326,36 +394,38 @@ export const useGameStore = create<GameStore>()(
                 inventory: [...student.inventory, cosmeticEntry],
                 pendingLevelUps: Math.max(0, (student.pendingLevelUps ?? 0) - 1),
                 pendingThemeUnlocks:
-               (student.pendingThemeUnlocks ?? 0) +
-               (payload.newLevel % 2 === 0 ? 1 : 0),
+                  (student.pendingThemeUnlocks ?? 0) +
+                  (payload.newLevel % 2 === 0 ? 1 : 0),
               },
             },
           };
         }),
-         completeThemeUnlock: (studentId, themeId) => {
-  set((state) => {
-    const student = state.students[studentId];
-    if (!student) return state;
-    if ((student.pendingThemeUnlocks ?? 0) <= 0) return state;
-    if (student.unlockedThemes.includes(themeId)) return state;
 
-    return {
-      ...state,
-      students: {
-        ...state.students,
-        [studentId]: {
-          ...student,
-          unlockedThemes: [...student.unlockedThemes, themeId],
-          pendingThemeUnlocks: (student.pendingThemeUnlocks ?? 0) - 1,
-        },
+      completeThemeUnlock: (studentId, themeId) => {
+        set((state) => {
+          const student = state.students[studentId];
+          if (!student) return state;
+          if ((student.pendingThemeUnlocks ?? 0) <= 0) return state;
+          if (student.unlockedThemes.includes(themeId)) return state;
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: {
+                ...student,
+                unlockedThemes: [...student.unlockedThemes, themeId],
+                pendingThemeUnlocks: Math.max(
+                  0,
+                  (student.pendingThemeUnlocks ?? 0) - 1
+                ),
+              },
+            },
+          };
+        });
       },
-    };
-  });
-},
 
       resetAll: () => set({ students: {} }),
     }),
     { name: 'mamlechet:game' }
   )
- 
 );
