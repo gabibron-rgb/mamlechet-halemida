@@ -35,7 +35,7 @@ export type RoomSurface = {
   furnitureZIndex: number;
 };
 
-export function getRoomSurface(x: number, y: number): RoomSurface {
+export function getRoomSurface(_x: number, y: number): RoomSurface {
   // y נמוך יותר במסך = רחוק יותר; y גבוה יותר = קרוב יותר לשחקן
   const depthScale = y < 45 ? 0.75 : y < 65 ? 0.9 : 1.1;
 

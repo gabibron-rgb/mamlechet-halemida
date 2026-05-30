@@ -1,6 +1,6 @@
 import type { Rarity } from './boxes';
 import type { ThemeId } from './themes';
-import type { DisplayKind, RoomSurface } from './roomSurfaces';
+import type { DisplayKind } from './roomSurfaces';
 export type ItemCategory =
   | 'furniture' | 'decoration' | 'storage' | 'upgrade'
   | 'companionItem' | 'trophy' | 'cosmetic';
