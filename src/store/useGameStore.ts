@@ -102,6 +102,7 @@ type GameStore = {
     }
   ) => void;
 
+    loadStudentsFromSupabase: (classId: string) => Promise<void>;
   resetAll: () => void;
 };
 
@@ -113,23 +114,39 @@ function isUuid(value: string | undefined): boolean {
   );
 }
 
-async function syncStudentPointsToSupabase(
-  student: StudentState,
-  nextPoints: number
-) {
+async function syncStudentToSupabase(student: StudentState) {
   const supabaseId = student.supabaseId ?? (isUuid(student.id) ? student.id : null);
   const loginName = student.loginName?.trim();
   const studentName = student.name?.trim();
 
-  let query = supabase.from('students').update({ points: nextPoints }).select('*');
+  const payload = {
+    points: student.points,
+    xp: student.xp,
+    level: student.level,
+    inventory: student.inventory,
+    meta: {
+      unlockedThemes: student.unlockedThemes,
+      capacities: student.capacities,
+      companion: student.companion,
+      pastRewards: student.pastRewards,
+      trophies: student.trophies,
+      pityCounters: student.pityCounters,
+      pendingLevelUps: student.pendingLevelUps,
+      pendingThemeUnlocks: student.pendingThemeUnlocks,
+    },
+    updated_at: new Date().toISOString(),
+  };
+
+  let query = supabase
+    .from('students')
+    .update(payload)
+    .select('*');
 
   if (supabaseId) {
     query = query.eq('id', supabaseId);
   } else if (loginName) {
     query = query.eq('login_name', loginName);
   } else if (studentName) {
-    // פתרון זמני לפיילוט: אם אין loginName/id אמיתי,
-    // נעדכן לפי השם בעברית שמופיע בטבלת students.
     query = query.eq('name', studentName);
   } else {
     console.warn('Cannot sync student to Supabase: missing id/loginName/name', student);
@@ -139,7 +156,7 @@ async function syncStudentPointsToSupabase(
   const { data, error } = await query.maybeSingle();
 
   if (error) {
-    console.error('Error syncing student points to Supabase:', error);
+    console.error('Error syncing student to Supabase:', error);
     return;
   }
 
@@ -148,7 +165,7 @@ async function syncStudentPointsToSupabase(
     return;
   }
 
-  console.log('Synced student points to Supabase:', data);
+  console.log('Synced student to Supabase:', data);
 }
 
 function defaultStudent(name: string, classId: string): StudentState {
@@ -186,6 +203,48 @@ function defaultStudent(name: string, classId: string): StudentState {
   };
 }
 
+function studentFromSupabase(row: any, classId: string): StudentState {
+  const base = defaultStudent(row.name ?? 'תלמיד/ה', classId);
+  const meta = row.meta ?? {};
+
+  return {
+    ...base,
+
+    id: row.id,
+    supabaseId: row.id,
+    loginName: row.login_name ?? undefined,
+
+    name: row.name ?? base.name,
+    classId,
+
+    points: row.points ?? 0,
+    xp: row.xp ?? 0,
+    level: row.level ?? 1,
+
+    inventory: Array.isArray(row.inventory) ? row.inventory : [],
+
+    unlockedThemes: Array.isArray(meta.unlockedThemes)
+      ? meta.unlockedThemes
+      : base.unlockedThemes,
+
+    capacities: {
+      inventory: 999,
+      displayShelf: 999,
+      wallSlots: 999,
+      desk: 999,
+      petArea: 999,
+    },
+
+    companion: meta.companion ?? base.companion,
+    pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
+    trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
+    pityCounters: meta.pityCounters ?? {},
+
+    pendingLevelUps: meta.pendingLevelUps ?? 0,
+    pendingThemeUnlocks: meta.pendingThemeUnlocks ?? 0,
+  };
+}
+
 export const useGameStore = create<GameStore>()(
   persist(
     (set, get) => ({
@@ -206,21 +265,59 @@ export const useGameStore = create<GameStore>()(
 
       getStudent: (id) => get().students[id],
 
-      updateStudent: (id, patch) =>
+            loadStudentsFromSupabase: async (classId) => {
+        const { data, error } = await supabase
+  .from('students')
+  .select('*')
+  .eq('class_id', classId)
+  .order('created_at', { ascending: true });
+
+        if (error) {
+          console.error('Error loading students from Supabase:', error);
+          return;
+        }
+
+        const studentsFromDb = (data ?? []).map((row) =>
+  studentFromSupabase(row, row.class_id ?? classId)
+);
+
         set((state) => {
-          const cur = state.students[id];
-          if (!cur) return state;
+          const nextStudents = { ...state.students };
+
+          for (const student of studentsFromDb) {
+            nextStudents[student.id] = student;
+          }
 
           return {
-            students: {
-              ...state.students,
-              [id]: {
-                ...cur,
-                ...patch,
-              },
-            },
+            students: nextStudents,
           };
-        }),
+        });
+      },
+
+      updateStudent: (id, patch) => {
+  let updatedStudent: StudentState | null = null;
+
+  set((state) => {
+    const cur = state.students[id];
+    if (!cur) return state;
+
+    updatedStudent = {
+      ...cur,
+      ...patch,
+    };
+
+    return {
+      students: {
+        ...state.students,
+        [id]: updatedStudent,
+      },
+    };
+  });
+
+  if (updatedStudent) {
+    void syncStudentToSupabase(updatedStudent);
+  }
+},
 
       updateInventoryEntry: (studentId, inventoryIndex, patch) =>
         set((state) => {
@@ -273,7 +370,7 @@ export const useGameStore = create<GameStore>()(
         });
 
         if (updatedStudent && nextPoints !== null) {
-          await syncStudentPointsToSupabase(updatedStudent, nextPoints);
+          await syncStudentToSupabase(updatedStudent);
         }
       },
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSessionStore } from '../store/useSessionStore';
 import { useClassStore } from '../store/useClassStore';
@@ -18,6 +18,12 @@ export default function TeacherHome() {
   // IMPORTANT: select the raw map, derive the array in useMemo.
   // (Returning a fresh filtered array from a selector causes re-render loops.)
   const allStudents = useGameStore(s => s.students);
+  const loadStudentsFromSupabase = useGameStore(s => s.loadStudentsFromSupabase);
+
+  useEffect(() => {
+    if (!currentClassId) return;
+    void loadStudentsFromSupabase(currentClassId);
+  }, [currentClassId, loadStudentsFromSupabase]);
   const students = useMemo(
     () => Object.values(allStudents).filter(st => st.classId === currentClassId),
     [allStudents, currentClassId]
@@ -54,7 +60,9 @@ export default function TeacherHome() {
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-2xl font-black text-magic-accent">{cls.nameHe}</h1>
-            <p className="text-magic-soft text-sm">קוד כיתה: {cls.code}</p>
+            <p className="text-magic-soft text-sm">
+  ברוכים הבאים לממלכת הלמידה
+</p>
           </div>
           <button
             onClick={() => { logout(); navigate('/'); }}

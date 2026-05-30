@@ -1,78 +1,203 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useClassStore } from '../store/useClassStore';
-import { useGameStore } from '../store/useGameStore';
+import { useGameStore, type StudentState } from '../store/useGameStore';
 import { useSessionStore } from '../store/useSessionStore';
+import { getStudentByLoginName } from '../lib/supabaseStudents';
+import { getClassByCodeAndTeacherCode } from '../lib/supabaseClasses';
+import { DEFAULT_UNLOCKED_THEMES } from '../data/themes';
 
 type Mode = 'choose' | 'student' | 'teacher';
 
+function buildStudentFromSupabase(row: any): StudentState {
+  const meta = row.meta ?? {};
+
+  return {
+    id: row.id,
+    supabaseId: row.id,
+    loginName: row.login_name,
+
+    name: row.name ?? row.login_name,
+    classId: row.class_id,
+
+    points: row.points ?? 0,
+    xp: row.xp ?? 0,
+    level: row.level ?? 1,
+
+    inventory: Array.isArray(row.inventory) ? row.inventory : [],
+
+    unlockedThemes: Array.isArray(meta.unlockedThemes)
+      ? meta.unlockedThemes
+      : [...DEFAULT_UNLOCKED_THEMES],
+
+    capacities: {
+      inventory: meta.capacities?.inventory ?? 1000,
+      displayShelf: meta.capacities?.displayShelf ?? 1000,
+      wallSlots: meta.capacities?.wallSlots ?? 1000,
+      desk: meta.capacities?.desk ?? 1000,
+      petArea: meta.capacities?.petArea ?? 1000,
+    },
+
+    companion: meta.companion ?? {
+      unlocked: false,
+      theme: null,
+      stage: 'egg',
+      bond: 0,
+      lastCareDate: null,
+      careXpToday: 0,
+      activeFlourishes: [],
+      ownedFlourishes: [],
+    },
+
+    pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
+    trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
+    pityCounters: meta.pityCounters ?? {},
+
+    pendingLevelUps: meta.pendingLevelUps ?? 0,
+    pendingThemeUnlocks: meta.pendingThemeUnlocks ?? 0,
+  };
+}
+
 export default function LoginPage() {
   const navigate = useNavigate();
+
   const [mode, setMode] = useState<Mode>('choose');
 
-  const [classCode, setClassCode] = useState('');
-  const [studentName, setStudentName] = useState('');
-  const [teacherClassName, setTeacherClassName] = useState('');
+  const [studentLoginName, setStudentLoginName] = useState('');
+  const [studentLoginCode, setStudentLoginCode] = useState('');
+
   const [teacherClassCode, setTeacherClassCode] = useState('');
+  const [teacherLoginCode, setTeacherLoginCode] = useState('');
+
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const findClassByCode = useClassStore(s => s.findClassByCode);
-  const createClass = useClassStore(s => s.createClass);
-  const classes = useClassStore(s => s.classes);
+  const loginStudent = useSessionStore((s) => s.loginStudent);
+  const loginTeacher = useSessionStore((s) => s.loginTeacher);
 
-  const students = useGameStore(s => s.students);
-  const createStudent = useGameStore(s => s.createStudent);
-
-  const loginStudent = useSessionStore(s => s.loginStudent);
-  const loginTeacher = useSessionStore(s => s.loginTeacher);
-
-  function handleStudentLogin() {
+  async function handleStudentLogin() {
     setError(null);
-    const cls = findClassByCode(classCode);
-    if (!cls) {
-      setError('קוד כיתה לא נמצא');
-      return;
-    }
-    if (!studentName.trim()) {
-      setError('צריך שם');
-      return;
-    }
-    // Find existing student in this class with same name, or create new
-    const existing = Object.values(students).find(
-      st => st.classId === cls.id && st.name === studentName.trim()
-    );
-    const studentId = existing
-      ? existing.id
-      : createStudent(studentName.trim(), cls.id);
-    loginStudent(studentId, cls.id);
-    navigate('/student');
-  }
+    setIsLoading(true);
 
-  function handleTeacherLogin() {
-    setError(null);
-    // If code already exists, log in to that class. Otherwise create.
-    let cls = findClassByCode(teacherClassCode);
-    if (!cls) {
-      if (!teacherClassName.trim() || !teacherClassCode.trim()) {
-        setError('צריך שם כיתה וקוד כיתה');
+    try {
+      const cleanLoginName = studentLoginName.trim().toLowerCase();
+      const cleanLoginCode = studentLoginCode.trim();
+
+      if (!cleanLoginName) {
+        setError('צריך להקליד שם משתמש');
         return;
       }
-      const id = createClass(teacherClassName.trim(), teacherClassCode.trim());
-      cls = { id, code: teacherClassCode.trim(), nameHe: teacherClassName.trim(), createdAt: Date.now() };
+
+      if (!cleanLoginCode) {
+        setError('צריך להקליד קוד אישי');
+        return;
+      }
+
+      const supabaseStudent = await getStudentByLoginName(cleanLoginName);
+
+      if (!supabaseStudent) {
+        setError('המשתמש לא קיים. פנה למורה כדי שיוסיף אותך למערכת.');
+        return;
+      }
+
+      if (String(supabaseStudent.login_code ?? '').trim() !== cleanLoginCode) {
+        setError('הקוד האישי לא נכון');
+        return;
+      }
+
+      if (!supabaseStudent.class_id) {
+        setError('לתלמיד הזה לא משויכת כיתה. צריך לבדוק את Supabase.');
+        return;
+      }
+
+      const student = buildStudentFromSupabase(supabaseStudent);
+
+      useGameStore.setState((state) => ({
+        students: {
+          ...state.students,
+          [student.id]: student,
+        },
+      }));
+
+      loginStudent(student.id, supabaseStudent.class_id);
+      navigate('/student');
+    } catch (err) {
+      console.error('Student login failed:', err);
+      setError('הייתה שגיאה בכניסת תלמיד. בדוק את Supabase או את הקונסול.');
+    } finally {
+      setIsLoading(false);
     }
-    loginTeacher(cls.id);
-    navigate('/teacher');
   }
 
-  const classCount = Object.keys(classes).length;
+  async function handleTeacherLogin() {
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const cleanTeacherClassCode = teacherClassCode.trim();
+      const cleanTeacherLoginCode = teacherLoginCode.trim();
+
+      if (!cleanTeacherClassCode) {
+        setError('צריך להקליד קוד כיתה');
+        return;
+      }
+
+      if (!cleanTeacherLoginCode) {
+        setError('צריך להקליד קוד מורה');
+        return;
+      }
+
+      const cls = await getClassByCodeAndTeacherCode(
+        cleanTeacherClassCode,
+        cleanTeacherLoginCode
+      );
+
+      if (!cls) {
+        setError('קוד הכיתה או קוד המורה לא נכונים');
+        return;
+      }
+
+      useClassStore.setState((state) => ({
+        classes: {
+          ...state.classes,
+          [cls.id]: {
+            id: cls.id,
+            code: cls.code,
+            nameHe: cls.name_he,
+            createdAt: cls.created_at
+              ? new Date(cls.created_at).getTime()
+              : Date.now(),
+          },
+        },
+        world: {
+          ...state.world,
+          [cls.id]: state.world[cls.id] ?? {
+            classId: cls.id,
+            donatedTotal: 0,
+            unlockedMilestones: [],
+          },
+        },
+      }));
+
+      loginTeacher(cls.id);
+      navigate('/teacher');
+    } catch (err) {
+      console.error('Teacher login failed:', err);
+      setError('הייתה שגיאה בכניסת מורה. בדוק את Supabase או את הקונסול.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
       <div className="bg-magic-panel/80 backdrop-blur rounded-3xl shadow-2xl p-10 max-w-xl w-full text-center border border-magic-soft/20">
         <div className="text-6xl mb-4">✨</div>
+
         <h1 className="text-4xl font-black text-magic-accent mb-3">
           ממלכת הלמידה
         </h1>
+
         <p className="text-magic-soft text-lg mb-8">
           המשחק האישי שלך לכיתה הקסומה
         </p>
@@ -86,13 +211,20 @@ export default function LoginPage() {
         {mode === 'choose' && (
           <div className="flex flex-col gap-3">
             <button
-              onClick={() => setMode('student')}
+              onClick={() => {
+                setMode('student');
+                setError(null);
+              }}
               className="bg-magic-accent text-magic-bg font-bold py-3 px-6 rounded-2xl hover:scale-105 transition-transform"
             >
               כניסת תלמיד/ה
             </button>
+
             <button
-              onClick={() => setMode('teacher')}
+              onClick={() => {
+                setMode('teacher');
+                setError(null);
+              }}
               className="bg-magic-panel border-2 border-magic-soft/40 text-magic-soft font-bold py-3 px-6 rounded-2xl hover:bg-magic-soft/10 transition-colors"
             >
               כניסת מורה
@@ -102,30 +234,37 @@ export default function LoginPage() {
 
         {mode === 'student' && (
           <div className="flex flex-col gap-3 text-right">
-            <label className="text-magic-soft text-sm">קוד כיתה</label>
+            <label className="text-magic-soft text-sm">שם משתמש</label>
             <input
               type="text"
-              value={classCode}
-              onChange={e => setClassCode(e.target.value)}
-              placeholder="לדוגמה: כיתה-ג1"
+              value={studentLoginName}
+              onChange={(e) => setStudentLoginName(e.target.value)}
+              placeholder="לדוגמה: yoni"
               className="bg-magic-bg/60 border border-magic-soft/30 rounded-xl p-3 text-white placeholder-magic-soft/40"
             />
-            <label className="text-magic-soft text-sm">שם</label>
+
+            <label className="text-magic-soft text-sm">קוד אישי</label>
             <input
-              type="text"
-              value={studentName}
-              onChange={e => setStudentName(e.target.value)}
-              placeholder="השם שלי"
+              type="password"
+              value={studentLoginCode}
+              onChange={(e) => setStudentLoginCode(e.target.value)}
+              placeholder="הקוד האישי שלי"
               className="bg-magic-bg/60 border border-magic-soft/30 rounded-xl p-3 text-white placeholder-magic-soft/40"
             />
+
             <button
               onClick={handleStudentLogin}
-              className="bg-magic-accent text-magic-bg font-bold py-3 px-6 rounded-2xl hover:scale-105 transition-transform mt-2"
+              disabled={isLoading}
+              className="bg-magic-accent text-magic-bg font-bold py-3 px-6 rounded-2xl hover:scale-105 transition-transform mt-2 disabled:opacity-60 disabled:hover:scale-100"
             >
-              כניסה
+              {isLoading ? 'בודק...' : 'כניסה'}
             </button>
+
             <button
-              onClick={() => { setMode('choose'); setError(null); }}
+              onClick={() => {
+                setMode('choose');
+                setError(null);
+              }}
               className="text-magic-soft/60 text-sm mt-1 hover:text-magic-soft"
             >
               חזרה
@@ -136,34 +275,40 @@ export default function LoginPage() {
         {mode === 'teacher' && (
           <div className="flex flex-col gap-3 text-right">
             <p className="text-magic-soft/70 text-sm text-center mb-1">
-              {classCount === 0
-                ? 'אין עדיין כיתות — צור/י כיתה חדשה'
-                : 'הקלד/י קוד כיתה קיימת, או צור/י חדשה'}
+              הקלד/י קוד כיתה וקוד מורה
             </p>
-            <label className="text-magic-soft text-sm">שם הכיתה</label>
-            <input
-              type="text"
-              value={teacherClassName}
-              onChange={e => setTeacherClassName(e.target.value)}
-              placeholder="כיתה ג'1"
-              className="bg-magic-bg/60 border border-magic-soft/30 rounded-xl p-3 text-white placeholder-magic-soft/40"
-            />
+
             <label className="text-magic-soft text-sm">קוד כיתה</label>
             <input
               type="text"
               value={teacherClassCode}
-              onChange={e => setTeacherClassCode(e.target.value)}
-              placeholder="לדוגמה: כיתה-ג1"
+              onChange={(e) => setTeacherClassCode(e.target.value)}
+              placeholder="לדוגמה: gimel1"
               className="bg-magic-bg/60 border border-magic-soft/30 rounded-xl p-3 text-white placeholder-magic-soft/40"
             />
+
+            <label className="text-magic-soft text-sm">קוד מורה</label>
+            <input
+              type="password"
+              value={teacherLoginCode}
+              onChange={(e) => setTeacherLoginCode(e.target.value)}
+              placeholder="קוד המורה"
+              className="bg-magic-bg/60 border border-magic-soft/30 rounded-xl p-3 text-white placeholder-magic-soft/40"
+            />
+
             <button
               onClick={handleTeacherLogin}
-              className="bg-magic-accent text-magic-bg font-bold py-3 px-6 rounded-2xl hover:scale-105 transition-transform mt-2"
+              disabled={isLoading}
+              className="bg-magic-accent text-magic-bg font-bold py-3 px-6 rounded-2xl hover:scale-105 transition-transform mt-2 disabled:opacity-60 disabled:hover:scale-100"
             >
-              כניסה / יצירת כיתה
+              {isLoading ? 'בודק...' : 'כניסה למורה'}
             </button>
+
             <button
-              onClick={() => { setMode('choose'); setError(null); }}
+              onClick={() => {
+                setMode('choose');
+                setError(null);
+              }}
               className="text-magic-soft/60 text-sm mt-1 hover:text-magic-soft"
             >
               חזרה
