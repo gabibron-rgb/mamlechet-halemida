@@ -76,6 +76,18 @@ const genericCandle: ItemSpriteData = {
   roomHeightScale: 1.6,
 };
 
+const genericMagicScroll: ItemSpriteData = {
+  src: '/assets/items/generic-magic-scroll.png',
+  alt: 'מגילת קסם',
+  className:
+    'object-contain drop-shadow-[0_0_10px_rgba(80,180,255,0.45)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+};
+
 const posterStars: ItemSpriteData = {
   src: '/assets/items/poster-stars.png',
   alt: 'פוסטר כוכבים',
@@ -164,4 +176,5 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   animals_fox_statue: animalsFoxStatue,
   lamp_basic: lampBasic,
   chess_pawn: chessPawn,
+  generic_magic_scroll: genericMagicScroll,
 };
