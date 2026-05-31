@@ -102,7 +102,9 @@ type GameStore = {
     }
   ) => void;
 
-    loadStudentsFromSupabase: (classId: string) => Promise<void>;
+  loadStudentFromSupabase: (studentId: string) => Promise<void>;
+  loadStudentsFromSupabase: (classId: string) => Promise<void>;
+
   resetAll: () => void;
 };
 
@@ -137,10 +139,7 @@ async function syncStudentToSupabase(student: StudentState) {
     updated_at: new Date().toISOString(),
   };
 
-  let query = supabase
-    .from('students')
-    .update(payload)
-    .select('*');
+  let query = supabase.from('students').update(payload).select('*');
 
   if (supabaseId) {
     query = query.eq('id', supabaseId);
@@ -265,12 +264,39 @@ export const useGameStore = create<GameStore>()(
 
       getStudent: (id) => get().students[id],
 
-            loadStudentsFromSupabase: async (classId) => {
+      loadStudentFromSupabase: async (studentId) => {
         const { data, error } = await supabase
-  .from('students')
-  .select('*')
-  .eq('class_id', classId)
-  .order('created_at', { ascending: true });
+          .from('students')
+          .select('*')
+          .eq('id', studentId)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error loading student from Supabase:', error);
+          return;
+        }
+
+        if (!data) {
+          console.warn('Student not found in Supabase:', studentId);
+          return;
+        }
+
+        const student = studentFromSupabase(data, data.class_id);
+
+        set((state) => ({
+          students: {
+            ...state.students,
+            [student.id]: student,
+          },
+        }));
+      },
+
+      loadStudentsFromSupabase: async (classId) => {
+        const { data, error } = await supabase
+          .from('students')
+          .select('*')
+          .eq('class_id', classId)
+          .order('created_at', { ascending: true });
 
         if (error) {
           console.error('Error loading students from Supabase:', error);
@@ -278,8 +304,8 @@ export const useGameStore = create<GameStore>()(
         }
 
         const studentsFromDb = (data ?? []).map((row) =>
-  studentFromSupabase(row, row.class_id ?? classId)
-);
+          studentFromSupabase(row, row.class_id ?? classId)
+        );
 
         set((state) => {
           const nextStudents = { ...state.students };
@@ -295,31 +321,33 @@ export const useGameStore = create<GameStore>()(
       },
 
       updateStudent: (id, patch) => {
-  let updatedStudent: StudentState | null = null;
+        let updatedStudent: StudentState | null = null;
 
-  set((state) => {
-    const cur = state.students[id];
-    if (!cur) return state;
+        set((state) => {
+          const cur = state.students[id];
+          if (!cur) return state;
 
-    updatedStudent = {
-      ...cur,
-      ...patch,
-    };
+          updatedStudent = {
+            ...cur,
+            ...patch,
+          };
 
-    return {
-      students: {
-        ...state.students,
-        [id]: updatedStudent,
+          return {
+            students: {
+              ...state.students,
+              [id]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
       },
-    };
-  });
 
-  if (updatedStudent) {
-    void syncStudentToSupabase(updatedStudent);
-  }
-},
+      updateInventoryEntry: (studentId, inventoryIndex, patch) => {
+        let updatedStudent: StudentState | null = null;
 
-      updateInventoryEntry: (studentId, inventoryIndex, patch) =>
         set((state) => {
           const student = state.students[studentId];
           if (!student) return state;
@@ -335,16 +363,23 @@ export const useGameStore = create<GameStore>()(
               : entry
           );
 
+          updatedStudent = {
+            ...student,
+            inventory: nextInventory,
+          };
+
           return {
             students: {
               ...state.students,
-              [studentId]: {
-                ...student,
-                inventory: nextInventory,
-              },
+              [studentId]: updatedStudent,
             },
           };
-        }),
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
 
       addPoints: async (id, delta) => {
         let updatedStudent: StudentState | null = null;
@@ -374,23 +409,34 @@ export const useGameStore = create<GameStore>()(
         }
       },
 
-      addXp: (id, delta) =>
+      addXp: (id, delta) => {
+        let updatedStudent: StudentState | null = null;
+
         set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
 
+          updatedStudent = {
+            ...cur,
+            xp: Math.max(0, cur.xp + delta),
+          };
+
           return {
             students: {
               ...state.students,
-              [id]: {
-                ...cur,
-                xp: Math.max(0, cur.xp + delta),
-              },
+              [id]: updatedStudent,
             },
           };
-        }),
+        });
 
-      addInventory: (id, itemId) =>
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      addInventory: (id, itemId) => {
+        let updatedStudent: StudentState | null = null;
+
         set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
@@ -408,18 +454,27 @@ export const useGameStore = create<GameStore>()(
             roomRotation: 0,
           };
 
+          updatedStudent = {
+            ...cur,
+            inventory: [...cur.inventory, entry],
+          };
+
           return {
             students: {
               ...state.students,
-              [id]: {
-                ...cur,
-                inventory: [...cur.inventory, entry],
-              },
+              [id]: updatedStudent,
             },
           };
-        }),
+        });
 
-      removeInventory: (id, itemId) =>
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      removeInventory: (id, itemId) => {
+        let updatedStudent: StudentState | null = null;
+
         set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
@@ -427,38 +482,56 @@ export const useGameStore = create<GameStore>()(
           const idx = cur.inventory.findIndex((e) => e.itemId === itemId);
           if (idx === -1) return state;
 
-          const next = [...cur.inventory];
-          next.splice(idx, 1);
+          const nextInventory = [...cur.inventory];
+          nextInventory.splice(idx, 1);
+
+          updatedStudent = {
+            ...cur,
+            inventory: nextInventory,
+          };
 
           return {
             students: {
               ...state.students,
-              [id]: {
-                ...cur,
-                inventory: next,
-              },
+              [id]: updatedStudent,
             },
           };
-        }),
+        });
 
-      unlockTheme: (id, theme) =>
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      unlockTheme: (id, theme) => {
+        let updatedStudent: StudentState | null = null;
+
         set((state) => {
           const cur = state.students[id];
           if (!cur) return state;
           if (cur.unlockedThemes.includes(theme)) return state;
 
+          updatedStudent = {
+            ...cur,
+            unlockedThemes: [...cur.unlockedThemes, theme],
+          };
+
           return {
             students: {
               ...state.students,
-              [id]: {
-                ...cur,
-                unlockedThemes: [...cur.unlockedThemes, theme],
-              },
+              [id]: updatedStudent,
             },
           };
-        }),
+        });
 
-      completeLevelUp: (studentId, payload) =>
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      completeLevelUp: (studentId, payload) => {
+        let updatedStudent: StudentState | null = null;
+
         set((state) => {
           const student = state.students[studentId];
           if (!student) return state;
@@ -481,44 +554,59 @@ export const useGameStore = create<GameStore>()(
             roomRotation: 0,
           };
 
+          updatedStudent = {
+            ...student,
+            points: student.points + payload.pointBonus,
+            capacities,
+            inventory: [...student.inventory, cosmeticEntry],
+            pendingLevelUps: Math.max(0, (student.pendingLevelUps ?? 0) - 1),
+            pendingThemeUnlocks:
+              (student.pendingThemeUnlocks ?? 0) +
+              (payload.newLevel % 2 === 0 ? 1 : 0),
+          };
+
           return {
             students: {
               ...state.students,
-              [studentId]: {
-                ...student,
-                points: student.points + payload.pointBonus,
-                capacities,
-                inventory: [...student.inventory, cosmeticEntry],
-                pendingLevelUps: Math.max(0, (student.pendingLevelUps ?? 0) - 1),
-                pendingThemeUnlocks:
-                  (student.pendingThemeUnlocks ?? 0) +
-                  (payload.newLevel % 2 === 0 ? 1 : 0),
-              },
+              [studentId]: updatedStudent,
             },
           };
-        }),
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
 
       completeThemeUnlock: (studentId, themeId) => {
+        let updatedStudent: StudentState | null = null;
+
         set((state) => {
           const student = state.students[studentId];
           if (!student) return state;
           if ((student.pendingThemeUnlocks ?? 0) <= 0) return state;
           if (student.unlockedThemes.includes(themeId)) return state;
 
+          updatedStudent = {
+            ...student,
+            unlockedThemes: [...student.unlockedThemes, themeId],
+            pendingThemeUnlocks: Math.max(
+              0,
+              (student.pendingThemeUnlocks ?? 0) - 1
+            ),
+          };
+
           return {
             students: {
               ...state.students,
-              [studentId]: {
-                ...student,
-                unlockedThemes: [...student.unlockedThemes, themeId],
-                pendingThemeUnlocks: Math.max(
-                  0,
-                  (student.pendingThemeUnlocks ?? 0) - 1
-                ),
-              },
+              [studentId]: updatedStudent,
             },
           };
         });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
       },
 
       resetAll: () => set({ students: {} }),

@@ -20,9 +20,18 @@ export default function TeacherHome() {
   const allStudents = useGameStore(s => s.students);
   const loadStudentsFromSupabase = useGameStore(s => s.loadStudentsFromSupabase);
 
-  useEffect(() => {
+    useEffect(() => {
     if (!currentClassId) return;
+
     void loadStudentsFromSupabase(currentClassId);
+
+    const intervalId = window.setInterval(() => {
+      void loadStudentsFromSupabase(currentClassId);
+    }, 10000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
   }, [currentClassId, loadStudentsFromSupabase]);
   const students = useMemo(
     () => Object.values(allStudents).filter(st => st.classId === currentClassId),

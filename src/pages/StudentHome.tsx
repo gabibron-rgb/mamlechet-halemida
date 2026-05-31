@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,8 +17,25 @@ type Tab = 'progress' | 'room' | 'shop' | 'inventory';
 export default function StudentHome() {
   const navigate = useNavigate();
 
-  const currentStudentId = useSessionStore(s => s.currentStudentId);
+    const currentStudentId = useSessionStore(s => s.currentStudentId);
+  const currentClassId = useSessionStore(s => s.currentClassId);
   const logout = useSessionStore(s => s.logout);
+
+  const loadStudentFromSupabase = useGameStore(s => s.loadStudentFromSupabase);
+
+    useEffect(() => {
+    if (!currentStudentId || !currentClassId) return;
+
+    void loadStudentFromSupabase(currentStudentId);
+
+    const intervalId = window.setInterval(() => {
+      void loadStudentFromSupabase(currentStudentId);
+    }, 10000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [currentStudentId, currentClassId, loadStudentFromSupabase]);
 
   const student = useGameStore(s =>
     currentStudentId ? s.students[currentStudentId] : undefined
