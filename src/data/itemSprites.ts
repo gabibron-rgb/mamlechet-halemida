@@ -182,6 +182,77 @@ const genericSmallPlant: ItemSpriteData = {
   roomFloorHeightScale: 1.45,
 };
 
+const chessKnight: ItemSpriteData = {
+  src: '/assets/items/chess-knight.png',
+  alt: 'פרש שחמט',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.35)]',
+
+  // ברירת מחדל — מתאים לשולחן
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+
+  // מדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 8,
+  roomShelfWidthScale: 1.25,
+  roomShelfHeightScale: 1.25,
+
+  roomRotation: 0,
+};
+
+const chessQueenStatue: ItemSpriteData = {
+  src: '/assets/items/chess-queen-statue.png',
+  alt: 'פסל מלכה',
+  className:
+    'object-contain drop-shadow-[0_0_18px_rgba(255,220,120,0.65)]',
+
+  // ברירת מחדל — מתאים לשולחן
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+
+  // מדף — גדול, אבל לא ענק מדי
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.85,
+  roomShelfHeightScale: 1.85,
+
+  // רצפה / special — כאן היא צריכה להיות הכי מרשימה
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 18,
+  roomFloorWidthScale: 2.35,
+  roomFloorHeightScale: 2.35,
+};
+
+const chessKing: ItemSpriteData = {
+  src: '/assets/items/chess-king.png',
+  alt: 'מלך השחמט',
+  className:
+    'object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.35)]',
+
+  // ברירת מחדל
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 2.05,
+  roomHeightScale: 2.05,
+
+  // מדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 2.2,
+  roomShelfHeightScale: 2.2,
+
+  // רצפה / special
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 26,
+  roomFloorWidthScale: 2.35,
+  roomFloorHeightScale: 2.35,
+};
+
 const chessPawn: ItemSpriteData = {
   src: '/assets/items/chess-pawn.png',
   alt: 'פיון שחמט',
@@ -190,6 +261,25 @@ const chessPawn: ItemSpriteData = {
   roomOffsetY: 26,
   roomWidthScale: 1.7,
   roomHeightScale: 1.7,
+};
+
+const spaceMoonLamp: ItemSpriteData = {
+  src: '/assets/items/space-moon-lamp.png',
+  alt: 'מנורת ירח',
+  className:
+    'object-contain drop-shadow-[0_0_14px_rgba(180,210,255,0.55)]',
+
+  // ברירת מחדל — שולחן
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+
+  // מדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 25,
+  roomShelfWidthScale: 1.2,
+  roomShelfHeightScale: 1.2,
 };
 
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
@@ -229,4 +319,8 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   chess_tactics_cards: chessTacticsCards,
   chess_clock: chessClock,
   generic_small_plant: genericSmallPlant,
+  chess_knight: chessKnight,
+  chess_queen_statue: chessQueenStatue,
+  chess_king: chessKing,
+  space_moon_lamp: spaceMoonLamp,
 };

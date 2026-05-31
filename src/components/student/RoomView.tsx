@@ -72,12 +72,11 @@ type InferDisplayKindItem = {
 };
 
 function inferDisplayKind(item: InferDisplayKindItem, zone: Zone | null): DisplayKind {
-  if (item.displayKind) {
-    return item.displayKind;
-  }
-
   const itemId = item.itemId ?? item.id ?? '';
 
+  // קודם כל בודקים איפה החפץ מונח בפועל.
+  // זה חשוב כדי שאותו חפץ יוכל לקבל מראה אחר על שולחן / מדף / רצפה.
+  // אחרת displayKind קבוע בפריט יכול לגרום לכך ששינויי shelf/floor לא ישפיעו.
   if (zone === 'wall') {
     return 'wallDecor';
   }
@@ -96,6 +95,11 @@ function inferDisplayKind(item: InferDisplayKindItem, zone: Zone | null): Displa
 
   if (zone === 'special') {
     return 'floorItem';
+  }
+
+  // רק אם אין zone ברור, משתמשים ב-displayKind שהוגדר בפריט.
+  if (item.displayKind) {
+    return item.displayKind;
   }
 
   if (itemId.includes('rug')) {
@@ -278,9 +282,10 @@ let spriteOffsetY = spriteData?.roomOffsetY ?? 0;
 let spriteWidthScale = spriteData?.roomWidthScale ?? 1;
 let spriteHeightScale = spriteData?.roomHeightScale ?? 1;
 
-// התאמות מיוחדות לפי מיקום — כרגע רק לעציץ קטן,
-// כדי לא לשנות בטעות חפצים קיימים שכבר נראים טוב.
-if (item.itemId === 'generic_small_plant' && spriteData) {
+// התאמות מיוחדות לפי סוג מיקום.
+// זה לא משנה חפצים ישנים, אלא רק חפצים שיש להם בפועל
+// roomShelfOffsetY / roomFloorOffsetY / וכו' בתוך ה-sprite שלהם.
+if (spriteData) {
   if (item.displayKind === 'shelfItem') {
     spriteOffsetX = spriteData.roomShelfOffsetX ?? spriteOffsetX;
     spriteOffsetY = spriteData.roomShelfOffsetY ?? spriteOffsetY;
