@@ -62,11 +62,22 @@ export default function Inventory({ student }: Props) {
     const pityKey = `${entry.boxTier}_${boxTheme}`;
     const currentPity = student.pityCounters[pityKey] ?? 0;
 
-    const reward = openBoxReward(entry.boxTier, boxTheme, currentPity);
+    const ownedItemIds = student.inventory
+      .filter((inventoryEntry) => inventoryEntry.kind !== 'box')
+      .map((inventoryEntry) => inventoryEntry.itemId);
+
+    const reward = openBoxReward(
+      entry.boxTier,
+      boxTheme,
+      currentPity,
+      ownedItemIds
+    );
 
     if (!reward) {
-      setMessage('לא נמצא פרס מתאים לקופסה');
-      setTimeout(() => setMessage(null), 1500);
+      setMessage(
+        'כבר קיבלת את כל החפצים האפשריים מהקופסה הזאת. כדאי לפתוח קופסה מסוג אחר.'
+      );
+      setTimeout(() => setMessage(null), 2500);
       return;
     }
 
@@ -181,7 +192,10 @@ export default function Inventory({ student }: Props) {
             const themeName = theme?.nameHe ?? 'כללי';
 
             return (
-              <div key={`${entry.id}_${idx}`} className="bg-magic-bg/40 rounded-2xl p-3">
+              <div
+                key={`${entry.id}_${idx}`}
+                className="bg-magic-bg/40 rounded-2xl p-3"
+              >
                 <div className="flex justify-between mb-1">
                   <div>
                     <div className="text-white font-bold text-sm">

@@ -42,13 +42,15 @@ export type BoxOpenResult = {
 export function openBoxReward(
   boxTier: BoxTier,
   theme: ThemeId,
-  pityCount: number
+  pityCount: number,
+  ownedItemIds: string[] = []
 ): BoxOpenResult | null {
+  const ownedSet = new Set(ownedItemIds);
   const targetRarity = rollRarity(boxTier, pityCount);
 
   // קופסה כללית יכולה לתת רק פרסים כלליים.
   // קופסה נושאית, למשל שחמט, תנסה לתת רק פרסים של אותו נושא.
-  const themeRewards = ITEMS.filter(item => {
+  const themeRewards = ITEMS.filter((item) => {
     if (item.source !== 'box') return false;
 
     if (theme === 'generic') {
@@ -63,20 +65,32 @@ export function openBoxReward(
   const rewardsPool =
     themeRewards.length > 0
       ? themeRewards
-      : ITEMS.filter(item => item.source === 'box' && item.theme === 'generic');
+      : ITEMS.filter((item) => item.source === 'box' && item.theme === 'generic');
 
   if (rewardsPool.length === 0) return null;
 
-  let candidates = rewardsPool.filter(item => item.rarity === targetRarity);
+  // כאן התיקון החשוב:
+  // מסננים החוצה חפצים שכבר קיימים אצל התלמיד.
+  const unownedRewardsPool = rewardsPool.filter((item) => !ownedSet.has(item.id));
 
+  // אם לילד כבר יש את כל הפרסים האפשריים מהקופסה הזאת,
+  // לא נותנים כפילות. נחזיר null, והמסך יציג הודעה מתאימה.
+  if (unownedRewardsPool.length === 0) return null;
+
+  let candidates = unownedRewardsPool.filter((item) => item.rarity === targetRarity);
+
+  // אם אין חפץ חדש בדיוק בנדירות שיצאה,
+  // ננסה לתת חפץ חדש בנדירות גבוהה יותר.
   if (candidates.length === 0) {
-    candidates = rewardsPool.filter(
-      item => rarityRank(item.rarity) >= rarityRank(targetRarity)
+    candidates = unownedRewardsPool.filter(
+      (item) => rarityRank(item.rarity) >= rarityRank(targetRarity)
     );
   }
 
+  // אם גם זה לא אפשרי, ניתן כל חפץ חדש שקיים במאגר.
+  // עדיין בלי כפילויות.
   if (candidates.length === 0) {
-    candidates = rewardsPool;
+    candidates = unownedRewardsPool;
   }
 
   const item = pickRandom(candidates);
