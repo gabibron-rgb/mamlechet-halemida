@@ -133,6 +133,55 @@ const lampBasic: ItemSpriteData = {
   roomHeightScale: 1.6,
 };
 
+const chessTacticsCards: ItemSpriteData = {
+  src: '/assets/items/chess-tactics-cards.png',
+  alt: 'קלפי טקטיקה',
+  className:
+    'object-contain drop-shadow-[0_0_10px_rgba(80,180,255,0.45)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 2,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+};
+
+const chessClock: ItemSpriteData = {
+  src: '/assets/items/chess-clock.png',
+  alt: 'שעון שחמט',
+  className:
+    'object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.05,
+  roomHeightScale: 1.05,
+};
+
+const genericSmallPlant: ItemSpriteData = {
+  src: '/assets/items/generic-small-plant.png',
+  alt: 'עציץ קטן',
+  className:
+    'object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)]',
+
+  // ברירת מחדל — מתאים לשולחן
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+
+  // מדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 30,
+  roomShelfWidthScale: 1.3,
+  roomShelfHeightScale: 1.3,
+
+  // רצפה — קצת יותר נמוך
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 36,
+  roomFloorWidthScale: 1.45,
+  roomFloorHeightScale: 1.45,
+};
+
 const chessPawn: ItemSpriteData = {
   src: '/assets/items/chess-pawn.png',
   alt: 'פיון שחמט',
@@ -177,4 +226,7 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   lamp_basic: lampBasic,
   chess_pawn: chessPawn,
   generic_magic_scroll: genericMagicScroll,
+  chess_tactics_cards: chessTacticsCards,
+  chess_clock: chessClock,
+  generic_small_plant: genericSmallPlant,
 };

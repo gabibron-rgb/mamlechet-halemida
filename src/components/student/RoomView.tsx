@@ -272,11 +272,29 @@ function itemRoomStyle(item: DisplayItem): CSSProperties {
     ITEM_SPRITES[item.itemId] ??
     (item.modelRef ? ITEM_SPRITES[item.modelRef] : undefined);
 
-  const spriteOffsetX = spriteData?.roomOffsetX ?? 0;
-  const spriteOffsetY = spriteData?.roomOffsetY ?? 0;
+  let spriteOffsetX = spriteData?.roomOffsetX ?? 0;
+let spriteOffsetY = spriteData?.roomOffsetY ?? 0;
 
-  const spriteWidthScale = spriteData?.roomWidthScale ?? 1;
-  const spriteHeightScale = spriteData?.roomHeightScale ?? 1;
+let spriteWidthScale = spriteData?.roomWidthScale ?? 1;
+let spriteHeightScale = spriteData?.roomHeightScale ?? 1;
+
+// התאמות מיוחדות לפי מיקום — כרגע רק לעציץ קטן,
+// כדי לא לשנות בטעות חפצים קיימים שכבר נראים טוב.
+if (item.itemId === 'generic_small_plant' && spriteData) {
+  if (item.displayKind === 'shelfItem') {
+    spriteOffsetX = spriteData.roomShelfOffsetX ?? spriteOffsetX;
+    spriteOffsetY = spriteData.roomShelfOffsetY ?? spriteOffsetY;
+    spriteWidthScale = spriteData.roomShelfWidthScale ?? spriteWidthScale;
+    spriteHeightScale = spriteData.roomShelfHeightScale ?? spriteHeightScale;
+  }
+
+  if (item.displayKind === 'floorItem') {
+    spriteOffsetX = spriteData.roomFloorOffsetX ?? spriteOffsetX;
+    spriteOffsetY = spriteData.roomFloorOffsetY ?? spriteOffsetY;
+    spriteWidthScale = spriteData.roomFloorWidthScale ?? spriteWidthScale;
+    spriteHeightScale = spriteData.roomFloorHeightScale ?? spriteHeightScale;
+  }
+}
 
   const spriteRotation = spriteData?.roomRotation ?? 0;
 
@@ -303,12 +321,19 @@ function itemRoomStyle(item: DisplayItem): CSSProperties {
   }
 
   if (item.displayKind === 'tableItem') {
-    width = surface.tableItemWidth;
-    height = surface.tableItemHeight;
-    zIndex = surface.tableZIndex;
-    anchorY = '-85%';
-    extraTransform = ' perspective(700px) rotateX(55deg)';
-  }
+  width = surface.tableItemWidth;
+  height = surface.tableItemHeight;
+  zIndex = surface.tableZIndex;
+  anchorY = '-85%';
+
+  // רק לוח שחמט צריך להיראות שטוח על השולחן.
+  // שאר החפצים — עציץ, נר, שעון וכו' — נשארים עומדים רגיל.
+  const shouldFlattenOnTable = item.itemId === 'chess-board-basic';
+
+  extraTransform = shouldFlattenOnTable
+    ? ' perspective(700px) rotateX(55deg)'
+    : '';
+}
 
   if (item.displayKind === 'shelfItem') {
     width = surface.shelfItemWidth;
