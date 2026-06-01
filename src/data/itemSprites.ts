@@ -145,6 +145,25 @@ const chessTacticsCards: ItemSpriteData = {
   roomHeightScale: 1.75,
 };
 
+const spacePlanet: ItemSpriteData = {
+  src: '/assets/items/space-planet.png',
+  alt: 'כדור הארץ הקטן',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+
+  // ברירת מחדל — שולחן
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+
+  // מדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 21,
+  roomShelfWidthScale: 1.45,
+  roomShelfHeightScale: 1.45,
+};
+
 const chessClock: ItemSpriteData = {
   src: '/assets/items/chess-clock.png',
   alt: 'שעון שחמט',
@@ -301,6 +320,55 @@ const spaceRocket: ItemSpriteData = {
   roomShelfHeightScale: 1.35,
 };
 
+const spaceBlackHole: ItemSpriteData = {
+  src: '/assets/items/space-black-hole.png',
+  alt: 'חור שחור זעיר',
+  className:
+    'object-contain drop-shadow-[0_0_18px_rgba(120,80,255,0.75)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+
+  // מדף — אפי, אבל עדיין צריך לשבת יפה על המדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 21,
+  roomShelfWidthScale: 1.55,
+  roomShelfHeightScale: 1.55,
+
+  // רצפה / special — גדול ומרשים יותר
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 6,
+  roomFloorWidthScale: 1.9,
+  roomFloorHeightScale: 1.9,
+};
+
+const spaceGalaxyCore: ItemSpriteData = {
+  src: '/assets/items/space-galaxy-core.png',
+  alt: 'ליבת גלקסיה',
+  className:
+    'object-contain drop-shadow-[0_0_18px_rgba(180,120,255,0.9)]',
+
+  // ברירת מחדל / special / רצפה
+  roomOffsetX: 0,
+  roomOffsetY: 20,
+  roomWidthScale: 2.15,
+  roomHeightScale: 2.15,
+
+  // מדף — קטן יותר, כדי שלא ישתלט על כל המדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.55,
+  roomShelfHeightScale: 1.55,
+
+  // רצפה — גדול ומרשים יותר
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 28,
+  roomFloorWidthScale: 2.25,
+  roomFloorHeightScale: 2.25,
+};
+
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   // לוח שחמט
   chess: chessBoardBasic,
@@ -343,4 +411,7 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   chess_king: chessKing,
   space_moon_lamp: spaceMoonLamp,
   space_rocket: spaceRocket,
+  space_planet: spacePlanet,
+  space_black_hole: spaceBlackHole,
+  space_galaxy_core: spaceGalaxyCore,
 };
