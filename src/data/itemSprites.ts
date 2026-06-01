@@ -140,7 +140,7 @@ const chessTacticsCards: ItemSpriteData = {
     'object-contain drop-shadow-[0_0_10px_rgba(80,180,255,0.45)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
 
   roomOffsetX: 0,
-  roomOffsetY: 2,
+  roomOffsetY: 26,
   roomWidthScale: 1.75,
   roomHeightScale: 1.75,
 };
@@ -282,6 +282,25 @@ const spaceMoonLamp: ItemSpriteData = {
   roomShelfHeightScale: 1.2,
 };
 
+const spaceRocket: ItemSpriteData = {
+  src: '/assets/items/space-rocket.png',
+  alt: 'דגם רקטה',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+
+  // ברירת מחדל — שולחן
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+
+  // מדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+};
+
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   // לוח שחמט
   chess: chessBoardBasic,
@@ -323,4 +342,5 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   chess_queen_statue: chessQueenStatue,
   chess_king: chessKing,
   space_moon_lamp: spaceMoonLamp,
+  space_rocket: spaceRocket,
 };

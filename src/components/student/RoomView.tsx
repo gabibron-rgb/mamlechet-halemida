@@ -74,9 +74,34 @@ type InferDisplayKindItem = {
 function inferDisplayKind(item: InferDisplayKindItem, zone: Zone | null): DisplayKind {
   const itemId = item.itemId ?? item.id ?? '';
 
-  // קודם כל בודקים איפה החפץ מונח בפועל.
-  // זה חשוב כדי שאותו חפץ יוכל לקבל מראה אחר על שולחן / מדף / רצפה.
-  // אחרת displayKind קבוע בפריט יכול לגרום לכך ששינויי shelf/floor לא ישפיעו.
+  // שטיח חייב להישאר שטיח תמיד, גם אם הוא נמצא באזור floor.
+  // אחרת הוא מקבל floorItem ונראה כמו חפץ רגיל במקום שטיח שטוח.
+  if (itemId.includes('rug')) {
+    return 'rug';
+  }
+
+  // קישוטי קיר תמיד צריכים להישאר קישוטי קיר.
+  if (
+    itemId.includes('poster') ||
+    itemId.includes('banner') ||
+    itemId.includes('flag')
+  ) {
+    return 'wallDecor';
+  }
+
+  // רהיטים גדולים לא צריכים להפוך אוטומטית לחפצי מדף/שולחן.
+  if (
+    itemId.includes('chair') ||
+    itemId.includes('table') ||
+    itemId.includes('desk') ||
+    itemId.includes('bed') ||
+    itemId.includes('shelf')
+  ) {
+    return 'furniture';
+  }
+
+  // עכשיו בודקים איפה החפץ מונח בפועל.
+  // זה חשוב כדי שאותו חפץ יוכל לקבל התאמות שונות על שולחן / מדף / רצפה.
   if (zone === 'wall') {
     return 'wallDecor';
   }
@@ -100,28 +125,6 @@ function inferDisplayKind(item: InferDisplayKindItem, zone: Zone | null): Displa
   // רק אם אין zone ברור, משתמשים ב-displayKind שהוגדר בפריט.
   if (item.displayKind) {
     return item.displayKind;
-  }
-
-  if (itemId.includes('rug')) {
-    return 'rug';
-  }
-
-  if (
-    itemId.includes('poster') ||
-    itemId.includes('banner') ||
-    itemId.includes('flag')
-  ) {
-    return 'wallDecor';
-  }
-
-  if (
-    itemId.includes('chair') ||
-    itemId.includes('table') ||
-    itemId.includes('desk') ||
-    itemId.includes('bed') ||
-    itemId.includes('shelf')
-  ) {
-    return 'furniture';
   }
 
   if (
@@ -446,58 +449,94 @@ function RoomScene({
 }) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
-  function displayKindForZone(zone: Zone): DisplayKind {
-    if (zone === 'wall') return 'wallDecor';
-    if (zone === 'special') return 'floorItem';
-    if (zone === 'shelf') return 'shelfItem';
-    if (zone === 'desk') return 'tableItem';
-    if (zone === 'floor' || zone === 'petarea') return 'floorItem';
+  function displayKindForZone(zone: Zone, item?: DisplayItem): DisplayKind {
+  const itemId =
+    item?.entry?.itemId ??
+    item?.entry?.id ??
+    '';
 
+  // חשוב: שטיח תמיד נשאר שטיח.
+  // אחרת הוא מקבל floorItem כשהוא על הרצפה, ואז הוא נהרס / נעמד / משתנה כמו חפץ רגיל.
+  if (itemId.includes('rug')) {
+    return 'rug';
+  }
+
+  if (zone === 'wall') {
+    return 'wallDecor';
+  }
+
+  if (zone === 'shelf') {
+    return 'shelfItem';
+  }
+
+  if (zone === 'desk') {
+    return 'tableItem';
+  }
+
+  if (zone === 'floor') {
     return 'floorItem';
   }
 
-  function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
-    const allowedZones = getAllowedZones(item.entry);
-
-    const canUseShelf = allowedZones.includes('shelf');
-    const canUseDesk = allowedZones.includes('desk');
-    const canUseWall = allowedZones.includes('wall');
-    const canUseFloor = allowedZones.includes('floor');
-    const canUsePetArea = allowedZones.includes('petarea');
-    const canUseSpecial = allowedZones.includes('special');
-
-    if (canUseShelf && x >= 58 && x <= 86 && y >= 36 && y <= 80) {
-      return 'shelf';
-    }
-
-    if (canUseDesk && x >= 10 && x <= 48 && y >= 52 && y <= 74) {
-      return 'desk';
-    }
-
-    if (canUseSpecial && x >= 38 && x <= 68 && y >= 14 && y <= 42) {
-      return 'special';
-    }
-
-    if (canUseWall && y >= 12 && y <= 66) {
-      return 'wall';
-    }
-
-    if (canUsePetArea && x >= 55 && x <= 90 && y >= 68) {
-      return 'petarea';
-    }
-
-    if (canUseFloor) {
-      return 'floor';
-    }
-
-    if (canUseDesk && x < 52) return 'desk';
-    if (canUseShelf) return 'shelf';
-    if (canUseWall) return 'wall';
-    if (canUseSpecial) return 'special';
-    if (canUsePetArea) return 'petarea';
-
-    return allowedZones[0] ?? 'floor';
+  if (zone === 'special') {
+    return 'floorItem';
   }
+
+  if (zone === 'petarea') {
+    return 'floorItem';
+  }
+
+  return 'floorItem';
+}
+
+function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
+  const allowedZones = getAllowedZones(item.entry);
+
+  const canUseShelf = allowedZones.includes('shelf');
+  const canUseDesk = allowedZones.includes('desk');
+  const canUseWall = allowedZones.includes('wall');
+  const canUseFloor = allowedZones.includes('floor');
+  const canUsePetArea = allowedZones.includes('petarea');
+  const canUseSpecial = allowedZones.includes('special');
+
+  // מדף — רק תחום המדף עצמו, לא כל הארון
+  if (canUseShelf && x >= 58 && x <= 86 && y >= 36 && y <= 68) {
+    return 'shelf';
+  }
+
+  // שולחן — רק משטח השולחן, לא האוויר מעליו
+  if (canUseDesk && x >= 10 && x <= 48 && y >= 55 && y <= 68) {
+    return 'desk';
+  }
+
+  // אזור מיוחד — כרגע אזור עליון/מרכזי
+  if (canUseSpecial && x >= 38 && x <= 68 && y >= 14 && y <= 42) {
+    return 'special';
+  }
+
+  if (canUseWall && y >= 12 && y <= 66) {
+    return 'wall';
+  }
+
+  if (canUsePetArea && x >= 55 && x <= 90 && y >= 68) {
+    return 'petarea';
+  }
+
+  // רצפה — רק אם באמת נמצאים באזור רצפה
+  if (canUseFloor && y >= 68) {
+    return 'floor';
+  }
+
+  // fallback בטוח:
+  // לא זורקים אוטומטית למדף/שולחן, כי זה מה שגורם לקפיצות.
+  // מחזירים את האזור הנוכחי של החפץ אם הוא עדיין מותר.
+  const currentZone = item.entry.placedZone;
+
+  if (currentZone && allowedZones.includes(currentZone)) {
+    return currentZone;
+  }
+
+  return allowedZones[0] ?? 'floor';
+}
 
   function getRoomPercent(event: PointerEvent<HTMLButtonElement>) {
     const room = roomRef.current;
@@ -593,14 +632,28 @@ function RoomScene({
               setDraggingIndex(item.inventoryIndex);
             }}
             onPointerMove={event => {
-              if (!isEditing) return;
-              if (draggingIndex !== item.inventoryIndex) return;
+  if (!isEditing) return;
+  if (draggingIndex !== item.inventoryIndex) return;
 
-              const point = getRoomPercent(event);
-              if (!point) return;
+  const point = getRoomPercent(event);
+  if (!point) return;
 
-              onMoveItem(item.inventoryIndex, point.x, point.y);
-            }}
+  const zone = chooseZoneFromPoint(item, point.x, point.y);
+
+  const displayKind =
+    item.displayKind === 'rug' ? 'rug' : displayKindForZone(zone, item);
+
+  const snapped = snapItemToRoomSurface(displayKind, point.x, point.y);
+
+  onMoveItem(
+    item.inventoryIndex,
+    snapped.x,
+    snapped.y,
+    item.entry.roomScale ?? 1,
+    item.entry.roomRotation ?? 0,
+    zone
+  );
+}}
             onPointerUp={event => {
               if (!isEditing) return;
 
