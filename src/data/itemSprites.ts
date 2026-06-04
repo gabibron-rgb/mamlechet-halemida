@@ -170,10 +170,17 @@ const chessClock: ItemSpriteData = {
   className:
     'object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)]',
 
+  // שולחן — כמו עכשיו, כי אמרת שהוא יושב טוב
   roomOffsetX: 0,
-  roomOffsetY: 12,
+  roomOffsetY: 24,
   roomWidthScale: 1.05,
   roomHeightScale: 1.05,
+
+  // מדף — מיקום נפרד לפי השיטה החדשה
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 32,
+  roomShelfWidthScale: 0.95,
+  roomShelfHeightScale: 0.95,
 };
 
 const genericSmallPlant: ItemSpriteData = {
@@ -369,6 +376,242 @@ const spaceGalaxyCore: ItemSpriteData = {
   roomFloorHeightScale: 2.25,
 };
 
+const genericCrystalSmall: ItemSpriteData = {
+  src: '/assets/items/generic-crystal-small.png',
+  alt: 'קריסטל קטן',
+  className:
+    'object-contain drop-shadow-[0_0_12px_rgba(180,120,255,0.55)]',
+
+  // שולחן
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.15,
+  roomHeightScale: 1.15,
+
+  // מדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 26,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const genericGoldTrophy: ItemSpriteData = {
+  src: '/assets/items/generic-gold-trophy.png',
+  alt: 'גביע זהב קטן',
+  className:
+    'object-contain drop-shadow-[0_0_12px_rgba(255,210,80,0.55)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+
+  // שולחן
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+
+  // מדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 26,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+};
+
+const genericFloatingCrystal: ItemSpriteData = {
+  src: '/assets/items/generic-floating-crystal.png',
+  alt: 'קריסטל מרחף',
+  className:
+    'object-contain drop-shadow-[0_0_18px_rgba(255,120,255,0.75)] drop-shadow-[0_0_32px_rgba(180,80,255,0.45)]',
+
+  // ברירת מחדל — שולחן / special
+  roomOffsetX: 0,
+  roomOffsetY: 2,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+
+  // מדף — קטן יותר, כדי שלא ישתלט על המדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+
+  // רצפה — גדול ומרשים יותר, כמו חפץ אפי
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 50,
+  roomFloorWidthScale: 2.05,
+  roomFloorHeightScale: 2.05,
+};
+
+const genericRoyalBanner: ItemSpriteData = {
+  src: '/assets/items/generic-royal-banner.png',
+  alt: 'דגל מלכותי',
+  className:
+    'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.32)] drop-shadow-[0_0_18px_rgba(180,120,255,0.38)]',
+
+  // ברירת מחדל — קיר / special
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.15,
+  roomHeightScale: 2.15,
+};
+
+const cosmeticGlowBlue: ItemSpriteData = {
+  src: '/assets/items/cosmetic-glow-blue.png',
+  alt: 'הילה כחולה',
+  className:
+    'object-contain drop-shadow-[0_0_10px_rgba(80,180,255,0.55)] drop-shadow-[0_0_18px_rgba(60,140,255,0.30)]',
+
+  // ברירת מחדל — שולחן / special
+  roomOffsetX: 0,
+  roomOffsetY: 20,
+  roomWidthScale: 0.95,
+  roomHeightScale: 0.95,
+
+  // רצפה — קצת יותר גדול, אבל עדיין נדיר ולא אפי
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 28,
+  roomFloorWidthScale: 1.35,
+  roomFloorHeightScale: 1.35,
+};
+
+const cosmeticSparkles: ItemSpriteData = {
+  src: '/assets/items/cosmetic-sparkles.png',
+  alt: 'ניצוצות קסם',
+  className:
+    'object-contain drop-shadow-[0_0_10px_rgba(120,200,255,0.55)] drop-shadow-[0_0_18px_rgba(255,230,150,0.28)]',
+
+  // ברירת מחדל — wall / desk / special
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.15,
+  roomHeightScale: 1.15,
+
+  // רצפה — קצת יותר גדול, אבל עדיין נדיר ולא אפי
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 18,
+  roomFloorWidthScale: 1.35,
+  roomFloorHeightScale: 1.35,
+};
+
+const cosmeticRainbow: ItemSpriteData = {
+  src: '/assets/items/cosmetic-rainbow.png',
+  alt: 'קשת בענן',
+  className:
+    'object-contain drop-shadow-[0_0_18px_rgba(255,220,120,0.55)] drop-shadow-[0_0_32px_rgba(120,180,255,0.42)]',
+
+  // ברירת מחדל — wall / special
+  // חפץ epic: גדול, בולט, אבל לא ענק כמו legendary
+  roomOffsetX: 0,
+  roomOffsetY: -16,
+  roomWidthScale: 2.35,
+  roomHeightScale: 2.35,
+};
+
+const animalsCatSleeping: ItemSpriteData = {
+  src: '/assets/items/animals-cat-sleeping.png',
+  alt: 'חתול ישנוני',
+  className:
+    'object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)]',
+
+  // ברירת מחדל — רצפה
+  roomOffsetX: 0,
+  roomOffsetY: 30,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+
+  // מדף — קטן יותר, כדי שיישב יפה ולא ייראה ענק
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 28,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+};
+
+const animalsOwlPerch: ItemSpriteData = {
+  src: '/assets/items/animals-owl-perch.png',
+  alt: 'ינשוף על ענף',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+
+  // ברירת מחדל — שולחן
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+
+  // מדף — קצת קטן יותר, כדי לשבת יפה על המדף
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.18,
+  roomShelfHeightScale: 1.18,
+};
+
+const animalsTinyDragon: ItemSpriteData = {
+  src: '/assets/items/animals-tiny-dragon.png',
+  alt: 'דרקון מחמד קטן',
+  className:
+    'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.32)] drop-shadow-[0_0_18px_rgba(180,120,255,0.38)]',
+
+  // שולחן
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 2.05,
+  roomHeightScale: 2.05,
+
+  // רצפה — זה המקום שבו הוא באמת אמור לבלוט
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 70,
+  roomFloorWidthScale: 2.55,
+  roomFloorHeightScale: 2.55,
+};
+
+const animalsPhoenixEgg: ItemSpriteData = {
+  src: '/assets/items/animals-phoenix-egg.png',
+  alt: 'ביצת עוף חול',
+  className:
+    'object-contain drop-shadow-[0_0_22px_rgba(255,150,40,0.75)] drop-shadow-[0_12px_22px_rgba(0,0,0,0.35)]',
+
+  // ברירת מחדל — special
+  // חפץ legendary: גדול, זוהר ומרשים
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 2.65,
+  roomHeightScale: 2.65,
+
+  // מדף — עדיין גדול ומיוחד, אבל לא משתלט לגמרי
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.75,
+  roomShelfHeightScale: 1.75,
+
+  // רצפה — המקום שבו הוא הכי אגדי ומרשים
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 70,
+  roomFloorWidthScale: 3.05,
+  roomFloorHeightScale: 3.05,
+};
+
+const deskChessCrown: ItemSpriteData = {
+  src: '/assets/items/desk-chess-crown.png',
+  alt: 'כתר השחמט',
+  className:
+    'object-contain drop-shadow-[0_0_12px_rgba(180,120,255,0.45)] drop-shadow-[0_6px_10px_rgba(0,0,0,0.30)]',
+
+  // שולחן — חפץ epic, אבל עדיין חפץ קטן יחסית
+  roomOffsetX: 0,
+  roomOffsetY: 34,
+  roomWidthScale: 0.8,
+  roomHeightScale: 0.8,
+
+  // מדף — צריך להיות קטן בהרבה, כי הכתר רחב
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 55,
+  roomShelfWidthScale: 0.35,
+roomShelfHeightScale: 0.35,
+
+  // special / floor — יותר מרשים, אבל לא ענק
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 40,
+  roomFloorWidthScale: 1.15,
+  roomFloorHeightScale: 1.15,
+};
+
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   // לוח שחמט
   chess: chessBoardBasic,
@@ -414,4 +657,16 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   space_planet: spacePlanet,
   space_black_hole: spaceBlackHole,
   space_galaxy_core: spaceGalaxyCore,
+  generic_crystal_small: genericCrystalSmall,
+  generic_gold_trophy: genericGoldTrophy,
+  generic_floating_crystal: genericFloatingCrystal,
+  generic_royal_banner: genericRoyalBanner,
+  cosmetic_glow_blue: cosmeticGlowBlue,
+  cosmetic_sparkles: cosmeticSparkles,
+  cosmetic_rainbow: cosmeticRainbow,
+  animals_cat_sleeping: animalsCatSleeping,
+  animals_owl_perch: animalsOwlPerch,
+  animals_tiny_dragon: animalsTinyDragon,
+  animals_phoenix_egg: animalsPhoenixEgg,
+  desk_chess_crown: deskChessCrown,
 };
