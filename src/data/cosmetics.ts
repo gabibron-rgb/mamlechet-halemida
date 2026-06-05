@@ -1,3 +1,9 @@
+// Deprecated-ish:
+/// This file is still used by the current level reward system.
+/// Every cosmetic id here must also exist as a real item in ITEMS.
+/// Do not add new rewards here unless they are also added to items.ts and itemSprites.ts.
+
+
 import type { Rarity } from './boxes';
 export type CosmeticCategory =
   | 'frame'

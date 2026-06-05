@@ -90,15 +90,17 @@ function inferDisplayKind(item: InferDisplayKindItem, zone: Zone | null): Displa
   }
 
   // רהיטים גדולים לא צריכים להפוך אוטומטית לחפצי מדף/שולחן.
-  if (
-    itemId.includes('chair') ||
-    itemId.includes('table') ||
-    itemId.includes('desk') ||
-    itemId.includes('bed') ||
-    itemId.includes('shelf')
-  ) {
-    return 'furniture';
-  }
+// חשוב: לא לבדוק itemId.includes('desk'),
+// כי חפצים כמו desk_inkwell או desk_chess_crown הם לא רהיטים.
+if (
+  itemId.includes('chair') ||
+  itemId.includes('bed') ||
+  itemId.includes('bookshelf') ||
+  itemId.includes('cabinet') ||
+  itemId.includes('wardrobe')
+) {
+  return 'furniture';
+}
 
   // עכשיו בודקים איפה החפץ מונח בפועל.
   // זה חשוב כדי שאותו חפץ יוכל לקבל התאמות שונות על שולחן / מדף / רצפה.

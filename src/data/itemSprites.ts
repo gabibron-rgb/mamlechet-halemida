@@ -611,6 +611,270 @@ roomShelfHeightScale: 0.35,
   roomFloorWidthScale: 1.15,
   roomFloorHeightScale: 1.15,
 };
+const deskInkwell: ItemSpriteData = {
+  src: '/assets/items/desk-inkwell.png',
+  alt: 'קסת דיו עתיקה',
+  className:
+    'object-contain drop-shadow-[0_5px_8px_rgba(0,0,0,0.26)]',
+
+  // שולחן — חפץ common קטן, אבל נראה לעין
+  roomOffsetX: 0,
+  roomOffsetY: 24,
+  roomWidthScale: 1.32,
+  roomHeightScale: 1.32,
+
+  // מדף — קטן יותר מהשולחן, אבל לא מיניאטורי
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.42,
+  roomShelfHeightScale: 1.42,
+};
+const wallMap: ItemSpriteData = {
+  src: '/assets/items/wall-map.png',
+  alt: 'מפת הממלכה',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]',
+
+  // קיר — חפץ common, אבל מפה צריכה להיות מספיק קריאה
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+};
+const bannerDragon: ItemSpriteData = {
+  src: '/assets/items/banner-dragon.png',
+  alt: 'דגל הדרקון',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_10px_rgba(255,180,80,0.22)]',
+
+  // קיר — rare, אז קצת יותר בולט ממפת הממלכה
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.8,
+  roomHeightScale: 1.8,
+};
+const wallCandleSconce: ItemSpriteData = {
+  src: '/assets/items/wall-candle-sconce.png',
+  alt: 'פמוט קיר עתיק',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)] drop-shadow-[0_0_12px_rgba(255,220,140,0.25)]',
+
+  // קיר — uncommon, יפה ובולט אבל לא נדיר מדי
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+};
+const wallScrollBadge: ItemSpriteData = {
+  src: '/assets/items/wall-scroll-badge.png',
+  alt: 'תעודת מגילה',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)] drop-shadow-[0_0_10px_rgba(255,210,120,0.22)]',
+
+  // קיר — rare, יותר בולט ממפה רגילה אבל לא אפי
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.8,
+  roomHeightScale: 1.8,
+};
+const bannerRoyalLion: ItemSpriteData = {
+  src: '/assets/items/banner-royal-lion.png',
+  alt: 'דגל האריה המלכותי',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]',
+
+  // קיר — common, יפה אבל לא מוגזם
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+};
+const deskCrystalLamp: ItemSpriteData = {
+  src: '/assets/items/desk-crystal-lamp.png',
+  alt: 'מנורת קריסטל',
+  className:
+    'object-contain drop-shadow-[0_0_14px_rgba(160,200,255,0.55)] drop-shadow-[0_7px_12px_rgba(0,0,0,0.30)]',
+
+  // שולחן — rare, בולטת אבל לא ענקית
+  roomOffsetX: 0,
+  roomOffsetY: 14,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+
+  // מדף — קצת קטנה יותר
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+
+  // special — קצת יותר מרשימה
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 18,
+  roomFloorWidthScale: 1.45,
+  roomFloorHeightScale: 1.45,
+};
+const wallWizardShelf: ItemSpriteData = {
+  src: '/assets/items/wall-wizard-shelf.png',
+  alt: 'מדף הקוסם',
+  className:
+    'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.32)] drop-shadow-[0_0_14px_rgba(150,100,255,0.25)]',
+
+  // ברירת מחדל — wall / special
+  // חפץ epic רחב ומפורט, לכן לא להגזים בסקייל
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+};
+const petOwlFamiliar: ItemSpriteData = {
+  src: '/assets/items/pet-owl-familiar.png',
+  alt: 'ינשוף שליחים',
+  className:
+    'object-contain drop-shadow-[0_0_12px_rgba(140,160,255,0.45)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+
+  // wall / special
+  // חפץ rare מרחף — בולט, אבל לא ענק
+  roomOffsetX: 0,
+  roomOffsetY: -6,
+  roomWidthScale: 1.52,
+  roomHeightScale: 1.52,
+};
+const petRuneCat: ItemSpriteData = {
+  src: '/assets/items/pet-rune-cat.png',
+  alt: 'חתול רונות',
+  className:
+    'object-contain drop-shadow-[0_0_12px_rgba(170,90,255,0.48)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+
+  // ברירת מחדל — special
+  // חפץ rare: קסום ובולט, אבל לא אפי
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+
+  // רצפה — מתאים יותר לחתול, קצת גדול יותר ונמוך יותר
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 56,
+  roomFloorWidthScale: 1.65,
+  roomFloorHeightScale: 1.65,
+};
+const petTinyDragon: ItemSpriteData = {
+  src: '/assets/items/pet-tiny-dragon.png',
+  alt: 'דרקון מחמד קטן',
+  className:
+    'object-contain drop-shadow-[0_0_14px_rgba(170,90,255,0.40)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+
+  // wall / special
+  // חפץ epic מעופף — בולט יותר מ-rare, אבל לא ענק
+  roomOffsetX: 0,
+  roomOffsetY: -8,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+};
+const bannerPhoenix: ItemSpriteData = {
+  src: '/assets/items/banner-phoenix.png',
+  alt: 'דגל עוף החול',
+  className:
+    'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.32)] drop-shadow-[0_0_14px_rgba(255,140,60,0.28)]',
+
+  // wall / special
+  // חפץ epic — צריך להיות יותר מרשים מהדגלים הרגילים
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.85,
+  roomHeightScale: 1.85,
+};
+const magicCarpet: ItemSpriteData = {
+  src: '/assets/items/magic-carpet.png',
+  alt: 'שטיח קסמים',
+  className:
+    'object-contain drop-shadow-[0_0_24px_rgba(180,120,255,0.55)] drop-shadow-[0_0_38px_rgba(255,220,120,0.32)] drop-shadow-[0_10px_18px_rgba(0,0,0,0.30)]',
+
+  // wall / special
+  // חפץ legendary — צריך להיות גדול, בולט ומיוחד
+  roomOffsetX: 0,
+ roomOffsetY: -14,
+roomWidthScale: 2.85,
+roomHeightScale: 2.85,
+};
+const lightingStarlight: ItemSpriteData = {
+  src: '/assets/items/lighting-starlight.png',
+  alt: 'אור הכוכבים',
+  className:
+    'object-contain drop-shadow-[0_0_24px_rgba(255,230,120,0.65)] drop-shadow-[0_0_42px_rgba(160,100,255,0.48)]',
+
+  // wall / special
+  // חפץ legendary: אפקט תאורה גדול, זוהר ומרכזי
+  roomOffsetX: 0,
+  roomOffsetY: -8,
+  roomWidthScale: 2.25,
+  roomHeightScale: 2.25,
+};
+const badgeFirstQuest: ItemSpriteData = {
+  src: '/assets/items/badge-first-quest.png',
+  alt: 'אות המסע הראשון',
+  className:
+    'object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)] drop-shadow-[0_0_8px_rgba(255,210,120,0.22)]',
+
+  // wall / special
+  // חפץ common — יפה וברור, אבל לא גדול מדי
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.05,
+  roomHeightScale: 1.05,
+};
+const badgeScholar: ItemSpriteData = {
+  src: '/assets/items/badge-scholar.png',
+  alt: 'אות החוקר',
+  className:
+    'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)] drop-shadow-[0_0_10px_rgba(80,150,255,0.26)]',
+
+  // wall / special
+  // חפץ rare — יותר מרשים מ-badge_first_quest, אבל לא אפי
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+};
+const frameGlowSilver: ItemSpriteData = {
+  src: '/assets/items/frame-glow-silver.png',
+  alt: 'מסגרת כסף זוהרת',
+  className:
+    'object-contain drop-shadow-[0_0_14px_rgba(180,220,255,0.35)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.28)]',
+
+  // wall / special
+  // חפץ common, אבל מסגרת צריכה להיות גדולה יחסית
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.95,
+  roomHeightScale: 2.95,
+};
+const frameRoyalGold: ItemSpriteData = {
+  src: '/assets/items/frame-royal-gold.png',
+  alt: 'מסגרת זהב מלכותית',
+  className:
+    'object-contain drop-shadow-[0_0_16px_rgba(255,215,80,0.45)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+
+  // wall / special
+  // rare — יותר מרשימה מהכסופה, אבל לא מטורפת כמו arcane
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 3.05,
+  roomHeightScale: 3.05,
+};
+const frameArcane: ItemSpriteData = {
+  src: '/assets/items/frame-arcane.png',
+  alt: 'מסגרת רונות',
+  className:
+    'object-contain drop-shadow-[0_0_18px_rgba(170,90,255,0.48)] drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+
+  // wall / special
+  // מסגרת epic — יותר מרשימה מהזהב, אבל לא ענקית מדי
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 3.15,
+  roomHeightScale: 3.15,
+};
 
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   // לוח שחמט
@@ -669,4 +933,23 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   animals_tiny_dragon: animalsTinyDragon,
   animals_phoenix_egg: animalsPhoenixEgg,
   desk_chess_crown: deskChessCrown,
+  desk_inkwell: deskInkwell,
+  wall_map: wallMap,
+  banner_dragon: bannerDragon,
+  wall_candle_sconce: wallCandleSconce,
+  wall_scroll_badge: wallScrollBadge,
+  banner_royal_lion: bannerRoyalLion,
+  desk_crystal_lamp: deskCrystalLamp,
+  wall_wizard_shelf: wallWizardShelf,
+  pet_owl_familiar: petOwlFamiliar,
+  pet_rune_cat: petRuneCat,
+  pet_tiny_dragon: petTinyDragon,
+  banner_phoenix: bannerPhoenix,
+  magic_carpet: magicCarpet,
+  lighting_starlight: lightingStarlight,
+  badge_first_quest: badgeFirstQuest,
+  badge_scholar: badgeScholar,
+  frame_glow_silver: frameGlowSilver,
+  frame_royal_gold: frameRoyalGold,
+  frame_arcane: frameArcane,
 };
