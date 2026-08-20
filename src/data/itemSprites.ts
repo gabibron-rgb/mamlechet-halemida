@@ -1482,6 +1482,275 @@ const sportsKingdomChampionsCup: ItemSpriteData = {
   roomFloorHeightScale: 3.1,
 };
 
+const fantasyPotionSet: ItemSpriteData = {
+  src: '/assets/items/fantasy-potion-set.png',
+  alt: 'סט שיקויים קסומים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(180,100,255,0.36)]',
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const fantasyWizardHat: ItemSpriteData = {
+  src: '/assets/items/fantasy-wizard-hat.png',
+  alt: 'כובע קוסם',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const fantasySparkWand: ItemSpriteData = {
+  src: '/assets/items/fantasy-spark-wand.png',
+  alt: 'שרביט ניצוצות',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(70,210,255,0.40)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const fantasyFairyBottle: ItemSpriteData = {
+  src: '/assets/items/fantasy-fairy-bottle.png',
+  alt: 'בקבוק אור פיות',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_14px_rgba(255,120,245,0.42)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const fantasyMushroomStool: ItemSpriteData = {
+  src: '/assets/items/fantasy-mushroom-stool.png',
+  alt: 'שרפרף פטרייה',
+  className: 'object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.36)]',
+  roomOffsetX: 0,
+  roomOffsetY: 50,
+  roomWidthScale: 1.8,
+  roomHeightScale: 1.8,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 50,
+  roomFloorWidthScale: 1.8,
+  roomFloorHeightScale: 1.8,
+};
+
+const fantasyEnchantedKey: ItemSpriteData = {
+  src: '/assets/items/fantasy-enchanted-key.png',
+  alt: 'מפתח מכושף',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(60,210,230,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const fantasyCastleRug: ItemSpriteData = {
+  src: '/assets/items/fantasy-castle-rug.png',
+  alt: 'שטיח טירת העננים',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]',
+};
+
+const fantasySecretDoor: ItemSpriteData = {
+  src: '/assets/items/fantasy-secret-door.png',
+  alt: 'דלת סודית',
+  className: 'object-contain scale-[2.4] drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_14px_rgba(170,90,255,0.38)]',
+  roomOffsetY: 12,
+};
+
+const fantasySpellbookLectern: ItemSpriteData = {
+  src: '/assets/items/fantasy-spellbook-lectern.png',
+  alt: 'ספר לחשים על מעמד',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_16px_rgba(100,200,255,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 50,
+  roomWidthScale: 2.1,
+  roomHeightScale: 2.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 50,
+  roomFloorWidthScale: 2.1,
+  roomFloorHeightScale: 2.1,
+};
+
+const fantasyFairyTree: ItemSpriteData = {
+  src: '/assets/items/fantasy-fairy-tree.png',
+  alt: 'עץ פיות מיניאטורי',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_16px_rgba(230,100,255,0.40)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 48,
+  roomFloorWidthScale: 2.1,
+  roomFloorHeightScale: 2.1,
+};
+
+const fantasyUnicornMusicBox: ItemSpriteData = {
+  src: '/assets/items/fantasy-unicorn-music-box.png',
+  alt: 'תיבת נגינה חד־קרן',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_14px_rgba(255,150,225,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const fantasyCrystalCauldron: ItemSpriteData = {
+  src: '/assets/items/fantasy-crystal-cauldron.png',
+  alt: 'קלחת קריסטל',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(80,210,255,0.45)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.7,
+  roomHeightScale: 1.7,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.25,
+  roomFloorHeightScale: 2.25,
+};
+
+const fantasyKnightShield: ItemSpriteData = {
+  src: '/assets/items/fantasy-knight-shield.png',
+  alt: 'מגן אביר מכושף',
+  className: 'object-contain scale-[2.3] drop-shadow-[0_10px_18px_rgba(0,0,0,0.36)] drop-shadow-[0_0_14px_rgba(80,180,255,0.32)]',
+};
+
+const fantasyFairyQueenStatue: ItemSpriteData = {
+  src: '/assets/items/fantasy-fairy-queen-statue.png',
+  alt: 'פסל מלכת הפיות',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_20px_rgba(235,120,255,0.45)]',
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const fantasyMermaidFountain: ItemSpriteData = {
+  src: '/assets/items/fantasy-mermaid-fountain.png',
+  alt: 'מזרקת בת הים',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_20px_rgba(70,210,255,0.44)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.4,
+  roomFloorHeightScale: 2.4,
+};
+
+const fantasyGriffinGuardian: ItemSpriteData = {
+  src: '/assets/items/fantasy-griffin-guardian.png',
+  alt: 'גריפון שומר',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_16px_rgba(255,195,80,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const fantasyMoonFairyGarden: ItemSpriteData = {
+  src: '/assets/items/fantasy-moon-fairy-garden.png',
+  alt: 'גן פיות ירחי',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_20px_rgba(185,110,255,0.46)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.3,
+  roomFloorHeightScale: 2.3,
+};
+
+const fantasyDragonThrone: ItemSpriteData = {
+  src: '/assets/items/fantasy-dragon-throne.png',
+  alt: 'כס הדרקון',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.38)] drop-shadow-[0_0_22px_rgba(160,90,255,0.50)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.8,
+  roomHeightScale: 2.8,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.8,
+  roomFloorHeightScale: 2.8,
+};
+
+const fantasyPortalMirror: ItemSpriteData = {
+  src: '/assets/items/fantasy-portal-mirror.png',
+  alt: 'מראת מעבר קסומה',
+  className: 'object-contain scale-[2.6] drop-shadow-[0_14px_24px_rgba(0,0,0,0.38)] drop-shadow-[0_0_22px_rgba(110,120,255,0.48)]',
+};
+
+const fantasyDreamCastle: ItemSpriteData = {
+  src: '/assets/items/fantasy-dream-castle.png',
+  alt: 'טירת החלומות המרחפת',
+  className: 'object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.40)] drop-shadow-[0_0_30px_rgba(255,145,235,0.62)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 2.65,
+  roomHeightScale: 2.65,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 17,
+  roomFloorWidthScale: 3.1,
+  roomFloorHeightScale: 3.1,
+};
+
 const deskChessCrown: ItemSpriteData = {
   src: '/assets/items/desk-chess-crown.png',
   alt: 'כתר השחמט',
@@ -1888,6 +2157,26 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   sports_hologram_stadium: sportsHologramStadium,
   sports_victory_torch: sportsVictoryTorch,
   sports_kingdom_champions_cup: sportsKingdomChampionsCup,
+  fantasy_potion_set: fantasyPotionSet,
+  fantasy_wizard_hat: fantasyWizardHat,
+  fantasy_spark_wand: fantasySparkWand,
+  fantasy_fairy_bottle: fantasyFairyBottle,
+  fantasy_mushroom_stool: fantasyMushroomStool,
+  fantasy_enchanted_key: fantasyEnchantedKey,
+  fantasy_castle_rug: fantasyCastleRug,
+  fantasy_secret_door: fantasySecretDoor,
+  fantasy_spellbook_lectern: fantasySpellbookLectern,
+  fantasy_fairy_tree: fantasyFairyTree,
+  fantasy_unicorn_music_box: fantasyUnicornMusicBox,
+  fantasy_crystal_cauldron: fantasyCrystalCauldron,
+  fantasy_knight_shield: fantasyKnightShield,
+  fantasy_fairy_queen_statue: fantasyFairyQueenStatue,
+  fantasy_mermaid_fountain: fantasyMermaidFountain,
+  fantasy_griffin_guardian: fantasyGriffinGuardian,
+  fantasy_moon_fairy_garden: fantasyMoonFairyGarden,
+  fantasy_dragon_throne: fantasyDragonThrone,
+  fantasy_portal_mirror: fantasyPortalMirror,
+  fantasy_dream_castle: fantasyDreamCastle,
   desk_chess_crown: deskChessCrown,
   desk_inkwell: deskInkwell,
   wall_map: wallMap,

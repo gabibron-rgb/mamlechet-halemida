@@ -19,6 +19,7 @@ const LAB_THEMES: Array<{ id: ThemeId; nameHe: string }> = [
   { id: 'space', nameHe: 'חלל' },
   { id: 'animals', nameHe: 'חיות' },
   { id: 'sports', nameHe: 'ספורט' },
+  { id: 'fantasy', nameHe: 'פנטזיה' },
 ];
 
 const RARITIES: Rarity[] = [
