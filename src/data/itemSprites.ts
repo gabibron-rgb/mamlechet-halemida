@@ -376,6 +376,198 @@ const spaceGalaxyCore: ItemSpriteData = {
   roomFloorHeightScale: 2.25,
 };
 
+const spaceAstronautHelmet: ItemSpriteData = {
+  src: '/assets/items/space-astronaut-helmet.png',
+  alt: 'קסדת אסטרונאוט',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)] drop-shadow-[0_0_10px_rgba(70,210,255,0.24)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const spaceSatelliteModel: ItemSpriteData = {
+  src: '/assets/items/space-satellite-model.png',
+  alt: 'דגם לוויין',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const spaceMeteoriteSample: ItemSpriteData = {
+  src: '/assets/items/space-meteorite-sample.png',
+  alt: 'דגימת מטאוריט',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.32)] drop-shadow-[0_0_10px_rgba(130,90,255,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const spaceAlienPlant: ItemSpriteData = {
+  src: '/assets/items/space-alien-plant.png',
+  alt: 'צמח חייזרי קטן',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)] drop-shadow-[0_0_12px_rgba(100,230,220,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const spaceConstellationFrame: ItemSpriteData = {
+  src: '/assets/items/space-constellation-frame.png',
+  alt: 'תמונת קבוצות כוכבים',
+  className: 'object-contain drop-shadow-[0_9px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.6,
+  roomHeightScale: 1.65,
+};
+
+const spaceLaunchPadRug: ItemSpriteData = {
+  src: '/assets/items/space-launch-pad-rug.png',
+  alt: 'שטיח משטח שיגור',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]',
+};
+
+const spaceLunarRover: ItemSpriteData = {
+  src: '/assets/items/space-lunar-rover.png',
+  alt: 'רכב ירח קטן',
+  className: 'object-contain drop-shadow-[0_9px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 18,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 17,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 42,
+  roomFloorWidthScale: 1.95,
+  roomFloorHeightScale: 1.95,
+};
+
+const spaceSolarSystemMobile: ItemSpriteData = {
+  src: '/assets/items/space-solar-system-mobile.png',
+  alt: 'מובייל מערכת השמש',
+  className: 'object-contain drop-shadow-[0_9px_18px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(255,190,70,0.24)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.8,
+  roomHeightScale: 2.3,
+};
+
+const spaceFriendlyAlien: ItemSpriteData = {
+  src: '/assets/items/space-friendly-alien.png',
+  alt: 'אורח חייזרי ידידותי',
+  className: 'object-contain drop-shadow-[0_10px_16px_rgba(0,0,0,0.34)] drop-shadow-[0_0_14px_rgba(80,230,190,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.6,
+  roomHeightScale: 1.6,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 50,
+  roomFloorWidthScale: 2.1,
+  roomFloorHeightScale: 2.1,
+};
+
+const spaceObservatoryTelescope: ItemSpriteData = {
+  src: '/assets/items/space-observatory-telescope.png',
+  alt: 'טלסקופ לצפייה בכוכבים',
+  className: 'object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 50,
+  roomWidthScale: 2,
+  roomHeightScale: 2,
+};
+
+const spaceMarsColony: ItemSpriteData = {
+  src: '/assets/items/space-mars-colony.png',
+  alt: 'מושבת מאדים מיניאטורית',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_14px_rgba(70,210,255,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.3,
+  roomFloorHeightScale: 2.3,
+};
+
+const spaceCrystalComet: ItemSpriteData = {
+  src: '/assets/items/space-crystal-comet.png',
+  alt: 'שביט קריסטל',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(90,190,255,0.44)]',
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.8,
+  roomHeightScale: 1.8,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.35,
+  roomFloorHeightScale: 2.35,
+};
+
+const spaceAstronautExplorerStatue: ItemSpriteData = {
+  src: '/assets/items/space-astronaut-explorer-statue.png',
+  alt: 'פסל חוקרת החלל',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_16px_rgba(100,170,255,0.36)]',
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 14,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const spaceNebulaPortal: ItemSpriteData = {
+  src: '/assets/items/space-nebula-portal.png',
+  alt: 'שער הערפילית',
+  className: 'object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.38)] drop-shadow-[0_0_24px_rgba(150,90,255,0.55)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.5,
+  roomHeightScale: 2.5,
+};
+
 const genericCrystalSmall: ItemSpriteData = {
   src: '/assets/items/generic-crystal-small.png',
   alt: 'קריסטל קטן',
@@ -1624,6 +1816,20 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   space_planet: spacePlanet,
   space_black_hole: spaceBlackHole,
   space_galaxy_core: spaceGalaxyCore,
+  space_astronaut_helmet: spaceAstronautHelmet,
+  space_satellite_model: spaceSatelliteModel,
+  space_meteorite_sample: spaceMeteoriteSample,
+  space_alien_plant: spaceAlienPlant,
+  space_constellation_frame: spaceConstellationFrame,
+  space_launch_pad_rug: spaceLaunchPadRug,
+  space_lunar_rover: spaceLunarRover,
+  space_solar_system_mobile: spaceSolarSystemMobile,
+  space_friendly_alien: spaceFriendlyAlien,
+  space_observatory_telescope: spaceObservatoryTelescope,
+  space_mars_colony: spaceMarsColony,
+  space_crystal_comet: spaceCrystalComet,
+  space_astronaut_explorer_statue: spaceAstronautExplorerStatue,
+  space_nebula_portal: spaceNebulaPortal,
   generic_crystal_small: genericCrystalSmall,
   generic_gold_trophy: genericGoldTrophy,
   generic_floating_crystal: genericFloatingCrystal,
