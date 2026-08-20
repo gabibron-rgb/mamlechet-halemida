@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { CSSProperties, PointerEvent } from 'react';
 import { ITEMS } from '../data/items';
 import type { Item, Zone } from '../data/items';
 import { ITEM_SPRITES } from '../data/itemSprites';
@@ -9,7 +9,7 @@ import {
   RARITY_LABEL_HE,
 } from '../data/boxes';
 import type { Rarity } from '../data/boxes';
-import { getRoomSurface } from '../data/roomSurfaces';
+import { getRoomSurface, snapItemToRoomSurface } from '../data/roomSurfaces';
 import type { DisplayKind } from '../data/roomSurfaces';
 import type { ThemeId } from '../data/themes';
 
@@ -55,6 +55,71 @@ const PREVIEW_POINT: Record<Zone, { x: number; y: number }> = {
   special: { x: 52, y: 34 },
   petarea: { x: 72, y: 82 },
 };
+
+type PreviewPoint = { x: number; y: number };
+
+function previewPositionKey(itemId: string, zone: Zone): string {
+  return `${itemId}:${zone}`;
+}
+
+function choosePreviewZone(
+  item: Item,
+  currentZone: Zone,
+  x: number,
+  y: number,
+): Zone {
+  const allowedZones = item.zones;
+
+  if (
+    allowedZones.includes('shelf') &&
+    x >= 58 &&
+    x <= 86 &&
+    y >= 36 &&
+    y <= 68
+  ) {
+    return 'shelf';
+  }
+
+  if (
+    allowedZones.includes('desk') &&
+    x >= 10 &&
+    x <= 48 &&
+    y >= 55 &&
+    y <= 68
+  ) {
+    return 'desk';
+  }
+
+  if (
+    allowedZones.includes('special') &&
+    x >= 38 &&
+    x <= 68 &&
+    y >= 14 &&
+    y <= 42
+  ) {
+    return 'special';
+  }
+
+  if (allowedZones.includes('wall') && y >= 12 && y <= 66) {
+    return 'wall';
+  }
+
+  if (
+    allowedZones.includes('petarea') &&
+    x >= 55 &&
+    x <= 90 &&
+    y >= 68
+  ) {
+    return 'petarea';
+  }
+
+  if (allowedZones.includes('floor') && y >= 68) {
+    return 'floor';
+  }
+
+  if (allowedZones.includes(currentZone)) return currentZone;
+  return allowedZones[0] ?? 'floor';
+}
 
 type NumericSpriteKey =
   | 'roomOffsetX'
@@ -254,8 +319,9 @@ function previewStyle(
   item: Item,
   zone: Zone,
   draft: ItemSpriteData,
+  point: PreviewPoint,
 ): CSSProperties {
-  const { x, y } = PREVIEW_POINT[zone];
+  const { x, y } = point;
   const surface = getRoomSurface(x, y);
   const displayKind = displayKindForZone(item, zone);
 
@@ -459,6 +525,11 @@ export default function ItemLab() {
   const [assetErrors, setAssetErrors] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
+  const previewRoomRef = useRef<HTMLDivElement | null>(null);
+  const [previewPositions, setPreviewPositions] = useState<
+    Record<string, PreviewPoint>
+  >({});
+  const [isPreviewDragging, setIsPreviewDragging] = useState(false);
 
   const selectedItem =
     visibleItems.find(item => item.id === selectedItemId) ?? visibleItems[0];
@@ -466,6 +537,11 @@ export default function ItemLab() {
   const selectedDraft = selectedItem
     ? drafts[selectedItem.id] ?? createSpriteDraft(selectedItem)
     : null;
+
+  const selectedPreviewPosition = selectedItem
+    ? previewPositions[previewPositionKey(selectedItem.id, selectedZone)] ??
+      PREVIEW_POINT[selectedZone]
+    : PREVIEW_POINT.floor;
 
   useEffect(() => {
     if (!visibleItems.some(item => item.id === selectedItemId)) {
@@ -522,6 +598,45 @@ export default function ItemLab() {
 
       if (!current.includes(itemId)) return current;
       return current.filter(id => id !== itemId);
+    });
+  }
+
+  function movePreviewItem(event: PointerEvent<HTMLButtonElement>) {
+    if (!selectedItem) return;
+
+    const room = previewRoomRef.current;
+    if (!room) return;
+
+    const rect = room.getBoundingClientRect();
+    const rawX = ((event.clientX - rect.left) / rect.width) * 100;
+    const rawY = ((event.clientY - rect.top) / rect.height) * 100;
+    const x = Math.max(3, Math.min(97, rawX));
+    const y = Math.max(5, Math.min(95, rawY));
+
+    const zone = choosePreviewZone(selectedItem, selectedZone, x, y);
+    const displayKind = displayKindForZone(selectedItem, zone);
+    const snapped = snapItemToRoomSurface(displayKind, x, y);
+
+    setSelectedZone(zone);
+    setPreviewPositions(current => ({
+      ...current,
+      [previewPositionKey(selectedItem.id, zone)]: {
+        x: snapped.x,
+        y: snapped.y,
+      },
+    }));
+  }
+
+  function resetPreviewPosition() {
+    if (!selectedItem) return;
+
+    const key = previewPositionKey(selectedItem.id, selectedZone);
+    setPreviewPositions(current => {
+      if (!(key in current)) return current;
+
+      const next = { ...current };
+      delete next[key];
+      return next;
     });
   }
 
@@ -847,27 +962,42 @@ export default function ItemLab() {
                 <div>
                   <h2 className="text-2xl font-black">{selectedItem.nameHe}</h2>
                   <div className="mt-1 text-sm text-white/50">{selectedItem.id}</div>
+                  <div className="mt-2 text-xs text-emerald-200/80">
+                    גררי את החפץ בחדר. הוא ייצמד ויעבור בין האזורים המותרים כמו בחדר התלמידים.
+                  </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {selectedItem.zones.map(zone => (
-                    <button
-                      key={zone}
-                      type="button"
-                      onClick={() => setSelectedZone(zone)}
-                      className={`rounded-xl px-3 py-2 text-sm font-bold ${
-                        selectedZone === zone
-                          ? 'bg-fuchsia-500 text-white'
-                          : 'bg-white/5 text-white/60 hover:bg-white/10'
-                      }`}
-                    >
-                      {ZONE_LABEL_HE[zone]}
-                    </button>
-                  ))}
+                <div className="flex flex-col items-start gap-2 md:items-end">
+                  <div className="flex flex-wrap gap-2">
+                    {selectedItem.zones.map(zone => (
+                      <button
+                        key={zone}
+                        type="button"
+                        onClick={() => setSelectedZone(zone)}
+                        className={`rounded-xl px-3 py-2 text-sm font-bold ${
+                          selectedZone === zone
+                            ? 'bg-fuchsia-500 text-white'
+                            : 'bg-white/5 text-white/60 hover:bg-white/10'
+                        }`}
+                      >
+                        {ZONE_LABEL_HE[zone]}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={resetPreviewPosition}
+                    className="rounded-lg bg-white/5 px-3 py-1.5 text-xs font-bold text-white/60 hover:bg-white/10"
+                  >
+                    איפוס מיקום הבדיקה
+                  </button>
                 </div>
               </div>
 
-              <div className="relative mx-auto aspect-[16/10] w-full max-w-5xl overflow-hidden rounded-2xl border border-yellow-300/20 bg-black shadow-2xl">
+              <div
+                ref={previewRoomRef}
+                className="relative mx-auto aspect-[16/10] w-full max-w-5xl overflow-hidden rounded-2xl border border-yellow-300/20 bg-black shadow-2xl"
+              >
                 <img
                   src="/rooms/kingdom-room.png"
                   alt="חדר בדיקה"
@@ -875,7 +1005,39 @@ export default function ItemLab() {
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-black/5" />
-                <div className="absolute" style={previewStyle(selectedItem, selectedZone, selectedDraft)}>
+                <button
+                  type="button"
+                  aria-label={`גרירת ${selectedItem.nameHe} בחדר הבדיקה`}
+                  onPointerDown={event => {
+                    event.preventDefault();
+                    event.currentTarget.setPointerCapture(event.pointerId);
+                    setIsPreviewDragging(true);
+                    movePreviewItem(event);
+                  }}
+                  onPointerMove={event => {
+                    if (isPreviewDragging) movePreviewItem(event);
+                  }}
+                  onPointerUp={event => {
+                    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+                      event.currentTarget.releasePointerCapture(event.pointerId);
+                    }
+                    movePreviewItem(event);
+                    setIsPreviewDragging(false);
+                  }}
+                  onPointerCancel={() => setIsPreviewDragging(false)}
+                  onLostPointerCapture={() => setIsPreviewDragging(false)}
+                  className={`absolute touch-none select-none border-0 bg-transparent p-0 shadow-none outline-none ring-2 ring-yellow-300/80 ring-offset-2 ring-offset-transparent ${
+                    isPreviewDragging
+                      ? 'cursor-grabbing drop-shadow-[0_0_14px_rgba(250,204,21,0.9)]'
+                      : 'cursor-grab'
+                  }`}
+                  style={previewStyle(
+                    selectedItem,
+                    selectedZone,
+                    selectedDraft,
+                    selectedPreviewPosition,
+                  )}
+                >
                   <img
                     src={selectedDraft.src}
                     alt={selectedDraft.alt}
@@ -884,6 +1046,13 @@ export default function ItemLab() {
                     onError={() => reportAsset(selectedItem.id, true)}
                     onLoad={() => reportAsset(selectedItem.id, false)}
                   />
+                </button>
+
+                <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/65 px-3 py-2 text-left text-xs text-white/75" dir="ltr">
+                  x: {selectedPreviewPosition.x.toFixed(1)} · y: {selectedPreviewPosition.y.toFixed(1)}
+                  <span className="ml-2 text-fuchsia-200" dir="rtl">
+                    {ZONE_LABEL_HE[selectedZone]}
+                  </span>
                 </div>
               </div>
             </div>

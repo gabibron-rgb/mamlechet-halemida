@@ -452,6 +452,203 @@ const genericRoyalBanner: ItemSpriteData = {
   roomHeightScale: 2.15,
 };
 
+const genericRoundRug: ItemSpriteData = {
+  src: '/assets/items/generic-round-rug.png',
+  alt: 'שטיח עגול צבעוני',
+  className:
+    'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1,
+  roomHeightScale: 1,
+};
+
+const genericPencilCup: ItemSpriteData = {
+  src: '/assets/items/generic-pencil-cup.png',
+  alt: 'כוס כלי כתיבה',
+  className: 'object-contain drop-shadow-[0_8px_10px_rgba(0,0,0,0.35)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 15,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+};
+
+const genericSmallHourglass: ItemSpriteData = {
+  src: '/assets/items/generic-small-hourglass.png',
+  alt: 'שעון חול קטן',
+  className:
+    'object-contain drop-shadow-[0_0_8px_rgba(100,210,255,0.28)] drop-shadow-[0_8px_10px_rgba(0,0,0,0.35)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.2,
+  roomHeightScale: 1.2,
+
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const genericStorageBasket: ItemSpriteData = {
+  src: '/assets/items/generic-storage-basket.png',
+  alt: 'סל אחסון קלוע',
+  className: 'object-contain drop-shadow-[0_10px_12px_rgba(0,0,0,0.35)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 18,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 23,
+  roomShelfWidthScale: 1,
+  roomShelfHeightScale: 1,
+
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 34,
+  roomFloorWidthScale: 1.55,
+  roomFloorHeightScale: 1.55,
+};
+
+const genericFramedLandscape: ItemSpriteData = {
+  src: '/assets/items/generic-framed-landscape.png',
+  alt: 'תמונת נוף ממוסגרת',
+  className:
+    'object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.35)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.45,
+  roomHeightScale: 2.45,
+};
+
+const genericExplorerGlobe: ItemSpriteData = {
+  src: '/assets/items/generic-explorer-globe.png',
+  alt: 'גלובוס החוקר',
+  className:
+    'object-contain drop-shadow-[0_0_10px_rgba(70,180,255,0.22)] drop-shadow-[0_8px_12px_rgba(0,0,0,0.35)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 17,
+  roomShelfWidthScale: 1.2,
+  roomShelfHeightScale: 1.2,
+};
+
+const genericMagicMusicBox: ItemSpriteData = {
+  src: '/assets/items/generic-magic-music-box.png',
+  alt: 'תיבת נגינה קסומה',
+  className:
+    'object-contain drop-shadow-[0_0_12px_rgba(150,100,255,0.38)] drop-shadow-[0_8px_12px_rgba(0,0,0,0.35)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 17,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+};
+
+const genericScholarsClock: ItemSpriteData = {
+  src: '/assets/items/generic-scholars-clock.png',
+  alt: 'שעון המלומדים',
+  className:
+    'object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.35)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.2,
+  roomHeightScale: 2.2,
+};
+
+const genericTreasureChest: ItemSpriteData = {
+  src: '/assets/items/generic-treasure-chest.png',
+  alt: 'תיבת אוצר עתיקה',
+  className:
+    'object-contain drop-shadow-[0_0_12px_rgba(255,190,70,0.32)] drop-shadow-[0_10px_14px_rgba(0,0,0,0.38)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 16,
+  roomWidthScale: 1.6,
+  roomHeightScale: 1.6,
+
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 26,
+  roomFloorWidthScale: 2.1,
+  roomFloorHeightScale: 2.1,
+};
+
+const genericWisdomLantern: ItemSpriteData = {
+  src: '/assets/items/generic-wisdom-lantern.png',
+  alt: 'פנס החוכמה',
+  className:
+    'object-contain drop-shadow-[0_0_18px_rgba(255,190,70,0.58)] drop-shadow-[0_8px_12px_rgba(0,0,0,0.35)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 30,
+  roomFloorWidthScale: 1.75,
+  roomFloorHeightScale: 1.75,
+};
+
+const genericStainedGlassWindow: ItemSpriteData = {
+  src: '/assets/items/generic-stained-glass-window.png',
+  alt: 'חלון ויטראז׳ קסום',
+  className:
+    'object-contain drop-shadow-[0_0_14px_rgba(110,150,255,0.45)] drop-shadow-[0_8px_16px_rgba(0,0,0,0.34)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+};
+
+const genericFloatingBook: ItemSpriteData = {
+  src: '/assets/items/generic-floating-book.png',
+  alt: 'ספר הידע המרחף',
+  className:
+    'object-contain drop-shadow-[0_0_18px_rgba(160,100,255,0.75)] drop-shadow-[0_0_28px_rgba(80,160,255,0.42)]',
+
+  roomOffsetX: 0,
+  roomOffsetY: 2,
+  roomWidthScale: 1.7,
+  roomHeightScale: 1.7,
+
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 24,
+  roomFloorWidthScale: 2.1,
+  roomFloorHeightScale: 2.1,
+};
+
 const cosmeticGlowBlue: ItemSpriteData = {
   src: '/assets/items/cosmetic-glow-blue.png',
   alt: 'הילה כחולה',
@@ -925,6 +1122,18 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   generic_gold_trophy: genericGoldTrophy,
   generic_floating_crystal: genericFloatingCrystal,
   generic_royal_banner: genericRoyalBanner,
+  generic_round_rug: genericRoundRug,
+  generic_pencil_cup: genericPencilCup,
+  generic_small_hourglass: genericSmallHourglass,
+  generic_storage_basket: genericStorageBasket,
+  generic_framed_landscape: genericFramedLandscape,
+  generic_explorer_globe: genericExplorerGlobe,
+  generic_magic_music_box: genericMagicMusicBox,
+  generic_scholars_clock: genericScholarsClock,
+  generic_treasure_chest: genericTreasureChest,
+  generic_wisdom_lantern: genericWisdomLantern,
+  generic_stained_glass_window: genericStainedGlassWindow,
+  generic_floating_book: genericFloatingBook,
   cosmetic_glow_blue: cosmeticGlowBlue,
   cosmetic_sparkles: cosmeticSparkles,
   cosmetic_rainbow: cosmeticRainbow,
