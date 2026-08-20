@@ -5,8 +5,12 @@ import { useGameStore, type StudentState } from '../../store/useGameStore';
 import { canSell, sellValueOf } from '../../logic/economy';
 import RarityBadge from '../shared/RarityBadge';
 import { BOX_TIERS, RARITY_LABEL_HE } from '../../data/boxes';
-import { openBoxReward } from '../../logic/boxes';
+import type { BoxTier, Rarity } from '../../data/boxes';
+import { getBoxRewardPool, openBoxReward } from '../../logic/boxes';
 import { THEMES } from '../../data/themes';
+import type { ThemeId } from '../../data/themes';
+import Modal from '../shared/Modal';
+import ItemSprite from './ItemSprite';
 
 type Props = {
   student: StudentState;
@@ -19,11 +23,49 @@ type OpenedReward = {
   pityTriggered: boolean;
 };
 
+type BoxPreview = {
+  tier: BoxTier;
+  theme: ThemeId;
+};
+
+const RARITY_ORDER: Rarity[] = [
+  'common',
+  'uncommon',
+  'rare',
+  'epic',
+  'legendary',
+];
+
+function formatPercent(value: number): string {
+  const percentage = value * 100;
+  return Number.isInteger(percentage)
+    ? `${percentage}%`
+    : `${Number(percentage.toFixed(1))}%`;
+}
+
 export default function Inventory({ student }: Props) {
   const updateStudent = useGameStore((s) => s.updateStudent);
 
   const [message, setMessage] = useState<string | null>(null);
   const [openedReward, setOpenedReward] = useState<OpenedReward | null>(null);
+  const [boxPreview, setBoxPreview] = useState<BoxPreview | null>(null);
+
+  const ownedItemIds = new Set(
+    student.inventory
+      .filter((entry) => entry.kind !== 'box')
+      .map((entry) => entry.itemId)
+  );
+
+  const previewBox = boxPreview ? BOX_TIERS[boxPreview.tier] : null;
+  const previewTheme = boxPreview
+    ? THEMES.find((theme) => theme.id === boxPreview.theme)
+    : null;
+  const previewRewards = boxPreview
+    ? getBoxRewardPool(boxPreview.tier, boxPreview.theme)
+    : [];
+  const remainingPreviewRewardCount = previewRewards.filter(
+    (item) => !ownedItemIds.has(item.id)
+  ).length;
 
   function sell(idx: number) {
     const entry = student.inventory[idx];
@@ -130,6 +172,96 @@ export default function Inventory({ student }: Props) {
 
   return (
     <div>
+      {boxPreview && previewBox && (
+        <Modal
+          open={boxPreview !== null}
+          onClose={() => setBoxPreview(null)}
+          title={`מה יכול לצאת מ${previewBox.nameHe}?`}
+        >
+          <div className="mb-4 text-center">
+            <div className="text-sm text-magic-soft/75">
+              נושא: {previewTheme?.nameHe ?? 'כללי'}
+            </div>
+            <div className="mt-1 text-lg font-black text-white">
+              {previewRewards.length} חפצים במאגר
+            </div>
+            <div className="mt-1 text-sm font-bold text-emerald-300">
+              {remainingPreviewRewardCount} עדיין חסרים לך
+            </div>
+            <div className="mt-2 text-xs leading-5 text-magic-soft/60">
+              תחילה מוגרלת נדירות, ואז נבחר חפץ שעדיין אינו בבעלותך.
+              בגרסה הנוכחית, נדירות עם סיכוי בסיסי של 0% אינה מוגרלת
+              ישירות, אך עדיין עשויה להיבחר דרך מנגנון מניעת הכפילויות.
+            </div>
+          </div>
+
+          <div className="space-y-5">
+            {RARITY_ORDER.map((rarity) => {
+              const odds = previewBox.odds[rarity] ?? 0;
+              const rarityItems = previewRewards.filter(
+                (item) => item.rarity === rarity
+              );
+              if (rarityItems.length === 0) return null;
+
+              return (
+                <section key={rarity}>
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <RarityBadge rarity={rarity} />
+                    <div
+                      className={`text-xs font-bold ${
+                        odds > 0 ? 'text-magic-soft/70' : 'text-amber-300'
+                      }`}
+                    >
+                      {odds > 0
+                        ? `סיכוי בסיסי: ${formatPercent(odds)}`
+                        : '0% ישיר · אפשרי רק דרך מניעת כפילויות'}{' '}
+                      · {rarityItems.length} חפצים
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {rarityItems.map((item) => {
+                      const isOwned = ownedItemIds.has(item.id);
+
+                      return (
+                        <div
+                          key={item.id}
+                          className={`rounded-xl border p-2 text-center ${
+                            isOwned
+                              ? 'border-emerald-400/35 bg-emerald-500/10'
+                              : 'border-white/10 bg-magic-bg/40'
+                          }`}
+                        >
+                          <div className="mx-auto mb-2 h-20 w-20">
+                            <ItemSprite itemId={item.id} rarity={item.rarity} />
+                          </div>
+                          <div className="text-xs font-bold text-white">
+                            {item.nameHe}
+                          </div>
+                          {isOwned && (
+                            <div className="mt-1 text-[10px] font-bold text-emerald-300">
+                              כבר בבעלותך ✓
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setBoxPreview(null)}
+            className="mt-6 w-full rounded-xl bg-magic-accent py-2.5 font-bold text-magic-bg"
+          >
+            סגירה
+          </button>
+        </Modal>
+      )}
+
       {openedReward && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-6">
           <div className="w-full max-w-md rounded-3xl bg-magic-panel border border-magic-accent/50 p-6 text-center shadow-2xl">
@@ -187,8 +319,11 @@ export default function Inventory({ student }: Props) {
       <div className="grid grid-cols-2 gap-3">
         {student.inventory.map((entry, idx) => {
           if (entry.kind === 'box' && entry.boxTier) {
-            const box = BOX_TIERS[entry.boxTier];
-            const theme = THEMES.find((t) => t.id === entry.boxTheme);
+            const boxTier = entry.boxTier;
+            const boxTheme =
+              entry.boxTheme ?? student.unlockedThemes[0] ?? 'generic';
+            const box = BOX_TIERS[boxTier];
+            const theme = THEMES.find((t) => t.id === boxTheme);
             const themeName = theme?.nameHe ?? 'כללי';
 
             return (
@@ -214,13 +349,25 @@ export default function Inventory({ student }: Props) {
                   קופסה סגורה — פתח/י כדי לקבל פרס.
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => openBox(idx)}
-                  className="bg-magic-accent text-magic-bg font-bold py-2 rounded-xl text-sm mt-2 w-full"
-                >
-                  פתח/י קופסה
-                </button>
+                <div className="mt-2 grid gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setBoxPreview({ tier: boxTier, theme: boxTheme })
+                    }
+                    className="w-full rounded-xl border border-magic-accent/40 bg-magic-accent/10 py-2 text-sm font-bold text-magic-accent hover:bg-magic-accent/20"
+                  >
+                    מה יכול לצאת?
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openBox(idx)}
+                    className="w-full rounded-xl bg-magic-accent py-2 text-sm font-bold text-magic-bg"
+                  >
+                    פתח/י קופסה
+                  </button>
+                </div>
               </div>
             );
           }

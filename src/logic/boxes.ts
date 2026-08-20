@@ -33,6 +33,33 @@ function pickRandom<T>(arr: T[]): T | null {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function rewardsForTheme(theme: ThemeId): Item[] {
+  const themeRewards = ITEMS.filter((item) => {
+    if (item.source !== 'box') return false;
+
+    if (theme === 'generic') {
+      return item.theme === 'generic';
+    }
+
+    return item.theme === theme;
+  });
+
+  if (themeRewards.length > 0) return themeRewards;
+
+  return ITEMS.filter(
+    (item) => item.source === 'box' && item.theme === 'generic'
+  );
+}
+
+export function getBoxRewardPool(
+  _boxTier: BoxTier,
+  theme: ThemeId
+): Item[] {
+  // כרגע שומרים על ההתנהגות הקיימת: גם נדירות עם סיכוי בסיסי 0
+  // נשארת במאגר ויכולה להיבחר רק דרך מנגנון ה-fallback למניעת כפילויות.
+  return rewardsForTheme(theme);
+}
+
 export type BoxOpenResult = {
   item: Item;
   newPityCount: number;
@@ -47,25 +74,7 @@ export function openBoxReward(
 ): BoxOpenResult | null {
   const ownedSet = new Set(ownedItemIds);
   const targetRarity = rollRarity(boxTier, pityCount);
-
-  // קופסה כללית יכולה לתת רק פרסים כלליים.
-  // קופסה נושאית, למשל שחמט, תנסה לתת רק פרסים של אותו נושא.
-  const themeRewards = ITEMS.filter((item) => {
-    if (item.source !== 'box') return false;
-
-    if (theme === 'generic') {
-      return item.theme === 'generic';
-    }
-
-    return item.theme === theme;
-  });
-
-  // אם אין בכלל פרסים לנושא הזה, רק אז ניפול חזרה לפרסים כלליים
-  // כדי שהמשחק לא ייתקע.
-  const rewardsPool =
-    themeRewards.length > 0
-      ? themeRewards
-      : ITEMS.filter((item) => item.source === 'box' && item.theme === 'generic');
+  const rewardsPool = getBoxRewardPool(boxTier, theme);
 
   if (rewardsPool.length === 0) return null;
 
