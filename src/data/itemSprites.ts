@@ -784,6 +784,216 @@ const animalsPhoenixEgg: ItemSpriteData = {
   roomFloorHeightScale: 3.05,
 };
 
+const animalsBunnyCushion: ItemSpriteData = {
+  src: '/assets/items/animals-bunny-cushion.png',
+  alt: 'ארנבון על כרית',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 22,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 34,
+  roomFloorWidthScale: 1.8,
+  roomFloorHeightScale: 1.8,
+};
+
+const animalsHamsterWheel: ItemSpriteData = {
+  src: '/assets/items/animals-hamster-wheel.png',
+  alt: 'אוגר בגלגל',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+};
+
+const animalsTurtleFriend: ItemSpriteData = {
+  src: '/assets/items/animals-turtle-friend.png',
+  alt: 'צב קטן וסקרן',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 34,
+  roomFloorWidthScale: 1.6,
+  roomFloorHeightScale: 1.6,
+};
+
+const animalsPuppyBasket: ItemSpriteData = {
+  src: '/assets/items/animals-puppy-basket.png',
+  alt: 'גור כלבים בסל',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 20,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 36,
+  roomFloorWidthScale: 1.8,
+  roomFloorHeightScale: 1.8,
+};
+
+const animalsCapybaraFriend: ItemSpriteData = {
+  src: '/assets/items/animals-capybara-friend.png',
+  alt: 'קפיברה רגועה',
+  className: 'object-contain drop-shadow-[0_9px_13px_rgba(0,0,0,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 18,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 42,
+  roomFloorWidthScale: 2.05,
+  roomFloorHeightScale: 2.05,
+};
+
+const animalsButterflyFrame: ItemSpriteData = {
+  src: '/assets/items/animals-butterfly-frame.png',
+  alt: 'תמונת פרפרים',
+  className: 'object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+};
+
+const animalsPawRug: ItemSpriteData = {
+  src: '/assets/items/animals-paw-rug.png',
+  alt: 'שטיח עקבות צבעוני',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]',
+};
+
+const animalsRedPanda: ItemSpriteData = {
+  src: '/assets/items/animals-red-panda.png',
+  alt: 'פנדה אדומה קטנה',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_10px_rgba(40,210,190,0.20)]',
+  roomOffsetX: 0,
+  roomOffsetY: 18,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.18,
+  roomShelfHeightScale: 1.18,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 40,
+  roomFloorWidthScale: 1.95,
+  roomFloorHeightScale: 1.95,
+};
+
+const animalsOtterShell: ItemSpriteData = {
+  src: '/assets/items/animals-otter-shell.png',
+  alt: 'לוטרה עם צדף',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_10px_rgba(80,190,255,0.22)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 36,
+  roomFloorWidthScale: 1.75,
+  roomFloorHeightScale: 1.75,
+};
+
+const animalsAxolotlAquarium: ItemSpriteData = {
+  src: '/assets/items/animals-axolotl-aquarium.png',
+  alt: 'אקווריום אקסולוטל',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(80,220,255,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+};
+
+const animalsFrogLantern: ItemSpriteData = {
+  src: '/assets/items/animals-frog-lantern.png',
+  alt: 'מנורת צפרדע',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(80,255,150,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.25,
+  roomHeightScale: 1.25,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+};
+
+const animalsSnowLeopardCub: ItemSpriteData = {
+  src: '/assets/items/animals-snow-leopard-cub.png',
+  alt: 'גור נמר שלג',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_16px_rgba(100,210,255,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 16,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 48,
+  roomFloorWidthScale: 2.35,
+  roomFloorHeightScale: 2.35,
+};
+
+const animalsCrystalDeer: ItemSpriteData = {
+  src: '/assets/items/animals-crystal-deer.png',
+  alt: 'אייל הקריסטל',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(100,220,255,0.42)]',
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.85,
+  roomHeightScale: 1.85,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.45,
+  roomFloorHeightScale: 2.45,
+};
+
+const animalsMoonWolfPortrait: ItemSpriteData = {
+  src: '/assets/items/animals-moon-wolf-portrait.png',
+  alt: 'תמונת זאב הירח',
+  className: 'object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.38)] drop-shadow-[0_0_16px_rgba(80,150,255,0.26)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+};
+
+const animalsCloudPegasus: ItemSpriteData = {
+  src: '/assets/items/animals-cloud-pegasus.png',
+  alt: 'פגסוס העננים',
+  className: 'object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.36)] drop-shadow-[0_0_22px_rgba(180,130,255,0.48)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 2,
+  roomHeightScale: 2,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.7,
+  roomFloorHeightScale: 2.7,
+};
+
 const deskChessCrown: ItemSpriteData = {
   src: '/assets/items/desk-chess-crown.png',
   alt: 'כתר השחמט',
@@ -1141,6 +1351,21 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   animals_owl_perch: animalsOwlPerch,
   animals_tiny_dragon: animalsTinyDragon,
   animals_phoenix_egg: animalsPhoenixEgg,
+  animals_bunny_cushion: animalsBunnyCushion,
+  animals_hamster_wheel: animalsHamsterWheel,
+  animals_turtle_friend: animalsTurtleFriend,
+  animals_puppy_basket: animalsPuppyBasket,
+  animals_capybara_friend: animalsCapybaraFriend,
+  animals_butterfly_frame: animalsButterflyFrame,
+  animals_paw_rug: animalsPawRug,
+  animals_red_panda: animalsRedPanda,
+  animals_otter_shell: animalsOtterShell,
+  animals_axolotl_aquarium: animalsAxolotlAquarium,
+  animals_frog_lantern: animalsFrogLantern,
+  animals_snow_leopard_cub: animalsSnowLeopardCub,
+  animals_crystal_deer: animalsCrystalDeer,
+  animals_moon_wolf_portrait: animalsMoonWolfPortrait,
+  animals_cloud_pegasus: animalsCloudPegasus,
   desk_chess_crown: deskChessCrown,
   desk_inkwell: deskInkwell,
   wall_map: wallMap,

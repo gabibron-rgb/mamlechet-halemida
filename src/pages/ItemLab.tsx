@@ -194,6 +194,27 @@ const NUMERIC_KEYS: NumericSpriteKey[] = [
   'roomFloorHeightScale',
 ];
 
+const TEXT_SPRITE_KEYS = [
+  'src',
+  'alt',
+  'className',
+  'roomAnchorY',
+] as const;
+
+function spriteDraftsMatch(
+  savedDraft: ItemSpriteData,
+  codeDraft: ItemSpriteData,
+): boolean {
+  const textValuesMatch = TEXT_SPRITE_KEYS.every(
+    key => savedDraft[key] === codeDraft[key],
+  );
+  const numericValuesMatch = NUMERIC_KEYS.every(
+    key => savedDraft[key] === codeDraft[key],
+  );
+
+  return textValuesMatch && numericValuesMatch;
+}
+
 function spriteForItem(item: Item): ItemSpriteData | undefined {
   return ITEM_SPRITES[item.id] ?? ITEM_SPRITES[item.modelRef];
 }
@@ -229,17 +250,34 @@ function loadSavedLabState(items: Item[]): SavedLabState {
     }
 
     const saved = JSON.parse(savedText) as Partial<SavedLabState>;
-    const savedDrafts =
+    const savedDrafts: Record<string, ItemSpriteData> =
       saved.drafts && typeof saved.drafts === 'object' ? saved.drafts : {};
     const validItemIds = new Set(items.map(item => item.id));
-    const editedItemIds = Array.isArray(saved.editedItemIds)
+    const savedEditedItemIds = Array.isArray(saved.editedItemIds)
       ? saved.editedItemIds.filter(
           (id): id is string => typeof id === 'string' && validItemIds.has(id),
         )
       : [];
 
+    const editedItemIds = savedEditedItemIds.filter(id => {
+      const savedDraft = savedDrafts[id];
+      const codeDraft = defaultDrafts[id];
+
+      if (!savedDraft || !codeDraft) return false;
+      return !spriteDraftsMatch(savedDraft, codeDraft);
+    });
+
+    const pendingDrafts = Object.fromEntries(
+      editedItemIds.map(id => [
+        id,
+        { ...defaultDrafts[id], ...savedDrafts[id] },
+      ]),
+    );
+
     return {
-      drafts: { ...defaultDrafts, ...savedDrafts },
+      // רק שינויים שעדיין שונים מהקוד מקבלים עדיפות על ITEM_SPRITES.
+      // כך שמירה ישנה בדפדפן לא מסתירה עדכון שכבר הוטמע בקובץ.
+      drafts: { ...defaultDrafts, ...pendingDrafts },
       editedItemIds,
     };
   } catch {
