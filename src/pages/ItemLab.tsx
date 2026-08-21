@@ -17,6 +17,7 @@ const LAB_THEMES: Array<{ id: ThemeId; nameHe: string }> = [
   { id: 'generic', nameHe: 'כללי' },
   { id: 'chess', nameHe: 'שחמט' },
   { id: 'space', nameHe: 'חלל' },
+  { id: 'nature', nameHe: 'טבע' },
   { id: 'animals', nameHe: 'חיות' },
   { id: 'sports', nameHe: 'ספורט' },
   { id: 'music', nameHe: 'מוזיקה' },

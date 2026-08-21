@@ -3121,6 +3121,294 @@ const balletLegendaryPrimaStage: ItemSpriteData = {
   roomFloorHeightScale: 3.1,
 };
 
+const natureWildflowerPot: ItemSpriteData = {
+  src: '/assets/items/nature-wildflower-pot.png',
+  alt: 'עציץ פרחי בר',
+  className: 'object-contain drop-shadow-[0_9px_16px_rgba(0,0,0,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const natureAcornCollection: ItemSpriteData = {
+  src: '/assets/items/nature-acorn-collection.png',
+  alt: 'אוסף בלוטים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 14,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1,
+  roomShelfHeightScale: 1,
+};
+
+const natureMossyStone: ItemSpriteData = {
+  src: '/assets/items/nature-mossy-stone.png',
+  alt: 'אבן מכוסה טחב',
+  className: 'object-contain drop-shadow-[0_10px_17px_rgba(0,0,0,0.35)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.7,
+  roomHeightScale: 1.7,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 54,
+  roomFloorWidthScale: 2.25,
+  roomFloorHeightScale: 2.25,
+};
+
+const natureLeafPress: ItemSpriteData = {
+  src: '/assets/items/nature-leaf-press.png',
+  alt: 'מכבש עלים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 14,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1,
+  roomShelfHeightScale: 1,
+};
+
+const natureSunflowerVase: ItemSpriteData = {
+  src: '/assets/items/nature-sunflower-vase.png',
+  alt: 'אגרטל חמניות',
+  className: 'object-contain drop-shadow-[0_9px_16px_rgba(0,0,0,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const natureFernBasket: ItemSpriteData = {
+  src: '/assets/items/nature-fern-basket.png',
+  alt: 'סלסילת שרכים',
+  className: 'object-contain drop-shadow-[0_10px_17px_rgba(0,0,0,0.35)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 54,
+  roomFloorWidthScale: 2.2,
+  roomFloorHeightScale: 2.2,
+};
+
+const natureLeafRug: ItemSpriteData = {
+  src: '/assets/items/nature-leaf-rug.png',
+  alt: 'שטיח עלה',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]',
+};
+
+const natureLogStool: ItemSpriteData = {
+  src: '/assets/items/nature-log-stool.png',
+  alt: 'שרפרף בול עץ',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.37)]',
+  roomOffsetX: 0,
+  roomOffsetY: 55,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 55,
+  roomFloorWidthScale: 2.4,
+  roomFloorHeightScale: 2.4,
+};
+
+const natureBonsaiTree: ItemSpriteData = {
+  src: '/assets/items/nature-bonsai-tree.png',
+  alt: 'עץ בונסאי',
+  className: 'object-contain drop-shadow-[0_11px_19px_rgba(0,0,0,0.36)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.8,
+  roomHeightScale: 1.8,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 54,
+  roomFloorWidthScale: 2.3,
+  roomFloorHeightScale: 2.3,
+};
+
+const natureMushroomLantern: ItemSpriteData = {
+  src: '/assets/items/nature-mushroom-lantern.png',
+  alt: 'מנורת פטריות',
+  className: 'object-contain drop-shadow-[0_11px_19px_rgba(0,0,0,0.36)] drop-shadow-[0_0_20px_rgba(255,195,80,0.40)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.8,
+  roomHeightScale: 1.8,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 54,
+  roomFloorWidthScale: 2.3,
+  roomFloorHeightScale: 2.3,
+};
+
+const natureIndoorHerbGarden: ItemSpriteData = {
+  src: '/assets/items/nature-indoor-herb-garden.png',
+  alt: 'גינת תבלינים קטנה',
+  className: 'object-contain drop-shadow-[0_13px_22px_rgba(0,0,0,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.6,
+  roomHeightScale: 2.6,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.6,
+  roomFloorHeightScale: 2.6,
+};
+
+const natureRainCloudMobile: ItemSpriteData = {
+  src: '/assets/items/nature-rain-cloud-mobile.png',
+  alt: 'מובייל ענן גשם',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(90,190,255,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: -2,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+};
+
+const natureFlowerArch: ItemSpriteData = {
+  src: '/assets/items/nature-flower-arch.png',
+  alt: 'קשת פרחים',
+  className: 'object-contain drop-shadow-[0_13px_22px_rgba(0,0,0,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.8,
+  roomHeightScale: 2.8,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.8,
+  roomFloorHeightScale: 2.8,
+};
+
+const natureCrystalGeode: ItemSpriteData = {
+  src: '/assets/items/nature-crystal-geode.png',
+  alt: 'גאודת טבע זוהרת',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.37)] drop-shadow-[0_0_24px_rgba(80,210,255,0.45)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 56,
+  roomFloorWidthScale: 2.4,
+  roomFloorHeightScale: 2.4,
+};
+
+const natureMiniWaterfall: ItemSpriteData = {
+  src: '/assets/items/nature-mini-waterfall.png',
+  alt: 'מפל טבע קטן',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.40)] drop-shadow-[0_0_22px_rgba(80,195,255,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.8,
+  roomHeightScale: 2.8,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.8,
+  roomFloorHeightScale: 2.8,
+};
+
+const natureGlowingMossGarden: ItemSpriteData = {
+  src: '/assets/items/nature-glowing-moss-garden.png',
+  alt: 'גינת טחב זוהרת',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.40)] drop-shadow-[0_0_24px_rgba(120,255,135,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.7,
+  roomHeightScale: 2.7,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.7,
+  roomFloorHeightScale: 2.7,
+};
+
+const natureFourSeasonsTree: ItemSpriteData = {
+  src: '/assets/items/nature-four-seasons-tree.png',
+  alt: 'עץ ארבע העונות',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.40)] drop-shadow-[0_0_23px_rgba(255,195,100,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 62,
+  roomWidthScale: 2.9,
+  roomHeightScale: 2.9,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 62,
+  roomFloorWidthScale: 2.9,
+  roomFloorHeightScale: 2.9,
+};
+
+const natureEnchantedGreenhouse: ItemSpriteData = {
+  src: '/assets/items/nature-enchanted-greenhouse.png',
+  alt: 'החממה הקסומה',
+  className: 'object-contain drop-shadow-[0_15px_27px_rgba(0,0,0,0.42)] drop-shadow-[0_0_28px_rgba(110,255,155,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 64,
+  roomWidthScale: 3,
+  roomHeightScale: 3,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 3,
+  roomFloorHeightScale: 3,
+};
+
+const natureLivingForestCorner: ItemSpriteData = {
+  src: '/assets/items/nature-living-forest-corner.png',
+  alt: 'פינת היער החיה',
+  className: 'object-contain drop-shadow-[0_15px_27px_rgba(0,0,0,0.42)] drop-shadow-[0_0_27px_rgba(80,205,255,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 64,
+  roomWidthScale: 3,
+  roomHeightScale: 3,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 3,
+  roomFloorHeightScale: 3,
+};
+
+const natureHeartOfTheForest: ItemSpriteData = {
+  src: '/assets/items/nature-heart-of-the-forest.png',
+  alt: 'לב היער האגדי',
+  className: 'object-contain drop-shadow-[0_16px_29px_rgba(0,0,0,0.43)] drop-shadow-[0_0_35px_rgba(70,255,145,0.58)] drop-shadow-[0_0_46px_rgba(255,210,80,0.36)]',
+  roomOffsetX: 0,
+  roomOffsetY: 66,
+  roomWidthScale: 3.1,
+  roomHeightScale: 3.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 66,
+  roomFloorWidthScale: 3.1,
+  roomFloorHeightScale: 3.1,
+};
+
 const deskChessCrown: ItemSpriteData = {
   src: '/assets/items/desk-chess-crown.png',
   alt: 'כתר השחמט',
@@ -3647,6 +3935,26 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   ballet_dream_rehearsal_studio: balletDreamRehearsalStudio,
   ballet_moonlit_theatre_stage: balletMoonlitTheatreStage,
   ballet_legendary_prima_stage: balletLegendaryPrimaStage,
+  nature_wildflower_pot: natureWildflowerPot,
+  nature_acorn_collection: natureAcornCollection,
+  nature_mossy_stone: natureMossyStone,
+  nature_leaf_press: natureLeafPress,
+  nature_sunflower_vase: natureSunflowerVase,
+  nature_fern_basket: natureFernBasket,
+  nature_leaf_rug: natureLeafRug,
+  nature_log_stool: natureLogStool,
+  nature_bonsai_tree: natureBonsaiTree,
+  nature_mushroom_lantern: natureMushroomLantern,
+  nature_indoor_herb_garden: natureIndoorHerbGarden,
+  nature_rain_cloud_mobile: natureRainCloudMobile,
+  nature_flower_arch: natureFlowerArch,
+  nature_crystal_geode: natureCrystalGeode,
+  nature_mini_waterfall: natureMiniWaterfall,
+  nature_glowing_moss_garden: natureGlowingMossGarden,
+  nature_four_seasons_tree: natureFourSeasonsTree,
+  nature_enchanted_greenhouse: natureEnchantedGreenhouse,
+  nature_living_forest_corner: natureLivingForestCorner,
+  nature_heart_of_the_forest: natureHeartOfTheForest,
   desk_chess_crown: deskChessCrown,
   desk_inkwell: deskInkwell,
   wall_map: wallMap,
