@@ -1751,6 +1751,554 @@ const fantasyDreamCastle: ItemSpriteData = {
   roomFloorHeightScale: 3.1,
 };
 
+const musicColorfulMaracas: ItemSpriteData = {
+  src: '/assets/items/music-colorful-maracas.png',
+  alt: 'זוג מאראקס צבעוניים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const musicRoyalTambourine: ItemSpriteData = {
+  src: '/assets/items/music-royal-tambourine.png',
+  alt: 'תוף מרים מלכותי',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const musicRainbowXylophone: ItemSpriteData = {
+  src: '/assets/items/music-rainbow-xylophone.png',
+  alt: 'קסילופון קשת',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 18,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+};
+
+const musicMagicMetronome: ItemSpriteData = {
+  src: '/assets/items/music-magic-metronome.png',
+  alt: 'מטרונום קסום',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(100,200,255,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const musicViolinCase: ItemSpriteData = {
+  src: '/assets/items/music-violin-case.png',
+  alt: 'נרתיק כינור פתוח',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 18,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const musicNoteRug: ItemSpriteData = {
+  src: '/assets/items/music-note-rug.png',
+  alt: 'שטיח מנגינה',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]',
+};
+
+const musicGlowingGuitar: ItemSpriteData = {
+  src: '/assets/items/music-glowing-guitar.png',
+  alt: 'גיטרה זוהרת',
+  className: 'object-contain scale-[2.4] drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_16px_rgba(255,70,190,0.40)]',
+};
+
+const musicSilverFlute: ItemSpriteData = {
+  src: '/assets/items/music-silver-flute.png',
+  alt: 'חליל צד כסוף',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 18,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const musicViolinStand: ItemSpriteData = {
+  src: '/assets/items/music-violin-stand.png',
+  alt: 'כינור מלכותי על מעמד',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_14px_rgba(255,170,70,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.25,
+  roomFloorHeightScale: 2.25,
+};
+
+const musicGoldenSaxophone: ItemSpriteData = {
+  src: '/assets/items/music-golden-saxophone.png',
+  alt: 'סקסופון מוזהב',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_14px_rgba(255,190,70,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.25,
+  roomFloorHeightScale: 2.25,
+};
+
+const musicDrumKit: ItemSpriteData = {
+  src: '/assets/items/music-drum-kit.png',
+  alt: 'מערכת תופים צבעונית',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.4,
+  roomFloorHeightScale: 2.4,
+};
+
+const musicStageMicrophone: ItemSpriteData = {
+  src: '/assets/items/music-stage-microphone.png',
+  alt: 'מיקרופון במה',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_16px_rgba(255,80,220,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 55,
+  roomWidthScale: 2.1,
+  roomHeightScale: 2.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 55,
+  roomFloorWidthScale: 2.1,
+  roomFloorHeightScale: 2.1,
+};
+
+const musicGlowingNotesFrame: ItemSpriteData = {
+  src: '/assets/items/music-glowing-notes-frame.png',
+  alt: 'תמונת תווים זוהרים',
+  className: 'object-contain scale-[2.4] drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(120,140,255,0.42)]',
+};
+
+const musicCrystalHarp: ItemSpriteData = {
+  src: '/assets/items/music-crystal-harp.png',
+  alt: 'נבל קריסטל',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_20px_rgba(80,210,255,0.45)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.5,
+  roomHeightScale: 2.5,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const musicGrandPiano: ItemSpriteData = {
+  src: '/assets/items/music-grand-piano.png',
+  alt: 'פסנתר כנף מלכותי',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.38)] drop-shadow-[0_0_20px_rgba(140,90,255,0.42)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.7,
+  roomHeightScale: 2.7,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.7,
+  roomFloorHeightScale: 2.7,
+};
+
+const musicYoungViolinistStatue: ItemSpriteData = {
+  src: '/assets/items/music-young-violinist-statue.png',
+  alt: 'פסל הכנרת הצעירה',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_18px_rgba(255,130,210,0.42)]',
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const musicEnchantedGramophone: ItemSpriteData = {
+  src: '/assets/items/music-enchanted-gramophone.png',
+  alt: 'גרמופון מכושף',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_18px_rgba(255,170,70,0.40)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.3,
+  roomFloorHeightScale: 2.3,
+};
+
+const musicMagicalOrchestra: ItemSpriteData = {
+  src: '/assets/items/music-magical-orchestra.png',
+  alt: 'תזמורת הכלים הקסומה',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.38)] drop-shadow-[0_0_24px_rgba(255,100,220,0.52)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 2.2,
+  roomHeightScale: 2.2,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 62,
+  roomFloorWidthScale: 2.8,
+  roomFloorHeightScale: 2.8,
+};
+
+const musicRainbowPipeOrgan: ItemSpriteData = {
+  src: '/assets/items/music-rainbow-pipe-organ.png',
+  alt: 'עוגב הקשת המלכותי',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.38)] drop-shadow-[0_0_26px_rgba(100,180,255,0.52)]',
+  roomOffsetX: 0,
+  roomOffsetY: 62,
+  roomWidthScale: 2.9,
+  roomHeightScale: 2.9,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 62,
+  roomFloorWidthScale: 2.9,
+  roomFloorHeightScale: 2.9,
+};
+
+const musicFloatingConcertStage: ItemSpriteData = {
+  src: '/assets/items/music-floating-concert-stage.png',
+  alt: 'במת הקונצרט המרחפת',
+  className: 'object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.40)] drop-shadow-[0_0_30px_rgba(255,100,220,0.62)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 2.65,
+  roomHeightScale: 2.65,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 23,
+  roomFloorWidthScale: 3.1,
+  roomFloorHeightScale: 3.1,
+};
+
+const roboticsTinyHelperBot: ItemSpriteData = {
+  src: '/assets/items/robotics-tiny-helper-bot.png',
+  alt: 'רובוט עוזר קטן',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_10px_rgba(50,210,255,0.26)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const roboticsColorfulGears: ItemSpriteData = {
+  src: '/assets/items/robotics-colorful-gears.png',
+  alt: 'גלגלי שיניים צבעוניים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const roboticsRemoteController: ItemSpriteData = {
+  src: '/assets/items/robotics-remote-controller.png',
+  alt: 'שלט רובוטים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_10px_rgba(255,135,35,0.22)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const roboticsSensorKit: ItemSpriteData = {
+  src: '/assets/items/robotics-sensor-kit.png',
+  alt: 'ערכת חיישנים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 16,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const roboticsCircuitRug: ItemSpriteData = {
+  src: '/assets/items/robotics-circuit-rug.png',
+  alt: 'שטיח מעגלים',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)] drop-shadow-[0_0_14px_rgba(50,210,255,0.24)]',
+};
+
+const roboticsBlueprintFrame: ItemSpriteData = {
+  src: '/assets/items/robotics-blueprint-frame.png',
+  alt: 'תרשים רובוט זוהר',
+  className: 'object-contain scale-[2.4] drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(50,210,255,0.42)]',
+};
+
+const roboticsMiniDrone: ItemSpriteData = {
+  src: '/assets/items/robotics-mini-drone.png',
+  alt: 'רחפן מיני',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(100,90,255,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const roboticsToolbox: ItemSpriteData = {
+  src: '/assets/items/robotics-toolbox.png',
+  alt: 'ארגז כלים חכם',
+  className: 'object-contain drop-shadow-[0_9px_15px_rgba(0,0,0,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 16,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 48,
+  roomFloorWidthScale: 2.1,
+  roomFloorHeightScale: 2.1,
+};
+
+const roboticsRoboticArm: ItemSpriteData = {
+  src: '/assets/items/robotics-robotic-arm.png',
+  alt: 'זרוע רובוטית',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_14px_rgba(50,210,255,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 55,
+  roomWidthScale: 2.2,
+  roomHeightScale: 2.2,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 55,
+  roomFloorWidthScale: 2.2,
+  roomFloorHeightScale: 2.2,
+};
+
+const robotics3dPrinter: ItemSpriteData = {
+  src: '/assets/items/robotics-3d-printer.png',
+  alt: 'מדפסת תלת־ממד',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_14px_rgba(255,135,35,0.26)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.3,
+  roomHeightScale: 2.3,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.3,
+  roomFloorHeightScale: 2.3,
+};
+
+const roboticsWheeledRover: ItemSpriteData = {
+  src: '/assets/items/robotics-wheeled-rover.png',
+  alt: 'רכב רובוטי',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.36)] drop-shadow-[0_0_14px_rgba(50,210,255,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 54,
+  roomFloorWidthScale: 2.4,
+  roomFloorHeightScale: 2.4,
+};
+
+const roboticsHologramWorkbench: ItemSpriteData = {
+  src: '/assets/items/robotics-hologram-workbench.png',
+  alt: 'שולחן תכנון הולוגרפי',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_18px_rgba(50,210,255,0.36)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.5,
+  roomHeightScale: 2.5,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const roboticsCodingConsole: ItemSpriteData = {
+  src: '/assets/items/robotics-coding-console.png',
+  alt: 'מסוף תכנות עתידני',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_16px_rgba(100,90,255,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 55,
+  roomWidthScale: 2.2,
+  roomHeightScale: 2.2,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 55,
+  roomFloorWidthScale: 2.2,
+  roomFloorHeightScale: 2.2,
+};
+
+const roboticsCompetitionRobot: ItemSpriteData = {
+  src: '/assets/items/robotics-competition-robot.png',
+  alt: 'רובוט המשימות האלוף',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_18px_rgba(255,135,35,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 2.1,
+  roomHeightScale: 2.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.6,
+  roomFloorHeightScale: 2.6,
+};
+
+const roboticsFriendlyAndroid: ItemSpriteData = {
+  src: '/assets/items/robotics-friendly-android.png',
+  alt: 'אנדרואיד ידידותי',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_18px_rgba(50,210,255,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.15,
+  roomShelfHeightScale: 1.15,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const roboticsDroneHangar: ItemSpriteData = {
+  src: '/assets/items/robotics-drone-hangar.png',
+  alt: 'תחנת רחפנים',
+  className: 'object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.38)] drop-shadow-[0_0_20px_rgba(50,210,255,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.7,
+  roomHeightScale: 2.7,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.7,
+  roomFloorHeightScale: 2.7,
+};
+
+const roboticsAiCrystalCore: ItemSpriteData = {
+  src: '/assets/items/robotics-ai-crystal-core.png',
+  alt: 'ליבת הבינה הקריסטלית',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_22px_rgba(90,120,255,0.50)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.85,
+  roomHeightScale: 1.85,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.3,
+  roomFloorHeightScale: 2.3,
+};
+
+const roboticsTransformingMech: ItemSpriteData = {
+  src: '/assets/items/robotics-transforming-mech.png',
+  alt: 'רובוט משנה צורה',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.40)] drop-shadow-[0_0_24px_rgba(50,210,255,0.48)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 2.9,
+  roomFloorHeightScale: 2.9,
+};
+
+const roboticsHolographicLab: ItemSpriteData = {
+  src: '/assets/items/robotics-holographic-lab.png',
+  alt: 'מעבדת הרובוטיקה ההולוגרפית',
+  className: 'object-contain drop-shadow-[0_15px_26px_rgba(0,0,0,0.40)] drop-shadow-[0_0_26px_rgba(50,210,255,0.52)]',
+  roomOffsetX: 0,
+  roomOffsetY: 62,
+  roomWidthScale: 2.9,
+  roomHeightScale: 2.9,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 62,
+  roomFloorWidthScale: 2.9,
+  roomFloorHeightScale: 2.9,
+};
+
+const roboticsKingdomGuardian: ItemSpriteData = {
+  src: '/assets/items/robotics-kingdom-guardian.png',
+  alt: 'שומר הממלכה הרובוטי',
+  className: 'object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.42)] drop-shadow-[0_0_30px_rgba(255,195,55,0.58)] drop-shadow-[0_0_40px_rgba(50,210,255,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 2.65,
+  roomHeightScale: 2.65,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 70,
+  roomFloorWidthScale: 3.1,
+  roomFloorHeightScale: 3.1,
+};
+
 const deskChessCrown: ItemSpriteData = {
   src: '/assets/items/desk-chess-crown.png',
   alt: 'כתר השחמט',
@@ -2177,6 +2725,46 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   fantasy_dragon_throne: fantasyDragonThrone,
   fantasy_portal_mirror: fantasyPortalMirror,
   fantasy_dream_castle: fantasyDreamCastle,
+  music_colorful_maracas: musicColorfulMaracas,
+  music_royal_tambourine: musicRoyalTambourine,
+  music_rainbow_xylophone: musicRainbowXylophone,
+  music_magic_metronome: musicMagicMetronome,
+  music_violin_case: musicViolinCase,
+  music_note_rug: musicNoteRug,
+  music_glowing_guitar: musicGlowingGuitar,
+  music_silver_flute: musicSilverFlute,
+  music_violin_stand: musicViolinStand,
+  music_golden_saxophone: musicGoldenSaxophone,
+  music_drum_kit: musicDrumKit,
+  music_stage_microphone: musicStageMicrophone,
+  music_glowing_notes_frame: musicGlowingNotesFrame,
+  music_crystal_harp: musicCrystalHarp,
+  music_grand_piano: musicGrandPiano,
+  music_young_violinist_statue: musicYoungViolinistStatue,
+  music_enchanted_gramophone: musicEnchantedGramophone,
+  music_magical_orchestra: musicMagicalOrchestra,
+  music_rainbow_pipe_organ: musicRainbowPipeOrgan,
+  music_floating_concert_stage: musicFloatingConcertStage,
+  robotics_tiny_helper_bot: roboticsTinyHelperBot,
+  robotics_colorful_gears: roboticsColorfulGears,
+  robotics_remote_controller: roboticsRemoteController,
+  robotics_sensor_kit: roboticsSensorKit,
+  robotics_circuit_rug: roboticsCircuitRug,
+  robotics_blueprint_frame: roboticsBlueprintFrame,
+  robotics_mini_drone: roboticsMiniDrone,
+  robotics_toolbox: roboticsToolbox,
+  robotics_robotic_arm: roboticsRoboticArm,
+  robotics_3d_printer: robotics3dPrinter,
+  robotics_wheeled_rover: roboticsWheeledRover,
+  robotics_hologram_workbench: roboticsHologramWorkbench,
+  robotics_coding_console: roboticsCodingConsole,
+  robotics_competition_robot: roboticsCompetitionRobot,
+  robotics_friendly_android: roboticsFriendlyAndroid,
+  robotics_drone_hangar: roboticsDroneHangar,
+  robotics_ai_crystal_core: roboticsAiCrystalCore,
+  robotics_transforming_mech: roboticsTransformingMech,
+  robotics_holographic_lab: roboticsHolographicLab,
+  robotics_kingdom_guardian: roboticsKingdomGuardian,
   desk_chess_crown: deskChessCrown,
   desk_inkwell: deskInkwell,
   wall_map: wallMap,
