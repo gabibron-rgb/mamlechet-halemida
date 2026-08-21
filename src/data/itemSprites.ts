@@ -2299,6 +2299,260 @@ const roboticsKingdomGuardian: ItemSpriteData = {
   roomFloorHeightScale: 3.1,
 };
 
+const artColorfulPaintJars: ItemSpriteData = {
+  src: '/assets/items/art-colorful-paint-jars.png',
+  alt: 'צנצנות צבע קסומות',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_10px_rgba(255,90,190,0.24)]',
+  roomOffsetX: 0,
+  roomOffsetY: 16,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const artBrushCup: ItemSpriteData = {
+  src: '/assets/items/art-brush-cup.png',
+  alt: 'כוס מכחולים צבעונית',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_10px_rgba(255,185,55,0.24)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const artWatercolorPalette: ItemSpriteData = {
+  src: '/assets/items/art-watercolor-palette.png',
+  alt: 'פלטת צבעי מים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 18,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const artSketchbookSet: ItemSpriteData = {
+  src: '/assets/items/art-sketchbook-set.png',
+  alt: 'מחברת הרעיונות',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetX: 0,
+  roomOffsetY: 16,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const artOrigamiCranes: ItemSpriteData = {
+  src: '/assets/items/art-origami-cranes.png',
+  alt: 'להקת עגורי אוריגמי',
+  className: 'object-contain drop-shadow-[0_9px_16px_rgba(0,0,0,0.34)] drop-shadow-[0_0_12px_rgba(255,165,70,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.6,
+  roomHeightScale: 1.6,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const artClayModelingSet: ItemSpriteData = {
+  src: '/assets/items/art-clay-modeling-set.png',
+  alt: 'ערכת פיסול בחימר',
+  className: 'object-contain drop-shadow-[0_9px_15px_rgba(0,0,0,0.33)]',
+  roomOffsetX: 0,
+  roomOffsetY: 16,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const artArtistApron: ItemSpriteData = {
+  src: '/assets/items/art-artist-apron.png',
+  alt: 'סינר האומן',
+  className: 'object-contain scale-[2.3] drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+};
+
+const artPaintSplashRug: ItemSpriteData = {
+  src: '/assets/items/art-paint-splash-rug.png',
+  alt: 'שטיח כתם צבע',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]',
+};
+
+const artWoodenEasel: ItemSpriteData = {
+  src: '/assets/items/art-wooden-easel.png',
+  alt: 'כן ציור נופי',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_14px_rgba(255,185,55,0.24)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.4,
+  roomFloorHeightScale: 2.4,
+};
+
+const artPotteryWheel: ItemSpriteData = {
+  src: '/assets/items/art-pottery-wheel.png',
+  alt: 'אובני הקדרים',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_15px_rgba(60,215,255,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.5,
+  roomHeightScale: 2.5,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const artStainedGlassButterfly: ItemSpriteData = {
+  src: '/assets/items/art-stained-glass-butterfly.png',
+  alt: 'ויטראז׳ הפרפר',
+  className: 'object-contain scale-[2.5] drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_20px_rgba(80,190,255,0.42)]',
+};
+
+const artDrawingTablet: ItemSpriteData = {
+  src: '/assets/items/art-drawing-tablet.png',
+  alt: 'לוח ציור דיגיטלי',
+  className: 'object-contain drop-shadow-[0_9px_16px_rgba(0,0,0,0.34)] drop-shadow-[0_0_12px_rgba(60,190,255,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 16,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const artCraftWorkbench: ItemSpriteData = {
+  src: '/assets/items/art-craft-workbench.png',
+  alt: 'שולחן מלאכת היד',
+  className: 'object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 62,
+  roomWidthScale: 2.8,
+  roomHeightScale: 2.8,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 62,
+  roomFloorWidthScale: 2.8,
+  roomFloorHeightScale: 2.8,
+};
+
+const artSelfPaintingCanvas: ItemSpriteData = {
+  src: '/assets/items/art-self-painting-canvas.png',
+  alt: 'הציור שמצייר את עצמו',
+  className: 'object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.38)] drop-shadow-[0_0_20px_rgba(255,90,210,0.42)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.7,
+  roomHeightScale: 2.7,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.7,
+  roomFloorHeightScale: 2.7,
+};
+
+const artCrystalSculpture: ItemSpriteData = {
+  src: '/assets/items/art-crystal-sculpture.png',
+  alt: 'פסל הקריסטל המופשט',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_22px_rgba(100,150,255,0.48)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.4,
+  roomFloorHeightScale: 2.4,
+};
+
+const artKineticColorMobile: ItemSpriteData = {
+  src: '/assets/items/art-kinetic-color-mobile.png',
+  alt: 'מובייל הצבעים הקינטי',
+  className: 'object-contain scale-[2.5] drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_22px_rgba(255,170,70,0.40)]',
+  roomOffsetX: 0,
+  roomOffsetY: -4,
+};
+
+const artEnchantedCeramicFountain: ItemSpriteData = {
+  src: '/assets/items/art-enchanted-ceramic-fountain.png',
+  alt: 'מזרקת הקרמיקה המכושפת',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.38)] drop-shadow-[0_0_22px_rgba(60,210,255,0.42)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.7,
+  roomHeightScale: 2.7,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.7,
+  roomFloorHeightScale: 2.7,
+};
+
+const artOrigamiDragon: ItemSpriteData = {
+  src: '/assets/items/art-origami-dragon.png',
+  alt: 'דרקון האוריגמי הקסום',
+  className: 'object-contain drop-shadow-[0_15px_26px_rgba(0,0,0,0.40)] drop-shadow-[0_0_26px_rgba(255,145,70,0.50)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 2.3,
+  roomHeightScale: 2.3,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 2.9,
+  roomFloorHeightScale: 2.9,
+};
+
+const artLivingGallery: ItemSpriteData = {
+  src: '/assets/items/art-living-gallery.png',
+  alt: 'גלריית הציורים החיים',
+  className: 'object-contain drop-shadow-[0_15px_26px_rgba(0,0,0,0.40)] drop-shadow-[0_0_26px_rgba(255,95,205,0.50)]',
+  roomOffsetX: 0,
+  roomOffsetY: 62,
+  roomWidthScale: 2.9,
+  roomHeightScale: 2.9,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 62,
+  roomFloorWidthScale: 2.9,
+  roomFloorHeightScale: 2.9,
+};
+
+const artInfiniteImaginationFountain: ItemSpriteData = {
+  src: '/assets/items/art-infinite-imagination-fountain.png',
+  alt: 'מזרקת הדמיון האינסופית',
+  className: 'object-contain drop-shadow-[0_16px_28px_rgba(0,0,0,0.42)] drop-shadow-[0_0_32px_rgba(255,185,60,0.58)] drop-shadow-[0_0_42px_rgba(255,80,210,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 64,
+  roomWidthScale: 3,
+  roomHeightScale: 3,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 3,
+  roomFloorHeightScale: 3,
+};
+
 const deskChessCrown: ItemSpriteData = {
   src: '/assets/items/desk-chess-crown.png',
   alt: 'כתר השחמט',
@@ -2765,6 +3019,26 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   robotics_transforming_mech: roboticsTransformingMech,
   robotics_holographic_lab: roboticsHolographicLab,
   robotics_kingdom_guardian: roboticsKingdomGuardian,
+  art_colorful_paint_jars: artColorfulPaintJars,
+  art_brush_cup: artBrushCup,
+  art_watercolor_palette: artWatercolorPalette,
+  art_sketchbook_set: artSketchbookSet,
+  art_origami_cranes: artOrigamiCranes,
+  art_clay_modeling_set: artClayModelingSet,
+  art_artist_apron: artArtistApron,
+  art_paint_splash_rug: artPaintSplashRug,
+  art_wooden_easel: artWoodenEasel,
+  art_pottery_wheel: artPotteryWheel,
+  art_stained_glass_butterfly: artStainedGlassButterfly,
+  art_drawing_tablet: artDrawingTablet,
+  art_craft_workbench: artCraftWorkbench,
+  art_self_painting_canvas: artSelfPaintingCanvas,
+  art_crystal_sculpture: artCrystalSculpture,
+  art_kinetic_color_mobile: artKineticColorMobile,
+  art_enchanted_ceramic_fountain: artEnchantedCeramicFountain,
+  art_origami_dragon: artOrigamiDragon,
+  art_living_gallery: artLivingGallery,
+  art_infinite_imagination_fountain: artInfiniteImaginationFountain,
   desk_chess_crown: deskChessCrown,
   desk_inkwell: deskInkwell,
   wall_map: wallMap,
