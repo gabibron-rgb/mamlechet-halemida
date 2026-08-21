@@ -2849,6 +2849,278 @@ const scienceWonderEngine: ItemSpriteData = {
   roomFloorHeightScale: 3.1,
 };
 
+const balletSatinSlippers: ItemSpriteData = {
+  src: '/assets/items/ballet-satin-slippers.png',
+  alt: 'נעלי בלט מסאטן',
+  className: 'object-contain drop-shadow-[0_9px_16px_rgba(0,0,0,0.34)] drop-shadow-[0_0_12px_rgba(255,150,205,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 15,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const balletRehearsalBag: ItemSpriteData = {
+  src: '/assets/items/ballet-rehearsal-bag.png',
+  alt: 'תיק החזרות',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.35)] drop-shadow-[0_0_12px_rgba(200,125,255,0.24)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 54,
+  roomFloorWidthScale: 2.2,
+  roomFloorHeightScale: 2.2,
+};
+
+const balletRibbonBasket: ItemSpriteData = {
+  src: '/assets/items/ballet-ribbon-basket.png',
+  alt: 'סלסילת סרטים וסיכות',
+  className: 'object-contain drop-shadow-[0_9px_16px_rgba(0,0,0,0.34)] drop-shadow-[0_0_12px_rgba(255,150,205,0.24)]',
+  roomOffsetX: 0,
+  roomOffsetY: 12,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+};
+
+const balletRosinBox: ItemSpriteData = {
+  src: '/assets/items/ballet-rosin-box.png',
+  alt: 'קופסת רוזין לבלט',
+  className: 'object-contain drop-shadow-[0_9px_16px_rgba(0,0,0,0.34)] drop-shadow-[0_0_11px_rgba(255,190,115,0.22)]',
+  roomOffsetX: 0,
+  roomOffsetY: 14,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1,
+  roomShelfHeightScale: 1,
+};
+
+const balletWarmupSet: ItemSpriteData = {
+  src: '/assets/items/ballet-warmup-set.png',
+  alt: 'ערכת חימום לרקדנית',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.35)] drop-shadow-[0_0_12px_rgba(190,130,255,0.24)]',
+  roomOffsetX: 0,
+  roomOffsetY: 10,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.05,
+  roomShelfHeightScale: 1.05,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 54,
+  roomFloorWidthScale: 2.2,
+  roomFloorHeightScale: 2.2,
+};
+
+const balletPoseFrame: ItemSpriteData = {
+  src: '/assets/items/ballet-pose-frame.png',
+  alt: 'תמונת תנוחות בלט',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_16px_rgba(255,175,100,0.28)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.7,
+  roomHeightScale: 1.7,
+};
+
+const balletStarRug: ItemSpriteData = {
+  src: '/assets/items/ballet-star-rug.png',
+  alt: 'שטיח כוכבת הבמה',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_12px_rgba(0,0,0,0.28)] drop-shadow-[0_0_12px_rgba(255,190,80,0.22)]',
+};
+
+const balletPracticeStool: ItemSpriteData = {
+  src: '/assets/items/ballet-practice-stool.png',
+  alt: 'הדום קשירת נעליים',
+  className: 'object-contain drop-shadow-[0_13px_21px_rgba(0,0,0,0.38)] drop-shadow-[0_0_15px_rgba(255,150,205,0.26)]',
+  roomOffsetX: 0,
+  roomOffsetY: 55,
+  roomWidthScale: 2.4,
+  roomHeightScale: 2.4,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 55,
+  roomFloorWidthScale: 2.4,
+  roomFloorHeightScale: 2.4,
+};
+
+const balletPracticeBarre: ItemSpriteData = {
+  src: '/assets/items/ballet-practice-barre.png',
+  alt: 'מוט אימון לבלט',
+  className: 'object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.38)] drop-shadow-[0_0_15px_rgba(255,185,95,0.26)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.6,
+  roomHeightScale: 2.6,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.6,
+  roomFloorHeightScale: 2.6,
+};
+
+const balletRehearsalMirror: ItemSpriteData = {
+  src: '/assets/items/ballet-rehearsal-mirror.png',
+  alt: 'מראת הסטודיו',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_18px_rgba(210,175,255,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.8,
+  roomHeightScale: 1.8,
+};
+
+const balletTutuMannequin: ItemSpriteData = {
+  src: '/assets/items/ballet-tutu-mannequin.png',
+  alt: 'שמלת טוטו לתצוגה',
+  className: 'object-contain drop-shadow-[0_14px_23px_rgba(0,0,0,0.39)] drop-shadow-[0_0_18px_rgba(255,150,205,0.34)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.5,
+  roomHeightScale: 2.5,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const balletSpinningMusicBox: ItemSpriteData = {
+  src: '/assets/items/ballet-spinning-music-box.png',
+  alt: 'תיבת נגינה מסתובבת',
+  className: 'object-contain drop-shadow-[0_11px_19px_rgba(0,0,0,0.36)] drop-shadow-[0_0_18px_rgba(195,120,255,0.38)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+};
+
+const balletStageSpotlight: ItemSpriteData = {
+  src: '/assets/items/ballet-stage-spotlight.png',
+  alt: 'זרקור הבמה',
+  className: 'object-contain drop-shadow-[0_13px_22px_rgba(0,0,0,0.38)] drop-shadow-[0_0_22px_rgba(255,215,115,0.44)]',
+  roomOffsetX: 0,
+  roomOffsetY: 58,
+  roomWidthScale: 2.5,
+  roomHeightScale: 2.5,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.5,
+  roomFloorHeightScale: 2.5,
+};
+
+const balletCrystalSlippers: ItemSpriteData = {
+  src: '/assets/items/ballet-crystal-slippers.png',
+  alt: 'נעלי הבלט הקריסטליות',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.37)] drop-shadow-[0_0_25px_rgba(190,100,255,0.52)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.1,
+  roomShelfHeightScale: 1.1,
+};
+
+const balletSwanFountain: ItemSpriteData = {
+  src: '/assets/items/ballet-swan-fountain.png',
+  alt: 'מזרקת הברבורים',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.40)] drop-shadow-[0_0_24px_rgba(90,195,255,0.46)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.8,
+  roomHeightScale: 2.8,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.8,
+  roomFloorHeightScale: 2.8,
+};
+
+const balletPerfectLeapStatue: ItemSpriteData = {
+  src: '/assets/items/ballet-perfect-leap-statue.png',
+  alt: 'פסל הקפיצה המושלמת',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.40)] drop-shadow-[0_0_26px_rgba(190,155,255,0.48)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.7,
+  roomHeightScale: 2.7,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.7,
+  roomFloorHeightScale: 2.7,
+};
+
+const balletCostumeCarousel: ItemSpriteData = {
+  src: '/assets/items/ballet-costume-carousel.png',
+  alt: 'קרוסלת תלבושות הבלט',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.40)] drop-shadow-[0_0_24px_rgba(255,145,205,0.42)]',
+  roomOffsetX: 0,
+  roomOffsetY: 60,
+  roomWidthScale: 2.7,
+  roomHeightScale: 2.7,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.7,
+  roomFloorHeightScale: 2.7,
+};
+
+const balletDreamRehearsalStudio: ItemSpriteData = {
+  src: '/assets/items/ballet-dream-rehearsal-studio.png',
+  alt: 'סטודיו החלומות לבלט',
+  className: 'object-contain drop-shadow-[0_15px_27px_rgba(0,0,0,0.42)] drop-shadow-[0_0_27px_rgba(255,175,110,0.40)]',
+  roomOffsetX: 0,
+  roomOffsetY: 64,
+  roomWidthScale: 3,
+  roomHeightScale: 3,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 3,
+  roomFloorHeightScale: 3,
+};
+
+const balletMoonlitTheatreStage: ItemSpriteData = {
+  src: '/assets/items/ballet-moonlit-theatre-stage.png',
+  alt: 'במת הבלט לאור הירח',
+  className: 'object-contain drop-shadow-[0_15px_27px_rgba(0,0,0,0.42)] drop-shadow-[0_0_30px_rgba(90,125,255,0.52)]',
+  roomOffsetX: 0,
+  roomOffsetY: 64,
+  roomWidthScale: 3,
+  roomHeightScale: 3,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 3,
+  roomFloorHeightScale: 3,
+};
+
+const balletLegendaryPrimaStage: ItemSpriteData = {
+  src: '/assets/items/ballet-legendary-prima-stage.png',
+  alt: 'במת הפרימה בלרינה האגדית',
+  className: 'object-contain drop-shadow-[0_16px_29px_rgba(0,0,0,0.43)] drop-shadow-[0_0_35px_rgba(255,195,70,0.60)] drop-shadow-[0_0_45px_rgba(115,110,255,0.40)]',
+  roomOffsetX: 0,
+  roomOffsetY: 66,
+  roomWidthScale: 3.1,
+  roomHeightScale: 3.1,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 66,
+  roomFloorWidthScale: 3.1,
+  roomFloorHeightScale: 3.1,
+};
+
 const deskChessCrown: ItemSpriteData = {
   src: '/assets/items/desk-chess-crown.png',
   alt: 'כתר השחמט',
@@ -3355,6 +3627,26 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   science_time_machine: scienceTimeMachine,
   science_grand_discovery_lab: scienceGrandDiscoveryLab,
   science_wonder_engine: scienceWonderEngine,
+  ballet_satin_slippers: balletSatinSlippers,
+  ballet_rehearsal_bag: balletRehearsalBag,
+  ballet_ribbon_basket: balletRibbonBasket,
+  ballet_rosin_box: balletRosinBox,
+  ballet_warmup_set: balletWarmupSet,
+  ballet_pose_frame: balletPoseFrame,
+  ballet_star_rug: balletStarRug,
+  ballet_practice_stool: balletPracticeStool,
+  ballet_practice_barre: balletPracticeBarre,
+  ballet_rehearsal_mirror: balletRehearsalMirror,
+  ballet_tutu_mannequin: balletTutuMannequin,
+  ballet_spinning_music_box: balletSpinningMusicBox,
+  ballet_stage_spotlight: balletStageSpotlight,
+  ballet_crystal_slippers: balletCrystalSlippers,
+  ballet_swan_fountain: balletSwanFountain,
+  ballet_perfect_leap_statue: balletPerfectLeapStatue,
+  ballet_costume_carousel: balletCostumeCarousel,
+  ballet_dream_rehearsal_studio: balletDreamRehearsalStudio,
+  ballet_moonlit_theatre_stage: balletMoonlitTheatreStage,
+  ballet_legendary_prima_stage: balletLegendaryPrimaStage,
   desk_chess_crown: deskChessCrown,
   desk_inkwell: deskInkwell,
   wall_map: wallMap,

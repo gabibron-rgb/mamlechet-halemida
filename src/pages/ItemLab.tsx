@@ -24,6 +24,7 @@ const LAB_THEMES: Array<{ id: ThemeId; nameHe: string }> = [
   { id: 'robotics', nameHe: 'רובוטיקה' },
   { id: 'art', nameHe: 'אומנות' },
   { id: 'science', nameHe: 'מדע' },
+  { id: 'ballet', nameHe: 'בלט' },
 ];
 
 const RARITIES: Rarity[] = [

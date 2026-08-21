@@ -1,7 +1,7 @@
 export type ThemeId =
   | 'chess' | 'space' | 'nature' | 'animals' | 'science'
   | 'building' | 'sports' | 'music' | 'books' | 'math'
-  | 'fantasy' | 'robotics' | 'art' | 'generic';
+  | 'fantasy' | 'robotics' | 'art' | 'ballet' | 'generic';
 export type Theme = {
   id: ThemeId;
   nameHe: string;
@@ -22,6 +22,7 @@ export const THEMES: Theme[] = [
   { id: 'fantasy',  nameHe: 'פנטזיה',  emoji: '🐉', color: '#c026d3' },
   { id: 'robotics', nameHe: 'רובוטיקה', emoji: '🤖', color: '#64748b' },
   { id: 'art',      nameHe: 'אומנות',  emoji: '🎨', color: '#f43f5e' },
+  { id: 'ballet',   nameHe: 'בלט',     emoji: '🩰', color: '#f472b6' },
   { id: 'generic',  nameHe: 'כללי',    emoji: '✨', color: '#b8a4ff' },
 ];
 // Themes unlocked by default at level 1
