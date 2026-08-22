@@ -25,6 +25,7 @@ import CompanionFlourishEffects from './CompanionFlourishEffects';
 import CompanionSkillsPanel from './CompanionSkillsPanel';
 import CompanionBehaviorProfile from './CompanionBehaviorProfile';
 import CompanionTraitChallengePanel from './CompanionTraitChallengePanel';
+import CompanionJournal from './CompanionJournal';
 
 type Props = {
   student: StudentState;
@@ -487,6 +488,8 @@ export default function CompanionPanel({ student }: Props) {
         </div>
 
         <CompanionTraitChallengePanel companion={companion} />
+
+        <CompanionJournal companion={companion} />
 
         <CompanionBehaviorProfile companion={companion} />
 

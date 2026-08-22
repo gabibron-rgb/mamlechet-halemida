@@ -20,11 +20,16 @@ import {
   type CompanionTraitId,
 } from '../data/companionTraits';
 import {
+  COMPANION_TRAIT_CHALLENGE_TITLES,
   getLatestCompanionTraitChallenge,
   normalizeCompanionTraitChallenges,
   reconcileLatestCompanionTraitChallenge,
   type CompanionTraitChallenge,
 } from '../data/companionTraitChallenges';
+import {
+  normalizeCompanionJournalEntries,
+  type CompanionJournalEntry,
+} from '../data/companionJournal';
 
 export type StudentId = string;
 
@@ -61,6 +66,7 @@ export type CompanionState = {
   treasuresFound: number;
   behaviorMemories: CompanionBehaviorMemory[];
   traitChallenges: CompanionTraitChallenge[];
+  journalEntries: CompanionJournalEntry[];
 };
 
 export type CompanionSkillUnlockResult =
@@ -125,7 +131,8 @@ type GameStore = {
     studentId: StudentId,
     amount: number,
     reasonId: string | null,
-    sourceActivityId: string
+    sourceActivityId: string,
+    journalNote?: string | null
   ) => Promise<void>;
   undoBehaviorAward: (
     studentId: StudentId,
@@ -139,6 +146,15 @@ type GameStore = {
   ) => Promise<boolean>;
   cancelCompanionTraitChallenge: (
     studentId: StudentId
+  ) => Promise<boolean>;
+  updateCompanionJournalEntry: (
+    studentId: StudentId,
+    entryId: string,
+    message: string
+  ) => Promise<boolean>;
+  removeCompanionJournalEntry: (
+    studentId: StudentId,
+    entryId: string
   ) => Promise<boolean>;
   awardCompanionFlourish: (
     studentId: StudentId,
@@ -243,6 +259,36 @@ async function syncStudentToSupabase(student: StudentState) {
   console.log('Synced student to Supabase:', data);
 }
 
+function reconcileJournalWithLatestChallenge(
+  entries: CompanionJournalEntry[],
+  challenges: CompanionTraitChallenge[],
+  createdAt: number
+): CompanionJournalEntry[] {
+  const latest = getLatestCompanionTraitChallenge(challenges);
+  if (!latest) return entries;
+
+  const journalId = `journal:challenge:${latest.id}`;
+
+  if (latest.completedAt === null) {
+    return entries.filter(entry => entry.id !== journalId);
+  }
+
+  if (entries.some(entry => entry.id === journalId)) return entries;
+  if (latest.completedAt !== createdAt) return entries;
+
+  return [
+    ...entries,
+    {
+      id: journalId,
+      traitId: latest.traitId,
+      reasonId: null,
+      message: `הושלם אתגר האופי ונפתח התואר “${COMPANION_TRAIT_CHALLENGE_TITLES[latest.traitId]}”.`,
+      createdAt: latest.completedAt ?? createdAt,
+      source: 'challenge',
+    },
+  ];
+}
+
 function defaultStudent(name: string, classId: string): StudentState {
   return {
     id: genId('stu'),
@@ -276,6 +322,7 @@ function defaultStudent(name: string, classId: string): StudentState {
       treasuresFound: 0,
       behaviorMemories: [],
       traitChallenges: [],
+      journalEntries: [],
     },
     pastRewards: [],
     trophies: [],
@@ -350,6 +397,9 @@ function studentFromSupabase(row: any, classId: string): StudentState {
       ),
       traitChallenges: normalizeCompanionTraitChallenges(
         meta.companion?.traitChallenges
+      ),
+      journalEntries: normalizeCompanionJournalEntries(
+        meta.companion?.journalEntries
       ),
     },
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
@@ -616,10 +666,12 @@ export const useGameStore = create<GameStore>()(
         studentId,
         amount,
         reasonId,
-        sourceActivityId
+        sourceActivityId,
+        journalNote
       ) => {
         const safeAmount = Math.max(0, Math.round(amount));
         const cleanActivityId = sourceActivityId.trim();
+        const cleanJournalNote = (journalNote?.trim() ?? '').slice(0, 240);
         const traitId = companionTraitForReason(reasonId);
         const awardedAt = Date.now();
         let updatedStudent: StudentState | null = null;
@@ -656,6 +708,28 @@ export const useGameStore = create<GameStore>()(
             nextMemories,
             awardedAt
           );
+          const journalEntries = student.companion.journalEntries ?? [];
+          const journalId = `journal:award:${cleanActivityId}`;
+          const entriesWithTeacherNote =
+            traitId && cleanJournalNote && cleanActivityId &&
+            !journalEntries.some(entry => entry.id === journalId)
+              ? [
+                  ...journalEntries,
+                  {
+                    id: journalId,
+                    traitId,
+                    reasonId: reasonId as string,
+                    message: cleanJournalNote,
+                    createdAt: awardedAt,
+                    source: 'teacher_note' as const,
+                  },
+                ]
+              : journalEntries;
+          const nextJournalEntries = reconcileJournalWithLatestChallenge(
+            entriesWithTeacherNote,
+            nextChallenges,
+            awardedAt
+          );
 
           updatedStudent = {
             ...student,
@@ -666,6 +740,7 @@ export const useGameStore = create<GameStore>()(
                 (student.companion.petPoints ?? 0) + safeAmount,
               behaviorMemories: nextMemories,
               traitChallenges: nextChallenges,
+              journalEntries: nextJournalEntries,
             },
           };
 
@@ -703,6 +778,14 @@ export const useGameStore = create<GameStore>()(
             nextMemories,
             Date.now()
           );
+          const journalEntries = (
+            student.companion.journalEntries ?? []
+          ).filter(entry => entry.id !== `journal:award:${cleanActivityId}`);
+          const nextJournalEntries = reconcileJournalWithLatestChallenge(
+            journalEntries,
+            nextChallenges,
+            Date.now()
+          );
 
           updatedStudent = {
             ...student,
@@ -715,6 +798,7 @@ export const useGameStore = create<GameStore>()(
               ),
               behaviorMemories: nextMemories,
               traitChallenges: nextChallenges,
+              journalEntries: nextJournalEntries,
             },
           };
 
@@ -809,6 +893,87 @@ export const useGameStore = create<GameStore>()(
         return true;
       },
 
+      updateCompanionJournalEntry: async (
+        studentId,
+        entryId,
+        message
+      ) => {
+        const cleanEntryId = entryId.trim();
+        const cleanMessage = message.trim().slice(0, 240);
+        let updatedStudent: StudentState | null = null;
+
+        if (!cleanEntryId || !cleanMessage) return false;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const journalEntries = student.companion.journalEntries ?? [];
+          const target = journalEntries.find(entry => entry.id === cleanEntryId);
+          if (!target || target.source !== 'teacher_note') return state;
+
+          updatedStudent = {
+            ...student,
+            companion: {
+              ...student.companion,
+              journalEntries: journalEntries.map(entry =>
+                entry.id === cleanEntryId
+                  ? { ...entry, message: cleanMessage }
+                  : entry
+              ),
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+        await syncStudentToSupabase(updatedStudent);
+        return true;
+      },
+
+      removeCompanionJournalEntry: async (studentId, entryId) => {
+        const cleanEntryId = entryId.trim();
+        let updatedStudent: StudentState | null = null;
+
+        if (!cleanEntryId) return false;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const journalEntries = student.companion.journalEntries ?? [];
+          const target = journalEntries.find(entry => entry.id === cleanEntryId);
+          if (!target || target.source !== 'teacher_note') return state;
+
+          updatedStudent = {
+            ...student,
+            companion: {
+              ...student.companion,
+              journalEntries: journalEntries.filter(
+                entry => entry.id !== cleanEntryId
+              ),
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+        await syncStudentToSupabase(updatedStudent);
+        return true;
+      },
+
       awardCompanionFlourish: async (
         studentId,
         flourishId,
@@ -851,6 +1016,28 @@ export const useGameStore = create<GameStore>()(
             nextMemories,
             awardedAt
           );
+          const journalEntries = student.companion.journalEntries ?? [];
+          const flourishJournalId = `journal:flourish:${cleanFlourishId}`;
+          const entriesWithFlourish =
+            traitId &&
+            !journalEntries.some(entry => entry.id === flourishJournalId)
+              ? [
+                  ...journalEntries,
+                  {
+                    id: flourishJournalId,
+                    traitId,
+                    reasonId: flourish.reasonId,
+                    message: `${flourish.nameHe}: ${flourish.descriptionHe}`,
+                    createdAt: awardedAt,
+                    source: 'flourish' as const,
+                  },
+                ]
+              : journalEntries;
+          const nextJournalEntries = reconcileJournalWithLatestChallenge(
+            entriesWithFlourish,
+            nextChallenges,
+            awardedAt
+          );
 
           updatedStudent = {
             ...student,
@@ -865,6 +1052,7 @@ export const useGameStore = create<GameStore>()(
                 student.companion.celebratedStages ?? ['egg'],
               behaviorMemories: nextMemories,
               traitChallenges: nextChallenges,
+              journalEntries: nextJournalEntries,
             },
           };
 
@@ -906,6 +1094,16 @@ export const useGameStore = create<GameStore>()(
             nextMemories,
             Date.now()
           );
+          const journalEntries = (
+            student.companion.journalEntries ?? []
+          ).filter(
+            entry => entry.id !== `journal:flourish:${cleanFlourishId}`
+          );
+          const nextJournalEntries = reconcileJournalWithLatestChallenge(
+            journalEntries,
+            nextChallenges,
+            Date.now()
+          );
 
           updatedStudent = {
             ...student,
@@ -924,6 +1122,7 @@ export const useGameStore = create<GameStore>()(
               ).filter(id => id !== cleanFlourishId),
               behaviorMemories: nextMemories,
               traitChallenges: nextChallenges,
+              journalEntries: nextJournalEntries,
             },
           };
 

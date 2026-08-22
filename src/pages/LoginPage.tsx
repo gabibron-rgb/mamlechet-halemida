@@ -8,6 +8,7 @@ import { getClassByCodeAndTeacherCode } from '../lib/supabaseClasses';
 import { DEFAULT_UNLOCKED_THEMES } from '../data/themes';
 import { normalizeCompanionBehaviorMemories } from '../data/companionTraits';
 import { normalizeCompanionTraitChallenges } from '../data/companionTraitChallenges';
+import { normalizeCompanionJournalEntries } from '../data/companionJournal';
 
 type Mode = 'choose' | 'student' | 'teacher';
 
@@ -77,6 +78,9 @@ function buildStudentFromSupabase(row: any): StudentState {
       ),
       traitChallenges: normalizeCompanionTraitChallenges(
         meta.companion?.traitChallenges
+      ),
+      journalEntries: normalizeCompanionJournalEntries(
+        meta.companion?.journalEntries
       ),
     },
 

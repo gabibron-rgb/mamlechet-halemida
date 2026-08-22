@@ -96,6 +96,11 @@ export default function ActivityLog({ classId }: Props) {
                   {flourish.emoji} {flourish.nameHe}
                 </span>
               )}
+              {entry.note && !flourish && (
+                <span className="mt-1 max-w-md text-xs leading-5 text-amber-100/70">
+                  📖 {entry.note}
+                </span>
+              )}
             </div>
 
             {!entry.undone && (

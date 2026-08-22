@@ -18,6 +18,7 @@ import {
 import { THEMES, type ThemeId } from '../../data/themes';
 import type { StudentState } from '../../store/useGameStore';
 import CompanionTraitChallengeModal from './CompanionTraitChallengeModal';
+import CompanionJournalModal from './CompanionJournalModal';
 
 type Props = {
   students: StudentState[];
@@ -65,6 +66,7 @@ export default function CompanionProgressBoard({ students }: Props) {
   const [challengeStudentId, setChallengeStudentId] = useState<string | null>(
     null
   );
+  const [journalStudentId, setJournalStudentId] = useState<string | null>(null);
 
   const rows = useMemo(() => {
     const nextRows = students.map(student => {
@@ -165,6 +167,9 @@ export default function CompanionProgressBoard({ students }: Props) {
   }).length;
   const challengeStudent = challengeStudentId
     ? students.find(student => student.id === challengeStudentId) ?? null
+    : null;
+  const journalStudent = journalStudentId
+    ? students.find(student => student.id === journalStudentId) ?? null
     : null;
 
   return (
@@ -267,6 +272,13 @@ export default function CompanionProgressBoard({ students }: Props) {
                               ? 'צפייה באתגר 🧭'
                               : 'הגדרת אתגר אופי 🧭'}
                           </button>
+                          <button
+                            type="button"
+                            onClick={() => setJournalStudentId(student.id)}
+                            className="rounded-xl border border-amber-300/20 bg-amber-500/10 px-3 py-2 text-[11px] font-black text-amber-100 hover:bg-amber-500/20"
+                          >
+                            יומן החיה ({(companion.journalEntries ?? []).length}) 📖
+                          </button>
                         </div>
                       </div>
                     </article>
@@ -308,6 +320,13 @@ export default function CompanionProgressBoard({ students }: Props) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setJournalStudentId(student.id)}
+                          className="rounded-full border border-amber-300/20 bg-amber-500/10 px-3 py-1 text-[11px] font-black text-amber-100 hover:bg-amber-500/20"
+                        >
+                          יומן ({(companion.journalEntries ?? []).length}) 📖
+                        </button>
                         <button
                           type="button"
                           onClick={() => setChallengeStudentId(student.id)}
@@ -410,6 +429,12 @@ export default function CompanionProgressBoard({ students }: Props) {
         open={challengeStudentId !== null}
         onClose={() => setChallengeStudentId(null)}
         student={challengeStudent}
+      />
+
+      <CompanionJournalModal
+        open={journalStudentId !== null}
+        onClose={() => setJournalStudentId(null)}
+        student={journalStudent}
       />
     </section>
   );

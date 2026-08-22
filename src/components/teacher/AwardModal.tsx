@@ -22,6 +22,8 @@ export default function AwardModal({
   );
   const [amount, setAmount] = useState<number>(3);
   const [reasonId, setReasonId] = useState<string | null>(null);
+  const [addToJournal, setAddToJournal] = useState(false);
+  const [journalNote, setJournalNote] = useState('');
 
   const awardBehaviorPoints = useGameStore(s => s.awardBehaviorPoints);
   const logAward = useClassStore(s => s.logAward);
@@ -30,6 +32,13 @@ export default function AwardModal({
     setSelected(new Set(preselectedStudentId ? [preselectedStudentId] : []));
     setAmount(3);
     setReasonId(null);
+    setAddToJournal(false);
+    setJournalNote('');
+  }
+
+  function close() {
+    reset();
+    onClose();
   }
 
   function toggle(id: string) {
@@ -44,15 +53,24 @@ export default function AwardModal({
 
   function confirm() {
     if (selected.size === 0) return;
+    if (addToJournal && !journalNote.trim()) return;
     const ids = Array.from(selected);
+    const cleanJournalNote = addToJournal ? journalNote.trim() : null;
     const activityId = logAward({
       classId,
       studentIds: ids,
       amount,
       reasonId,
+      ...(cleanJournalNote ? { note: cleanJournalNote } : {}),
     });
     ids.forEach(id =>
-      void awardBehaviorPoints(id, amount, reasonId, activityId)
+      void awardBehaviorPoints(
+        id,
+        amount,
+        reasonId,
+        activityId,
+        cleanJournalNote
+      )
     );
     reset();
     onClose();
@@ -63,7 +81,7 @@ export default function AwardModal({
   void xpFromSpending;
 
   return (
-    <Modal open={open} onClose={onClose} title="מתן נקודות">
+    <Modal open={open} onClose={close} title="מתן נקודות">
       <div className="flex flex-col gap-4">
         {/* Students */}
         <div>
@@ -134,7 +152,14 @@ export default function AwardModal({
             {REASONS.map(r => (
               <button
                 key={r.id}
-                onClick={() => setReasonId(reasonId === r.id ? null : r.id)}
+                onClick={() => {
+                  const nextReasonId = reasonId === r.id ? null : r.id;
+                  setReasonId(nextReasonId);
+                  if (!nextReasonId) {
+                    setAddToJournal(false);
+                    setJournalNote('');
+                  }
+                }}
                 className={`px-3 py-2 rounded-xl text-sm transition-colors ${
                   reasonId === r.id
                     ? 'bg-magic-soft text-magic-bg font-bold'
@@ -147,17 +172,66 @@ export default function AwardModal({
           </div>
         </div>
 
+        {reasonId && (
+          <div className="rounded-2xl border border-amber-300/20 bg-amber-500/10 p-4 text-right">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={addToJournal}
+                onChange={event => {
+                  setAddToJournal(event.target.checked);
+                  if (!event.target.checked) setJournalNote('');
+                }}
+                className="h-4 w-4 accent-amber-300"
+              />
+              <div>
+                <div className="text-sm font-black text-amber-100">
+                  הוספת רגע מיוחד ליומן החיה 📖
+                </div>
+                <div className="mt-0.5 text-[10px] text-magic-soft/55">
+                  הרשומה אינה מעניקה נקודות נוספות ואינה מאיצה התפתחות.
+                </div>
+              </div>
+            </label>
+
+            {addToJournal && (
+              <div className="mt-3">
+                <textarea
+                  value={journalNote}
+                  onChange={event => setJournalNote(event.target.value)}
+                  maxLength={240}
+                  rows={3}
+                  autoFocus
+                  placeholder="למשל: לא ויתרת גם כשהתרגיל נעשה קשה..."
+                  className="w-full resize-none rounded-xl border border-white/15 bg-magic-bg/55 px-3 py-2 text-sm text-white outline-none placeholder:text-magic-soft/35 focus:border-amber-300/55"
+                />
+                <div className="mt-1 flex justify-between gap-2 text-[9px] text-magic-soft/40">
+                  <span>
+                    {selected.size > 1
+                      ? 'אותה הודעה תופיע ביומן של כל התלמידים שנבחרו.'
+                      : 'ההודעה תופיע ביומן האישי של התלמיד/ה.'}
+                  </span>
+                  <span>{journalNote.length}/240</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Confirm */}
         <div className="flex gap-2 mt-2">
           <button
-            onClick={onClose}
+            onClick={close}
             className="flex-1 bg-magic-bg/60 text-magic-soft font-bold py-3 rounded-xl"
           >
             ביטול
           </button>
           <button
             onClick={confirm}
-            disabled={selected.size === 0}
+            disabled={
+              selected.size === 0 ||
+              (addToJournal && journalNote.trim().length === 0)
+            }
             className="flex-1 bg-magic-accent text-magic-bg font-bold py-3 rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
           >
             תן/י +{amount} ל-{selected.size} תלמידים
