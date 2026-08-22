@@ -79,7 +79,7 @@ export default function ClassGoalBoard({ classId, students, onCreateGoal }: Prop
                   >
                     <span className="font-bold text-white">🏆 {goal.title}</span>
                     <span className="text-xs font-black text-emerald-200">
-                      הושלם יחד · {goal.target} צעדים
+                      ⭐ כוכב ממלכה · {goal.target} צעדים
                     </span>
                   </div>
                 ))}

@@ -13,6 +13,7 @@ import CollectionAlbum from '../components/student/CollectionAlbum';
 import CompanionPanel from '../components/student/CompanionPanel';
 import MissionsPanel from '../components/student/MissionsPanel';
 import ClassGoalBanner from '../components/student/ClassGoalBanner';
+import ClassKingdomPanel from '../components/student/ClassKingdomPanel';
 import RoomView from '../components/student/RoomView';
 import TrophyRoom from '../components/student/TrophyRoom';
 import { TrophyAwardCeremony } from '../components/student/TrophyAwardCeremony';
@@ -22,6 +23,7 @@ import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
 type Tab =
   | 'progress'
   | 'missions'
+  | 'classKingdom'
   | 'room'
   | 'shop'
   | 'inventory'
@@ -204,13 +206,20 @@ export default function StudentHome() {
         <ClassGoalBanner goals={student.classGoals ?? []} />
 
         {/* Tabs */}
-        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9">
           <TabButton active={tab === 'progress'} onClick={() => setTab('progress')}>
             התקדמות
           </TabButton>
 
           <TabButton active={tab === 'missions'} onClick={() => setTab('missions')}>
             📋 משימות{activeMissionCount > 0 ? ` (${activeMissionCount})` : ''}
+          </TabButton>
+
+          <TabButton
+            active={tab === 'classKingdom'}
+            onClick={() => setTab('classKingdom')}
+          >
+            🏰 הכיתה
           </TabButton>
 
           <TabButton active={tab === 'room'} onClick={() => setTab('room')}>
@@ -269,6 +278,10 @@ export default function StudentHome() {
           )}
 
           {tab === 'missions' && <MissionsPanel student={student} />}
+
+          {tab === 'classKingdom' && (
+            <ClassKingdomPanel goals={student.classGoals ?? []} />
+          )}
 
           {tab === 'room' && <RoomView student={student} />}
 

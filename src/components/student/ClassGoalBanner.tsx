@@ -71,7 +71,7 @@ export default function ClassGoalBanner({ goals }: Props) {
 
         {completed ? (
           <span className="font-black text-emerald-200">
-            🎉 הצלחנו יחד! ההישג הכיתתי הושלם
+            🎉 הצלחנו יחד! קיבלתם ⭐ כוכב ממלכה
           </span>
         ) : overdue ? (
           <span className="font-black text-rose-200">⚠️ עבר תאריך היעד — המורה עדיין יכול/ה להמשיך</span>

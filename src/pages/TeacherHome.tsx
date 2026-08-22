@@ -13,6 +13,7 @@ import MissionBoard from '../components/teacher/MissionBoard';
 import MissionCreateModal from '../components/teacher/MissionCreateModal';
 import ClassGoalBoard from '../components/teacher/ClassGoalBoard';
 import ClassGoalCreateModal from '../components/teacher/ClassGoalCreateModal';
+import ClassKingdomSummary from '../components/teacher/ClassKingdomSummary';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
@@ -128,6 +129,8 @@ export default function TeacherHome() {
           students={students}
           onCreateGoal={() => setClassGoalCreateOpen(true)}
         />
+
+        <ClassKingdomSummary students={students} />
 
         <MissionBoard
           students={students}
