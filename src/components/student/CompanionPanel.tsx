@@ -139,6 +139,79 @@ export default function CompanionPanel({ student }: Props) {
     ) ?? null;
   const ceremonyStage = celebratedStage ?? pendingEvolutionStage;
   const isPreviewCeremony = celebratedStage !== null;
+  const petPoints = companion.petPoints ?? 0;
+  const nextStepGuidance = (() => {
+    if (!nextStage || !evolutionProgress) {
+      return {
+        emoji: '👑',
+        title: 'הגעתם לשלב האגדי!',
+        text: 'כל שלבי ההתפתחות הושלמו. עכשיו אפשר להמשיך לחזק כישורים, לאסוף אותות ולבנות יחד עוד זיכרונות.',
+      };
+    }
+
+    if (!evolutionProgress.bondReady) {
+      if (petPoints > 0) {
+        return {
+          emoji: '🐾',
+          title: 'יש לך מה לעשות עכשיו',
+          text: `יש לך ${petPoints} נקודות חיה. בחר פעילות ממש כאן למטה כדי לחזק את הקשר עם ${companionDisplayName}.`,
+        };
+      }
+
+      const missingBond = Math.max(
+        0,
+        evolutionProgress.bondRequired - evolutionProgress.bond
+      );
+      return {
+        emoji: '💞',
+        title: 'הקשר צריך עוד קצת זמן',
+        text: `חסרות עוד ${missingBond} נקודות קשר. נקודות חיה שתקבל מהמורה בכיתה יאפשרו לך לעשות פעילויות ולחזק את הקשר.`,
+      };
+    }
+
+    if (!evolutionProgress.behaviorDaysReady) {
+      const missingDays = Math.max(
+        0,
+        evolutionProgress.behaviorDaysRequired - evolutionProgress.behaviorDays
+      );
+      return {
+        emoji: '🌟',
+        title: 'הקשר כבר מספיק חזק',
+        text: `עכשיו החיה מחכה לראות את הדרך שלך בכיתה. חסרים עוד ${missingDays} ימי התנהגות משמעותיים.`,
+      };
+    }
+
+    if (!evolutionProgress.distinctTraitsReady) {
+      const missingTraits = Math.max(
+        0,
+        evolutionProgress.distinctTraitsRequired - evolutionProgress.distinctTraits
+      );
+      return {
+        emoji: '🌈',
+        title: 'כמעט שם — צריך להראות עוד צד באופי',
+        text: `כבר צברת מספיק ימים, אבל להתפתחות חסרים עוד ${missingTraits} סוגי תכונות שונים שיבואו לידי ביטוי בכיתה.`,
+      };
+    }
+
+    if (!evolutionProgress.completedChallengesReady) {
+      const missingChallenges = Math.max(
+        0,
+        evolutionProgress.completedChallengesRequired -
+          evolutionProgress.completedChallenges
+      );
+      return {
+        emoji: '🎯',
+        title: 'השלב הבא תלוי באתגרי האופי',
+        text: `נשאר להשלים עוד ${missingChallenges} אתגרי אופי. האתגר הנוכחי מופיע מיד אחרי הדרך להתפתחות.`,
+      };
+    }
+
+    return {
+      emoji: '✨',
+      title: 'מוכנים להתפתחות!',
+      text: 'כל התנאים הושלמו. ההתפתחות הבאה כבר מוכנה להיפתח.',
+    };
+  })();
 
   function showMessage(text: string) {
     setMessage(text);
@@ -404,6 +477,12 @@ export default function CompanionPanel({ student }: Props) {
 
   return (
     <>
+      {message && (
+        <div className="fixed bottom-6 left-1/2 z-[120] w-[min(92vw,34rem)] -translate-x-1/2 rounded-2xl border border-white/15 bg-slate-950/95 px-4 py-3 text-center text-sm font-black text-white shadow-2xl backdrop-blur">
+          {message}
+        </div>
+      )}
+
       {ceremonyStage && ceremonyStage !== 'egg' && (
         <EvolutionCeremony
           stage={ceremonyStage}
@@ -434,9 +513,64 @@ export default function CompanionPanel({ student }: Props) {
         <div className="mb-2 text-sm font-black text-magic-soft/65">
           עולם {themeNameOf(companion.theme)}
         </div>
-        <h2 className="text-3xl font-black text-magic-accent">
-          {companionDisplayName}
-        </h2>
+
+        <div className="flex items-center justify-center gap-2">
+          <h2 className="text-3xl font-black text-magic-accent">
+            {companionDisplayName}
+          </h2>
+          <button
+            type="button"
+            onClick={() => {
+              setNameDraft(companion.name ?? '');
+              setIsRenaming(true);
+            }}
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-magic-soft/70 transition-colors hover:border-fuchsia-300/40 hover:bg-fuchsia-500/10 hover:text-fuchsia-100"
+            aria-label="שינוי שם החיה"
+            title="שינוי שם החיה"
+          >
+            ✏️
+          </button>
+        </div>
+
+        {isRenaming && (
+          <div className="mx-auto mt-3 flex max-w-md flex-col gap-2 rounded-2xl border border-fuchsia-300/20 bg-fuchsia-500/10 p-3 sm:flex-row">
+            <input
+              type="text"
+              value={nameDraft}
+              onChange={event => setNameDraft(event.target.value)}
+              maxLength={20}
+              placeholder="שם באורך 2–20 תווים"
+              autoFocus
+              className="min-w-0 flex-1 rounded-xl border border-white/15 bg-magic-bg/65 px-4 py-2.5 text-sm text-white outline-none placeholder:text-magic-soft/35 focus:border-fuchsia-300/60"
+              onKeyDown={event => {
+                if (event.key === 'Enter') saveCompanionName();
+                if (event.key === 'Escape') {
+                  setNameDraft(companion.name ?? '');
+                  setIsRenaming(false);
+                }
+              }}
+            />
+            <button
+              type="button"
+              onClick={saveCompanionName}
+              disabled={nameDraft.trim().length < 2}
+              className="rounded-xl bg-fuchsia-300 px-4 py-2.5 text-xs font-black text-purple-950 disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              שמירה
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setNameDraft(companion.name ?? '');
+                setIsRenaming(false);
+              }}
+              className="rounded-xl bg-magic-bg/50 px-3 py-2.5 text-xs font-bold text-magic-soft"
+            >
+              ביטול
+            </button>
+          </div>
+        )}
+
         <p className="mt-2 text-sm text-magic-soft/70">
           {companion.name?.trim() && (
             <span className="font-bold text-white/75">
@@ -461,157 +595,175 @@ export default function CompanionPanel({ student }: Props) {
           motif={companionVisuals.motif}
         />
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl border border-white/10 bg-magic-bg/40 p-4">
-            <div className="text-xs text-magic-soft/60">שלב התפתחות</div>
-            <div className="mt-1 font-black text-white">
-              {STAGE_LABEL_HE[displayStage]}
-              {previewStage && (
-                <span className="mr-2 text-[10px] text-fuchsia-300">
-                  תצוגה מקומית
-                </span>
-              )}
+        <section className="mt-4 rounded-3xl border border-emerald-300/30 bg-emerald-500/10 p-5 text-right shadow-[0_0_28px_rgba(52,211,153,0.08)]">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <div className="text-[10px] font-black tracking-wide text-emerald-200/65">
+                הפעולה המרכזית
+              </div>
+              <h3 className="mt-1 text-2xl font-black text-white">
+                🐾 לאמן ולחזק את {companionDisplayName}
+              </h3>
+              <p className="mt-1 max-w-xl text-xs leading-5 text-magic-soft/65">
+                נקודות חיה שהתקבלו מהנקודות של המורה הופכות כאן לזמן משותף ולקשר חזק יותר.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-emerald-300/20 bg-black/20 px-4 py-3 text-center">
+              <div className="text-[10px] font-bold text-emerald-100/60">נקודות חיה זמינות</div>
+              <div className="mt-1 text-lg font-black text-emerald-200">
+                {petPoints} 🐾
+              </div>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-magic-bg/40 p-4">
-            <div className="text-xs text-magic-soft/60">רמת קשר</div>
-            <div className="mt-1 font-black text-white">{companion.bond}</div>
-          </div>
-          <div className="rounded-2xl border border-emerald-300/20 bg-emerald-500/10 p-4">
-            <div className="text-xs text-emerald-100/65">נקודות חיה זמינות</div>
-            <div className="mt-1 font-black text-emerald-200">
-              {companion.petPoints ?? 0} 🐾
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="flex items-start gap-3">
+              <div className="text-3xl">{nextStepGuidance.emoji}</div>
+              <div>
+                <div className="text-sm font-black text-white">
+                  {nextStepGuidance.title}
+                </div>
+                <div className="mt-1 text-xs leading-5 text-magic-soft/70">
+                  {nextStepGuidance.text}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-4 rounded-2xl border border-white/10 bg-magic-bg/35 p-4 text-right">
-          <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold">
-            <span className="text-magic-soft/65">
-              {nextStage ? nextStage.labelHe : 'כל שלבי ההתפתחות הושלמו'}
-            </span>
-            <span className="text-magic-accent">
-              {nextStage && evolutionProgress
-                ? `${stageProgress}% מהדרך`
-                : 'מושלם 👑'}
-            </span>
-          </div>
-          <div className="h-3 overflow-hidden rounded-full bg-black/30">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                nextStage
-                  ? 'bg-gradient-to-l from-purple-500 to-magic-accent'
-                  : 'bg-gradient-to-l from-emerald-400 to-yellow-300'
-              }`}
-              style={{ width: `${stageProgress}%` }}
-            />
-          </div>
-          {nextStage && evolutionProgress && (
-            <>
-              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                <EvolutionRequirement
-                  label="קשר"
-                  value={`${evolutionProgress.bond}/${evolutionProgress.bondRequired}`}
-                  ready={evolutionProgress.bondReady}
-                />
-                <EvolutionRequirement
-                  label="ימי התנהגות"
-                  value={`${evolutionProgress.behaviorDays}/${evolutionProgress.behaviorDaysRequired}`}
-                  ready={evolutionProgress.behaviorDaysReady}
-                />
-                <EvolutionRequirement
-                  label="תכונות שונות"
-                  value={`${evolutionProgress.distinctTraits}/${evolutionProgress.distinctTraitsRequired}`}
-                  ready={evolutionProgress.distinctTraitsReady}
-                />
-                <EvolutionRequirement
-                  label="אתגרי אופי"
-                  value={
-                    evolutionProgress.completedChallengesRequired > 0
-                      ? `${evolutionProgress.completedChallenges}/${evolutionProgress.completedChallengesRequired}`
-                      : 'לא נדרש'
-                  }
-                  ready={evolutionProgress.completedChallengesReady}
-                />
-              </div>
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {availableInteractions.map(action => {
+              const lacksPetPoints = petPoints < action.petPointCost;
+              const bondBonus = getCompanionInteractionBondBonus(
+                unlockedSkills,
+                action.id,
+                action.petPointCost > 0
+              );
+              const totalBondGain = action.bondGain + bondBonus;
 
-              <div className="mt-2 rounded-lg bg-black/15 px-3 py-2 text-[11px] leading-5 text-magic-soft/70">
-                {evolutionProgress.bondReady && !evolutionProgress.ready
-                  ? 'הקשר כבר מספיק חזק. עכשיו ההתפתחות מחכה להוכחות נוספות מההתנהגות בכיתה.'
-                  : 'החיה מתפתחת רק כשגם הקשר מתחזק וגם נבנה אופי אמיתי דרך ההתנהגות בכיתה. אותה תכונה באותו יום לא מקצרת את הדרך.'}
+              return (
+                <button
+                  key={action.id}
+                  type="button"
+                  disabled={lacksPetPoints}
+                  onClick={() => handleInteraction(action.id)}
+                  className="rounded-2xl border border-white/10 bg-magic-bg/50 p-4 text-center transition-all hover:-translate-y-0.5 hover:border-emerald-300/45 hover:bg-magic-bg/75 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
+                >
+                  <div className="text-4xl">{action.emoji}</div>
+                  <div className="mt-2 font-black text-white">
+                    {action.nameHe}
+                  </div>
+                  <div className="mt-1 min-h-10 text-[11px] leading-5 text-magic-soft/60">
+                    {action.descriptionHe}
+                  </div>
+                  <div className="mt-2 text-xs font-bold text-emerald-300">
+                    {action.petPointCost === 0
+                      ? 'חינם · בשביל הכיף'
+                      : `${action.petPointCost} נקודות חיה · +${totalBondGain} קשר`}
+                  </div>
+                  {bondBonus > 0 && (
+                    <div className="mt-1 text-[10px] font-bold text-cyan-200">
+                      כולל בונוס כישורים +{bondBonus}
+                    </div>
+                  )}
+                  {lacksPetPoints && (
+                    <div className="mt-1 text-[10px] text-rose-300">
+                      אין מספיק נקודות חיה
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+        </section>
+
+        <section className="mt-4 rounded-3xl border border-purple-300/20 bg-purple-500/10 p-5 text-right">
+          <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+            <div>
+              <h3 className="text-xl font-black text-white">
+                🌱 הדרך להתפתחות הבאה
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-magic-soft/65">
+                החיה מתפתחת כשגם הקשר ביניכם מתחזק וגם נבנית דרך אמיתית של התנהגות בכיתה.
+              </p>
+            </div>
+            <div className="flex gap-2 text-center text-xs font-bold">
+              <div className="rounded-xl bg-black/20 px-3 py-2 text-purple-100">
+                {STAGE_LABEL_HE[displayStage]}
               </div>
-            </>
-          )}
-        </div>
+              <div className="rounded-xl bg-black/20 px-3 py-2 text-fuchsia-200">
+                {companion.bond} קשר 💞
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-magic-bg/35 p-4">
+            <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold">
+              <span className="text-magic-soft/65">
+                {nextStage ? nextStage.labelHe : 'כל שלבי ההתפתחות הושלמו'}
+              </span>
+              <span className="text-magic-accent">
+                {nextStage && evolutionProgress
+                  ? `${stageProgress}% מהדרך`
+                  : 'מושלם 👑'}
+              </span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full bg-black/30">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  nextStage
+                    ? 'bg-gradient-to-l from-purple-500 to-magic-accent'
+                    : 'bg-gradient-to-l from-emerald-400 to-yellow-300'
+                }`}
+                style={{ width: `${stageProgress}%` }}
+              />
+            </div>
+
+            {nextStage && evolutionProgress && (
+              <>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <EvolutionRequirement
+                    label="קשר"
+                    value={`${evolutionProgress.bond}/${evolutionProgress.bondRequired}`}
+                    ready={evolutionProgress.bondReady}
+                  />
+                  <EvolutionRequirement
+                    label="ימי התנהגות"
+                    value={`${evolutionProgress.behaviorDays}/${evolutionProgress.behaviorDaysRequired}`}
+                    ready={evolutionProgress.behaviorDaysReady}
+                  />
+                  <EvolutionRequirement
+                    label="תכונות שונות"
+                    value={`${evolutionProgress.distinctTraits}/${evolutionProgress.distinctTraitsRequired}`}
+                    ready={evolutionProgress.distinctTraitsReady}
+                  />
+                  <EvolutionRequirement
+                    label="אתגרי אופי"
+                    value={
+                      evolutionProgress.completedChallengesRequired > 0
+                        ? `${evolutionProgress.completedChallenges}/${evolutionProgress.completedChallengesRequired}`
+                        : 'לא נדרש'
+                    }
+                    ready={evolutionProgress.completedChallengesReady}
+                  />
+                </div>
+
+                <div className="mt-3 rounded-xl border border-white/5 bg-black/15 px-3 py-2 text-[11px] leading-5 text-magic-soft/70">
+                  אותה תכונה באותו יום נספרת פעם אחת בלבד. כך ההתפתחות משקפת דרך לאורך זמן ולא כמות לחיצות.
+                </div>
+              </>
+            )}
+          </div>
+        </section>
 
         <CompanionTraitChallengePanel companion={companion} />
 
-        <CompanionJournal companion={companion} />
-
         <CompanionBehaviorProfile companion={companion} />
 
-        <div className="mt-4 rounded-2xl border border-fuchsia-300/20 bg-fuchsia-500/10 p-4">
-            {companion.name?.trim() && !isRenaming ? (
-              <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-                <div className="text-right">
-                  <div className="text-xs text-fuchsia-200/65">השם שבחרת</div>
-                  <div className="text-xl font-black text-white">
-                    {companion.name}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNameDraft(companion.name ?? '');
-                    setIsRenaming(true);
-                  }}
-                  className="rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-xs font-bold text-fuchsia-100 hover:bg-white/10"
-                >
-                  שינוי שם ✏️
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div className="mb-3 text-sm font-black text-white">
-                  {companion.name?.trim()
-                    ? 'בחירת שם חדש לחיית המחמד'
-                    : companion.stage === 'egg'
-                      ? 'אפשר לבחור כבר עכשיו שם שיחכה לחיה שתבקע!'
-                      : 'הגיע הזמן לתת לחיית המחמד שם!'}
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <input
-                    type="text"
-                    value={nameDraft}
-                    onChange={event => setNameDraft(event.target.value)}
-                    maxLength={20}
-                    placeholder="שם באורך 2–20 תווים"
-                    className="min-w-0 flex-1 rounded-xl border border-white/15 bg-magic-bg/55 px-4 py-3 text-sm text-white outline-none placeholder:text-magic-soft/35 focus:border-fuchsia-300/60"
-                  />
-                  <button
-                    type="button"
-                    onClick={saveCompanionName}
-                    disabled={nameDraft.trim().length < 2}
-                    className="rounded-xl bg-fuchsia-300 px-5 py-3 text-sm font-black text-purple-950 disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    שמירת השם
-                  </button>
-                  {companion.name?.trim() && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setNameDraft(companion.name ?? '');
-                        setIsRenaming(false);
-                      }}
-                      className="rounded-xl bg-magic-bg/50 px-4 py-3 text-sm font-bold text-magic-soft"
-                    >
-                      ביטול
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-        </div>
+        <CompanionSkillsPanel
+          studentId={student.id}
+          companion={companion}
+        />
 
         <div className="mt-4 rounded-3xl border border-fuchsia-300/20 bg-fuchsia-500/10 p-5 text-right">
           <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
@@ -676,10 +828,7 @@ export default function CompanionPanel({ student }: Props) {
           </div>
         </div>
 
-        <CompanionSkillsPanel
-          studentId={student.id}
-          companion={companion}
-        />
+        <CompanionJournal companion={companion} />
 
         {import.meta.env.DEV && (
           <div className="mt-4 rounded-2xl border border-dashed border-fuchsia-300/30 bg-fuchsia-500/5 p-4">
@@ -696,19 +845,19 @@ export default function CompanionPanel({ student }: Props) {
                   'legendary',
                 ] as CompanionStage[]
               ).map(stage => (
-                  <button
-                    type="button"
-                    key={stage}
-                    onClick={() => setPreviewStage(stage)}
-                    className={`rounded-xl px-3 py-2 text-xs font-bold ${
-                      displayStage === stage
-                        ? 'bg-fuchsia-300 text-purple-950'
-                        : 'bg-magic-bg/55 text-magic-soft'
-                    }`}
-                  >
-                    {STAGE_LABEL_HE[stage]}
-                  </button>
-                ))}
+                <button
+                  type="button"
+                  key={stage}
+                  onClick={() => setPreviewStage(stage)}
+                  className={`rounded-xl px-3 py-2 text-xs font-bold ${
+                    displayStage === stage
+                      ? 'bg-fuchsia-300 text-purple-950'
+                      : 'bg-magic-bg/55 text-magic-soft'
+                  }`}
+                >
+                  {STAGE_LABEL_HE[stage]}
+                </button>
+              ))}
             </div>
             <div className="mt-3 flex flex-col justify-center gap-2 sm:flex-row">
               <button
@@ -734,73 +883,6 @@ export default function CompanionPanel({ student }: Props) {
             </div>
           </div>
         )}
-
-        <div className="mt-6 rounded-3xl border border-emerald-300/20 bg-emerald-500/10 p-5 text-right">
-          <div className="mb-4 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-            <div>
-              <h3 className="text-xl font-black text-white">זמן יחד</h3>
-              <p className="mt-1 text-xs text-magic-soft/60">
-                בוחרים איך לשחק עם החיה. הפעילות משתמשת רק בנקודות חיה שנצברו
-                מהנקודות שהמורה העניקה בכיתה.
-              </p>
-            </div>
-            <div className="rounded-xl bg-black/20 px-3 py-2 text-center text-xs font-bold text-emerald-200">
-              זמינות: {companion.petPoints ?? 0} נקודות חיה 🐾
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {availableInteractions.map(action => {
-              const lacksPetPoints =
-                (companion.petPoints ?? 0) < action.petPointCost;
-              const bondBonus = getCompanionInteractionBondBonus(
-                unlockedSkills,
-                action.id,
-                action.petPointCost > 0
-              );
-              const totalBondGain = action.bondGain + bondBonus;
-
-              return (
-                <button
-                  key={action.id}
-                  type="button"
-                  disabled={lacksPetPoints}
-                  onClick={() => handleInteraction(action.id)}
-                  className="rounded-2xl border border-white/10 bg-magic-bg/50 p-4 text-center transition-colors hover:border-emerald-300/40 hover:bg-magic-bg/75 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <div className="text-4xl">{action.emoji}</div>
-                  <div className="mt-2 font-black text-white">
-                    {action.nameHe}
-                  </div>
-                  <div className="mt-1 min-h-10 text-[11px] leading-5 text-magic-soft/60">
-                    {action.descriptionHe}
-                  </div>
-                  <div className="mt-2 text-xs font-bold text-emerald-300">
-                    {action.petPointCost === 0
-                      ? 'חינם · בשביל הכיף'
-                      : `${action.petPointCost} נקודות חיה · +${totalBondGain} קשר`}
-                  </div>
-                  {bondBonus > 0 && (
-                    <div className="mt-1 text-[10px] font-bold text-cyan-200">
-                      כולל בונוס כישורים +{bondBonus}
-                    </div>
-                  )}
-                  {lacksPetPoints && (
-                    <div className="mt-1 text-[10px] text-rose-300">
-                      אין מספיק נקודות חיה
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {message && (
-            <div className="mt-4 rounded-xl border border-white/10 bg-black/25 px-3 py-2 text-center text-sm font-bold text-white">
-              {message}
-            </div>
-          )}
-        </div>
 
         {canChangeWorld && (
           <button
