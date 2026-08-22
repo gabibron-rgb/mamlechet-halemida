@@ -9,6 +9,7 @@ import { DEFAULT_UNLOCKED_THEMES } from '../data/themes';
 import { normalizeCompanionBehaviorMemories } from '../data/companionTraits';
 import { normalizeCompanionTraitChallenges } from '../data/companionTraitChallenges';
 import { normalizeCompanionJournalEntries } from '../data/companionJournal';
+import { normalizeStudentMissions } from '../data/missions';
 
 type Mode = 'choose' | 'student' | 'teacher';
 
@@ -83,6 +84,8 @@ function buildStudentFromSupabase(row: any): StudentState {
         meta.companion?.journalEntries
       ),
     },
+
+    missions: normalizeStudentMissions(meta.missions),
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],

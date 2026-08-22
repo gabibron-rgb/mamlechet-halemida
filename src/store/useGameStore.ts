@@ -31,6 +31,12 @@ import {
   normalizeCompanionJournalEntries,
   type CompanionJournalEntry,
 } from '../data/companionJournal';
+import {
+  MISSION_REWARD_PRESETS,
+  normalizeStudentMissions,
+  type MissionRewardTier,
+  type StudentMission,
+} from '../data/missions';
 
 export type StudentId = string;
 
@@ -104,6 +110,7 @@ export type StudentState = {
     petArea: number;
   };
   companion: CompanionState;
+  missions: StudentMission[];
   pastRewards: string[];
   trophies: { id: string; trophyTheme: string; caption: string; awardedAt: number }[];
   seenTrophyIds: string[];
@@ -172,6 +179,24 @@ type GameStore = {
     skillId: string
   ) => Promise<CompanionSkillUnlockResult>;
 
+  assignMissionToStudents: (
+    studentIds: StudentId[],
+    input: {
+      title: string;
+      description: string;
+      rewardTier: MissionRewardTier;
+      dueAt: number | null;
+    }
+  ) => Promise<boolean>;
+  completeMission: (
+    studentId: StudentId,
+    missionId: string
+  ) => Promise<boolean>;
+  cancelMission: (
+    studentId: StudentId,
+    missionId: string
+  ) => Promise<boolean>;
+
   updateInventoryEntry: (
     studentId: StudentId,
     inventoryIndex: number,
@@ -222,6 +247,7 @@ async function syncStudentToSupabase(student: StudentState) {
       unlockedThemes: student.unlockedThemes,
       capacities: student.capacities,
       companion: student.companion,
+      missions: student.missions ?? [],
       pastRewards: student.pastRewards,
       trophies: student.trophies,
       seenTrophyIds: student.seenTrophyIds ?? [],
@@ -325,6 +351,7 @@ function defaultStudent(name: string, classId: string): StudentState {
       traitChallenges: [],
       journalEntries: [],
     },
+    missions: [],
     pastRewards: [],
     trophies: [],
     seenTrophyIds: [],
@@ -403,6 +430,7 @@ function studentFromSupabase(row: any, classId: string): StudentState {
         meta.companion?.journalEntries
       ),
     },
+    missions: normalizeStudentMissions(meta.missions),
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
@@ -1220,6 +1248,153 @@ export const useGameStore = create<GameStore>()(
         }
 
         return result;
+      },
+
+      assignMissionToStudents: async (studentIds, input) => {
+        const cleanTitle = input.title.trim().slice(0, 80);
+        const cleanDescription = input.description.trim().slice(0, 240);
+        const uniqueIds = Array.from(new Set(studentIds)).filter(Boolean);
+        const preset = MISSION_REWARD_PRESETS[input.rewardTier];
+        const dueAt =
+          typeof input.dueAt === 'number' && Number.isFinite(input.dueAt)
+            ? input.dueAt
+            : null;
+
+        if (!cleanTitle || uniqueIds.length === 0 || !preset) return false;
+
+        const missionId = genId('mission');
+        const assignedAt = Date.now();
+        const updatedStudents: StudentState[] = [];
+
+        set(state => {
+          const nextStudents = { ...state.students };
+
+          for (const studentId of uniqueIds) {
+            const student = nextStudents[studentId];
+            if (!student) continue;
+
+            const mission: StudentMission = {
+              id: missionId,
+              title: cleanTitle,
+              description: cleanDescription,
+              rewardTier: input.rewardTier,
+              rewardPoints: preset.points,
+              assignedAt,
+              dueAt,
+              completedAt: null,
+              cancelledAt: null,
+            };
+
+            const updatedStudent: StudentState = {
+              ...student,
+              missions: [...(student.missions ?? []), mission],
+            };
+
+            nextStudents[studentId] = updatedStudent;
+            updatedStudents.push(updatedStudent);
+          }
+
+          return updatedStudents.length > 0
+            ? { students: nextStudents }
+            : state;
+        });
+
+        if (updatedStudents.length === 0) return false;
+        await Promise.all(updatedStudents.map(syncStudentToSupabase));
+        return true;
+      },
+
+      completeMission: async (studentId, missionId) => {
+        const cleanMissionId = missionId.trim();
+        let updatedStudent: StudentState | null = null;
+
+        if (!cleanMissionId) return false;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const missions = student.missions ?? [];
+          const mission = missions.find(item => item.id === cleanMissionId);
+          if (
+            !mission ||
+            mission.completedAt !== null ||
+            mission.cancelledAt !== null
+          ) {
+            return state;
+          }
+
+          const completedAt = Date.now();
+          const rewardPoints = Math.max(0, Math.round(mission.rewardPoints));
+
+          updatedStudent = {
+            ...student,
+            points: student.points + rewardPoints,
+            missions: missions.map(item =>
+              item.id === cleanMissionId
+                ? { ...item, completedAt }
+                : item
+            ),
+            companion: {
+              ...student.companion,
+              petPoints: (student.companion.petPoints ?? 0) + rewardPoints,
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+        await syncStudentToSupabase(updatedStudent);
+        return true;
+      },
+
+      cancelMission: async (studentId, missionId) => {
+        const cleanMissionId = missionId.trim();
+        let updatedStudent: StudentState | null = null;
+
+        if (!cleanMissionId) return false;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const missions = student.missions ?? [];
+          const mission = missions.find(item => item.id === cleanMissionId);
+          if (
+            !mission ||
+            mission.completedAt !== null ||
+            mission.cancelledAt !== null
+          ) {
+            return state;
+          }
+
+          const cancelledAt = Date.now();
+          updatedStudent = {
+            ...student,
+            missions: missions.map(item =>
+              item.id === cleanMissionId
+                ? { ...item, cancelledAt }
+                : item
+            ),
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+        await syncStudentToSupabase(updatedStudent);
+        return true;
       },
 
       updateInventoryEntry: (studentId, inventoryIndex, patch) => {

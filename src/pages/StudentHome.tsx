@@ -11,6 +11,7 @@ import Shop from '../components/student/Shop';
 import Inventory from '../components/student/Inventory';
 import CollectionAlbum from '../components/student/CollectionAlbum';
 import CompanionPanel from '../components/student/CompanionPanel';
+import MissionsPanel from '../components/student/MissionsPanel';
 import RoomView from '../components/student/RoomView';
 import TrophyRoom from '../components/student/TrophyRoom';
 import { TrophyAwardCeremony } from '../components/student/TrophyAwardCeremony';
@@ -19,6 +20,7 @@ import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
 
 type Tab =
   | 'progress'
+  | 'missions'
   | 'room'
   | 'shop'
   | 'inventory'
@@ -113,6 +115,9 @@ export default function StudentHome() {
       index <= companionStageIndex &&
       !celebratedCompanionStages.has(stage)
   );
+  const activeMissionCount = (student.missions ?? []).filter(
+    mission => mission.completedAt === null && mission.cancelledAt === null
+  ).length;
 
   return (
     <div className="min-h-screen p-6">
@@ -196,9 +201,13 @@ export default function StudentHome() {
         </div>
 
         {/* Tabs */}
-        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">
           <TabButton active={tab === 'progress'} onClick={() => setTab('progress')}>
             התקדמות
+          </TabButton>
+
+          <TabButton active={tab === 'missions'} onClick={() => setTab('missions')}>
+            📋 משימות{activeMissionCount > 0 ? ` (${activeMissionCount})` : ''}
           </TabButton>
 
           <TabButton active={tab === 'room'} onClick={() => setTab('room')}>
@@ -248,11 +257,15 @@ export default function StudentHome() {
               xpInfo={xpInfo}
               xpPct={xpPct}
               inventoryCount={student.inventory.length}
+              activeMissionCount={activeMissionCount}
+              onGoMissions={() => setTab('missions')}
               onGoRoom={() => setTab('room')}
               onGoShop={() => setTab('shop')}
               onGoInventory={() => setTab('inventory')}
             />
           )}
+
+          {tab === 'missions' && <MissionsPanel student={student} />}
 
           {tab === 'room' && <RoomView student={student} />}
 
@@ -318,6 +331,8 @@ function ProgressPanel({
   xpInfo,
   xpPct,
   inventoryCount,
+  activeMissionCount,
+  onGoMissions,
   onGoRoom,
   onGoShop,
   onGoInventory,
@@ -328,6 +343,8 @@ function ProgressPanel({
   xpInfo: ReturnType<typeof xpToNextLevel>;
   xpPct: number;
   inventoryCount: number;
+  activeMissionCount: number;
+  onGoMissions: () => void;
   onGoRoom: () => void;
   onGoShop: () => void;
   onGoInventory: () => void;
@@ -374,7 +391,27 @@ function ProgressPanel({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {activeMissionCount > 0 && (
+        <div className="mb-6 flex flex-col gap-3 rounded-3xl border border-magic-accent/25 bg-magic-accent/10 p-4 text-right sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="font-black text-white">
+              📋 יש לך {activeMissionCount} {activeMissionCount === 1 ? 'משימה פעילה' : 'משימות פעילות'}
+            </div>
+            <div className="mt-1 text-xs text-magic-soft/65">
+              כדאי לבדוק מה המטרה הבאה שלך בממלכה.
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onGoMissions}
+            className="shrink-0 rounded-xl bg-magic-accent px-4 py-2 text-sm font-black text-magic-bg"
+          >
+            למשימות שלי
+          </button>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <ActionButton onClick={onGoRoom} primary>
           להיכנס לחדר שלי 🏠
         </ActionButton>
@@ -385,6 +422,10 @@ function ProgressPanel({
 
         <ActionButton onClick={onGoInventory}>
           לראות את המלאי שלי
+        </ActionButton>
+
+        <ActionButton onClick={onGoMissions}>
+          לפתוח את המשימות 📋
         </ActionButton>
       </div>
     </div>

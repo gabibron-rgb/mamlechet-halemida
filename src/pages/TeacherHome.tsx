@@ -9,6 +9,8 @@ import TrophyAwardModal from '../components/teacher/TrophyAwardModal';
 import TrophyManagementModal from '../components/teacher/TrophyManagementModal';
 import CompanionProgressBoard from '../components/teacher/CompanionProgressBoard';
 import FlourishAwardModal from '../components/teacher/FlourishAwardModal';
+import MissionBoard from '../components/teacher/MissionBoard';
+import MissionCreateModal from '../components/teacher/MissionCreateModal';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
@@ -47,6 +49,7 @@ export default function TeacherHome() {
   const [trophyStudentId, setTrophyStudentId] = useState<string | null>(null);
   const [managedTrophyStudentId, setManagedTrophyStudentId] = useState<string | null>(null);
   const [flourishStudentId, setFlourishStudentId] = useState<string | null>(null);
+  const [missionCreateOpen, setMissionCreateOpen] = useState(false);
 
   const trophyStudent = trophyStudentId
     ? students.find(student => student.id === trophyStudentId) ?? null
@@ -117,6 +120,11 @@ export default function TeacherHome() {
           </button>
         </div>
 
+        <MissionBoard
+          students={students}
+          onCreateMission={() => setMissionCreateOpen(true)}
+        />
+
         {/* Student list */}
         <div className="bg-magic-panel/80 rounded-3xl p-6 mb-4">
           <h2 className="text-magic-accent font-bold mb-3">
@@ -137,7 +145,7 @@ export default function TeacherHome() {
                   <div className="flex flex-col text-right">
                     <span className="text-white font-bold">{st.name}</span>
                     <span className="text-magic-soft text-xs">
-                      {st.points} נק׳ · רמה {st.level} · {st.xp} XP · {st.trophies.length} גביעים
+                      {st.points} נק׳ · רמה {st.level} · {st.xp} XP · {st.trophies.length} גביעים · {(st.missions ?? []).filter(mission => mission.completedAt === null && mission.cancelledAt === null).length} משימות
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 sm:flex">
@@ -185,6 +193,12 @@ export default function TeacherHome() {
           <ActivityLog classId={cls.id} />
         </div>
       </div>
+
+      <MissionCreateModal
+        open={missionCreateOpen}
+        onClose={() => setMissionCreateOpen(false)}
+        students={students}
+      />
 
       <AwardModal
         open={awardOpen}
