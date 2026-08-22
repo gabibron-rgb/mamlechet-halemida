@@ -214,7 +214,11 @@ export default function CollectionAlbum({ student }: Props) {
               >
                 <div className="mx-auto mb-3 h-28 w-28 max-w-full">
                   {isOwned ? (
-                    <ItemSprite itemId={item.id} rarity={item.rarity} />
+                    <ItemSprite
+                      itemId={item.id}
+                      rarity={item.rarity}
+                      fitWithinFrame
+                    />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center rounded-2xl bg-black/20 text-5xl font-black text-magic-soft/20">
                       ?

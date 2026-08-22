@@ -650,6 +650,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
                   <ItemSprite
                     itemId={openedReward.itemId}
                     rarity={openedReward.rarity}
+                    fitWithinFrame
                   />
                 </div>
               </div>
@@ -940,12 +941,26 @@ export default function Inventory({ student, onGoRoom }: Props) {
               key={`${entry.itemId}_${idx}`}
               className="bg-magic-bg/40 rounded-2xl p-3"
             >
-              <div className="flex justify-between mb-1">
-                <span className="text-xl">{icon}</span>
-                {rarity && <RarityBadge rarity={rarity} />}
+              <div className="mb-3 rounded-xl bg-black/15 p-2">
+                <div className="mx-auto h-28 w-28 max-w-full">
+                  {item ? (
+                    <ItemSprite
+                      itemId={entry.itemId}
+                      rarity={rarity}
+                      fitWithinFrame
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-5xl">
+                      {icon}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="text-white font-bold text-sm">{name}</div>
+              <div className="mb-1 flex items-start justify-between gap-2">
+                <div className="text-white font-bold text-sm">{name}</div>
+                {rarity && <RarityBadge rarity={rarity} />}
+              </div>
 
               {description && (
                 <div className="text-magic-soft/70 text-xs mt-1">

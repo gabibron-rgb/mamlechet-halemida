@@ -244,7 +244,11 @@ function InfoModal({
         onClick={event => event.stopPropagation()}
       >
         <div className="mx-auto mb-3 flex h-28 w-28 items-center justify-center">
-          <ItemSprite itemId={item.itemId} rarity={item.rarity} />
+          <ItemSprite
+            itemId={item.itemId}
+            rarity={item.rarity}
+            fitWithinFrame
+          />
         </div>
 
         <h3 className="text-xl font-bold text-white">{item.nameHe}</h3>

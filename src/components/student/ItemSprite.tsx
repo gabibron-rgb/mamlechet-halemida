@@ -6,6 +6,7 @@ import KingdomBannerSprite from './KingdomBannerSprite';
 type Props = {
   itemId: string;
   rarity?: Rarity;
+  fitWithinFrame?: boolean;
 };
 
 const ITEM_IMAGE_SRC: Record<string, string> = {};
@@ -308,7 +309,11 @@ function Sparkles({ rarity }: { rarity?: Rarity }) {
   );
 }
 
-export default function ItemSprite({ itemId, rarity }: Props) {
+export default function ItemSprite({
+  itemId,
+  rarity,
+  fitWithinFrame = false,
+}: Props) {
   const rarityEffect =
     rarity === 'common'
       ? undefined
@@ -344,12 +349,18 @@ export default function ItemSprite({ itemId, rarity }: Props) {
   const sprite = ITEM_SPRITES[itemId];
 
   if (sprite) {
+    const className = fitWithinFrame
+      ? (sprite.className ?? '')
+          .replace(/\bscale-(?:\[[^\]]+\]|\d+)\s*/g, '')
+          .trim()
+      : sprite.className;
+
     return (
       <ImageItem
         src={sprite.src}
         alt={sprite.alt}
         rarity={rarity}
-        className={sprite.className}
+        className={className}
         style={{
           filter: rarityEffect,
         }}
