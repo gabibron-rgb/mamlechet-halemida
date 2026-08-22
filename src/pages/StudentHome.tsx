@@ -11,6 +11,7 @@ import Inventory from '../components/student/Inventory';
 import CollectionAlbum from '../components/student/CollectionAlbum';
 import CompanionPanel from '../components/student/CompanionPanel';
 import RoomView from '../components/student/RoomView';
+import TrophyRoom from '../components/student/TrophyRoom';
 import { LevelUpCeremony } from '../components/student/LevelUpCeremony';
 import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
 
@@ -20,7 +21,8 @@ type Tab =
   | 'shop'
   | 'inventory'
   | 'collection'
-  | 'companion';
+  | 'companion'
+  | 'trophies';
 
 export default function StudentHome() {
   const navigate = useNavigate();
@@ -173,7 +175,7 @@ export default function StudentHome() {
         </div>
 
         {/* Tabs */}
-        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
           <TabButton active={tab === 'progress'} onClick={() => setTab('progress')}>
             התקדמות
           </TabButton>
@@ -206,6 +208,13 @@ export default function StudentHome() {
           >
             🐾 חיית מחמד
           </TabButton>
+
+          <TabButton
+            active={tab === 'trophies'}
+            onClick={() => setTab('trophies')}
+          >
+            🏆 חדר הפרסים
+          </TabButton>
         </div>
 
         {/* Tab content */}
@@ -235,6 +244,8 @@ export default function StudentHome() {
           {tab === 'collection' && <CollectionAlbum student={student} />}
 
           {tab === 'companion' && <CompanionPanel student={student} />}
+
+          {tab === 'trophies' && <TrophyRoom student={student} />}
         </div>
 
         {ceremonyOpen && pending > 0 && (
