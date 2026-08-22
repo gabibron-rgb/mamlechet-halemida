@@ -51,6 +51,7 @@ function buildStudentFromSupabase(row: any): StudentState {
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
+    seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
     pityCounters: meta.pityCounters ?? {},
 
     pendingLevelUps: meta.pendingLevelUps ?? 0,

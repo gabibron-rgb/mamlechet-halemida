@@ -12,6 +12,7 @@ import CollectionAlbum from '../components/student/CollectionAlbum';
 import CompanionPanel from '../components/student/CompanionPanel';
 import RoomView from '../components/student/RoomView';
 import TrophyRoom from '../components/student/TrophyRoom';
+import { TrophyAwardCeremony } from '../components/student/TrophyAwardCeremony';
 import { LevelUpCeremony } from '../components/student/LevelUpCeremony';
 import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
 
@@ -53,6 +54,7 @@ export default function StudentHome() {
 
   const completeLevelUp = useGameStore(s => s.completeLevelUp);
   const completeThemeUnlock = useGameStore(s => s.completeThemeUnlock);
+  const markTrophySeen = useGameStore(s => s.markTrophySeen);
 
   // ברירת המחדל עכשיו היא "התקדמות", כי זה מסך כניסה הרבה יותר ברור לילדים.
   const [tab, setTab] = useState<Tab>('progress');
@@ -92,6 +94,12 @@ export default function StudentHome() {
   const ownedCosmeticIds = student.inventory
     .filter(it => it.kind === 'cosmetic')
     .map(it => it.itemId);
+
+  const seenTrophyIds = new Set(student.seenTrophyIds ?? []);
+  const unseenTrophies = [...student.trophies]
+    .filter(trophy => !seenTrophyIds.has(trophy.id))
+    .sort((first, second) => first.awardedAt - second.awardedAt);
+  const activeUnseenTrophy = unseenTrophies[0] ?? null;
 
   return (
     <div className="min-h-screen p-6">
@@ -268,6 +276,21 @@ export default function StudentHome() {
               setThemeUnlockOpen(false);
             }}
             onClose={() => setThemeUnlockOpen(false)}
+          />
+        )}
+
+        {activeUnseenTrophy && !ceremonyOpen && !themeUnlockOpen && (
+          <TrophyAwardCeremony
+            studentName={student.name}
+            trophy={activeUnseenTrophy}
+            remainingCount={unseenTrophies.length - 1}
+            onComplete={() => {
+              markTrophySeen(student.id, activeUnseenTrophy.id);
+
+              if (unseenTrophies.length === 1) {
+                setTab('trophies');
+              }
+            }}
           />
         )}
       </div>

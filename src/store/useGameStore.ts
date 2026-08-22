@@ -67,6 +67,7 @@ export type StudentState = {
   companion: CompanionState;
   pastRewards: string[];
   trophies: { id: string; trophyTheme: string; caption: string; awardedAt: number }[];
+  seenTrophyIds: string[];
   pityCounters: Record<string, number>;
   pendingLevelUps: number;
   pendingThemeUnlocks: number;
@@ -87,6 +88,7 @@ type GameStore = {
     caption: string
   ) => void;
   removeTrophy: (studentId: StudentId, trophyId: string) => void;
+  markTrophySeen: (studentId: StudentId, trophyId: string) => void;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -140,6 +142,7 @@ async function syncStudentToSupabase(student: StudentState) {
       companion: student.companion,
       pastRewards: student.pastRewards,
       trophies: student.trophies,
+      seenTrophyIds: student.seenTrophyIds ?? [],
       pityCounters: student.pityCounters,
       pendingLevelUps: student.pendingLevelUps,
       pendingThemeUnlocks: student.pendingThemeUnlocks,
@@ -204,6 +207,7 @@ function defaultStudent(name: string, classId: string): StudentState {
     },
     pastRewards: [],
     trophies: [],
+    seenTrophyIds: [],
     pityCounters: {},
     pendingLevelUps: 0,
     pendingThemeUnlocks: 0,
@@ -245,6 +249,7 @@ function studentFromSupabase(row: any, classId: string): StudentState {
     companion: meta.companion ?? base.companion,
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
+    seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
     pityCounters: meta.pityCounters ?? {},
 
     pendingLevelUps: meta.pendingLevelUps ?? 0,
@@ -449,6 +454,44 @@ export const useGameStore = create<GameStore>()(
           updatedStudent = {
             ...student,
             trophies: nextTrophies,
+            seenTrophyIds: (student.seenTrophyIds ?? []).filter(
+              id => id !== trophyId
+            ),
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      markTrophySeen: (studentId, trophyId) => {
+        let updatedStudent: StudentState | null = null;
+
+        if (!trophyId) return;
+
+        set((state) => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const trophyExists = student.trophies.some(
+            trophy => trophy.id === trophyId
+          );
+          const seenTrophyIds = student.seenTrophyIds ?? [];
+          if (!trophyExists || seenTrophyIds.includes(trophyId)) {
+            return state;
+          }
+
+          updatedStudent = {
+            ...student,
+            seenTrophyIds: [...seenTrophyIds, trophyId],
           };
 
           return {
