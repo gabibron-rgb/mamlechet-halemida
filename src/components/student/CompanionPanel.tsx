@@ -23,6 +23,7 @@ import { getCompanionInteractionBondBonus } from '../../data/companionSkills';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import CompanionFlourishEffects from './CompanionFlourishEffects';
 import CompanionSkillsPanel from './CompanionSkillsPanel';
+import CompanionBehaviorProfile from './CompanionBehaviorProfile';
 
 type Props = {
   student: StudentState;
@@ -483,6 +484,8 @@ export default function CompanionPanel({ student }: Props) {
             </>
           )}
         </div>
+
+        <CompanionBehaviorProfile companion={companion} />
 
         <div className="mt-4 rounded-2xl border border-fuchsia-300/20 bg-fuchsia-500/10 p-4">
             {companion.name?.trim() && !isRenaming ? (

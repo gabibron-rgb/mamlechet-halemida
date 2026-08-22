@@ -13,6 +13,11 @@ import {
   companionStageMeetsRequirement,
   getCompanionSkill,
 } from '../data/companionSkills';
+import {
+  companionTraitForReason,
+  normalizeCompanionBehaviorMemories,
+  type CompanionBehaviorMemory,
+} from '../data/companionTraits';
 
 export type StudentId = string;
 
@@ -47,6 +52,7 @@ export type CompanionState = {
   ownedFlourishes: string[];
   unlockedSkills: string[];
   treasuresFound: number;
+  behaviorMemories: CompanionBehaviorMemory[];
 };
 
 export type CompanionSkillUnlockResult =
@@ -107,6 +113,17 @@ type GameStore = {
   ) => void;
   removeTrophy: (studentId: StudentId, trophyId: string) => void;
   markTrophySeen: (studentId: StudentId, trophyId: string) => void;
+  awardBehaviorPoints: (
+    studentId: StudentId,
+    amount: number,
+    reasonId: string | null,
+    sourceActivityId: string
+  ) => Promise<void>;
+  undoBehaviorAward: (
+    studentId: StudentId,
+    amount: number,
+    sourceActivityId: string
+  ) => Promise<void>;
   awardCompanionFlourish: (
     studentId: StudentId,
     flourishId: string,
@@ -241,6 +258,7 @@ function defaultStudent(name: string, classId: string): StudentState {
       ownedFlourishes: [],
       unlockedSkills: [],
       treasuresFound: 0,
+      behaviorMemories: [],
     },
     pastRewards: [],
     trophies: [],
@@ -310,6 +328,9 @@ function studentFromSupabase(row: any, classId: string): StudentState {
         typeof meta.companion?.treasuresFound === 'number'
           ? Math.max(0, Math.floor(meta.companion.treasuresFound))
           : 0,
+      behaviorMemories: normalizeCompanionBehaviorMemories(
+        meta.companion?.behaviorMemories
+      ),
     },
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
@@ -571,6 +592,110 @@ export const useGameStore = create<GameStore>()(
         }
       },
 
+      awardBehaviorPoints: async (
+        studentId,
+        amount,
+        reasonId,
+        sourceActivityId
+      ) => {
+        const safeAmount = Math.max(0, Math.round(amount));
+        const cleanActivityId = sourceActivityId.trim();
+        const traitId = companionTraitForReason(reasonId);
+        let updatedStudent: StudentState | null = null;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const behaviorMemories =
+            student.companion.behaviorMemories ?? [];
+          const memoryAlreadyExists =
+            traitId &&
+            cleanActivityId &&
+            behaviorMemories.some(memory => memory.id === cleanActivityId);
+
+          if (memoryAlreadyExists) return state;
+
+          const nextMemories =
+            traitId && cleanActivityId
+              ? [
+                  ...behaviorMemories,
+                  {
+                    id: cleanActivityId,
+                    traitId,
+                    reasonId: reasonId as string,
+                    pointAmount: safeAmount,
+                    awardedAt: Date.now(),
+                    source: 'points' as const,
+                  },
+                ]
+              : behaviorMemories;
+
+          updatedStudent = {
+            ...student,
+            points: student.points + safeAmount,
+            companion: {
+              ...student.companion,
+              petPoints:
+                (student.companion.petPoints ?? 0) + safeAmount,
+              behaviorMemories: nextMemories,
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          await syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      undoBehaviorAward: async (
+        studentId,
+        amount,
+        sourceActivityId
+      ) => {
+        const safeAmount = Math.max(0, Math.round(amount));
+        const cleanActivityId = sourceActivityId.trim();
+        let updatedStudent: StudentState | null = null;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          updatedStudent = {
+            ...student,
+            points: Math.max(0, student.points - safeAmount),
+            companion: {
+              ...student.companion,
+              petPoints: Math.max(
+                0,
+                (student.companion.petPoints ?? 0) - safeAmount
+              ),
+              behaviorMemories: (
+                student.companion.behaviorMemories ?? []
+              ).filter(memory => memory.id !== cleanActivityId),
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          await syncStudentToSupabase(updatedStudent);
+        }
+      },
+
       awardCompanionFlourish: async (
         studentId,
         flourishId,
@@ -579,8 +704,9 @@ export const useGameStore = create<GameStore>()(
         let updatedStudent: StudentState | null = null;
         const cleanFlourishId = flourishId.trim();
         const safePointBonus = Math.max(0, Math.round(pointBonus));
+        const flourish = getCompanionFlourish(cleanFlourishId);
 
-        if (!getCompanionFlourish(cleanFlourishId)) return false;
+        if (!flourish) return false;
 
         set(state => {
           const student = state.students[studentId];
@@ -588,6 +714,24 @@ export const useGameStore = create<GameStore>()(
 
           const ownedFlourishes = student.companion.ownedFlourishes ?? [];
           if (ownedFlourishes.includes(cleanFlourishId)) return state;
+          const behaviorMemories =
+            student.companion.behaviorMemories ?? [];
+          const traitId = companionTraitForReason(flourish.reasonId);
+          const memoryId = `flourish:${cleanFlourishId}`;
+          const nextMemories =
+            traitId && !behaviorMemories.some(memory => memory.id === memoryId)
+              ? [
+                  ...behaviorMemories,
+                  {
+                    id: memoryId,
+                    traitId,
+                    reasonId: flourish.reasonId,
+                    pointAmount: safePointBonus,
+                    awardedAt: Date.now(),
+                    source: 'flourish' as const,
+                  },
+                ]
+              : behaviorMemories;
 
           updatedStudent = {
             ...student,
@@ -600,6 +744,7 @@ export const useGameStore = create<GameStore>()(
               activeFlourishes: student.companion.activeFlourishes ?? [],
               celebratedStages:
                 student.companion.celebratedStages ?? ['egg'],
+              behaviorMemories: nextMemories,
             },
           };
 
@@ -648,6 +793,9 @@ export const useGameStore = create<GameStore>()(
               activeFlourishes: (
                 student.companion.activeFlourishes ?? []
               ).filter(id => id !== cleanFlourishId),
+              behaviorMemories: (
+                student.companion.behaviorMemories ?? []
+              ).filter(memory => memory.id !== `flourish:${cleanFlourishId}`),
             },
           };
 

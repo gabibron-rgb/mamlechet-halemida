@@ -6,6 +6,7 @@ import { useSessionStore } from '../store/useSessionStore';
 import { getStudentByLoginName } from '../lib/supabaseStudents';
 import { getClassByCodeAndTeacherCode } from '../lib/supabaseClasses';
 import { DEFAULT_UNLOCKED_THEMES } from '../data/themes';
+import { normalizeCompanionBehaviorMemories } from '../data/companionTraits';
 
 type Mode = 'choose' | 'student' | 'teacher';
 
@@ -70,6 +71,9 @@ function buildStudentFromSupabase(row: any): StudentState {
         typeof meta.companion?.treasuresFound === 'number'
           ? Math.max(0, Math.floor(meta.companion.treasuresFound))
           : 0,
+      behaviorMemories: normalizeCompanionBehaviorMemories(
+        meta.companion?.behaviorMemories
+      ),
     },
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],

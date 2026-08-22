@@ -23,7 +23,7 @@ export default function AwardModal({
   const [amount, setAmount] = useState<number>(3);
   const [reasonId, setReasonId] = useState<string | null>(null);
 
-  const addPoints = useGameStore(s => s.addPoints);
+  const awardBehaviorPoints = useGameStore(s => s.awardBehaviorPoints);
   const logAward = useClassStore(s => s.logAward);
 
   function reset() {
@@ -45,13 +45,15 @@ export default function AwardModal({
   function confirm() {
     if (selected.size === 0) return;
     const ids = Array.from(selected);
-    ids.forEach(id => addPoints(id, amount));
-    logAward({
+    const activityId = logAward({
       classId,
       studentIds: ids,
       amount,
       reasonId,
     });
+    ids.forEach(id =>
+      void awardBehaviorPoints(id, amount, reasonId, activityId)
+    );
     reset();
     onClose();
   }
@@ -111,6 +113,17 @@ export default function AwardModal({
                 +{n}
               </button>
             ))}
+          </div>
+          <div
+            className={`mt-3 rounded-xl px-3 py-2 text-[10px] font-bold leading-5 ${
+              reasonId
+                ? 'border border-violet-300/20 bg-violet-500/10 text-violet-100'
+                : 'bg-magic-bg/30 text-magic-soft/45'
+            }`}
+          >
+            {reasonId
+              ? 'הסיבה שנבחרה תיצור זיכרון אחד במפת האופי של החיה, ללא קשר לכמות הנקודות.'
+              : 'ללא בחירת סיבה יתקבלו נקודות רגילות ונקודות חיה, אך לא ייווצר זיכרון אופי.'}
           </div>
         </div>
 

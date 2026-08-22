@@ -11,6 +11,7 @@ export default function ActivityLog({ classId }: Props) {
   const students = useGameStore(s => s.students);
   const undoAward = useClassStore(s => s.undoAward);
   const addPoints = useGameStore(s => s.addPoints);
+  const undoBehaviorAward = useGameStore(s => s.undoBehaviorAward);
   const undoCompanionFlourishAward = useGameStore(
     s => s.undoCompanionFlourishAward
   );
@@ -31,6 +32,13 @@ export default function ActivityLog({ classId }: Props) {
           entry.flourishId as string,
           entry.amount
         )
+      );
+      return;
+    }
+
+    if (entry.reasonId) {
+      entry.studentIds.forEach(id =>
+        void undoBehaviorAward(id, entry.amount, entry.id)
       );
       return;
     }

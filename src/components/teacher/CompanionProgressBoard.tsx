@@ -7,6 +7,7 @@ import {
   type CompanionStage,
 } from '../../data/companionWorlds';
 import { COMPANION_SKILLS } from '../../data/companionSkills';
+import { getDominantCompanionTrait } from '../../data/companionTraits';
 import { THEMES, type ThemeId } from '../../data/themes';
 import type { StudentState } from '../../store/useGameStore';
 
@@ -68,6 +69,9 @@ export default function CompanionProgressBoard({ students }: Props) {
       const visuals = companion.theme
         ? COMPANION_VISUALS[companion.theme]
         : null;
+      const dominantTrait = getDominantCompanionTrait(
+        companion.behaviorMemories ?? []
+      );
 
       return {
         student,
@@ -76,6 +80,7 @@ export default function CompanionProgressBoard({ students }: Props) {
         remaining,
         progress,
         visuals,
+        dominantTrait,
         pendingCeremony: hasPendingCeremony(student),
         stageIndex: COMPANION_STAGE_ORDER.indexOf(companion.stage),
       };
@@ -197,6 +202,12 @@ export default function CompanionProgressBoard({ students }: Props) {
                               ? `החיה תיפתח ברמה 5 · כרגע ברמה ${student.level}`
                               : 'אפשר כבר לבחור עולם ולקבל ביצה'}
                           </div>
+                          {row.dominantTrait && (
+                            <div className="mt-2 text-[11px] font-bold text-violet-200">
+                              {row.dominantTrait.emoji} האופי שכבר נבנה: {' '}
+                              {row.dominantTrait.nameHe}
+                            </div>
+                          )}
                         </div>
                         <div className="self-start rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-magic-soft/60 sm:self-auto">
                           🔒 טרם נפתחה
@@ -241,6 +252,11 @@ export default function CompanionProgressBoard({ students }: Props) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
+                        {row.dominantTrait && (
+                          <span className="rounded-full border border-violet-300/25 bg-violet-500/10 px-3 py-1 text-[11px] font-black text-violet-100">
+                            {row.dominantTrait.emoji} אופי: {row.dominantTrait.nameHe}
+                          </span>
+                        )}
                         {row.pendingCeremony && (
                           <span className="rounded-full border border-fuchsia-300/35 bg-fuchsia-500/15 px-3 py-1 text-[11px] font-black text-fuchsia-200">
                             ✨ מחכה לטקס
