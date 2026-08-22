@@ -3945,6 +3945,255 @@ const buildingBlockCastle: ItemSpriteData = {
   roomFloorHeightScale: 2.25,
 };
 
+const booksBookStack: ItemSpriteData = {
+  src: '/assets/items/books-book-stack.png',
+  alt: 'ערימת ספרים צבעונית',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.25,
+  roomShelfHeightScale: 1.25,
+};
+
+const booksOpenBook: ItemSpriteData = {
+  src: '/assets/items/books-open-book.png',
+  alt: 'ספר פתוח',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetY: 28,
+  roomShelfWidthScale: 1.25,
+  roomShelfHeightScale: 1.25,
+};
+
+const booksBookmarkBook: ItemSpriteData = {
+  src: '/assets/items/books-bookmark-book.png',
+  alt: 'ספר עם סימנייה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.22,
+  roomShelfHeightScale: 1.22,
+};
+
+const booksNotebook: ItemSpriteData = {
+  src: '/assets/items/books-notebook.png',
+  alt: 'מחברת קריאה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetY: 24,
+  roomShelfWidthScale: 1.22,
+  roomShelfHeightScale: 1.22,
+};
+
+const booksStickyNotes: ItemSpriteData = {
+  src: '/assets/items/books-sticky-notes.png',
+  alt: 'פתקיות צבעוניות',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.28,
+  roomHeightScale: 1.28,
+  roomShelfOffsetY: 27,
+  roomShelfWidthScale: 1.2,
+  roomShelfHeightScale: 1.2,
+};
+
+const booksMagnifyingGlass: ItemSpriteData = {
+  src: '/assets/items/books-magnifying-glass.png',
+  alt: 'זכוכית מגדלת לקורא',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.28,
+  roomHeightScale: 1.28,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.2,
+  roomShelfHeightScale: 1.2,
+};
+
+const booksReadingGlasses: ItemSpriteData = {
+  src: '/assets/items/books-reading-glasses.png',
+  alt: 'משקפי קריאה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.28,
+  roomHeightScale: 1.28,
+  roomShelfOffsetY: 30,
+  roomShelfWidthScale: 1.2,
+  roomShelfHeightScale: 1.2,
+};
+
+const booksPencilHolder: ItemSpriteData = {
+  src: '/assets/items/books-pencil-holder.png',
+  alt: 'כוס כלי כתיבה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.22,
+  roomShelfHeightScale: 1.22,
+};
+
+const booksDeskLamp: ItemSpriteData = {
+  src: '/assets/items/books-desk-lamp.png',
+  alt: 'מנורת קריאה ירוקה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+};
+
+const booksLeatherJournal: ItemSpriteData = {
+  src: '/assets/items/books-leather-journal.png',
+  alt: 'יומן עור',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.42,
+  roomHeightScale: 1.42,
+  roomShelfOffsetY: 26,
+  roomShelfWidthScale: 1.32,
+  roomShelfHeightScale: 1.32,
+};
+
+const booksFantasyNovels: ItemSpriteData = {
+  src: '/assets/items/books-fantasy-novels.png',
+  alt: 'ערימת ספרי פנטזיה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.48,
+  roomHeightScale: 1.48,
+  roomShelfOffsetY: 27,
+  roomShelfWidthScale: 1.38,
+  roomShelfHeightScale: 1.38,
+};
+
+const booksQuillInk: ItemSpriteData = {
+  src: '/assets/items/books-quill-ink.png',
+  alt: 'קולמוס וקסת דיו',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+};
+
+const booksEncyclopediaSet: ItemSpriteData = {
+  src: '/assets/items/books-encyclopedia-set.png',
+  alt: 'סט אנציקלופדיות',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 14,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+  roomShelfOffsetY: 26,
+  roomShelfWidthScale: 1.45,
+  roomShelfHeightScale: 1.45,
+};
+
+const booksLibraryGlobe: ItemSpriteData = {
+  src: '/assets/items/books-library-globe.png',
+  alt: 'גלובוס הספרייה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 12,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.45,
+  roomShelfHeightScale: 1.45,
+  roomFloorOffsetY: 26,
+  roomFloorWidthScale: 2.05,
+  roomFloorHeightScale: 2.05,
+};
+
+const booksTypewriter: ItemSpriteData = {
+  src: '/assets/items/books-typewriter.png',
+  alt: 'מכונת כתיבה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 12,
+  roomWidthScale: 1.7,
+  roomHeightScale: 1.7,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.5,
+  roomShelfHeightScale: 1.5,
+  roomFloorOffsetY: 28,
+  roomFloorWidthScale: 2.05,
+  roomFloorHeightScale: 2.05,
+};
+
+const booksBookStand: ItemSpriteData = {
+  src: '/assets/items/books-book-stand.png',
+  alt: 'מעמד הספר',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 12,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+  roomShelfOffsetY: 33,
+  roomShelfWidthScale: 1.5,
+  roomShelfHeightScale: 1.5,
+  roomFloorOffsetY: 24,
+  roomFloorWidthScale: 1.95,
+  roomFloorHeightScale: 1.95,
+};
+
+const booksLibraryLadder: ItemSpriteData = {
+  src: '/assets/items/books-library-ladder.png',
+  alt: 'סולם הספרייה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 52,
+  roomWidthScale: 2.35,
+  roomHeightScale: 2.35,
+  roomFloorOffsetY: 52,
+  roomFloorWidthScale: 2.35,
+  roomFloorHeightScale: 2.35,
+};
+
+const booksReadingChair: ItemSpriteData = {
+  src: '/assets/items/books-reading-chair.png',
+  alt: 'כורסת הקריאה המלכותית',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 58,
+  roomWidthScale: 2.55,
+  roomHeightScale: 2.55,
+  roomFloorOffsetY: 75,
+  roomFloorWidthScale: 2.55,
+  roomFloorHeightScale: 2.55,
+};
+
+const booksMagicBook: ItemSpriteData = {
+  src: '/assets/items/books-magic-book.png',
+  alt: 'הספר הקסום',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(190,100,255,0.45)]',
+  roomOffsetY: 4,
+  roomWidthScale: 1.85,
+  roomHeightScale: 1.85,
+  roomShelfOffsetY: 24,
+  roomShelfWidthScale: 1.65,
+  roomShelfHeightScale: 1.65,
+};
+
+const booksMiniLibrary: ItemSpriteData = {
+  src: '/assets/items/books-mini-library.png',
+  alt: 'ספריית הממלכה המיניאטורית',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_20px_rgba(255,210,80,0.38)]',
+  roomOffsetY: 50,
+  roomWidthScale: 2.55,
+  roomHeightScale: 2.55,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 2.55,
+  roomFloorHeightScale: 2.55,
+};
+
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   // לוח שחמט
   chess: chessBoardBasic,
@@ -4102,6 +4351,26 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   building_clockwork_excavator: buildingClockworkExcavator,
   building_toy_crane: buildingToyCrane,
   building_block_castle: buildingBlockCastle,
+  books_book_stack: booksBookStack,
+  books_open_book: booksOpenBook,
+  books_bookmark_book: booksBookmarkBook,
+  books_notebook: booksNotebook,
+  books_sticky_notes: booksStickyNotes,
+  books_magnifying_glass: booksMagnifyingGlass,
+  books_reading_glasses: booksReadingGlasses,
+  books_pencil_holder: booksPencilHolder,
+  books_desk_lamp: booksDeskLamp,
+  books_leather_journal: booksLeatherJournal,
+  books_fantasy_novels: booksFantasyNovels,
+  books_quill_ink: booksQuillInk,
+  books_encyclopedia_set: booksEncyclopediaSet,
+  books_library_globe: booksLibraryGlobe,
+  books_typewriter: booksTypewriter,
+  books_book_stand: booksBookStand,
+  books_library_ladder: booksLibraryLadder,
+  books_reading_chair: booksReadingChair,
+  books_magic_book: booksMagicBook,
+  books_mini_library: booksMiniLibrary,
   music_colorful_maracas: musicColorfulMaracas,
   music_royal_tambourine: musicRoyalTambourine,
   music_rainbow_xylophone: musicRainbowXylophone,

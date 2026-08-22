@@ -22,6 +22,7 @@ const LAB_THEMES: Array<{ id: ThemeId; nameHe: string }> = [
   { id: 'building', nameHe: 'בנייה' },
   { id: 'sports', nameHe: 'ספורט' },
   { id: 'music', nameHe: 'מוזיקה' },
+  { id: 'books', nameHe: 'ספרים' },
   { id: 'fantasy', nameHe: 'פנטזיה' },
   { id: 'robotics', nameHe: 'רובוטיקה' },
   { id: 'art', nameHe: 'אומנות' },
