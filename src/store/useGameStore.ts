@@ -80,6 +80,13 @@ type GameStore = {
   getStudent: (id: StudentId) => StudentState | undefined;
   updateStudent: (id: StudentId, patch: Partial<StudentState>) => void;
   awardTrophy: (studentId: StudentId, trophyTheme: string, caption: string) => void;
+  updateTrophy: (
+    studentId: StudentId,
+    trophyId: string,
+    trophyTheme: string,
+    caption: string
+  ) => void;
+  removeTrophy: (studentId: StudentId, trophyId: string) => void;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -368,6 +375,80 @@ export const useGameStore = create<GameStore>()(
                 awardedAt: Date.now(),
               },
             ],
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      updateTrophy: (studentId, trophyId, trophyTheme, caption) => {
+        let updatedStudent: StudentState | null = null;
+        const cleanTheme = trophyTheme.trim();
+        const cleanCaption = caption.trim();
+
+        if (!trophyId || !cleanTheme || !cleanCaption) return;
+
+        set((state) => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const trophyExists = student.trophies.some(
+            trophy => trophy.id === trophyId
+          );
+          if (!trophyExists) return state;
+
+          updatedStudent = {
+            ...student,
+            trophies: student.trophies.map(trophy =>
+              trophy.id === trophyId
+                ? {
+                    ...trophy,
+                    trophyTheme: cleanTheme,
+                    caption: cleanCaption,
+                  }
+                : trophy
+            ),
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      removeTrophy: (studentId, trophyId) => {
+        let updatedStudent: StudentState | null = null;
+
+        if (!trophyId) return;
+
+        set((state) => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const nextTrophies = student.trophies.filter(
+            trophy => trophy.id !== trophyId
+          );
+          if (nextTrophies.length === student.trophies.length) return state;
+
+          updatedStudent = {
+            ...student,
+            trophies: nextTrophies,
           };
 
           return {

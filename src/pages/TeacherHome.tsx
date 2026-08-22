@@ -6,6 +6,7 @@ import { useGameStore } from '../store/useGameStore';
 import AwardModal from '../components/teacher/AwardModal';
 import ActivityLog from '../components/teacher/ActivityLog';
 import TrophyAwardModal from '../components/teacher/TrophyAwardModal';
+import TrophyManagementModal from '../components/teacher/TrophyManagementModal';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
@@ -42,9 +43,14 @@ export default function TeacherHome() {
   const [awardOpen, setAwardOpen] = useState(false);
   const [preselected, setPreselected] = useState<string | null>(null);
   const [trophyStudentId, setTrophyStudentId] = useState<string | null>(null);
+  const [managedTrophyStudentId, setManagedTrophyStudentId] = useState<string | null>(null);
 
   const trophyStudent = trophyStudentId
     ? students.find(student => student.id === trophyStudentId) ?? null
+    : null;
+
+  const managedTrophyStudent = managedTrophyStudentId
+    ? students.find(student => student.id === managedTrophyStudentId) ?? null
     : null;
 
   if (!cls) {
@@ -127,18 +133,26 @@ export default function TeacherHome() {
                       {st.points} נק׳ · רמה {st.level} · {st.xp} XP · {st.trophies.length} גביעים
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 sm:flex">
+                  <div className="grid grid-cols-3 gap-2 sm:flex">
                     <button
                       type="button"
                       onClick={() => setTrophyStudentId(st.id)}
-                      className="rounded-lg border border-yellow-300/35 bg-yellow-400/10 px-3 py-2 text-sm font-bold text-yellow-200 transition-colors hover:bg-yellow-400/20"
+                      className="rounded-lg border border-yellow-300/35 bg-yellow-400/10 px-3 py-2 text-xs font-bold text-yellow-200 transition-colors hover:bg-yellow-400/20 sm:text-sm"
                     >
-                      🏆 הענקת גביע
+                      🏆 גביע חדש
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setManagedTrophyStudentId(st.id)}
+                      disabled={st.trophies.length === 0}
+                      className="rounded-lg border border-white/15 bg-magic-bg/45 px-3 py-2 text-xs font-bold text-magic-soft transition-colors hover:bg-magic-bg/70 disabled:cursor-not-allowed disabled:opacity-35 sm:text-sm"
+                    >
+                      📜 גביעים ({st.trophies.length})
                     </button>
                     <button
                       type="button"
                       onClick={() => openAwardFor(st.id)}
-                      className="bg-magic-accent text-magic-bg text-sm font-bold py-2 px-3 rounded-lg hover:scale-105 transition-transform"
+                      className="bg-magic-accent text-magic-bg text-xs sm:text-sm font-bold py-2 px-3 rounded-lg hover:scale-105 transition-transform"
                     >
                       +נקודות
                     </button>
@@ -168,6 +182,12 @@ export default function TeacherHome() {
         open={trophyStudentId !== null}
         onClose={() => setTrophyStudentId(null)}
         student={trophyStudent}
+      />
+
+      <TrophyManagementModal
+        open={managedTrophyStudentId !== null}
+        onClose={() => setManagedTrophyStudentId(null)}
+        student={managedTrophyStudent}
       />
     </div>
   );
