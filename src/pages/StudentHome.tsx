@@ -9,11 +9,18 @@ import { xpToNextLevel } from '../logic/leveling';
 import Shop from '../components/student/Shop';
 import Inventory from '../components/student/Inventory';
 import CollectionAlbum from '../components/student/CollectionAlbum';
+import CompanionPanel from '../components/student/CompanionPanel';
 import RoomView from '../components/student/RoomView';
 import { LevelUpCeremony } from '../components/student/LevelUpCeremony';
 import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
 
-type Tab = 'progress' | 'room' | 'shop' | 'inventory' | 'collection';
+type Tab =
+  | 'progress'
+  | 'room'
+  | 'shop'
+  | 'inventory'
+  | 'collection'
+  | 'companion';
 
 export default function StudentHome() {
   const navigate = useNavigate();
@@ -166,7 +173,7 @@ export default function StudentHome() {
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 gap-2 mb-4 sm:grid-cols-5">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
           <TabButton active={tab === 'progress'} onClick={() => setTab('progress')}>
             התקדמות
           </TabButton>
@@ -191,6 +198,13 @@ export default function StudentHome() {
             onClick={() => setTab('collection')}
           >
             📖 האוסף שלי
+          </TabButton>
+
+          <TabButton
+            active={tab === 'companion'}
+            onClick={() => setTab('companion')}
+          >
+            🐾 חיית מחמד
           </TabButton>
         </div>
 
@@ -219,6 +233,8 @@ export default function StudentHome() {
           )}
 
           {tab === 'collection' && <CollectionAlbum student={student} />}
+
+          {tab === 'companion' && <CompanionPanel student={student} />}
         </div>
 
         {ceremonyOpen && pending > 0 && (
