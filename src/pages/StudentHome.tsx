@@ -14,6 +14,7 @@ import CompanionPanel from '../components/student/CompanionPanel';
 import MissionsPanel from '../components/student/MissionsPanel';
 import ClassGoalBanner from '../components/student/ClassGoalBanner';
 import ClassKingdomPanel from '../components/student/ClassKingdomPanel';
+import AchievementsPanel from '../components/student/AchievementsPanel';
 import RoomView from '../components/student/RoomView';
 import TrophyRoom from '../components/student/TrophyRoom';
 import { TrophyAwardCeremony } from '../components/student/TrophyAwardCeremony';
@@ -262,19 +263,22 @@ export default function StudentHome() {
         {/* Tab content */}
         <div className="bg-magic-panel/80 rounded-3xl p-6">
           {tab === 'progress' && (
-            <ProgressPanel
-              points={student.points}
-              level={student.level}
-              xp={student.xp}
-              xpInfo={xpInfo}
-              xpPct={xpPct}
-              inventoryCount={student.inventory.length}
-              activeMissionCount={activeMissionCount}
-              onGoMissions={() => setTab('missions')}
-              onGoRoom={() => setTab('room')}
-              onGoShop={() => setTab('shop')}
-              onGoInventory={() => setTab('inventory')}
-            />
+            <>
+              <ProgressPanel
+                points={student.points}
+                level={student.level}
+                xp={student.xp}
+                xpInfo={xpInfo}
+                xpPct={xpPct}
+                inventoryCount={student.inventory.length}
+                activeMissionCount={activeMissionCount}
+                onGoMissions={() => setTab('missions')}
+                onGoRoom={() => setTab('room')}
+                onGoShop={() => setTab('shop')}
+                onGoInventory={() => setTab('inventory')}
+              />
+              <AchievementsPanel student={student} />
+            </>
           )}
 
           {tab === 'missions' && <MissionsPanel student={student} />}

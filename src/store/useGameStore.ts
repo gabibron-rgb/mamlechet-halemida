@@ -50,6 +50,15 @@ import {
   classKingdomStars,
   normalizeClassKingdomClaimedRewards,
 } from '../data/classKingdom';
+import {
+  achievementById,
+  achievementHasReward,
+  normalizeAchievementRecords,
+  normalizeSpecialUnlocks,
+  reconcileAchievementRecords,
+  type AchievementRecord,
+  type SpecialUnlockEntry,
+} from '../data/achievements';
 
 export type StudentId = string;
 
@@ -126,6 +135,8 @@ export type StudentState = {
   missions: StudentMission[];
   classGoals: StudentClassGoal[];
   claimedClassKingdomRewards: number[];
+  achievementRecords: AchievementRecord[];
+  specialUnlocks: SpecialUnlockEntry[];
   pastRewards: string[];
   trophies: { id: string; trophyTheme: string; caption: string; awardedAt: number }[];
   seenTrophyIds: string[];
@@ -249,6 +260,12 @@ type GameStore = {
     rewardLevel: number,
     themeId?: ThemeId
   ) => Promise<boolean>;
+  reconcileAchievements: (studentId: StudentId) => Promise<string[]>;
+  claimAchievementReward: (
+    studentId: StudentId,
+    achievementId: string,
+    themeId?: ThemeId
+  ) => Promise<boolean>;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -303,6 +320,8 @@ async function syncStudentToSupabase(student: StudentState) {
       missions: student.missions ?? [],
       classGoals: student.classGoals ?? [],
       claimedClassKingdomRewards: student.claimedClassKingdomRewards ?? [],
+      achievementRecords: student.achievementRecords ?? [],
+      specialUnlocks: student.specialUnlocks ?? [],
       pastRewards: student.pastRewards,
       trophies: student.trophies,
       seenTrophyIds: student.seenTrophyIds ?? [],
@@ -409,12 +428,27 @@ function defaultStudent(name: string, classId: string): StudentState {
     missions: [],
     classGoals: [],
     claimedClassKingdomRewards: [],
+    achievementRecords: [],
+    specialUnlocks: [],
     pastRewards: [],
     trophies: [],
     seenTrophyIds: [],
     pityCounters: {},
     pendingLevelUps: 0,
     pendingThemeUnlocks: 0,
+  };
+}
+
+function withReconciledAchievements(student: StudentState): StudentState {
+  const reconciled = reconcileAchievementRecords(
+    student,
+    student.achievementRecords ?? []
+  );
+
+  if (reconciled.newlyAchievedIds.length === 0) return student;
+  return {
+    ...student,
+    achievementRecords: reconciled.records,
   };
 }
 
@@ -492,6 +526,8 @@ function studentFromSupabase(row: any, classId: string): StudentState {
     claimedClassKingdomRewards: normalizeClassKingdomClaimedRewards(
       meta.claimedClassKingdomRewards
     ),
+    achievementRecords: normalizeAchievementRecords(meta.achievementRecords),
+    specialUnlocks: normalizeSpecialUnlocks(meta.specialUnlocks),
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
@@ -604,7 +640,7 @@ export const useGameStore = create<GameStore>()(
           return;
         }
 
-        const studentsFromDb = (data ?? []).map((row) =>
+        const studentsFromDb = (data ?? []).map((row: any) =>
           studentFromSupabase(row, row.class_id ?? classId)
         );
 
@@ -628,10 +664,10 @@ export const useGameStore = create<GameStore>()(
           const cur = state.students[id];
           if (!cur) return state;
 
-          updatedStudent = {
+          updatedStudent = withReconciledAchievements({
             ...cur,
             ...patch,
-          };
+          });
 
           return {
             students: {
@@ -657,7 +693,7 @@ export const useGameStore = create<GameStore>()(
           const student = state.students[studentId];
           if (!student) return state;
 
-          updatedStudent = {
+          updatedStudent = withReconciledAchievements({
             ...student,
             trophies: [
               ...student.trophies,
@@ -668,7 +704,7 @@ export const useGameStore = create<GameStore>()(
                 awardedAt: Date.now(),
               },
             ],
-          };
+          });
 
           return {
             students: {
@@ -864,7 +900,7 @@ export const useGameStore = create<GameStore>()(
             awardedAt
           );
 
-          updatedStudent = {
+          updatedStudent = withReconciledAchievements({
             ...student,
             points: student.points + safeAmount,
             companion: {
@@ -881,7 +917,7 @@ export const useGameStore = create<GameStore>()(
               traitChallenges: nextChallenges,
               journalEntries: nextJournalEntries,
             },
-          };
+          });
 
           return {
             students: {
@@ -1533,7 +1569,7 @@ export const useGameStore = create<GameStore>()(
           const completedAt = Date.now();
           const rewardPoints = Math.max(0, Math.round(mission.rewardPoints));
 
-          updatedStudent = {
+          updatedStudent = withReconciledAchievements({
             ...student,
             points: student.points + rewardPoints,
             missions: missions.map(item =>
@@ -1545,7 +1581,7 @@ export const useGameStore = create<GameStore>()(
               ...student.companion,
               petPoints: (student.companion.petPoints ?? 0) + rewardPoints,
             },
-          };
+          });
 
           return {
             students: {
@@ -2003,6 +2039,161 @@ export const useGameStore = create<GameStore>()(
         return true;
       },
 
+      reconcileAchievements: async (studentId) => {
+        let updatedStudent: StudentState | null = null;
+        let newlyAchievedIds: string[] = [];
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const reconciled = reconcileAchievementRecords(
+            student,
+            student.achievementRecords ?? []
+          );
+          newlyAchievedIds = reconciled.newlyAchievedIds;
+          if (newlyAchievedIds.length === 0) return state;
+
+          updatedStudent = {
+            ...student,
+            achievementRecords: reconciled.records,
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          await syncStudentToSupabase(updatedStudent);
+        }
+
+        return newlyAchievedIds;
+      },
+
+      claimAchievementReward: async (studentId, achievementId, themeId) => {
+        const definition = achievementById(achievementId);
+        if (!definition || !achievementHasReward(definition)) return false;
+
+        let updatedStudent: StudentState | null = null;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const reconciled = reconcileAchievementRecords(
+            student,
+            student.achievementRecords ?? []
+          );
+          const record = reconciled.records.find(
+            entry => entry.achievementId === achievementId
+          );
+          if (!record || record.rewardClaimedAt !== null) return state;
+
+          const rewards = definition.rewards ?? [];
+          const boxRewards = rewards.filter(reward => reward.kind === 'box');
+          if (boxRewards.length > 0) {
+            if (!themeId) return state;
+            if (
+              themeId !== 'generic' &&
+              !student.unlockedThemes.includes(themeId)
+            ) {
+              return state;
+            }
+          }
+
+          const now = Date.now();
+          let nextInventory = [...student.inventory];
+          let nextUnlockedThemes = [...student.unlockedThemes];
+          let nextSpecialUnlocks = [...(student.specialUnlocks ?? [])];
+
+          for (const reward of rewards) {
+            if (reward.kind === 'box') {
+              const selectedTheme = themeId as ThemeId;
+              nextInventory.push({
+                id: `achievement_box_${achievementId}_${reward.tier}_${selectedTheme}_${now}_${nextInventory.length}`,
+                itemId: `box_${reward.tier}_${selectedTheme}`,
+                kind: 'box',
+                boxTier: reward.tier,
+                boxTheme: selectedTheme,
+                acquiredAt: now,
+                placedZone: null,
+                placedSlot: null,
+              });
+              continue;
+            }
+
+            if (reward.kind === 'inventoryItem') {
+              nextInventory.push({
+                id: `achievement_item_${achievementId}_${reward.itemId}_${now}_${nextInventory.length}`,
+                itemId: reward.itemId,
+                kind: reward.inventoryKind,
+                acquiredAt: now,
+                placedZone: null,
+                placedSlot: null,
+                roomX: null,
+                roomY: null,
+                roomScale: 1,
+                roomRotation: 0,
+              });
+              continue;
+            }
+
+            if (reward.kind === 'themeUnlock') {
+              if (!nextUnlockedThemes.includes(reward.themeId)) {
+                nextUnlockedThemes.push(reward.themeId);
+              }
+              continue;
+            }
+
+            if (reward.kind === 'specialUnlock') {
+              const alreadyUnlocked = nextSpecialUnlocks.some(
+                entry =>
+                  entry.kind === reward.unlockKind &&
+                  entry.unlockId === reward.unlockId
+              );
+              if (!alreadyUnlocked) {
+                nextSpecialUnlocks.push({
+                  unlockId: reward.unlockId,
+                  kind: reward.unlockKind,
+                  labelHe: reward.labelHe,
+                  sourceAchievementId: achievementId,
+                  unlockedAt: now,
+                });
+              }
+            }
+          }
+
+          const nextRecords = reconciled.records.map(entry =>
+            entry.achievementId === achievementId
+              ? { ...entry, rewardClaimedAt: now }
+              : entry
+          );
+
+          updatedStudent = {
+            ...student,
+            inventory: nextInventory,
+            unlockedThemes: nextUnlockedThemes,
+            specialUnlocks: nextSpecialUnlocks,
+            achievementRecords: nextRecords,
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+        await syncStudentToSupabase(updatedStudent);
+        return true;
+      },
+
       updateInventoryEntry: (studentId, inventoryIndex, patch) => {
         let updatedStudent: StudentState | null = null;
 
@@ -2121,10 +2312,10 @@ export const useGameStore = create<GameStore>()(
             roomRotation: 0,
           };
 
-          updatedStudent = {
+          updatedStudent = withReconciledAchievements({
             ...cur,
             inventory: [...cur.inventory, entry],
-          };
+          });
 
           return {
             students: {
@@ -2178,10 +2369,10 @@ export const useGameStore = create<GameStore>()(
           if (!cur) return state;
           if (cur.unlockedThemes.includes(theme)) return state;
 
-          updatedStudent = {
+          updatedStudent = withReconciledAchievements({
             ...cur,
             unlockedThemes: [...cur.unlockedThemes, theme],
-          };
+          });
 
           return {
             students: {
@@ -2221,7 +2412,7 @@ export const useGameStore = create<GameStore>()(
             roomRotation: 0,
           };
 
-          updatedStudent = {
+          updatedStudent = withReconciledAchievements({
             ...student,
             points: student.points + payload.pointBonus,
             capacities,
@@ -2230,7 +2421,7 @@ export const useGameStore = create<GameStore>()(
             pendingThemeUnlocks:
               (student.pendingThemeUnlocks ?? 0) +
               (payload.newLevel % 2 === 0 ? 1 : 0),
-          };
+          });
 
           return {
             students: {
@@ -2254,14 +2445,14 @@ export const useGameStore = create<GameStore>()(
           if ((student.pendingThemeUnlocks ?? 0) <= 0) return state;
           if (student.unlockedThemes.includes(themeId)) return state;
 
-          updatedStudent = {
+          updatedStudent = withReconciledAchievements({
             ...student,
             unlockedThemes: [...student.unlockedThemes, themeId],
             pendingThemeUnlocks: Math.max(
               0,
               (student.pendingThemeUnlocks ?? 0) - 1
             ),
-          };
+          });
 
           return {
             students: {
