@@ -9,6 +9,10 @@ import { genId } from '../utils/storage';
 import type { BoxTier } from '../data/boxes';
 import { supabase } from '../lib/supabaseClient';
 import { getCompanionFlourish } from '../data/companionFlourishes';
+import {
+  companionStageMeetsRequirement,
+  getCompanionSkill,
+} from '../data/companionSkills';
 
 export type StudentId = string;
 
@@ -41,7 +45,17 @@ export type CompanionState = {
   celebratedStages: CompanionStage[];
   activeFlourishes: string[];
   ownedFlourishes: string[];
+  unlockedSkills: string[];
+  treasuresFound: number;
 };
+
+export type CompanionSkillUnlockResult =
+  | 'unlocked'
+  | 'not-found'
+  | 'already-owned'
+  | 'stage-locked'
+  | 'prerequisite-locked'
+  | 'insufficient-points';
 
 export type StudentState = {
   id: StudentId;
@@ -103,6 +117,10 @@ type GameStore = {
     flourishId: string,
     pointBonus: number
   ) => Promise<void>;
+  unlockCompanionSkill: (
+    studentId: StudentId,
+    skillId: string
+  ) => Promise<CompanionSkillUnlockResult>;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -221,6 +239,8 @@ function defaultStudent(name: string, classId: string): StudentState {
       celebratedStages: ['egg'],
       activeFlourishes: [],
       ownedFlourishes: [],
+      unlockedSkills: [],
+      treasuresFound: 0,
     },
     pastRewards: [],
     trophies: [],
@@ -283,6 +303,13 @@ function studentFromSupabase(row: any, classId: string): StudentState {
       ownedFlourishes: Array.isArray(meta.companion?.ownedFlourishes)
         ? meta.companion.ownedFlourishes
         : [],
+      unlockedSkills: Array.isArray(meta.companion?.unlockedSkills)
+        ? meta.companion.unlockedSkills
+        : [],
+      treasuresFound:
+        typeof meta.companion?.treasuresFound === 'number'
+          ? Math.max(0, Math.floor(meta.companion.treasuresFound))
+          : 0,
     },
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
@@ -635,6 +662,76 @@ export const useGameStore = create<GameStore>()(
         if (updatedStudent) {
           await syncStudentToSupabase(updatedStudent);
         }
+      },
+
+      unlockCompanionSkill: async (studentId, skillId) => {
+        const cleanSkillId = skillId.trim();
+        const skill = getCompanionSkill(cleanSkillId);
+        let updatedStudent: StudentState | null = null;
+        let result: CompanionSkillUnlockResult = 'not-found';
+
+        if (!skill) return result;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const unlockedSkills = student.companion.unlockedSkills ?? [];
+
+          if (unlockedSkills.includes(skill.id)) {
+            result = 'already-owned';
+            return state;
+          }
+
+          if (
+            !companionStageMeetsRequirement(
+              student.companion.stage,
+              skill.requiredStage
+            )
+          ) {
+            result = 'stage-locked';
+            return state;
+          }
+
+          if (
+            !skill.prerequisites.every(prerequisite =>
+              unlockedSkills.includes(prerequisite)
+            )
+          ) {
+            result = 'prerequisite-locked';
+            return state;
+          }
+
+          const availablePetPoints = student.companion.petPoints ?? 0;
+          if (availablePetPoints < skill.cost) {
+            result = 'insufficient-points';
+            return state;
+          }
+
+          updatedStudent = {
+            ...student,
+            companion: {
+              ...student.companion,
+              petPoints: availablePetPoints - skill.cost,
+              unlockedSkills: [...unlockedSkills, skill.id],
+              treasuresFound: student.companion.treasuresFound ?? 0,
+            },
+          };
+          result = 'unlocked';
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          await syncStudentToSupabase(updatedStudent);
+        }
+
+        return result;
       },
 
       updateInventoryEntry: (studentId, inventoryIndex, patch) => {

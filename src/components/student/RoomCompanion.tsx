@@ -51,6 +51,9 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   const isEgg = companion.stage === 'egg';
   const isLegendary = companion.stage === 'legendary';
   const isChessPegasus = isLegendary && companion.theme === 'chess';
+  const hasLegendaryBond = (companion.unlockedSkills ?? []).includes(
+    'legendary_bond'
+  );
 
   useEffect(() => {
     if (!companion.unlocked || !visuals) return;
@@ -131,6 +134,18 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         activeFlourishes={companion.activeFlourishes ?? []}
         variant="room"
       />
+
+      {hasLegendaryBond && (
+        <>
+          <div className="absolute -inset-5 animate-pulse rounded-full border border-cyan-200/60 shadow-[0_0_32px_rgba(103,232,249,0.68)]" />
+          <div className="absolute -left-5 -top-4 animate-bounce text-sm drop-shadow-[0_0_8px_rgba(250,204,21,0.9)]">
+            ✨
+          </div>
+          <div className="absolute -right-4 top-1/3 animate-pulse text-sm drop-shadow-[0_0_8px_rgba(103,232,249,0.9)]">
+            ✦
+          </div>
+        </>
+      )}
 
       {isLegendary && (
         <div className="absolute -inset-3 animate-pulse rounded-full border border-yellow-200/55 shadow-[0_0_28px_rgba(250,204,21,0.7)]" />

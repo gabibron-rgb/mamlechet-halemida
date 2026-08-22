@@ -63,6 +63,13 @@ function buildStudentFromSupabase(row: any): StudentState {
       ownedFlourishes: Array.isArray(meta.companion?.ownedFlourishes)
         ? meta.companion.ownedFlourishes
         : [],
+      unlockedSkills: Array.isArray(meta.companion?.unlockedSkills)
+        ? meta.companion.unlockedSkills
+        : [],
+      treasuresFound:
+        typeof meta.companion?.treasuresFound === 'number'
+          ? Math.max(0, Math.floor(meta.companion.treasuresFound))
+          : 0,
     },
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],

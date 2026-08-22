@@ -1,4 +1,10 @@
-export type CompanionInteractionId = 'pet' | 'feed' | 'play' | 'train';
+export type CompanionInteractionId =
+  | 'pet'
+  | 'feed'
+  | 'play'
+  | 'train'
+  | 'explore'
+  | 'treasure';
 
 export type CompanionInteraction = {
   id: CompanionInteractionId;
@@ -8,6 +14,7 @@ export type CompanionInteraction = {
   reactionHe: string;
   petPointCost: number;
   bondGain: number;
+  requiredSkillId?: string;
 };
 
 /**
@@ -50,5 +57,25 @@ export const COMPANION_INTERACTIONS: CompanionInteraction[] = [
     reactionHe: 'התרגיל הצליח! ✨',
     petPointCost: 5,
     bondGain: 5,
+  },
+  {
+    id: 'explore',
+    emoji: '🧭',
+    nameHe: 'מסע קטן',
+    descriptionHe: 'הרפתקה קצרה בעקבות שבילים וסודות בחדר',
+    reactionHe: 'איזו הרפתקה נהדרת! גילינו פינה חדשה 🧭',
+    petPointCost: 7,
+    bondGain: 9,
+    requiredSkillId: 'keen_senses',
+  },
+  {
+    id: 'treasure',
+    emoji: '🗝️',
+    nameHe: 'חיפוש אוצרות',
+    descriptionHe: 'עוקבים אחרי רמזים ומגלים אוצר חדש לאוסף החיה',
+    reactionHe: 'מצאנו אוצר נסתר! 🗝️✨',
+    petPointCost: 12,
+    bondGain: 15,
+    requiredSkillId: 'treasure_hunter',
   },
 ];

@@ -19,8 +19,10 @@ import {
   type CompanionInteractionId,
 } from '../../logic/companion';
 import { COMPANION_FLOURISHES } from '../../data/companionFlourishes';
+import { getCompanionInteractionBondBonus } from '../../data/companionSkills';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import CompanionFlourishEffects from './CompanionFlourishEffects';
+import CompanionSkillsPanel from './CompanionSkillsPanel';
 
 type Props = {
   student: StudentState;
@@ -98,6 +100,12 @@ export default function CompanionPanel({ student }: Props) {
     import.meta.env.DEV && previewStage ? previewStage : companion.stage;
   const companionDisplayName =
     companion.name?.trim() || companionVisuals?.nameHe || 'חיית המחמד';
+  const unlockedSkills = companion.unlockedSkills ?? [];
+  const availableInteractions = COMPANION_INTERACTIONS.filter(
+    interaction =>
+      !interaction.requiredSkillId ||
+      unlockedSkills.includes(interaction.requiredSkillId)
+  );
   const celebratedStages = companion.celebratedStages ?? ['egg'];
   const actualStageIndex = COMPANION_STAGE_ORDER.indexOf(companion.stage);
   const pendingEvolutionStage =
@@ -138,6 +146,8 @@ export default function CompanionPanel({ student }: Props) {
         celebratedStages: companion.celebratedStages ?? ['egg'],
         activeFlourishes: companion.activeFlourishes ?? [],
         ownedFlourishes: companion.ownedFlourishes ?? [],
+        unlockedSkills,
+        treasuresFound: companion.treasuresFound ?? 0,
       },
     });
 
@@ -147,6 +157,13 @@ export default function CompanionPanel({ student }: Props) {
   function handleInteraction(actionId: CompanionInteractionId) {
     const action = COMPANION_INTERACTIONS.find(item => item.id === actionId);
     if (!action) return;
+    if (
+      action.requiredSkillId &&
+      !unlockedSkills.includes(action.requiredSkillId)
+    ) {
+      showMessage('צריך לפתוח קודם את הכישרון המתאים');
+      return;
+    }
 
     const availablePetPoints = companion.petPoints ?? 0;
 
@@ -156,7 +173,12 @@ export default function CompanionPanel({ student }: Props) {
     }
 
     if (action.petPointCost > 0) {
-      const nextBond = companion.bond + action.bondGain;
+      const bondBonus = getCompanionInteractionBondBonus(
+        unlockedSkills,
+        action.id,
+        true
+      );
+      const nextBond = companion.bond + action.bondGain + bondBonus;
 
       updateStudent(student.id, {
         companion: {
@@ -165,8 +187,18 @@ export default function CompanionPanel({ student }: Props) {
           bond: nextBond,
           stage: companionStageForBond(nextBond, companion.stage),
           celebratedStages: companion.celebratedStages ?? ['egg'],
+          unlockedSkills,
+          treasuresFound:
+            (companion.treasuresFound ?? 0) +
+            (action.id === 'treasure' ? 1 : 0),
         },
       });
+
+      const bonusText = bondBonus > 0 ? ` · בונוס כישורים +${bondBonus}` : '';
+      showMessage(
+        `${action.emoji} ${companionDisplayName}: ${action.reactionHe}${bonusText}`
+      );
+      return;
     }
 
     showMessage(`${action.emoji} ${companionDisplayName}: ${action.reactionHe}`);
@@ -388,6 +420,7 @@ export default function CompanionPanel({ student }: Props) {
           themeName={themeNameOf(companion.theme)}
           petName={companionDisplayName}
           activeFlourishes={companion.activeFlourishes ?? []}
+          hasLegendaryBond={unlockedSkills.includes('legendary_bond')}
         />
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -577,6 +610,11 @@ export default function CompanionPanel({ student }: Props) {
           </div>
         </div>
 
+        <CompanionSkillsPanel
+          studentId={student.id}
+          companion={companion}
+        />
+
         {import.meta.env.DEV && (
           <div className="mt-4 rounded-2xl border border-dashed border-fuchsia-300/30 bg-fuchsia-500/5 p-4">
             <div className="text-xs font-black text-fuchsia-200">
@@ -646,9 +684,15 @@ export default function CompanionPanel({ student }: Props) {
           </div>
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {COMPANION_INTERACTIONS.map(action => {
+            {availableInteractions.map(action => {
               const lacksPetPoints =
                 (companion.petPoints ?? 0) < action.petPointCost;
+              const bondBonus = getCompanionInteractionBondBonus(
+                unlockedSkills,
+                action.id,
+                action.petPointCost > 0
+              );
+              const totalBondGain = action.bondGain + bondBonus;
 
               return (
                 <button
@@ -668,8 +712,13 @@ export default function CompanionPanel({ student }: Props) {
                   <div className="mt-2 text-xs font-bold text-emerald-300">
                     {action.petPointCost === 0
                       ? 'חינם · בשביל הכיף'
-                      : `${action.petPointCost} נקודות חיה · +${action.bondGain} קשר`}
+                      : `${action.petPointCost} נקודות חיה · +${totalBondGain} קשר`}
                   </div>
+                  {bondBonus > 0 && (
+                    <div className="mt-1 text-[10px] font-bold text-cyan-200">
+                      כולל בונוס כישורים +{bondBonus}
+                    </div>
+                  )}
                   {lacksPetPoints && (
                     <div className="mt-1 text-[10px] text-rose-300">
                       אין מספיק נקודות חיה
@@ -710,12 +759,14 @@ function CompanionAvatar({
   themeName,
   petName,
   activeFlourishes = [],
+  hasLegendaryBond = false,
 }: {
   stage: CompanionStage;
   visuals: CompanionWorldVisuals;
   themeName: string;
   petName: string;
   activeFlourishes?: string[];
+  hasLegendaryBond?: boolean;
 }) {
   if (stage === 'egg') {
     return (
@@ -752,6 +803,17 @@ function CompanionAvatar({
   return (
     <div className="relative mx-auto my-8 flex h-60 w-60 items-end justify-center">
       <CompanionFlourishEffects activeFlourishes={activeFlourishes} />
+      {hasLegendaryBond && (
+        <>
+          <div className="absolute inset-1 animate-pulse rounded-full border-2 border-cyan-200/55 shadow-[0_0_75px_rgba(103,232,249,0.68)]" />
+          <div className="absolute left-3 top-12 animate-bounce text-2xl text-yellow-200">
+            ✨
+          </div>
+          <div className="absolute right-3 top-24 animate-pulse text-2xl text-cyan-100">
+            ✦
+          </div>
+        </>
+      )}
       {(stage === 'grown' || isLegendary) && (
         <div
           className={`absolute top-0 z-30 text-5xl ${

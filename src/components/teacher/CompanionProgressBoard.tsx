@@ -6,6 +6,7 @@ import {
   nextCompanionStage,
   type CompanionStage,
 } from '../../data/companionWorlds';
+import { COMPANION_SKILLS } from '../../data/companionSkills';
 import { THEMES, type ThemeId } from '../../data/themes';
 import type { StudentState } from '../../store/useGameStore';
 
@@ -254,11 +255,15 @@ export default function CompanionProgressBoard({ students }: Props) {
                       </div>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
                       <MiniStat label="נקודות קשר" value={row.bond} />
                       <MiniStat
                         label="נקודות חיה זמינות"
                         value={`${companion.petPoints ?? 0} 🐾`}
+                      />
+                      <MiniStat
+                        label="כישורים פתוחים"
+                        value={`${(companion.unlockedSkills ?? []).length}/${COMPANION_SKILLS.length}`}
                       />
                       <MiniStat
                         label="היעד הבא"
@@ -267,7 +272,6 @@ export default function CompanionProgressBoard({ students }: Props) {
                             ? `${row.nextStage.bondRequired} קשר`
                             : 'הושלם 🌟'
                         }
-                        wideOnMobile
                       />
                     </div>
 
