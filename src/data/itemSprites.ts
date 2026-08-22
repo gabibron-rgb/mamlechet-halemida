@@ -3698,6 +3698,253 @@ const frameArcane: ItemSpriteData = {
   roomHeightScale: 3.15,
 };
 
+
+const buildingBuilderHardHat: ItemSpriteData = {
+  src: '/assets/items/building-builder-hard-hat.png',
+  alt: 'קסדת בנאי כוכבים',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.25,
+  roomShelfHeightScale: 1.25,
+};
+
+const buildingBrickStackTrowel: ItemSpriteData = {
+  src: '/assets/items/building-brick-stack-trowel.png',
+  alt: 'לבנים וכף בנאים',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.25,
+  roomShelfHeightScale: 1.25,
+};
+
+const buildingCarpenterToolChest: ItemSpriteData = {
+  src: '/assets/items/building-carpenter-tool-chest.png',
+  alt: 'ארגז כלי נגר',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.25,
+  roomShelfHeightScale: 1.25,
+  roomFloorOffsetY: 28,
+  roomFloorWidthScale: 1.75,
+  roomFloorHeightScale: 1.75,
+};
+
+const buildingMeasuringSet: ItemSpriteData = {
+  src: '/assets/items/building-measuring-set.png',
+  alt: 'ערכת מדידה לבנאי',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.28,
+  roomHeightScale: 1.28,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.2,
+  roomShelfHeightScale: 1.2,
+};
+
+const buildingBlueprintScrolls: ItemSpriteData = {
+  src: '/assets/items/building-blueprint-scrolls.png',
+  alt: 'גלילי תוכניות בנייה',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.25,
+  roomShelfHeightScale: 1.25,
+};
+
+const buildingSmallBlockFortress: ItemSpriteData = {
+  src: '/assets/items/building-small-block-fortress.png',
+  alt: 'מבצר קוביות קטן',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetY: 14,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+  roomFloorOffsetY: 24,
+  roomFloorWidthScale: 1.8,
+  roomFloorHeightScale: 1.8,
+};
+
+const buildingSafetyBarrier: ItemSpriteData = {
+  src: '/assets/items/building-safety-barrier.png',
+  alt: 'מחסום אתר בנייה',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetY: 22,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+  roomFloorOffsetY: 32,
+  roomFloorWidthScale: 1.9,
+  roomFloorHeightScale: 1.9,
+};
+
+const buildingBlockBucket: ItemSpriteData = {
+  src: '/assets/items/building-block-bucket.png',
+  alt: 'דלי קוביות בנייה',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+  roomFloorOffsetY: 22,
+  roomFloorWidthScale: 1.9,
+  roomFloorHeightScale: 1.9,
+};
+
+const buildingCarpenterWorkbench: ItemSpriteData = {
+  src: '/assets/items/building-carpenter-workbench.png',
+  alt: 'שולחן הנגר',
+  className: 'object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.38)]',
+  roomOffsetY: 60,
+  roomWidthScale: 2.65,
+  roomHeightScale: 2.65,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.65,
+  roomFloorHeightScale: 2.65,
+};
+
+const buildingBlueprintRug: ItemSpriteData = {
+  src: '/assets/items/building-blueprint-rug.png',
+  alt: 'שטיח תוכניות הבנייה',
+  className: 'object-fill translate-y-[2px] drop-shadow-[0_10px_10px_rgba(0,0,0,0.25)]',
+};
+
+const buildingConcreteMixer: ItemSpriteData = {
+  src: '/assets/items/building-concrete-mixer.png',
+  alt: 'מערבל בטון צעצוע',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.7,
+  roomHeightScale: 1.7,
+  roomFloorOffsetY: 28,
+  roomFloorWidthScale: 2.05,
+  roomFloorHeightScale: 2.05,
+};
+
+const buildingBlueprintBoard: ItemSpriteData = {
+  src: '/assets/items/building-blueprint-board.png',
+  alt: 'לוח תוכנית בנייה',
+  className: 'object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.32)]',
+  roomOffsetY: 14,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+  roomFloorOffsetY: 18,
+  roomFloorWidthScale: 1.95,
+  roomFloorHeightScale: 1.95,
+};
+
+const buildingBuilderToolbelt: ItemSpriteData = {
+  src: '/assets/items/building-builder-toolbelt.png',
+  alt: 'ערכת בנאי צעיר',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.32,
+  roomShelfHeightScale: 1.32,
+};
+
+const buildingToolPegboard: ItemSpriteData = {
+  src: '/assets/items/building-tool-pegboard.png',
+  alt: 'לוח כלי הנגר',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_10px_rgba(80,170,255,0.24)]',
+  roomOffsetY: 0,
+  roomWidthScale: 2.65,
+  roomHeightScale: 2.65,
+};
+
+const buildingArchitectDesk: ItemSpriteData = {
+  src: '/assets/items/building-architect-desk.png',
+  alt: 'שולחן האדריכל',
+  className: 'object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.38)]',
+  roomOffsetY: 60,
+  roomWidthScale: 2.65,
+  roomHeightScale: 2.65,
+  roomFloorOffsetY: 60,
+  roomFloorWidthScale: 2.65,
+  roomFloorHeightScale: 2.65,
+};
+
+const buildingGoldenTowerCrane: ItemSpriteData = {
+  src: '/assets/items/building-golden-tower-crane.png',
+  alt: 'מנוף מגדל זהוב',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.36)] drop-shadow-[0_0_12px_rgba(255,210,80,0.32)]',
+  roomOffsetY: 10,
+  roomWidthScale: 1.65,
+  roomHeightScale: 1.65,
+  roomShelfOffsetY: 14,
+  roomShelfWidthScale: 1.5,
+  roomShelfHeightScale: 1.5,
+  roomFloorOffsetY: 24,
+  roomFloorWidthScale: 2.2,
+  roomFloorHeightScale: 2.2,
+};
+
+const buildingGlowingBlueprintTable: ItemSpriteData = {
+  src: '/assets/items/building-glowing-blueprint-table.png',
+  alt: 'שולחן התוכניות הזוהר',
+  className: 'object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.38)] drop-shadow-[0_0_18px_rgba(80,170,255,0.38)]',
+  roomOffsetY: 58,
+  roomWidthScale: 2.6,
+  roomHeightScale: 2.6,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.6,
+  roomFloorHeightScale: 2.6,
+};
+
+const buildingClockworkExcavator: ItemSpriteData = {
+  src: '/assets/items/building-clockwork-excavator.png',
+  alt: 'מחפר השעון הזהוב',
+  className: 'object-contain drop-shadow-[0_14px_24px_rgba(0,0,0,0.40)] drop-shadow-[0_0_18px_rgba(190,100,255,0.32)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.9,
+  roomHeightScale: 1.9,
+  roomFloorOffsetY: 30,
+  roomFloorWidthScale: 2.45,
+  roomFloorHeightScale: 2.45,
+};
+
+const buildingToyCrane: ItemSpriteData = {
+  src: '/assets/items/building-toy-crane.png',
+  alt: 'מנוף קוביות ענק',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 10,
+  roomWidthScale: 1.7,
+  roomHeightScale: 1.7,
+  roomFloorOffsetY: 20,
+  roomFloorWidthScale: 2.35,
+  roomFloorHeightScale: 2.35,
+};
+
+const buildingBlockCastle: ItemSpriteData = {
+  src: '/assets/items/building-block-castle.png',
+  alt: 'טירת הקוביות המלכותית',
+  className: 'object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.38)] drop-shadow-[0_0_20px_rgba(255,210,80,0.34)]',
+  roomOffsetY: 8,
+  roomWidthScale: 1.68,
+  roomHeightScale: 1.68,
+  roomFloorOffsetY: 18,
+  roomFloorWidthScale: 2.25,
+  roomFloorHeightScale: 2.25,
+};
+
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   // לוח שחמט
   chess: chessBoardBasic,
@@ -3835,6 +4082,26 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   fantasy_dragon_throne: fantasyDragonThrone,
   fantasy_portal_mirror: fantasyPortalMirror,
   fantasy_dream_castle: fantasyDreamCastle,
+  building_builder_hard_hat: buildingBuilderHardHat,
+  building_brick_stack_trowel: buildingBrickStackTrowel,
+  building_carpenter_tool_chest: buildingCarpenterToolChest,
+  building_measuring_set: buildingMeasuringSet,
+  building_blueprint_scrolls: buildingBlueprintScrolls,
+  building_small_block_fortress: buildingSmallBlockFortress,
+  building_safety_barrier: buildingSafetyBarrier,
+  building_block_bucket: buildingBlockBucket,
+  building_carpenter_workbench: buildingCarpenterWorkbench,
+  building_blueprint_rug: buildingBlueprintRug,
+  building_concrete_mixer: buildingConcreteMixer,
+  building_blueprint_board: buildingBlueprintBoard,
+  building_builder_toolbelt: buildingBuilderToolbelt,
+  building_tool_pegboard: buildingToolPegboard,
+  building_architect_desk: buildingArchitectDesk,
+  building_golden_tower_crane: buildingGoldenTowerCrane,
+  building_glowing_blueprint_table: buildingGlowingBlueprintTable,
+  building_clockwork_excavator: buildingClockworkExcavator,
+  building_toy_crane: buildingToyCrane,
+  building_block_castle: buildingBlockCastle,
   music_colorful_maracas: musicColorfulMaracas,
   music_royal_tambourine: musicRoyalTambourine,
   music_rainbow_xylophone: musicRainbowXylophone,

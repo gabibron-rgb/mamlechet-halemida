@@ -19,6 +19,7 @@ const LAB_THEMES: Array<{ id: ThemeId; nameHe: string }> = [
   { id: 'space', nameHe: 'חלל' },
   { id: 'nature', nameHe: 'טבע' },
   { id: 'animals', nameHe: 'חיות' },
+  { id: 'building', nameHe: 'בנייה' },
   { id: 'sports', nameHe: 'ספורט' },
   { id: 'music', nameHe: 'מוזיקה' },
   { id: 'fantasy', nameHe: 'פנטזיה' },
