@@ -19,6 +19,10 @@ import {
 } from '../../logic/companion';
 import { COMPANION_FLOURISHES } from '../../data/companionFlourishes';
 import {
+  pickCompanionInteractionEvent,
+  type CompanionInteractionEvent,
+} from '../../data/companionInteractionEvents';
+import {
   companionStageForProgress,
   getCompanionBehaviorDayCount,
   getCompanionEvolutionProgress,
@@ -100,6 +104,11 @@ export default function CompanionPanel({ student }: Props) {
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameDraft, setNameDraft] = useState(companion.name ?? '');
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
+  const [activityEvent, setActivityEvent] = useState<{
+    actionId: CompanionInteractionId;
+    event: CompanionInteractionEvent;
+    bondBonus: number;
+  } | null>(null);
   const petPointsRef = useRef<HTMLDivElement>(null);
   const trainingRef = useRef<HTMLElement>(null);
   const evolutionRef = useRef<HTMLElement>(null);
@@ -299,7 +308,7 @@ export default function CompanionPanel({ student }: Props) {
 
   function handleInteraction(actionId: CompanionInteractionId) {
     const action = COMPANION_INTERACTIONS.find(item => item.id === actionId);
-    if (!action) return;
+    if (!action || activityEvent) return;
     if (
       action.requiredSkillId &&
       !unlockedSkills.includes(action.requiredSkillId)
@@ -315,13 +324,41 @@ export default function CompanionPanel({ student }: Props) {
       return;
     }
 
+    const bondBonus = getCompanionInteractionBondBonus(
+      unlockedSkills,
+      action.id,
+      action.petPointCost > 0
+    );
+
+    setActivityEvent({
+      actionId,
+      event: pickCompanionInteractionEvent(actionId),
+      bondBonus,
+    });
+  }
+
+  function completeInteraction() {
+    if (!activityEvent) return;
+
+    const action = COMPANION_INTERACTIONS.find(
+      item => item.id === activityEvent.actionId
+    );
+    if (!action) {
+      setActivityEvent(null);
+      return;
+    }
+
     if (action.petPointCost > 0) {
-      const bondBonus = getCompanionInteractionBondBonus(
-        unlockedSkills,
-        action.id,
-        true
-      );
-      const nextBond = companion.bond + action.bondGain + bondBonus;
+      const availablePetPoints = companion.petPoints ?? 0;
+
+      if (availablePetPoints < action.petPointCost) {
+        setActivityEvent(null);
+        showMessage('אין מספיק נקודות חיה לפעילות הזאת');
+        return;
+      }
+
+      const nextBond =
+        companion.bond + action.bondGain + activityEvent.bondBonus;
 
       updateStudent(student.id, {
         companion: {
@@ -341,15 +378,9 @@ export default function CompanionPanel({ student }: Props) {
             (action.id === 'treasure' ? 1 : 0),
         },
       });
-
-      const bonusText = bondBonus > 0 ? ` · בונוס כישורים +${bondBonus}` : '';
-      showMessage(
-        `${action.emoji} ${companionDisplayName}: ${action.reactionHe}${bonusText}`
-      );
-      return;
     }
 
-    showMessage(`${action.emoji} ${companionDisplayName}: ${action.reactionHe}`);
+    setActivityEvent(null);
   }
 
   function saveCompanionName() {
@@ -529,7 +560,27 @@ export default function CompanionPanel({ student }: Props) {
         </div>
       )}
 
-      {tutorialStep !== null && !ceremonyStage && (
+      {activityEvent && (
+        <CompanionActivityEvent
+          action={
+            COMPANION_INTERACTIONS.find(
+              item => item.id === activityEvent.actionId
+            )!
+          }
+          event={activityEvent.event}
+          petName={companionDisplayName}
+          motif={companionVisuals.motif}
+          bondBonus={activityEvent.bondBonus}
+          treasureNumber={
+            activityEvent.actionId === 'treasure'
+              ? (companion.treasuresFound ?? 0) + 1
+              : null
+          }
+          onComplete={completeInteraction}
+        />
+      )}
+
+      {tutorialStep !== null && !ceremonyStage && !activityEvent && (
         <CompanionTutorial
           step={tutorialStep}
           petName={companionDisplayName}
@@ -1005,6 +1056,202 @@ export default function CompanionPanel({ student }: Props) {
         )}
       </div>
     </>
+  );
+}
+
+
+const ACTIVITY_TONE_CLASSES: Record<
+  CompanionInteractionId,
+  { border: string; glow: string; chip: string; orb: string }
+> = {
+  pet: {
+    border: 'border-rose-200/30',
+    glow: 'shadow-[0_0_80px_rgba(251,113,133,0.22)]',
+    chip: 'bg-rose-300/15 text-rose-100',
+    orb: 'from-rose-300/25 via-fuchsia-400/15 to-transparent',
+  },
+  feed: {
+    border: 'border-amber-200/30',
+    glow: 'shadow-[0_0_80px_rgba(251,191,36,0.22)]',
+    chip: 'bg-amber-300/15 text-amber-100',
+    orb: 'from-amber-300/25 via-orange-400/15 to-transparent',
+  },
+  play: {
+    border: 'border-sky-200/30',
+    glow: 'shadow-[0_0_80px_rgba(56,189,248,0.22)]',
+    chip: 'bg-sky-300/15 text-sky-100',
+    orb: 'from-sky-300/25 via-cyan-400/15 to-transparent',
+  },
+  train: {
+    border: 'border-fuchsia-200/30',
+    glow: 'shadow-[0_0_80px_rgba(232,121,249,0.24)]',
+    chip: 'bg-fuchsia-300/15 text-fuchsia-100',
+    orb: 'from-fuchsia-300/25 via-purple-400/15 to-transparent',
+  },
+  explore: {
+    border: 'border-emerald-200/30',
+    glow: 'shadow-[0_0_80px_rgba(52,211,153,0.22)]',
+    chip: 'bg-emerald-300/15 text-emerald-100',
+    orb: 'from-emerald-300/25 via-teal-400/15 to-transparent',
+  },
+  treasure: {
+    border: 'border-yellow-200/40',
+    glow: 'shadow-[0_0_95px_rgba(250,204,21,0.3)]',
+    chip: 'bg-yellow-300/20 text-yellow-100',
+    orb: 'from-yellow-300/30 via-amber-400/20 to-transparent',
+  },
+};
+
+function CompanionActivityEvent({
+  action,
+  event,
+  petName,
+  motif,
+  bondBonus,
+  treasureNumber,
+  onComplete,
+}: {
+  action: (typeof COMPANION_INTERACTIONS)[number];
+  event: CompanionInteractionEvent;
+  petName: string;
+  motif: string;
+  bondBonus: number;
+  treasureNumber: number | null;
+  onComplete: () => void;
+}) {
+  const [phase, setPhase] = useState(0);
+  const tone = ACTIVITY_TONE_CLASSES[action.id];
+  const totalBondGain = action.bondGain + bondBonus;
+
+  useEffect(() => {
+    setPhase(0);
+    const storyTimer = window.setTimeout(() => setPhase(1), 650);
+    const resultTimer = window.setTimeout(() => setPhase(2), 1500);
+    const readyTimer = window.setTimeout(() => setPhase(3), 2050);
+
+    return () => {
+      window.clearTimeout(storyTimer);
+      window.clearTimeout(resultTimer);
+      window.clearTimeout(readyTimer);
+    };
+  }, [action.id, event]);
+
+  return (
+    <div className="fixed inset-0 z-[9800] flex items-center justify-center overflow-hidden bg-slate-950/85 p-4 backdrop-blur-md">
+      <div
+        className={`relative w-full max-w-lg overflow-hidden rounded-[2rem] border bg-slate-950/95 p-5 text-center sm:p-7 ${tone.border} ${tone.glow}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`פעילות עם ${petName}`}
+      >
+        <div
+          className={`pointer-events-none absolute inset-x-8 top-0 h-44 rounded-full bg-gradient-to-b blur-3xl ${tone.orb}`}
+        />
+
+        {(event.sparkle || action.id === 'treasure') && (
+          <>
+            <div className="pointer-events-none absolute left-[12%] top-[14%] animate-pulse text-2xl text-yellow-100">✦</div>
+            <div className="pointer-events-none absolute right-[14%] top-[23%] animate-bounce text-xl text-white/80">✨</div>
+            <div className="pointer-events-none absolute bottom-[20%] left-[20%] animate-pulse text-xl text-fuchsia-100">✧</div>
+          </>
+        )}
+
+        <div className="relative">
+          <div className={`mx-auto inline-flex rounded-full px-3 py-1 text-[10px] font-black tracking-wide ${tone.chip}`}>
+            פעילות עם {petName}
+          </div>
+
+          <div className="relative mx-auto mt-5 flex h-32 w-32 items-center justify-center">
+            <div className="absolute inset-0 animate-pulse rounded-full border border-white/10 bg-white/5" />
+            <div className="animate-[bounce_1.4s_ease-in-out_infinite] text-6xl drop-shadow-2xl">
+              {motif}
+            </div>
+            <div className="absolute -bottom-2 -right-1 animate-[bounce_1.1s_ease-in-out_infinite] text-5xl drop-shadow-lg">
+              {action.emoji}
+            </div>
+          </div>
+
+          <h3 className="mt-5 text-2xl font-black text-white">
+            {event.titleHe}
+          </h3>
+
+          <div
+            className={`mx-auto mt-3 min-h-[3.75rem] max-w-md text-sm leading-6 text-magic-soft/75 transition-all duration-500 ${
+              phase >= 1 ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+            }`}
+          >
+            {event.storyHe}
+          </div>
+
+          <div
+            className={`mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 transition-all duration-500 ${
+              phase >= 2 ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+            }`}
+          >
+            <div className="text-sm font-black text-white">
+              “{event.reactionHe}”
+            </div>
+
+            <div className="mt-3 flex flex-wrap justify-center gap-2 text-[11px] font-bold">
+              {action.petPointCost === 0 ? (
+                <span className="rounded-full bg-white/5 px-3 py-1.5 text-magic-soft/70">
+                  חינם · רגע של חברות 🤍
+                </span>
+              ) : (
+                <>
+                  <span className="rounded-full bg-rose-500/10 px-3 py-1.5 text-rose-100">
+                    −{action.petPointCost} נקודות חיה 🐾
+                  </span>
+                  <span className="rounded-full bg-emerald-500/10 px-3 py-1.5 text-emerald-100">
+                    +{totalBondGain} קשר 💞
+                  </span>
+                </>
+              )}
+
+              {bondBonus > 0 && (
+                <span className="rounded-full bg-cyan-500/10 px-3 py-1.5 text-cyan-100">
+                  בונוס כישורים +{bondBonus} ✨
+                </span>
+              )}
+
+              {treasureNumber !== null && (
+                <span className="rounded-full bg-yellow-500/10 px-3 py-1.5 text-yellow-100">
+                  אוצר מספר {treasureNumber} לאוסף 💎
+                </span>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            disabled={phase < 3}
+            onClick={onComplete}
+            className="mt-5 w-full rounded-2xl bg-magic-accent px-5 py-3.5 text-sm font-black text-magic-bg transition-all hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-35 disabled:hover:translate-y-0"
+          >
+            {phase < 3
+              ? action.id === 'treasure'
+                ? 'פותחים את האוצר… ✨'
+                : 'רגע קטן… ✨'
+              : action.id === 'treasure'
+                ? 'להכניס את האוצר לאוסף 💎'
+                : 'להמשיך יחד 🐾'}
+          </button>
+
+          <div className="mt-3 flex justify-center gap-1.5">
+            {[0, 1, 2].map(index => (
+              <div
+                key={index}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  phase > index
+                    ? 'w-6 bg-magic-accent'
+                    : 'w-3 bg-white/15'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
