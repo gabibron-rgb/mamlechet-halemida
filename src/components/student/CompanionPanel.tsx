@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   COMPANION_STAGE_ORDER,
@@ -99,6 +99,43 @@ export default function CompanionPanel({ student }: Props) {
   const [previewStage, setPreviewStage] = useState<CompanionStage | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameDraft, setNameDraft] = useState(companion.name ?? '');
+  const [tutorialStep, setTutorialStep] = useState<number | null>(null);
+  const petPointsRef = useRef<HTMLDivElement>(null);
+  const trainingRef = useRef<HTMLElement>(null);
+  const evolutionRef = useRef<HTMLElement>(null);
+  const behaviorRef = useRef<HTMLDivElement>(null);
+
+  const tutorialStorageKey = `kingdom-companion-tutorial-v1:${student.id}`;
+
+  useEffect(() => {
+    if (!companion.unlocked) return;
+
+    const hasSeenTutorial =
+      window.localStorage.getItem(tutorialStorageKey) === 'done';
+
+    if (!hasSeenTutorial) {
+      setTutorialStep(0);
+    }
+  }, [companion.unlocked, tutorialStorageKey]);
+
+  useEffect(() => {
+    if (tutorialStep === null) return;
+
+    const target =
+      tutorialStep === 0
+        ? petPointsRef.current
+        : tutorialStep === 1
+          ? trainingRef.current
+          : tutorialStep === 2
+            ? evolutionRef.current
+            : behaviorRef.current;
+
+    const timeoutId = window.setTimeout(() => {
+      target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 80);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [tutorialStep]);
 
   const companionVisuals = companion.theme
     ? COMPANION_VISUALS[companion.theme]
@@ -212,6 +249,15 @@ export default function CompanionPanel({ student }: Props) {
       text: 'כל התנאים הושלמו. ההתפתחות הבאה כבר מוכנה להיפתח.',
     };
   })();
+
+  function finishTutorial() {
+    window.localStorage.setItem(tutorialStorageKey, 'done');
+    setTutorialStep(null);
+  }
+
+  function openTutorial() {
+    setTutorialStep(0);
+  }
 
   function showMessage(text: string) {
     setMessage(text);
@@ -483,6 +529,28 @@ export default function CompanionPanel({ student }: Props) {
         </div>
       )}
 
+      {tutorialStep !== null && !ceremonyStage && (
+        <CompanionTutorial
+          step={tutorialStep}
+          petName={companionDisplayName}
+          onNext={() => {
+            if (tutorialStep >= 3) {
+              finishTutorial();
+              return;
+            }
+            setTutorialStep(current =>
+              current === null ? 0 : Math.min(current + 1, 3)
+            );
+          }}
+          onBack={() =>
+            setTutorialStep(current =>
+              current === null ? 0 : Math.max(current - 1, 0)
+            )
+          }
+          onSkip={finishTutorial}
+        />
+      )}
+
       {ceremonyStage && ceremonyStage !== 'egg' && (
         <EvolutionCeremony
           stage={ceremonyStage}
@@ -595,7 +663,24 @@ export default function CompanionPanel({ student }: Props) {
           motif={companionVisuals.motif}
         />
 
-        <section className="mt-4 rounded-3xl border border-emerald-300/30 bg-emerald-500/10 p-5 text-right shadow-[0_0_28px_rgba(52,211,153,0.08)]">
+        <div className="mt-3 flex justify-center">
+          <button
+            type="button"
+            onClick={openTutorial}
+            className="rounded-full border border-sky-300/20 bg-sky-500/10 px-4 py-2 text-xs font-black text-sky-100 transition-colors hover:border-sky-300/40 hover:bg-sky-500/20"
+          >
+            ❓ איך מפתחים את החיה?
+          </button>
+        </div>
+
+        <section
+          ref={trainingRef}
+          className={`mt-4 rounded-3xl border border-emerald-300/30 bg-emerald-500/10 p-5 text-right shadow-[0_0_28px_rgba(52,211,153,0.08)] transition-all ${
+            tutorialStep === 1
+              ? 'relative z-[141] ring-4 ring-yellow-300 shadow-[0_0_45px_rgba(253,224,71,0.35)]'
+              : ''
+          }`}
+        >
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <div className="text-[10px] font-black tracking-wide text-emerald-200/65">
@@ -608,7 +693,14 @@ export default function CompanionPanel({ student }: Props) {
                 נקודות חיה שהתקבלו מהנקודות של המורה הופכות כאן לזמן משותף ולקשר חזק יותר.
               </p>
             </div>
-            <div className="rounded-2xl border border-emerald-300/20 bg-black/20 px-4 py-3 text-center">
+            <div
+              ref={petPointsRef}
+              className={`rounded-2xl border border-emerald-300/20 bg-black/20 px-4 py-3 text-center transition-all ${
+                tutorialStep === 0
+                  ? 'relative z-[142] ring-4 ring-yellow-300 shadow-[0_0_35px_rgba(253,224,71,0.4)]'
+                  : ''
+              }`}
+            >
               <div className="text-[10px] font-bold text-emerald-100/60">נקודות חיה זמינות</div>
               <div className="mt-1 text-lg font-black text-emerald-200">
                 {petPoints} 🐾
@@ -677,7 +769,14 @@ export default function CompanionPanel({ student }: Props) {
 
         </section>
 
-        <section className="mt-4 rounded-3xl border border-purple-300/20 bg-purple-500/10 p-5 text-right">
+        <section
+          ref={evolutionRef}
+          className={`mt-4 rounded-3xl border border-purple-300/20 bg-purple-500/10 p-5 text-right transition-all ${
+            tutorialStep === 2
+              ? 'relative z-[141] ring-4 ring-yellow-300 shadow-[0_0_45px_rgba(253,224,71,0.35)]'
+              : ''
+          }`}
+        >
           <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
             <div>
               <h3 className="text-xl font-black text-white">
@@ -756,9 +855,17 @@ export default function CompanionPanel({ student }: Props) {
           </div>
         </section>
 
-        <CompanionTraitChallengePanel companion={companion} />
-
-        <CompanionBehaviorProfile companion={companion} />
+        <div
+          ref={behaviorRef}
+          className={`rounded-3xl transition-all ${
+            tutorialStep === 3
+              ? 'relative z-[141] ring-4 ring-yellow-300 shadow-[0_0_45px_rgba(253,224,71,0.35)]'
+              : ''
+          }`}
+        >
+          <CompanionTraitChallengePanel companion={companion} />
+          <CompanionBehaviorProfile companion={companion} />
+        </div>
 
         <CompanionSkillsPanel
           studentId={student.id}
@@ -896,6 +1003,121 @@ export default function CompanionPanel({ student }: Props) {
             שינוי עולם הביצה
           </button>
         )}
+      </div>
+    </>
+  );
+}
+
+function CompanionTutorial({
+  step,
+  petName,
+  onNext,
+  onBack,
+  onSkip,
+}: {
+  step: number;
+  petName: string;
+  onNext: () => void;
+  onBack: () => void;
+  onSkip: () => void;
+}) {
+  const steps = [
+    {
+      emoji: '🐾',
+      title: 'אלה נקודות החיה שלך',
+      text: 'את נקודות החיה מקבלים בעקבות הפעילות שלך בכיתה. הן מאפשרות לך לבלות עם החיה ולחזק את הקשר ביניכם.',
+    },
+    {
+      emoji: '🎮',
+      title: `כאן מבלים עם ${petName}`,
+      text: 'בחר פעילות עם החיה. פעילויות משתמשות בנקודות חיה ומוסיפות קשר — וזה אחד הדברים שעוזרים לחיה להתפתח.',
+    },
+    {
+      emoji: '🌱',
+      title: 'ככה החיה מתפתחת',
+      text: 'קשר חזק לבדו לא מספיק. כדי לגדול, החיה צריכה גם לראות לאורך זמן את ההתנהגות והמאמץ שלך בכיתה.',
+    },
+    {
+      emoji: '🌟',
+      title: 'החיה לומדת מי אתה',
+      text: 'נחישות, חברות, סקרנות ותכונות נוספות שהמורה רואה אצלך בונות את פרופיל האופי ואת האתגרים של החיה.',
+    },
+  ];
+
+  const current = steps[Math.max(0, Math.min(step, steps.length - 1))];
+  const isLast = step === steps.length - 1;
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[130] bg-slate-950/75 backdrop-blur-[1px]" />
+
+      <div
+        className="fixed bottom-4 left-1/2 z-[150] w-[min(92vw,36rem)] -translate-x-1/2 rounded-3xl border border-yellow-200/30 bg-slate-950/95 p-5 text-right shadow-2xl backdrop-blur sm:bottom-6"
+        role="dialog"
+        aria-modal="true"
+        aria-label="הדרכה לפיתוח החיה"
+      >
+        <div className="flex items-start gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-yellow-300/15 text-3xl">
+            {current.emoji}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-black tracking-wide text-yellow-200/60">
+              שלב {step + 1} מתוך {steps.length}
+            </div>
+            <div className="mt-1 text-lg font-black text-white">
+              {current.title}
+            </div>
+            <p className="mt-1 text-sm leading-6 text-magic-soft/75">
+              {current.text}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onNext}
+            className="flex-1 rounded-xl bg-yellow-300 px-4 py-3 text-sm font-black text-slate-950 transition-transform hover:-translate-y-0.5"
+          >
+            {isLast ? 'הבנתי! בואו נתחיל 🐾' : 'הבא ←'}
+          </button>
+
+          {step > 0 && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold text-magic-soft hover:bg-white/10"
+            >
+              חזרה
+            </button>
+          )}
+
+          {!isLast && (
+            <button
+              type="button"
+              onClick={onSkip}
+              className="rounded-xl px-3 py-3 text-xs font-bold text-magic-soft/55 hover:text-white"
+            >
+              דילוג
+            </button>
+          )}
+        </div>
+
+        <div className="mt-3 flex justify-center gap-1.5">
+          {steps.map((_, index) => (
+            <div
+              key={index}
+              className={`h-1.5 rounded-full transition-all ${
+                index === step
+                  ? 'w-7 bg-yellow-300'
+                  : index < step
+                    ? 'w-3 bg-emerald-300/70'
+                    : 'w-3 bg-white/15'
+              }`}
+            />
+          ))}
+        </div>
       </div>
     </>
   );
