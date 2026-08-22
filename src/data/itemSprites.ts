@@ -4194,7 +4194,268 @@ const booksMiniLibrary: ItemSpriteData = {
   roomFloorHeightScale: 2.55,
 };
 
+
+// Math box sprites
+const mathCalculator: ItemSpriteData = {
+  src: '/assets/items/math-calculator.png',
+  alt: 'מחשבון חכם',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.2,
+  roomShelfHeightScale: 1.2,
+};
+
+const mathGeometryNotebook: ItemSpriteData = {
+  src: '/assets/items/math-geometry-notebook.png',
+  alt: 'מחברת הגאומטריה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.32,
+  roomHeightScale: 1.32,
+  roomShelfOffsetY: 19,
+  roomShelfWidthScale: 1.22,
+  roomShelfHeightScale: 1.22,
+};
+
+const mathPiNotes: ItemSpriteData = {
+  src: '/assets/items/math-pi-notes.png',
+  alt: 'פנקס מערכת הצירים',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.28,
+  roomHeightScale: 1.28,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.18,
+  roomShelfHeightScale: 1.18,
+};
+
+const mathRulerSet: ItemSpriteData = {
+  src: '/assets/items/math-ruler-set.png',
+  alt: 'ערכת הסרגלים',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.34,
+  roomHeightScale: 1.34,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.22,
+  roomShelfHeightScale: 1.22,
+};
+
+const mathPuzzleCube: ItemSpriteData = {
+  src: '/assets/items/math-puzzle-cube.png',
+  alt: 'קוביית היגיון',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.38,
+  roomHeightScale: 1.38,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.28,
+  roomShelfHeightScale: 1.28,
+};
+
+const mathFractionChain: ItemSpriteData = {
+  src: '/assets/items/math-fraction-chain.png',
+  alt: 'פאזל השברים',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.38,
+  roomHeightScale: 1.38,
+  roomShelfOffsetY: 19,
+  roomShelfWidthScale: 1.28,
+  roomShelfHeightScale: 1.28,
+};
+
+const mathNumberDice: ItemSpriteData = {
+  src: '/assets/items/math-number-dice.png',
+  alt: 'קוביות ההסתברות',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.36,
+  roomHeightScale: 1.36,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.26,
+  roomShelfHeightScale: 1.26,
+};
+
+const mathHourglass: ItemSpriteData = {
+  src: '/assets/items/math-hourglass.png',
+  alt: 'שעון החול המתמטי',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 14,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 19,
+  roomShelfWidthScale: 1.34,
+  roomShelfHeightScale: 1.34,
+};
+
+const mathGeometricModel: ItemSpriteData = {
+  src: '/assets/items/math-geometric-model.png',
+  alt: 'אוסף הגופים הגאומטריים',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 12,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.42,
+  roomShelfHeightScale: 1.42,
+};
+
+const mathPiStatue: ItemSpriteData = {
+  src: '/assets/items/math-pi-statue.png',
+  alt: 'קריסטל פאי',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 10,
+  roomWidthScale: 1.62,
+  roomHeightScale: 1.62,
+  roomShelfOffsetY: 15,
+  roomShelfWidthScale: 1.48,
+  roomShelfHeightScale: 1.48,
+};
+
+const mathTangram: ItemSpriteData = {
+  src: '/assets/items/math-tangram.png',
+  alt: 'לוח טנגרם',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 16,
+  roomWidthScale: 1.48,
+  roomHeightScale: 1.48,
+  roomShelfOffsetY: 19,
+  roomShelfWidthScale: 1.36,
+  roomShelfHeightScale: 1.36,
+};
+
+const mathMobiusStrip: ItemSpriteData = {
+  src: '/assets/items/math-mobius-strip.png',
+  alt: 'רצועת מביוס',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 8,
+  roomWidthScale: 1.6,
+  roomHeightScale: 1.6,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.46,
+  roomShelfHeightScale: 1.46,
+};
+
+const mathNumberCube: ItemSpriteData = {
+  src: '/assets/items/math-number-cube.png',
+  alt: 'קוביות המספרים',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 12,
+  roomWidthScale: 1.55,
+  roomHeightScale: 1.55,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.42,
+  roomShelfHeightScale: 1.42,
+};
+
+const mathWooden3DPuzzle: ItemSpriteData = {
+  src: '/assets/items/math-wooden-3d-puzzle.png',
+  alt: 'קוביית האינסוף',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 35,
+  roomWidthScale: 1.85,
+  roomHeightScale: 1.85,
+  roomShelfOffsetY: 20,
+  roomShelfWidthScale: 1.6,
+  roomShelfHeightScale: 1.6,
+  roomFloorOffsetY: 58,
+  roomFloorWidthScale: 2.1,
+  roomFloorHeightScale: 2.1,
+};
+
+const mathNewtonCradle: ItemSpriteData = {
+  src: '/assets/items/math-newton-cradle.png',
+  alt: 'קליידוסקופ הסימטריה',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 28,
+  roomWidthScale: 1.82,
+  roomHeightScale: 1.82,
+  roomShelfOffsetY: 23,
+  roomShelfWidthScale: 1.55,
+  roomShelfHeightScale: 1.55,
+};
+
+const mathNumberOrb: ItemSpriteData = {
+  src: '/assets/items/math-number-orb.png',
+  alt: 'המשולש הבלתי־אפשרי',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 8,
+  roomWidthScale: 1.8,
+  roomHeightScale: 1.8,
+};
+
+const mathFibonacciShell: ItemSpriteData = {
+  src: '/assets/items/math-fibonacci-shell.png',
+  alt: 'ספירלת פאי',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 8,
+  roomWidthScale: 1.78,
+  roomHeightScale: 1.78,
+  roomShelfOffsetY: 22,
+  roomShelfWidthScale: 1.55,
+  roomShelfHeightScale: 1.55,
+};
+
+const mathFormulaBook: ItemSpriteData = {
+  src: '/assets/items/math-formula-book.png',
+  alt: 'מסגרת יחס הזהב',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(190,100,255,0.42)]',
+  roomOffsetY: 2,
+  roomWidthScale: 1.95,
+  roomHeightScale: 1.95,
+};
+
+const mathGoldenOrrery: ItemSpriteData = {
+  src: '/assets/items/math-golden-orrery.png',
+  alt: 'היפרקובייה זוהרת',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_18px_rgba(190,100,255,0.42)]',
+  roomOffsetY: 42,
+  roomWidthScale: 2.15,
+  roomHeightScale: 2.15,
+  roomFloorOffsetY: 62,
+  roomFloorWidthScale: 2.35,
+  roomFloorHeightScale: 2.35,
+};
+
+const mathFloatingAcademy: ItemSpriteData = {
+  src: '/assets/items/math-floating-academy.png',
+  alt: 'מצפה המתמטיקאי',
+  className: 'object-contain drop-shadow-[0_10px_18px_rgba(0,0,0,0.34)] drop-shadow-[0_0_20px_rgba(255,210,80,0.42)]',
+  roomOffsetY: 45,
+  roomWidthScale: 2.45,
+  roomHeightScale: 2.45,
+  roomFloorOffsetY: 70,
+  roomFloorWidthScale: 2.65,
+  roomFloorHeightScale: 2.65,
+};
+
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
+  // Math box
+  math_calculator: mathCalculator,
+  math_geometry_notebook: mathGeometryNotebook,
+  math_pi_notes: mathPiNotes,
+  math_ruler_set: mathRulerSet,
+  math_puzzle_cube: mathPuzzleCube,
+  math_fraction_chain: mathFractionChain,
+  math_number_dice: mathNumberDice,
+  math_hourglass: mathHourglass,
+  math_geometric_model: mathGeometricModel,
+  math_pi_statue: mathPiStatue,
+  math_tangram: mathTangram,
+  math_mobius_strip: mathMobiusStrip,
+  math_number_cube: mathNumberCube,
+  math_wooden_3d_puzzle: mathWooden3DPuzzle,
+  math_newton_cradle: mathNewtonCradle,
+  math_number_orb: mathNumberOrb,
+  math_fibonacci_shell: mathFibonacciShell,
+  math_formula_book: mathFormulaBook,
+  math_golden_orrery: mathGoldenOrrery,
+  math_floating_academy: mathFloatingAcademy,
+
   // לוח שחמט
   chess: chessBoardBasic,
   'chess-board-basic': chessBoardBasic,
