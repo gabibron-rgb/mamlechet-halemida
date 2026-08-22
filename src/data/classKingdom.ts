@@ -1,3 +1,4 @@
+import type { BoxTier } from './boxes';
 import {
   isClassGoalActive,
   isClassGoalCompleted,
@@ -17,6 +18,16 @@ export type ClassKingdomMilestone = {
   titleHe: string;
   emoji: string;
   descriptionHe: string;
+};
+
+export type ClassKingdomReward = {
+  level: number;
+  minStars: number;
+  titleHe: string;
+  emoji: string;
+  descriptionHe: string;
+  kind: 'box' | 'themeUnlock';
+  boxTier?: BoxTier;
 };
 
 export const CLASS_KINGDOM_LEVELS: ClassKingdomLevel[] = [
@@ -61,6 +72,53 @@ export const CLASS_KINGDOM_LEVELS: ClassKingdomLevel[] = [
     titleHe: 'ממלכה אגדית',
     emoji: '✨',
     descriptionHe: 'הממלכה נבנתה לאורך זמן מתוך המון הצלחות משותפות.',
+  },
+];
+
+export const CLASS_KINGDOM_REWARDS: ClassKingdomReward[] = [
+  {
+    level: 2,
+    minStars: 2,
+    titleHe: 'מתנת הממלכה הראשונה',
+    emoji: '📦',
+    descriptionHe: 'קופסת עץ חינם בנושא שכבר פתחת.',
+    kind: 'box',
+    boxTier: 'wooden',
+  },
+  {
+    level: 3,
+    minStars: 5,
+    titleHe: 'מפתח לעולם חדש',
+    emoji: '🗝️',
+    descriptionHe: 'פתיחת נושא נוסף לקופסאות. אם כל הנושאים כבר פתוחים, מתקבלת קופסת כסף במקום.',
+    kind: 'themeUnlock',
+  },
+  {
+    level: 4,
+    minStars: 9,
+    titleHe: 'אוצר הכסף',
+    emoji: '🎁',
+    descriptionHe: 'קופסת כסף חינם בנושא שכבר פתחת.',
+    kind: 'box',
+    boxTier: 'silver',
+  },
+  {
+    level: 5,
+    minStars: 14,
+    titleHe: 'אוצר הכתר',
+    emoji: '🏆',
+    descriptionHe: 'קופסת זהב חינם בנושא שכבר פתחת.',
+    kind: 'box',
+    boxTier: 'golden',
+  },
+  {
+    level: 6,
+    minStars: 20,
+    titleHe: 'מתנת הממלכה האגדית',
+    emoji: '🔮',
+    descriptionHe: 'קופסה מסתורית חינם בנושא שכבר פתחת.',
+    kind: 'box',
+    boxTier: 'mystic',
   },
 ];
 
@@ -169,6 +227,40 @@ export function classKingdomLevelProgress(stars: number): {
     needed: span,
     pct: Math.min(100, Math.round((current / span) * 100)),
   };
+}
+
+export function normalizeClassKingdomClaimedRewards(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+
+  const validLevels = new Set(CLASS_KINGDOM_REWARDS.map(reward => reward.level));
+  return Array.from(
+    new Set(
+      value
+        .filter((entry): entry is number => typeof entry === 'number' && Number.isFinite(entry))
+        .map(entry => Math.floor(entry))
+        .filter(level => validLevels.has(level))
+    )
+  ).sort((first, second) => first - second);
+}
+
+export function classKingdomRewardForLevel(
+  level: number
+): ClassKingdomReward | null {
+  return CLASS_KINGDOM_REWARDS.find(reward => reward.level === level) ?? null;
+}
+
+export function unlockedClassKingdomRewards(
+  stars: number
+): ClassKingdomReward[] {
+  const safeStars = Math.max(0, Math.floor(stars));
+  return CLASS_KINGDOM_REWARDS.filter(reward => safeStars >= reward.minStars);
+}
+
+export function nextClassKingdomReward(
+  stars: number
+): ClassKingdomReward | null {
+  const safeStars = Math.max(0, Math.floor(stars));
+  return CLASS_KINGDOM_REWARDS.find(reward => reward.minStars > safeStars) ?? null;
 }
 
 export function unlockedClassKingdomMilestones(

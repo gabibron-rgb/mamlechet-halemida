@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { BOX_TIERS } from '../../data/boxes';
 import {
   classGoalMetricDefinition,
   classGoalProgress,
@@ -5,6 +7,7 @@ import {
 } from '../../data/classGoals';
 import {
   CLASS_KINGDOM_MILESTONES,
+  CLASS_KINGDOM_REWARDS,
   activeClassGoal,
   classKingdomLevel,
   classKingdomLevelProgress,
@@ -12,13 +15,18 @@ import {
   completedClassGoals,
   nextClassKingdomLevel,
   nextClassKingdomMilestone,
+  nextClassKingdomReward,
+  type ClassKingdomReward,
 } from '../../data/classKingdom';
+import { THEMES, type ThemeId } from '../../data/themes';
+import { useGameStore, type StudentState } from '../../store/useGameStore';
 
 type Props = {
-  goals: StudentClassGoal[];
+  student: StudentState;
 };
 
-export default function ClassKingdomPanel({ goals }: Props) {
+export default function ClassKingdomPanel({ student }: Props) {
+  const goals = student.classGoals ?? [];
   const completed = completedClassGoals(goals);
   const active = activeClassGoal(goals);
   const stars = classKingdomStars(goals);
@@ -26,6 +34,56 @@ export default function ClassKingdomPanel({ goals }: Props) {
   const nextLevel = nextClassKingdomLevel(stars);
   const levelProgress = classKingdomLevelProgress(stars);
   const nextMilestone = nextClassKingdomMilestone(stars);
+  const nextReward = nextClassKingdomReward(stars);
+  const claimReward = useGameStore(state => state.claimClassKingdomReward);
+
+  const [selectedThemes, setSelectedThemes] = useState<Record<number, ThemeId>>({});
+  const [busyLevel, setBusyLevel] = useState<number | null>(null);
+  const [rewardMessage, setRewardMessage] = useState<string | null>(null);
+
+  const unlockedThemeDefs = THEMES.filter(
+    theme => theme.id === 'generic' || student.unlockedThemes.includes(theme.id)
+  );
+  const fallbackTheme = unlockedThemeDefs[0]?.id ?? 'generic';
+  const claimedLevels = student.claimedClassKingdomRewards ?? [];
+
+  async function handleClaim(reward: ClassKingdomReward) {
+    if (busyLevel !== null) return;
+
+    const selectedTheme =
+      reward.kind === 'box'
+        ? selectedThemes[reward.level] ?? fallbackTheme
+        : undefined;
+
+    setBusyLevel(reward.level);
+    setRewardMessage(null);
+
+    const allThemesOpen = THEMES.filter(theme => theme.id !== 'generic').every(
+      theme => student.unlockedThemes.includes(theme.id)
+    );
+
+    const ok = await claimReward(student.id, reward.level, selectedTheme);
+    setBusyLevel(null);
+
+    if (!ok) {
+      setRewardMessage('לא הצלחתי לאסוף את הפרס. נסו לרענן ולנסות שוב.');
+      return;
+    }
+
+    if (reward.kind === 'themeUnlock') {
+      setRewardMessage(
+        allThemesOpen
+          ? '🎁 כל הנושאים כבר פתוחים, אז קיבלת קופסת כסף במקום!'
+          : '🗝️ נפתח לך פרס לבחירת נושא חדש! אפשר לבחור אותו מההתראה בחלק העליון של המסך.'
+      );
+      return;
+    }
+
+    const boxName = reward.boxTier
+      ? BOX_TIERS[reward.boxTier].nameHe
+      : 'קופסה';
+    setRewardMessage(`🎁 ${boxName} נוספה למלאי שלך!`);
+  }
 
   return (
     <div className="text-right">
@@ -35,7 +93,7 @@ export default function ClassKingdomPanel({ goals }: Props) {
             <div className="text-xs font-black text-yellow-100/60">🏰 ההתקדמות המשותפת של הכיתה</div>
             <h2 className="mt-1 text-3xl font-black text-magic-accent">הממלכה הכיתתית</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-magic-soft/75">
-              כל יעד כיתתי שהכיתה משלימה מוסיף ⭐ כוכב ממלכה אחד. הכוכבים שייכים לכולם יחד — אין כאן דירוג אישי.
+              כל יעד כיתתי שהכיתה משלימה מוסיף ⭐ כוכב ממלכה אחד. הכוכבים שייכים לכולם יחד — ואין כאן דירוג אישי.
             </p>
           </div>
 
@@ -69,6 +127,127 @@ export default function ClassKingdomPanel({ goals }: Props) {
               style={{ width: `${levelProgress.pct}%` }}
             />
           </div>
+
+          {nextReward && (
+            <div className="mt-4 rounded-2xl border border-yellow-300/15 bg-yellow-400/8 px-4 py-3">
+              <div className="text-xs font-black text-yellow-100/80">
+                🎁 ברמה {nextReward.level} ייפתח: {nextReward.titleHe}
+              </div>
+              <div className="mt-1 text-[11px] text-magic-soft/55">
+                {nextReward.descriptionHe}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="mt-5 rounded-3xl border border-yellow-300/15 bg-magic-bg/35 p-5">
+        <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h3 className="font-black text-white">🎁 פרסי רמות הממלכה</h3>
+            <p className="mt-1 text-xs text-magic-soft/55">
+              אלה פרסים אישיים שנפתחים בזכות ההצלחה המשותפת של כל הכיתה. כל פרס ניתן לאיסוף פעם אחת.
+            </p>
+          </div>
+          <div className="text-xs font-black text-yellow-200">
+            {claimedLevels.length}/{CLASS_KINGDOM_REWARDS.length} נאספו
+          </div>
+        </div>
+
+        {rewardMessage && (
+          <div className="mb-4 rounded-2xl border border-emerald-300/20 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-100">
+            {rewardMessage}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 xl:grid-cols-3">
+          {CLASS_KINGDOM_REWARDS.map(reward => {
+            const unlocked = stars >= reward.minStars;
+            const claimed = claimedLevels.includes(reward.level);
+            const selectedTheme = selectedThemes[reward.level] ?? fallbackTheme;
+            const boxName = reward.boxTier
+              ? BOX_TIERS[reward.boxTier].nameHe
+              : null;
+
+            return (
+              <div
+                key={reward.level}
+                className={`rounded-2xl border p-4 transition-colors ${
+                  claimed
+                    ? 'border-emerald-300/20 bg-emerald-500/8'
+                    : unlocked
+                      ? 'border-yellow-300/25 bg-yellow-400/10'
+                      : 'border-white/8 bg-black/10 opacity-55'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">{claimed ? '✅' : unlocked ? reward.emoji : '🔒'}</div>
+                    <div>
+                      <div className="text-[10px] font-black text-yellow-100/55">
+                        רמת ממלכה {reward.level} · {reward.minStars} ⭐
+                      </div>
+                      <div className="mt-1 font-black text-white">{reward.titleHe}</div>
+                    </div>
+                  </div>
+                  {claimed && (
+                    <div className="shrink-0 rounded-full bg-emerald-400/15 px-2.5 py-1 text-[10px] font-black text-emerald-200">
+                      נאסף
+                    </div>
+                  )}
+                </div>
+
+                <p className="mt-3 text-xs leading-5 text-magic-soft/65">
+                  {reward.descriptionHe}
+                </p>
+
+                {!unlocked && (
+                  <div className="mt-3 text-xs font-black text-magic-soft/45">
+                    חסרים {Math.max(0, reward.minStars - stars)} כוכבים
+                  </div>
+                )}
+
+                {unlocked && !claimed && reward.kind === 'box' && boxName && (
+                  <div className="mt-4">
+                    <label className="mb-1 block text-[11px] font-bold text-magic-soft/60">
+                      בחרו נושא ל{boxName}
+                    </label>
+                    <select
+                      value={selectedTheme}
+                      onChange={event =>
+                        setSelectedThemes(current => ({
+                          ...current,
+                          [reward.level]: event.target.value as ThemeId,
+                        }))
+                      }
+                      className="w-full rounded-xl border border-white/10 bg-magic-bg/80 px-3 py-2 text-sm font-bold text-white outline-none focus:border-magic-accent"
+                    >
+                      {unlockedThemeDefs.map(theme => (
+                        <option key={theme.id} value={theme.id}>
+                          {theme.emoji} {theme.nameHe}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {unlocked && !claimed && (
+                  <button
+                    type="button"
+                    disabled={busyLevel !== null}
+                    onClick={() => void handleClaim(reward)}
+                    className="mt-4 w-full rounded-xl bg-magic-accent px-4 py-2.5 text-sm font-black text-magic-bg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {busyLevel === reward.level
+                      ? 'שומר...'
+                      : reward.kind === 'themeUnlock'
+                        ? '🗝️ קבלו את מפתח הנושא'
+                        : `🎁 קבלו ${boxName ?? 'את הפרס'}`}
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       </section>
 

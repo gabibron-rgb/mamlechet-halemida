@@ -280,7 +280,7 @@ export default function StudentHome() {
           {tab === 'missions' && <MissionsPanel student={student} />}
 
           {tab === 'classKingdom' && (
-            <ClassKingdomPanel goals={student.classGoals ?? []} />
+            <ClassKingdomPanel student={student} />
           )}
 
           {tab === 'room' && <RoomView student={student} />}

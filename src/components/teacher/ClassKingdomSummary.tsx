@@ -4,6 +4,7 @@ import {
   classKingdomStars,
   nextClassKingdomLevel,
   nextClassKingdomMilestone,
+  nextClassKingdomReward,
 } from '../../data/classKingdom';
 import type { StudentClassGoal } from '../../data/classGoals';
 import type { StudentState } from '../../store/useGameStore';
@@ -18,6 +19,7 @@ export default function ClassKingdomSummary({ students }: Props) {
   const level = classKingdomLevel(stars);
   const nextLevel = nextClassKingdomLevel(stars);
   const nextMilestone = nextClassKingdomMilestone(stars);
+  const nextReward = nextClassKingdomReward(stars);
   const progress = classKingdomLevelProgress(stars);
 
   return (
@@ -61,6 +63,17 @@ export default function ClassKingdomSummary({ students }: Props) {
           />
         </div>
       </div>
+
+      {nextReward && (
+        <div className="mt-3 flex flex-col gap-1 rounded-2xl border border-yellow-300/10 bg-yellow-400/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <span className="text-sm font-bold text-white">
+            {nextReward.emoji} פרס הרמה הבא: {nextReward.titleHe}
+          </span>
+          <span className="text-xs font-black text-yellow-200">
+            ברמה {nextReward.level} · {nextReward.minStars} ⭐
+          </span>
+        </div>
+      )}
 
       {nextMilestone && (
         <div className="mt-3 flex flex-col gap-1 rounded-2xl border border-fuchsia-300/10 bg-fuchsia-500/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">

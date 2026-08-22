@@ -11,6 +11,7 @@ import { normalizeCompanionTraitChallenges } from '../data/companionTraitChallen
 import { normalizeCompanionJournalEntries } from '../data/companionJournal';
 import { normalizeStudentMissions } from '../data/missions';
 import { normalizeStudentClassGoals } from '../data/classGoals';
+import { normalizeClassKingdomClaimedRewards } from '../data/classKingdom';
 
 type Mode = 'choose' | 'student' | 'teacher';
 
@@ -88,6 +89,9 @@ function buildStudentFromSupabase(row: any): StudentState {
 
     missions: normalizeStudentMissions(meta.missions),
     classGoals: normalizeStudentClassGoals(meta.classGoals),
+    claimedClassKingdomRewards: normalizeClassKingdomClaimedRewards(
+      meta.claimedClassKingdomRewards
+    ),
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],

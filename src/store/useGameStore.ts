@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { DEFAULT_UNLOCKED_THEMES } from '../data/themes';
+import { DEFAULT_UNLOCKED_THEMES, THEMES } from '../data/themes';
 import type { ThemeId } from '../data/themes';
 import type { CompanionStage } from '../data/companionWorlds';
 import type { Zone } from '../data/items';
@@ -45,6 +45,11 @@ import {
   type ClassGoalMetric,
   type StudentClassGoal,
 } from '../data/classGoals';
+import {
+  classKingdomRewardForLevel,
+  classKingdomStars,
+  normalizeClassKingdomClaimedRewards,
+} from '../data/classKingdom';
 
 export type StudentId = string;
 
@@ -120,6 +125,7 @@ export type StudentState = {
   companion: CompanionState;
   missions: StudentMission[];
   classGoals: StudentClassGoal[];
+  claimedClassKingdomRewards: number[];
   pastRewards: string[];
   trophies: { id: string; trophyTheme: string; caption: string; awardedAt: number }[];
   seenTrophyIds: string[];
@@ -238,6 +244,11 @@ type GameStore = {
     goalId: string,
     batchId: string
   ) => Promise<boolean>;
+  claimClassKingdomReward: (
+    studentId: StudentId,
+    rewardLevel: number,
+    themeId?: ThemeId
+  ) => Promise<boolean>;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -291,6 +302,7 @@ async function syncStudentToSupabase(student: StudentState) {
       companion: student.companion,
       missions: student.missions ?? [],
       classGoals: student.classGoals ?? [],
+      claimedClassKingdomRewards: student.claimedClassKingdomRewards ?? [],
       pastRewards: student.pastRewards,
       trophies: student.trophies,
       seenTrophyIds: student.seenTrophyIds ?? [],
@@ -396,6 +408,7 @@ function defaultStudent(name: string, classId: string): StudentState {
     },
     missions: [],
     classGoals: [],
+    claimedClassKingdomRewards: [],
     pastRewards: [],
     trophies: [],
     seenTrophyIds: [],
@@ -476,6 +489,9 @@ function studentFromSupabase(row: any, classId: string): StudentState {
     },
     missions: normalizeStudentMissions(meta.missions),
     classGoals: normalizeStudentClassGoals(meta.classGoals),
+    claimedClassKingdomRewards: normalizeClassKingdomClaimedRewards(
+      meta.claimedClassKingdomRewards
+    ),
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
@@ -1903,6 +1919,87 @@ export const useGameStore = create<GameStore>()(
 
         if (updatedStudents.length === 0) return false;
         await Promise.all(updatedStudents.map(syncStudentToSupabase));
+        return true;
+      },
+
+      claimClassKingdomReward: async (studentId, rewardLevel, themeId) => {
+        const reward = classKingdomRewardForLevel(rewardLevel);
+        if (!reward) return false;
+
+        const updatedStudents: StudentState[] = [];
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const stars = classKingdomStars(student.classGoals ?? []);
+          if (stars < reward.minStars) return state;
+
+          const claimed = student.claimedClassKingdomRewards ?? [];
+          if (claimed.includes(reward.level)) return state;
+
+          const now = Date.now();
+          let nextInventory = student.inventory;
+          let nextPendingThemeUnlocks = student.pendingThemeUnlocks ?? 0;
+
+          if (reward.kind === 'box') {
+            if (!reward.boxTier || !themeId) return state;
+            if (themeId !== 'generic' && !student.unlockedThemes.includes(themeId)) return state;
+
+            const boxEntry: InventoryEntry = {
+              id: `kingdom_box_${reward.level}_${themeId}_${now}`,
+              itemId: `box_${reward.boxTier}_${themeId}`,
+              kind: 'box',
+              boxTier: reward.boxTier,
+              boxTheme: themeId,
+              acquiredAt: now,
+              placedZone: null,
+              placedSlot: null,
+            };
+
+            nextInventory = [...student.inventory, boxEntry];
+          } else {
+            const hasLockedTheme = THEMES.some(
+              theme =>
+                theme.id !== 'generic' &&
+                !student.unlockedThemes.includes(theme.id)
+            );
+
+            if (hasLockedTheme) {
+              nextPendingThemeUnlocks += 1;
+            } else {
+              const fallbackBox: InventoryEntry = {
+                id: `kingdom_box_${reward.level}_fallback_${now}`,
+                itemId: 'box_silver_generic',
+                kind: 'box',
+                boxTier: 'silver',
+                boxTheme: 'generic',
+                acquiredAt: now,
+                placedZone: null,
+                placedSlot: null,
+              };
+              nextInventory = [...student.inventory, fallbackBox];
+            }
+          }
+
+          const updatedStudent: StudentState = {
+            ...student,
+            inventory: nextInventory,
+            pendingThemeUnlocks: nextPendingThemeUnlocks,
+            claimedClassKingdomRewards: [...claimed, reward.level],
+          };
+          updatedStudents.push(updatedStudent);
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudents.length === 0) return false;
+        await syncStudentToSupabase(updatedStudents[0]);
         return true;
       },
 
