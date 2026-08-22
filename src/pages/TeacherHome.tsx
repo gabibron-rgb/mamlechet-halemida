@@ -11,6 +11,8 @@ import CompanionProgressBoard from '../components/teacher/CompanionProgressBoard
 import FlourishAwardModal from '../components/teacher/FlourishAwardModal';
 import MissionBoard from '../components/teacher/MissionBoard';
 import MissionCreateModal from '../components/teacher/MissionCreateModal';
+import ClassGoalBoard from '../components/teacher/ClassGoalBoard';
+import ClassGoalCreateModal from '../components/teacher/ClassGoalCreateModal';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
@@ -50,6 +52,7 @@ export default function TeacherHome() {
   const [managedTrophyStudentId, setManagedTrophyStudentId] = useState<string | null>(null);
   const [flourishStudentId, setFlourishStudentId] = useState<string | null>(null);
   const [missionCreateOpen, setMissionCreateOpen] = useState(false);
+  const [classGoalCreateOpen, setClassGoalCreateOpen] = useState(false);
 
   const trophyStudent = trophyStudentId
     ? students.find(student => student.id === trophyStudentId) ?? null
@@ -119,6 +122,12 @@ export default function TeacherHome() {
             ✨ תן/י נקודות
           </button>
         </div>
+
+        <ClassGoalBoard
+          classId={cls.id}
+          students={students}
+          onCreateGoal={() => setClassGoalCreateOpen(true)}
+        />
 
         <MissionBoard
           students={students}
@@ -193,6 +202,13 @@ export default function TeacherHome() {
           <ActivityLog classId={cls.id} />
         </div>
       </div>
+
+      <ClassGoalCreateModal
+        open={classGoalCreateOpen}
+        onClose={() => setClassGoalCreateOpen(false)}
+        classId={cls.id}
+        studentCount={students.length}
+      />
 
       <MissionCreateModal
         open={missionCreateOpen}

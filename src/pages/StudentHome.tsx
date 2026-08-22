@@ -12,6 +12,7 @@ import Inventory from '../components/student/Inventory';
 import CollectionAlbum from '../components/student/CollectionAlbum';
 import CompanionPanel from '../components/student/CompanionPanel';
 import MissionsPanel from '../components/student/MissionsPanel';
+import ClassGoalBanner from '../components/student/ClassGoalBanner';
 import RoomView from '../components/student/RoomView';
 import TrophyRoom from '../components/student/TrophyRoom';
 import { TrophyAwardCeremony } from '../components/student/TrophyAwardCeremony';
@@ -199,6 +200,8 @@ export default function StudentHome() {
             </div>
           )}
         </div>
+
+        <ClassGoalBanner goals={student.classGoals ?? []} />
 
         {/* Tabs */}
         <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-8">

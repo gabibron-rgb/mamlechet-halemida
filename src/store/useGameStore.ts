@@ -37,6 +37,14 @@ import {
   type MissionRewardTier,
   type StudentMission,
 } from '../data/missions';
+import {
+  normalizeStudentClassGoals,
+  withClassGoalContribution,
+  withoutClassGoalContribution,
+  isClassGoalActive,
+  type ClassGoalMetric,
+  type StudentClassGoal,
+} from '../data/classGoals';
 
 export type StudentId = string;
 
@@ -111,6 +119,7 @@ export type StudentState = {
   };
   companion: CompanionState;
   missions: StudentMission[];
+  classGoals: StudentClassGoal[];
   pastRewards: string[];
   trophies: { id: string; trophyTheme: string; caption: string; awardedAt: number }[];
   seenTrophyIds: string[];
@@ -196,6 +205,30 @@ type GameStore = {
     studentId: StudentId,
     missionId: string
   ) => Promise<boolean>;
+  createClassGoal: (
+    classId: string,
+    input: {
+      title: string;
+      description: string;
+      metric: ClassGoalMetric;
+      target: number;
+      dueAt: number | null;
+    }
+  ) => Promise<boolean>;
+  cancelClassGoal: (
+    classId: string,
+    goalId: string
+  ) => Promise<boolean>;
+  recordClassGoalContribution: (
+    classId: string,
+    metric: ClassGoalMetric,
+    contributionId: string
+  ) => Promise<void>;
+  removeClassGoalContribution: (
+    classId: string,
+    metric: ClassGoalMetric,
+    contributionId: string
+  ) => Promise<void>;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -248,6 +281,7 @@ async function syncStudentToSupabase(student: StudentState) {
       capacities: student.capacities,
       companion: student.companion,
       missions: student.missions ?? [],
+      classGoals: student.classGoals ?? [],
       pastRewards: student.pastRewards,
       trophies: student.trophies,
       seenTrophyIds: student.seenTrophyIds ?? [],
@@ -352,6 +386,7 @@ function defaultStudent(name: string, classId: string): StudentState {
       journalEntries: [],
     },
     missions: [],
+    classGoals: [],
     pastRewards: [],
     trophies: [],
     seenTrophyIds: [],
@@ -431,6 +466,7 @@ function studentFromSupabase(row: any, classId: string): StudentState {
       ),
     },
     missions: normalizeStudentMissions(meta.missions),
+    classGoals: normalizeStudentClassGoals(meta.classGoals),
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
@@ -789,6 +825,15 @@ export const useGameStore = create<GameStore>()(
 
         if (updatedStudent) {
           await syncStudentToSupabase(updatedStudent);
+
+          const classId = get().students[studentId]?.classId;
+          if (classId && traitId && cleanActivityId && safeAmount > 0) {
+            await get().recordClassGoalContribution(
+              classId,
+              'behavior',
+              `behavior:${studentId}:${cleanActivityId}`
+            );
+          }
         }
       },
 
@@ -800,11 +845,15 @@ export const useGameStore = create<GameStore>()(
         const safeAmount = Math.max(0, Math.round(amount));
         const cleanActivityId = sourceActivityId.trim();
         let updatedStudent: StudentState | null = null;
+        let removedBehaviorContribution = false;
 
         set(state => {
           const student = state.students[studentId];
           if (!student) return state;
 
+          removedBehaviorContribution = (
+            student.companion.behaviorMemories ?? []
+          ).some(memory => memory.id === cleanActivityId);
           const nextMemories = (
             student.companion.behaviorMemories ?? []
           ).filter(memory => memory.id !== cleanActivityId);
@@ -847,6 +896,15 @@ export const useGameStore = create<GameStore>()(
 
         if (updatedStudent) {
           await syncStudentToSupabase(updatedStudent);
+
+          const classId = get().students[studentId]?.classId;
+          if (classId && removedBehaviorContribution && cleanActivityId) {
+            await get().removeClassGoalContribution(
+              classId,
+              'behavior',
+              `behavior:${studentId}:${cleanActivityId}`
+            );
+          }
         }
       },
 
@@ -1351,6 +1409,14 @@ export const useGameStore = create<GameStore>()(
 
         if (!updatedStudent) return false;
         await syncStudentToSupabase(updatedStudent);
+        const classId = get().students[studentId]?.classId;
+        if (classId) {
+          await get().recordClassGoalContribution(
+            classId,
+            'missions',
+            `mission:${studentId}:${cleanMissionId}`
+          );
+        }
         return true;
       },
 
@@ -1395,6 +1461,173 @@ export const useGameStore = create<GameStore>()(
         if (!updatedStudent) return false;
         await syncStudentToSupabase(updatedStudent);
         return true;
+      },
+
+      createClassGoal: async (classId, input) => {
+        const cleanClassId = classId.trim();
+        const cleanTitle = input.title.trim().slice(0, 80);
+        const cleanDescription = input.description.trim().slice(0, 240);
+        const target = Math.min(200, Math.max(5, Math.round(input.target)));
+        const dueAt =
+          typeof input.dueAt === 'number' && Number.isFinite(input.dueAt)
+            ? input.dueAt
+            : null;
+
+        if (!cleanClassId || !cleanTitle) return false;
+
+        const classStudents = Object.values(get().students).filter(
+          student => student.classId === cleanClassId
+        );
+        if (classStudents.length === 0) return false;
+        if (
+          classStudents.some(student =>
+            (student.classGoals ?? []).some(isClassGoalActive)
+          )
+        ) {
+          return false;
+        }
+
+        const createdAt = Date.now();
+        const goal: StudentClassGoal = {
+          id: genId('class-goal'),
+          title: cleanTitle,
+          description: cleanDescription,
+          metric: input.metric,
+          target,
+          contributionIds: [],
+          createdAt,
+          dueAt,
+          completedAt: null,
+          cancelledAt: null,
+        };
+        const updatedStudents: StudentState[] = [];
+
+        set(state => {
+          const nextStudents = { ...state.students };
+
+          for (const student of Object.values(nextStudents)) {
+            if (student.classId !== cleanClassId) continue;
+
+            const updatedStudent: StudentState = {
+              ...student,
+              classGoals: [...(student.classGoals ?? []), { ...goal }],
+            };
+            nextStudents[student.id] = updatedStudent;
+            updatedStudents.push(updatedStudent);
+          }
+
+          return updatedStudents.length > 0 ? { students: nextStudents } : state;
+        });
+
+        if (updatedStudents.length === 0) return false;
+        await Promise.all(updatedStudents.map(syncStudentToSupabase));
+        return true;
+      },
+
+      cancelClassGoal: async (classId, goalId) => {
+        const cleanClassId = classId.trim();
+        const cleanGoalId = goalId.trim();
+        if (!cleanClassId || !cleanGoalId) return false;
+
+        const cancelledAt = Date.now();
+        const updatedStudents: StudentState[] = [];
+
+        set(state => {
+          const nextStudents = { ...state.students };
+
+          for (const student of Object.values(nextStudents)) {
+            if (student.classId !== cleanClassId) continue;
+
+            let changed = false;
+            const classGoals = (student.classGoals ?? []).map(goal => {
+              if (goal.id !== cleanGoalId || !isClassGoalActive(goal)) return goal;
+              changed = true;
+              return { ...goal, cancelledAt };
+            });
+            if (!changed) continue;
+
+            const updatedStudent: StudentState = { ...student, classGoals };
+            nextStudents[student.id] = updatedStudent;
+            updatedStudents.push(updatedStudent);
+          }
+
+          return updatedStudents.length > 0 ? { students: nextStudents } : state;
+        });
+
+        if (updatedStudents.length === 0) return false;
+        await Promise.all(updatedStudents.map(syncStudentToSupabase));
+        return true;
+      },
+
+      recordClassGoalContribution: async (classId, metric, contributionId) => {
+        const cleanClassId = classId.trim();
+        const cleanContributionId = contributionId.trim();
+        if (!cleanClassId || !cleanContributionId) return;
+
+        const updatedStudents: StudentState[] = [];
+        const at = Date.now();
+
+        set(state => {
+          const nextStudents = { ...state.students };
+
+          for (const student of Object.values(nextStudents)) {
+            if (student.classId !== cleanClassId) continue;
+
+            let changed = false;
+            const classGoals = (student.classGoals ?? []).map(goal => {
+              if (goal.metric !== metric || !isClassGoalActive(goal)) return goal;
+              const nextGoal = withClassGoalContribution(goal, cleanContributionId, at);
+              if (nextGoal !== goal) changed = true;
+              return nextGoal;
+            });
+            if (!changed) continue;
+
+            const updatedStudent: StudentState = { ...student, classGoals };
+            nextStudents[student.id] = updatedStudent;
+            updatedStudents.push(updatedStudent);
+          }
+
+          return updatedStudents.length > 0 ? { students: nextStudents } : state;
+        });
+
+        if (updatedStudents.length > 0) {
+          await Promise.all(updatedStudents.map(syncStudentToSupabase));
+        }
+      },
+
+      removeClassGoalContribution: async (classId, metric, contributionId) => {
+        const cleanClassId = classId.trim();
+        const cleanContributionId = contributionId.trim();
+        if (!cleanClassId || !cleanContributionId) return;
+
+        const updatedStudents: StudentState[] = [];
+
+        set(state => {
+          const nextStudents = { ...state.students };
+
+          for (const student of Object.values(nextStudents)) {
+            if (student.classId !== cleanClassId) continue;
+
+            let changed = false;
+            const classGoals = (student.classGoals ?? []).map(goal => {
+              if (goal.metric !== metric) return goal;
+              const nextGoal = withoutClassGoalContribution(goal, cleanContributionId);
+              if (nextGoal !== goal) changed = true;
+              return nextGoal;
+            });
+            if (!changed) continue;
+
+            const updatedStudent: StudentState = { ...student, classGoals };
+            nextStudents[student.id] = updatedStudent;
+            updatedStudents.push(updatedStudent);
+          }
+
+          return updatedStudents.length > 0 ? { students: nextStudents } : state;
+        });
+
+        if (updatedStudents.length > 0) {
+          await Promise.all(updatedStudents.map(syncStudentToSupabase));
+        }
       },
 
       updateInventoryEntry: (studentId, inventoryIndex, patch) => {
