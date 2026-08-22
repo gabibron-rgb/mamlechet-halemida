@@ -1,9 +1,9 @@
 import {
   COMPANION_TRAITS,
-  getCompanionTraitEvidenceCount,
   getCompanionTraitCounts,
   getDominantCompanionTrait,
 } from '../../data/companionTraits';
+import { getCompanionBehaviorDayCount } from '../../data/companionEvolution';
 import { REASONS } from '../../data/reasons';
 import type { CompanionState } from '../../store/useGameStore';
 
@@ -14,7 +14,7 @@ type Props = {
 export default function CompanionBehaviorProfile({ companion }: Props) {
   const memories = companion.behaviorMemories ?? [];
   const counts = getCompanionTraitCounts(memories);
-  const evidenceCount = getCompanionTraitEvidenceCount(memories);
+  const behaviorDayCount = getCompanionBehaviorDayCount(memories);
   const dominantTrait = getDominantCompanionTrait(memories);
   const highestCount = Math.max(1, ...Object.values(counts));
   const recentMemories = [...memories]
@@ -34,7 +34,7 @@ export default function CompanionBehaviorProfile({ companion }: Props) {
           </p>
         </div>
         <div className="rounded-xl bg-black/20 px-4 py-2 text-center text-xs font-bold text-violet-100">
-          {evidenceCount} ימי הוכחה מהכיתה
+          {behaviorDayCount} ימי התנהגות בכיתה
         </div>
       </div>
 

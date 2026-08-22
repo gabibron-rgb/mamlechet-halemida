@@ -7,6 +7,7 @@ import {
   type CompanionStage,
 } from '../../data/companionWorlds';
 import { COMPANION_SKILLS } from '../../data/companionSkills';
+import { getCompanionEvolutionProgress } from '../../data/companionEvolution';
 import {
   getCompanionTrait,
   getDominantCompanionTrait,
@@ -73,12 +74,18 @@ export default function CompanionProgressBoard({ students }: Props) {
       const companion = student.companion;
       const bond = Math.max(0, companion.bond ?? 0);
       const nextStage = nextCompanionStage(companion.stage);
+      const evolutionProgress = nextStage
+        ? getCompanionEvolutionProgress(
+            nextStage.stage,
+            bond,
+            companion.behaviorMemories ?? [],
+            companion.traitChallenges ?? []
+          )
+        : null;
+      const progress = evolutionProgress?.overallPercent ?? 100;
       const remaining = nextStage
-        ? Math.max(0, nextStage.bondRequired - bond)
+        ? Math.max(0, 100 - progress)
         : Number.POSITIVE_INFINITY;
-      const progress = nextStage
-        ? Math.min(100, Math.round((bond / nextStage.bondRequired) * 100))
-        : 100;
       const visuals = companion.theme
         ? COMPANION_VISUALS[companion.theme]
         : null;
@@ -102,6 +109,7 @@ export default function CompanionProgressBoard({ students }: Props) {
         student,
         bond,
         nextStage,
+        evolutionProgress,
         remaining,
         progress,
         visuals,
@@ -249,7 +257,36 @@ export default function CompanionProgressBoard({ students }: Props) {
                               {row.dominantTrait.nameHe}
                             </div>
                           )}
-                          {row.latestChallenge && row.challengeTrait && (
+                          {row.nextStage && row.evolutionProgress && (
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] sm:grid-cols-4">
+                        <TeacherEvolutionRequirement
+                          label="קשר"
+                          value={`${row.evolutionProgress.bond}/${row.evolutionProgress.bondRequired}`}
+                          ready={row.evolutionProgress.bondReady}
+                        />
+                        <TeacherEvolutionRequirement
+                          label="ימי התנהגות"
+                          value={`${row.evolutionProgress.behaviorDays}/${row.evolutionProgress.behaviorDaysRequired}`}
+                          ready={row.evolutionProgress.behaviorDaysReady}
+                        />
+                        <TeacherEvolutionRequirement
+                          label="תכונות"
+                          value={`${row.evolutionProgress.distinctTraits}/${row.evolutionProgress.distinctTraitsRequired}`}
+                          ready={row.evolutionProgress.distinctTraitsReady}
+                        />
+                        <TeacherEvolutionRequirement
+                          label="אתגרים"
+                          value={
+                            row.evolutionProgress.completedChallengesRequired > 0
+                              ? `${row.evolutionProgress.completedChallenges}/${row.evolutionProgress.completedChallengesRequired}`
+                              : 'לא נדרש'
+                          }
+                          ready={row.evolutionProgress.completedChallengesReady}
+                        />
+                      </div>
+                    )}
+
+                    {row.latestChallenge && row.challengeTrait && (
                             <div className="mt-1 text-[11px] font-bold text-cyan-200">
                               {row.challengeTrait.emoji} אתגר{' '}
                               {row.challengeTrait.nameHe}:{' '}
@@ -368,12 +405,41 @@ export default function CompanionProgressBoard({ students }: Props) {
                       <MiniStat
                         label="היעד הבא"
                         value={
-                          row.nextStage
-                            ? `${row.nextStage.bondRequired} קשר`
+                          row.nextStage && row.evolutionProgress
+                            ? `${row.progress}% מוכן`
                             : 'הושלם 🌟'
                         }
                       />
                     </div>
+
+                    {row.nextStage && row.evolutionProgress && (
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] sm:grid-cols-4">
+                        <TeacherEvolutionRequirement
+                          label="קשר"
+                          value={`${row.evolutionProgress.bond}/${row.evolutionProgress.bondRequired}`}
+                          ready={row.evolutionProgress.bondReady}
+                        />
+                        <TeacherEvolutionRequirement
+                          label="ימי התנהגות"
+                          value={`${row.evolutionProgress.behaviorDays}/${row.evolutionProgress.behaviorDaysRequired}`}
+                          ready={row.evolutionProgress.behaviorDaysReady}
+                        />
+                        <TeacherEvolutionRequirement
+                          label="תכונות"
+                          value={`${row.evolutionProgress.distinctTraits}/${row.evolutionProgress.distinctTraitsRequired}`}
+                          ready={row.evolutionProgress.distinctTraitsReady}
+                        />
+                        <TeacherEvolutionRequirement
+                          label="אתגרים"
+                          value={
+                            row.evolutionProgress.completedChallengesRequired > 0
+                              ? `${row.evolutionProgress.completedChallenges}/${row.evolutionProgress.completedChallengesRequired}`
+                              : 'לא נדרש'
+                          }
+                          ready={row.evolutionProgress.completedChallengesReady}
+                        />
+                      </div>
+                    )}
 
                     {row.latestChallenge && row.challengeTrait && (
                       <div
@@ -402,7 +468,7 @@ export default function CompanionProgressBoard({ students }: Props) {
                         </span>
                         <span>
                           {row.nextStage
-                            ? `חסרות ${row.remaining}`
+                            ? `${row.progress}% מהדרך`
                             : 'אגדי 👑'}
                         </span>
                       </div>
@@ -439,6 +505,33 @@ export default function CompanionProgressBoard({ students }: Props) {
     </section>
   );
 }
+
+function TeacherEvolutionRequirement({
+  label,
+  value,
+  ready,
+}: {
+  label: string;
+  value: string;
+  ready: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-xl border px-2 py-2 text-center ${
+        ready
+          ? 'border-emerald-300/20 bg-emerald-500/10 text-emerald-100'
+          : 'border-white/10 bg-black/15 text-magic-soft/70'
+      }`}
+    >
+      <div className="font-bold opacity-70">{label}</div>
+      <div className="mt-0.5 font-black">
+        {ready ? '✓ ' : ''}
+        {value}
+      </div>
+    </div>
+  );
+}
+
 
 function SummaryBox({
   label,

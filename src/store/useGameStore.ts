@@ -9,6 +9,7 @@ import { genId } from '../utils/storage';
 import type { BoxTier } from '../data/boxes';
 import { supabase } from '../lib/supabaseClient';
 import { getCompanionFlourish } from '../data/companionFlourishes';
+import { companionStageForProgress } from '../data/companionEvolution';
 import {
   companionStageMeetsRequirement,
   getCompanionSkill,
@@ -736,6 +737,12 @@ export const useGameStore = create<GameStore>()(
             points: student.points + safeAmount,
             companion: {
               ...student.companion,
+              stage: companionStageForProgress({
+                bond: student.companion.bond ?? 0,
+                currentStage: student.companion.stage,
+                behaviorMemories: nextMemories,
+                traitChallenges: nextChallenges,
+              }),
               petPoints:
                 (student.companion.petPoints ?? 0) + safeAmount,
               behaviorMemories: nextMemories,
@@ -1044,6 +1051,12 @@ export const useGameStore = create<GameStore>()(
             points: student.points + safePointBonus,
             companion: {
               ...student.companion,
+              stage: companionStageForProgress({
+                bond: student.companion.bond ?? 0,
+                currentStage: student.companion.stage,
+                behaviorMemories: nextMemories,
+                traitChallenges: nextChallenges,
+              }),
               petPoints:
                 (student.companion.petPoints ?? 0) + safePointBonus,
               ownedFlourishes: [...ownedFlourishes, cleanFlourishId],

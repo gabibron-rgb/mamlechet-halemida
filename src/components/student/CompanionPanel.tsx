@@ -4,7 +4,6 @@ import {
   COMPANION_STAGE_ORDER,
   COMPANION_VISUALS,
   MAX_ACTIVE_FLOURISHES,
-  companionStageForBond,
   nextCompanionStage,
   type CompanionStage,
   type CompanionWorldVisuals,
@@ -19,6 +18,10 @@ import {
   type CompanionInteractionId,
 } from '../../logic/companion';
 import { COMPANION_FLOURISHES } from '../../data/companionFlourishes';
+import {
+  companionStageForProgress,
+  getCompanionEvolutionProgress,
+} from '../../data/companionEvolution';
 import { getCompanionInteractionBondBonus } from '../../data/companionSkills';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import CompanionFlourishEffects from './CompanionFlourishEffects';
@@ -53,18 +56,18 @@ const STAGE_CEREMONY: Record<
   },
   young: {
     title: 'חיית המחמד גדלה! ✨',
-    description: 'הקשר ביניכם התחזק והיא הפכה לחיית מחמד צעירה.',
+    description: 'הקשר ביניכם התחזק, וגם ההתנהגות בכיתה הראתה שהיא מוכנה לגדול.',
     button: 'להמשיך לגדול יחד 💫',
   },
   grown: {
     title: 'התפתחות מושלמת! 👑',
-    description: 'חיית המחמד הגיעה לשלב הבוגר, אבל עוד מחכה לה יעד אגדי.',
+    description: 'הקשר, ההתמדה והאופי שנבנה בכיתה הביאו את חיית המחמד לשלב הבוגר.',
     button: 'להמשיך לעבר האגדה 🏆',
   },
   legendary: {
     title: 'התפתחות אגדית! 🌟👑🌟',
     description:
-      'הקשר ביניכם הגיע לעוצמה נדירה והיא קיבלה את הצורה האגדית שלה!',
+      'הקשר ביניכם והדרך שעשית בכיתה הגיעו לעוצמה נדירה — והחיה קיבלה את הצורה האגדית שלה!',
     button: 'לחשוף את הכוח האגדי ✨',
   },
 };
@@ -97,9 +100,15 @@ export default function CompanionPanel({ student }: Props) {
   const shouldShowPicker =
     canUnlock && (!companion.unlocked || !companionVisuals || isChangingWorld);
   const nextStage = nextCompanionStage(companion.stage);
-  const stageProgress = nextStage
-    ? Math.min(100, Math.round((companion.bond / nextStage.bondRequired) * 100))
-    : 100;
+  const evolutionProgress = nextStage
+    ? getCompanionEvolutionProgress(
+        nextStage.stage,
+        companion.bond,
+        companion.behaviorMemories ?? [],
+        companion.traitChallenges ?? []
+      )
+    : null;
+  const stageProgress = evolutionProgress?.overallPercent ?? 100;
   const displayStage =
     import.meta.env.DEV && previewStage ? previewStage : companion.stage;
   const companionDisplayName =
@@ -131,10 +140,12 @@ export default function CompanionPanel({ student }: Props) {
     if (!selectedTheme || !canUnlock) return;
 
     const accumulatedBond = companion.bond ?? 0;
-    const actualStage = companionStageForBond(
-      accumulatedBond,
-      companion.unlocked ? companion.stage : 'egg'
-    );
+    const actualStage = companionStageForProgress({
+      bond: accumulatedBond,
+      currentStage: companion.unlocked ? companion.stage : 'egg',
+      behaviorMemories: companion.behaviorMemories ?? [],
+      traitChallenges: companion.traitChallenges ?? [],
+    });
 
     updateStudent(student.id, {
       companion: {
@@ -189,7 +200,12 @@ export default function CompanionPanel({ student }: Props) {
           ...companion,
           petPoints: availablePetPoints - action.petPointCost,
           bond: nextBond,
-          stage: companionStageForBond(nextBond, companion.stage),
+          stage: companionStageForProgress({
+            bond: nextBond,
+            currentStage: companion.stage,
+            behaviorMemories: companion.behaviorMemories ?? [],
+            traitChallenges: companion.traitChallenges ?? [],
+          }),
           celebratedStages: companion.celebratedStages ?? ['egg'],
           unlockedSkills,
           treasuresFound:
@@ -463,8 +479,8 @@ export default function CompanionPanel({ student }: Props) {
               {nextStage ? nextStage.labelHe : 'כל שלבי ההתפתחות הושלמו'}
             </span>
             <span className="text-magic-accent">
-              {nextStage
-                ? `${companion.bond} / ${nextStage.bondRequired}`
+              {nextStage && evolutionProgress
+                ? `${stageProgress}% מהדרך`
                 : 'מושלם 👑'}
             </span>
           </div>
@@ -478,17 +494,39 @@ export default function CompanionPanel({ student }: Props) {
               style={{ width: `${stageProgress}%` }}
             />
           </div>
-          {nextStage && (
+          {nextStage && evolutionProgress && (
             <>
-              <div className="mt-2 text-[10px] text-magic-soft/45">
-                חסרות עוד{' '}
-                {Math.max(0, nextStage.bondRequired - companion.bond)} נקודות
-                קשר לשלב הבא.
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <EvolutionRequirement
+                  label="קשר"
+                  value={`${evolutionProgress.bond}/${evolutionProgress.bondRequired}`}
+                  ready={evolutionProgress.bondReady}
+                />
+                <EvolutionRequirement
+                  label="ימי התנהגות"
+                  value={`${evolutionProgress.behaviorDays}/${evolutionProgress.behaviorDaysRequired}`}
+                  ready={evolutionProgress.behaviorDaysReady}
+                />
+                <EvolutionRequirement
+                  label="תכונות שונות"
+                  value={`${evolutionProgress.distinctTraits}/${evolutionProgress.distinctTraitsRequired}`}
+                  ready={evolutionProgress.distinctTraitsReady}
+                />
+                <EvolutionRequirement
+                  label="אתגרי אופי"
+                  value={
+                    evolutionProgress.completedChallengesRequired > 0
+                      ? `${evolutionProgress.completedChallenges}/${evolutionProgress.completedChallengesRequired}`
+                      : 'לא נדרש'
+                  }
+                  ready={evolutionProgress.completedChallengesReady}
+                />
               </div>
+
               <div className="mt-2 rounded-lg bg-black/15 px-3 py-2 text-[11px] leading-5 text-magic-soft/70">
-                כל נקודה שהמורה מעניקה בכיתה מוסיפה גם נקודת חיה. משתמשים
-                בנקודות החיה במשחק ובפעילויות כדי לחזק את הקשר ולהתפתח. קניות
-                בחנות אינן משפיעות עליהן.
+                {evolutionProgress.bondReady && !evolutionProgress.ready
+                  ? 'הקשר כבר מספיק חזק. עכשיו ההתפתחות מחכה להוכחות נוספות מההתנהגות בכיתה.'
+                  : 'החיה מתפתחת רק כשגם הקשר מתחזק וגם נבנה אופי אמיתי דרך ההתנהגות בכיתה. אותה תכונה באותו יום לא מקצרת את הדרך.'}
               </div>
             </>
           )}
@@ -768,6 +806,37 @@ export default function CompanionPanel({ student }: Props) {
     </>
   );
 }
+
+function EvolutionRequirement({
+  label,
+  value,
+  ready,
+}: {
+  label: string;
+  value: string;
+  ready: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-xl border px-3 py-2 text-center ${
+        ready
+          ? 'border-emerald-300/25 bg-emerald-500/10'
+          : 'border-white/10 bg-black/15'
+      }`}
+    >
+      <div className="text-[9px] font-bold text-magic-soft/50">{label}</div>
+      <div
+        className={`mt-1 text-xs font-black ${
+          ready ? 'text-emerald-200' : 'text-white'
+        }`}
+      >
+        {ready ? '✓ ' : ''}
+        {value}
+      </div>
+    </div>
+  );
+}
+
 
 function CompanionAvatar({
   stage,
