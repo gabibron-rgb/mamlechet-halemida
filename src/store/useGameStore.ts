@@ -79,6 +79,7 @@ type GameStore = {
   createStudent: (name: string, classId: string) => StudentId;
   getStudent: (id: StudentId) => StudentState | undefined;
   updateStudent: (id: StudentId, patch: Partial<StudentState>) => void;
+  awardTrophy: (studentId: StudentId, trophyTheme: string, caption: string) => void;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -336,6 +337,43 @@ export const useGameStore = create<GameStore>()(
             students: {
               ...state.students,
               [id]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      awardTrophy: (studentId, trophyTheme, caption) => {
+        let updatedStudent: StudentState | null = null;
+        const cleanTheme = trophyTheme.trim();
+        const cleanCaption = caption.trim();
+
+        if (!cleanTheme || !cleanCaption) return;
+
+        set((state) => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          updatedStudent = {
+            ...student,
+            trophies: [
+              ...student.trophies,
+              {
+                id: genId('trophy'),
+                trophyTheme: cleanTheme,
+                caption: cleanCaption,
+                awardedAt: Date.now(),
+              },
+            ],
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
             },
           };
         });

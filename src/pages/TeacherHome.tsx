@@ -5,6 +5,7 @@ import { useClassStore } from '../store/useClassStore';
 import { useGameStore } from '../store/useGameStore';
 import AwardModal from '../components/teacher/AwardModal';
 import ActivityLog from '../components/teacher/ActivityLog';
+import TrophyAwardModal from '../components/teacher/TrophyAwardModal';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
@@ -40,6 +41,11 @@ export default function TeacherHome() {
 
   const [awardOpen, setAwardOpen] = useState(false);
   const [preselected, setPreselected] = useState<string | null>(null);
+  const [trophyStudentId, setTrophyStudentId] = useState<string | null>(null);
+
+  const trophyStudent = trophyStudentId
+    ? students.find(student => student.id === trophyStudentId) ?? null
+    : null;
 
   if (!cls) {
     return (
@@ -113,20 +119,30 @@ export default function TeacherHome() {
               {students.map(st => (
                 <li
                   key={st.id}
-                  className="flex justify-between items-center bg-magic-bg/40 rounded-xl p-3"
+                  className="flex flex-col gap-3 bg-magic-bg/40 rounded-xl p-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex flex-col text-right">
                     <span className="text-white font-bold">{st.name}</span>
                     <span className="text-magic-soft text-xs">
-                      {st.points} נק׳ · רמה {st.level} · {st.xp} XP
+                      {st.points} נק׳ · רמה {st.level} · {st.xp} XP · {st.trophies.length} גביעים
                     </span>
                   </div>
-                  <button
-                    onClick={() => openAwardFor(st.id)}
-                    className="bg-magic-accent text-magic-bg text-sm font-bold py-2 px-3 rounded-lg hover:scale-105 transition-transform"
-                  >
-                    +נקודות
-                  </button>
+                  <div className="grid grid-cols-2 gap-2 sm:flex">
+                    <button
+                      type="button"
+                      onClick={() => setTrophyStudentId(st.id)}
+                      className="rounded-lg border border-yellow-300/35 bg-yellow-400/10 px-3 py-2 text-sm font-bold text-yellow-200 transition-colors hover:bg-yellow-400/20"
+                    >
+                      🏆 הענקת גביע
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => openAwardFor(st.id)}
+                      className="bg-magic-accent text-magic-bg text-sm font-bold py-2 px-3 rounded-lg hover:scale-105 transition-transform"
+                    >
+                      +נקודות
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -146,6 +162,12 @@ export default function TeacherHome() {
         classId={cls.id}
         students={students}
         preselectedStudentId={preselected}
+      />
+
+      <TrophyAwardModal
+        open={trophyStudentId !== null}
+        onClose={() => setTrophyStudentId(null)}
+        student={trophyStudent}
       />
     </div>
   );
