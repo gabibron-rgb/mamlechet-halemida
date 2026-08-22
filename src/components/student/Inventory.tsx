@@ -1,25 +1,29 @@
 import { useState } from 'react';
-import { getItemById } from '../../data/items';
+import { getItemById, ITEMS } from '../../data/items';
 import { COSMETIC_BY_ID } from '../../data/cosmetics';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import { canSell, sellValueOf } from '../../logic/economy';
 import RarityBadge from '../shared/RarityBadge';
-import { BOX_TIERS, RARITY_LABEL_HE } from '../../data/boxes';
+import { BOX_TIERS, RARITY_COLOR, RARITY_LABEL_HE } from '../../data/boxes';
 import type { BoxTier, Rarity } from '../../data/boxes';
 import { getBoxRewardPool, openBoxReward } from '../../logic/boxes';
 import { THEMES } from '../../data/themes';
 import type { ThemeId } from '../../data/themes';
 import Modal from '../shared/Modal';
+import ItemSprite from './ItemSprite';
 
 type Props = {
   student: StudentState;
+  onGoRoom: () => void;
 };
 
 type OpenedReward = {
+  itemId: string;
   nameHe: string;
   descriptionHe?: string;
   rarity: keyof typeof RARITY_LABEL_HE;
   pityTriggered: boolean;
+  isPreview?: boolean;
 };
 
 type BoxPreview = {
@@ -48,6 +52,35 @@ const RARITY_ORDER: Rarity[] = [
   'legendary',
 ];
 
+const REWARD_TITLE_HE: Record<Rarity, string> = {
+  common: 'גילית חפץ חדש!',
+  uncommon: 'חפץ יוצא דופן!',
+  rare: '💎 חפץ נדיר! 💎',
+  epic: '✨ פרס אפי! ✨',
+  legendary: '👑 חפץ אגדי!!! 👑',
+};
+
+const REWARD_SUBTITLE_HE: Record<Rarity, string> = {
+  common: 'החפץ נוסף למלאי שלך',
+  uncommon: 'מציאה מיוחדת נוספה למלאי שלך',
+  rare: 'לא בכל יום מגלים חפץ כזה',
+  epic: 'אנרגיית קסם אדירה ממלאת את הממלכה!',
+  legendary: 'אחד האוצרות הנדירים ביותר בממלכת הלמידה!',
+};
+
+const CELEBRATION_PARTICLES = [
+  { top: '7%', left: '8%', delay: '0s', rare: '✦', epic: '✦', legendary: '★' },
+  { top: '13%', left: '78%', delay: '0.2s', rare: '◆', epic: '◆', legendary: '✦' },
+  { top: '28%', left: '18%', delay: '0.5s', rare: '✧', epic: '✧', legendary: '✨' },
+  { top: '35%', left: '88%', delay: '0.8s', rare: '✦', epic: '✦', legendary: '★' },
+  { top: '55%', left: '6%', delay: '0.3s', rare: '◆', epic: '◆', legendary: '✧' },
+  { top: '63%', left: '82%', delay: '0.6s', rare: '✧', epic: '✧', legendary: '✨' },
+  { top: '79%', left: '15%', delay: '0.9s', rare: '✦', epic: '✦', legendary: '★' },
+  { top: '84%', left: '72%', delay: '0.4s', rare: '◆', epic: '◆', legendary: '✦' },
+  { top: '47%', left: '30%', delay: '0.7s', rare: '✧', epic: '✧', legendary: '✨' },
+  { top: '20%', left: '48%', delay: '1s', rare: '✦', epic: '✦', legendary: '★' },
+];
+
 const EXTRA_THEME_NAMES: Record<string, string> = {
   ballet: 'בלט',
 };
@@ -69,7 +102,7 @@ function formatPercent(value: number): string {
     : `${Number(percentage.toFixed(1))}%`;
 }
 
-export default function Inventory({ student }: Props) {
+export default function Inventory({ student, onGoRoom }: Props) {
   const updateStudent = useGameStore((s) => s.updateStudent);
 
   const [message, setMessage] = useState<string | null>(null);
@@ -167,12 +200,35 @@ export default function Inventory({ student }: Props) {
     rarityFilter !== 'all' ||
     placementFilter !== 'all';
 
+  const isRareReward = openedReward?.rarity === 'rare';
+  const isEpicReward = openedReward?.rarity === 'epic';
+  const isLegendaryReward = openedReward?.rarity === 'legendary';
+  const isMajorReward = isEpicReward || isLegendaryReward;
+  const isCelebrationReward = isRareReward || isMajorReward;
+
   function resetFilters() {
     setSearchQuery('');
     setKindFilter('all');
     setThemeFilter('all');
     setRarityFilter('all');
     setPlacementFilter('all');
+  }
+
+  function previewRewardCelebration(rarity: 'rare' | 'epic' | 'legendary') {
+    const item = ITEMS.find(
+      candidate => candidate.source === 'box' && candidate.rarity === rarity
+    );
+
+    if (!item) return;
+
+    setOpenedReward({
+      itemId: item.id,
+      nameHe: item.nameHe,
+      descriptionHe: item.descriptionHe,
+      rarity: item.rarity,
+      pityTriggered: false,
+      isPreview: true,
+    });
   }
 
   const previewBox = boxPreview ? BOX_TIERS[boxPreview.tier] : null;
@@ -272,6 +328,7 @@ export default function Inventory({ student }: Props) {
     });
 
     setOpenedReward({
+      itemId: reward.item.id,
       nameHe: reward.item.nameHe,
       descriptionHe: reward.item.descriptionHe,
       rarity: reward.item.rarity,
@@ -379,29 +436,240 @@ export default function Inventory({ student }: Props) {
       )}
 
       {openedReward && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-6">
-          <div className="w-full max-w-md rounded-3xl bg-magic-panel border border-magic-accent/50 p-6 text-center shadow-2xl">
-            <div className="text-6xl mb-4 animate-bounce">🎁</div>
+        <div
+          className={`fixed inset-0 z-50 flex items-center justify-center overflow-hidden p-4 backdrop-blur-sm sm:p-6 ${
+            isLegendaryReward
+              ? 'bg-amber-950/90'
+              : isEpicReward
+                ? 'bg-purple-950/90'
+                : isRareReward
+                  ? 'bg-blue-950/85'
+                  : 'bg-black/70'
+          }`}
+        >
+          {isCelebrationReward && (
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 overflow-hidden"
+            >
+              {isMajorReward && (
+                <>
+                  <div
+                    className={`absolute left-1/2 top-1/2 h-[78vmin] w-[78vmin] -translate-x-1/2 -translate-y-1/2 animate-spin rounded-full border-4 border-dashed border-t-transparent opacity-40 ${
+                      isLegendaryReward
+                        ? 'border-yellow-300'
+                        : 'border-fuchsia-400'
+                    }`}
+                  />
+                  <div
+                    className={`absolute left-1/2 top-1/2 h-[48vmin] w-[48vmin] -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full border-4 opacity-25 ${
+                      isLegendaryReward
+                        ? 'border-amber-200'
+                        : 'border-purple-300'
+                    }`}
+                  />
+                </>
+              )}
 
-            <div className="text-magic-accent font-black text-2xl mb-2">
-              קיבלת פרס!
+              {(isRareReward
+                ? CELEBRATION_PARTICLES.slice(0, 6)
+                : CELEBRATION_PARTICLES
+              ).map((particle, index) => (
+                <span
+                  key={`${particle.top}-${particle.left}`}
+                  className={`absolute animate-bounce font-black ${
+                    index % 3 === 0
+                      ? 'text-4xl'
+                      : index % 3 === 1
+                        ? 'text-3xl'
+                        : 'text-2xl'
+                  } ${
+                    isLegendaryReward
+                      ? 'text-yellow-200'
+                      : isEpicReward
+                        ? 'text-fuchsia-300'
+                        : 'text-blue-300'
+                  }`}
+                  style={{
+                    top: particle.top,
+                    left: particle.left,
+                    animationDelay: particle.delay,
+                    textShadow: isLegendaryReward
+                      ? '0 0 18px rgba(250, 204, 21, 0.95)'
+                      : isEpicReward
+                        ? '0 0 18px rgba(217, 70, 239, 0.95)'
+                        : '0 0 14px rgba(59, 130, 246, 0.9)',
+                  }}
+                >
+                  {isLegendaryReward
+                    ? particle.legendary
+                    : isEpicReward
+                      ? particle.epic
+                      : particle.rare}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div
+            className={`relative z-10 max-h-[92vh] w-full overflow-y-auto rounded-3xl border p-6 text-center shadow-2xl ${
+              isLegendaryReward
+                ? 'max-w-lg bg-gradient-to-b from-amber-950 via-magic-panel to-purple-950'
+                : isEpicReward
+                  ? 'max-w-lg bg-gradient-to-b from-purple-950 via-magic-panel to-indigo-950'
+                  : isRareReward
+                    ? 'max-w-md bg-gradient-to-b from-blue-950 via-magic-panel to-indigo-950'
+                    : 'max-w-md bg-magic-panel'
+            }`}
+            style={{
+              borderColor: `${RARITY_COLOR[openedReward.rarity]}99`,
+              boxShadow: isLegendaryReward
+                ? `0 0 90px ${RARITY_COLOR.legendary}aa`
+                : isEpicReward
+                  ? `0 0 70px ${RARITY_COLOR.epic}99`
+                  : isRareReward
+                    ? `0 0 52px ${RARITY_COLOR.rare}88`
+                    : `0 0 38px ${RARITY_COLOR[openedReward.rarity]}45`,
+            }}
+          >
+            {openedReward.isPreview && (
+              <div className="mb-3 inline-block rounded-full border border-white/20 bg-black/25 px-3 py-1 text-[10px] font-black text-white/70">
+                תצוגת בדיקה בלבד
+              </div>
+            )}
+
+            <div
+              className={`mb-2 animate-bounce ${
+                isLegendaryReward
+                  ? 'text-7xl'
+                  : isEpicReward
+                    ? 'text-6xl'
+                    : isRareReward
+                      ? 'text-6xl'
+                      : 'text-5xl'
+              }`}
+            >
+              {isLegendaryReward
+                ? '👑'
+                : isEpicReward
+                  ? '💥'
+                  : isRareReward
+                    ? '💎'
+                    : '🎁'}
             </div>
 
-            <div className="bg-magic-bg/50 rounded-2xl p-4 mb-4">
-              <div className="text-5xl mb-3">✨</div>
+            <div
+              className={`mb-1 font-black ${
+                isLegendaryReward
+                  ? 'text-4xl text-yellow-300'
+                  : isEpicReward
+                    ? 'text-3xl text-fuchsia-300'
+                    : isRareReward
+                      ? 'text-3xl text-blue-300'
+                      : 'text-2xl text-magic-accent'
+              }`}
+              style={
+                isCelebrationReward
+                  ? {
+                      textShadow: `0 0 20px ${RARITY_COLOR[openedReward.rarity]}`,
+                    }
+                  : undefined
+              }
+            >
+              {REWARD_TITLE_HE[openedReward.rarity]}
+            </div>
 
-              <div className="text-white font-black text-xl mb-1">
+            <div
+              className={`mb-4 ${
+                isCelebrationReward
+                  ? 'text-sm font-bold text-white/80'
+                  : 'text-xs text-magic-soft/60'
+              }`}
+            >
+              {openedReward.isPreview
+                ? 'התצוגה אינה צורכת קופסה ואינה מוסיפה חפץ למלאי'
+                : REWARD_SUBTITLE_HE[openedReward.rarity]}
+            </div>
+
+            <div
+              className={`relative mb-4 overflow-hidden rounded-2xl border p-4 ${
+                isLegendaryReward
+                  ? 'bg-gradient-to-br from-yellow-500/20 via-magic-bg/70 to-purple-700/25'
+                  : isEpicReward
+                    ? 'bg-gradient-to-br from-fuchsia-600/20 via-magic-bg/70 to-indigo-700/25'
+                    : isRareReward
+                      ? 'bg-gradient-to-br from-blue-500/20 via-magic-bg/70 to-indigo-700/20'
+                      : 'bg-magic-bg/55'
+              }`}
+              style={{
+                borderColor: `${RARITY_COLOR[openedReward.rarity]}66`,
+              }}
+            >
+              <div
+                className="pointer-events-none absolute inset-0 opacity-20"
+                style={{
+                  background: `radial-gradient(circle, ${RARITY_COLOR[openedReward.rarity]} 0%, transparent 68%)`,
+                }}
+              />
+
+              <div
+                className={`relative mx-auto mb-3 max-w-full ${
+                  isLegendaryReward
+                    ? 'h-60 w-60'
+                    : isEpicReward
+                      ? 'h-52 w-52'
+                      : isRareReward
+                        ? 'h-48 w-48'
+                        : 'h-44 w-44'
+                }`}
+              >
+                {isMajorReward && (
+                  <>
+                    <div
+                      className={`absolute inset-1 animate-spin rounded-full border-4 border-t-transparent ${
+                        isLegendaryReward
+                          ? 'border-yellow-300'
+                          : 'border-fuchsia-400'
+                      }`}
+                    />
+                    <div
+                      className={`absolute inset-7 animate-ping rounded-full border-4 opacity-35 ${
+                        isLegendaryReward
+                          ? 'border-amber-100'
+                          : 'border-purple-200'
+                      }`}
+                    />
+                  </>
+                )}
+
+                {isRareReward && (
+                  <div className="absolute inset-2 animate-spin rounded-full border-2 border-blue-400 border-t-transparent" />
+                )}
+
+                <div className="relative z-10 h-full w-full animate-pulse p-3">
+                  <ItemSprite
+                    itemId={openedReward.itemId}
+                    rarity={openedReward.rarity}
+                  />
+                </div>
+              </div>
+
+              <div
+                className={`relative mb-1 font-black text-white ${
+                  isCelebrationReward ? 'text-2xl' : 'text-xl'
+                }`}
+              >
                 {openedReward.nameHe}
               </div>
 
               {openedReward.descriptionHe && (
-                <div className="text-magic-soft/80 text-sm mb-2">
+                <div className="relative mb-3 text-sm text-magic-soft/80">
                   {openedReward.descriptionHe}
                 </div>
               )}
 
-              <div className="inline-block rounded-full border border-magic-accent/60 px-3 py-1 text-xs text-magic-accent">
-                {RARITY_LABEL_HE[openedReward.rarity]}
+              <div className="relative">
+                <RarityBadge rarity={openedReward.rarity} />
               </div>
             </div>
 
@@ -411,13 +679,36 @@ export default function Inventory({ student }: Props) {
               </div>
             )}
 
-            <button
-              type="button"
-              onClick={() => setOpenedReward(null)}
-              className="w-full rounded-xl bg-magic-accent py-3 font-bold text-magic-bg"
-            >
-              מעולה!
-            </button>
+            {openedReward.isPreview ? (
+              <button
+                type="button"
+                onClick={() => setOpenedReward(null)}
+                className="w-full rounded-xl bg-white/15 py-3 font-bold text-white hover:bg-white/20"
+              >
+                סגירת תצוגת הבדיקה
+              </button>
+            ) : (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setOpenedReward(null)}
+                  className="rounded-xl bg-magic-accent py-3 font-bold text-magic-bg"
+                >
+                  להישאר במלאי
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenedReward(null);
+                    onGoRoom();
+                  }}
+                  className="rounded-xl border border-magic-accent/40 bg-magic-accent/10 py-3 font-bold text-magic-accent hover:bg-magic-accent/20"
+                >
+                  לעבור לחדר 🏠
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -425,6 +716,43 @@ export default function Inventory({ student }: Props) {
       {message && (
         <div className="bg-magic-soft/20 border border-magic-soft text-magic-soft rounded-xl p-2 mb-3 text-sm text-center">
           {message}
+        </div>
+      )}
+
+      {import.meta.env.DEV && (
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-fuchsia-400/25 bg-fuchsia-500/10 p-3">
+          <div>
+            <div className="text-sm font-black text-fuchsia-200">
+              בדיקת חגיגת זכייה — מקומי בלבד
+            </div>
+            <div className="text-[11px] text-magic-soft/55">
+              לא צורך קופסה ולא משנה את המלאי
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => previewRewardCelebration('rare')}
+              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-black text-white hover:bg-blue-500"
+            >
+              הצג נדיר
+            </button>
+            <button
+              type="button"
+              onClick={() => previewRewardCelebration('epic')}
+              className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-black text-white hover:bg-purple-500"
+            >
+              הצג אפי
+            </button>
+            <button
+              type="button"
+              onClick={() => previewRewardCelebration('legendary')}
+              className="rounded-lg bg-yellow-400 px-3 py-1.5 text-xs font-black text-yellow-950 hover:bg-yellow-300"
+            >
+              הצג אגדי
+            </button>
+          </div>
         </div>
       )}
 

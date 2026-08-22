@@ -214,7 +214,9 @@ export default function StudentHome() {
 
           {tab === 'shop' && <Shop student={student} />}
 
-          {tab === 'inventory' && <Inventory student={student} />}
+          {tab === 'inventory' && (
+            <Inventory student={student} onGoRoom={() => setTab('room')} />
+          )}
 
           {tab === 'collection' && <CollectionAlbum student={student} />}
         </div>
