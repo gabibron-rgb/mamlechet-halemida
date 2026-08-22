@@ -26,6 +26,7 @@ import CompanionSkillsPanel from './CompanionSkillsPanel';
 import CompanionBehaviorProfile from './CompanionBehaviorProfile';
 import CompanionTraitChallengePanel from './CompanionTraitChallengePanel';
 import CompanionJournal from './CompanionJournal';
+import CompanionReactionCard from './CompanionReactionCard';
 
 type Props = {
   student: StudentState;
@@ -424,6 +425,12 @@ export default function CompanionPanel({ student }: Props) {
           petName={companionDisplayName}
           activeFlourishes={companion.activeFlourishes ?? []}
           hasLegendaryBond={unlockedSkills.includes('legendary_bond')}
+        />
+
+        <CompanionReactionCard
+          companion={companion}
+          petName={companionDisplayName}
+          motif={companionVisuals.motif}
         />
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
