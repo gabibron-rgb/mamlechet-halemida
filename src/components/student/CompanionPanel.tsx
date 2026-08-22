@@ -30,6 +30,7 @@ const STAGE_LABEL_HE: Record<CompanionStage, string> = {
   hatchling: 'חיית מחמד קטנטנה',
   young: 'חיית מחמד צעירה',
   grown: 'חיית מחמד בוגרת',
+  legendary: 'חיית מחמד אגדית',
 };
 
 const STAGE_CEREMONY: Record<
@@ -48,8 +49,14 @@ const STAGE_CEREMONY: Record<
   },
   grown: {
     title: 'התפתחות מושלמת! 👑',
-    description: 'חיית המחמד הגיעה לשלב הבוגר והשלימה את מסע ההתפתחות.',
-    button: 'לחגוג יחד 🏆',
+    description: 'חיית המחמד הגיעה לשלב הבוגר, אבל עוד מחכה לה יעד אגדי.',
+    button: 'להמשיך לעבר האגדה 🏆',
+  },
+  legendary: {
+    title: 'התפתחות אגדית! 🌟👑🌟',
+    description:
+      'הקשר ביניכם הגיע לעוצמה נדירה והיא קיבלה את הצורה האגדית שלה!',
+    button: 'לחשוף את הכוח האגדי ✨',
   },
 };
 
@@ -480,9 +487,16 @@ export default function CompanionPanel({ student }: Props) {
             <div className="text-xs font-black text-fuchsia-200">
               בדיקת שלבי התפתחות — מקומית בלבד
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {(['egg', 'hatchling', 'young', 'grown'] as CompanionStage[]).map(
-                stage => (
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {(
+                [
+                  'egg',
+                  'hatchling',
+                  'young',
+                  'grown',
+                  'legendary',
+                ] as CompanionStage[]
+              ).map(stage => (
                   <button
                     type="button"
                     key={stage}
@@ -495,8 +509,7 @@ export default function CompanionPanel({ student }: Props) {
                   >
                     {STAGE_LABEL_HE[stage]}
                   </button>
-                )
-              )}
+                ))}
             </div>
             <div className="mt-3 flex flex-col justify-center gap-2 sm:flex-row">
               <button
@@ -631,13 +644,36 @@ function CompanionAvatar({
       ? 'h-36 w-36'
       : stage === 'young'
         ? 'h-44 w-40'
-        : 'h-48 w-44';
+        : stage === 'grown'
+          ? 'h-48 w-44'
+          : 'h-52 w-48';
   const eyeSize = stage === 'hatchling' ? 'h-7 w-7' : 'h-8 w-8';
+  const isLegendary = stage === 'legendary';
+  const isChessPegasus = isLegendary && visuals.theme === 'chess';
 
   return (
     <div className="relative mx-auto my-8 flex h-60 w-60 items-end justify-center">
-      {stage === 'grown' && (
-        <div className="absolute top-0 z-20 animate-bounce text-5xl">👑</div>
+      {(stage === 'grown' || isLegendary) && (
+        <div
+          className={`absolute top-0 z-30 text-5xl ${
+            isLegendary ? 'animate-pulse' : 'animate-bounce'
+          }`}
+        >
+          👑
+        </div>
+      )}
+      {isLegendary && (
+        <div className="absolute inset-4 animate-pulse rounded-full border-2 border-yellow-200/60 shadow-[0_0_70px_rgba(250,204,21,0.65)]" />
+      )}
+      {isChessPegasus && (
+        <>
+          <div className="absolute left-0 top-24 z-0 -rotate-12 text-8xl drop-shadow-[0_0_18px_rgba(255,255,255,0.75)]">
+            🪽
+          </div>
+          <div className="absolute right-0 top-24 z-0 rotate-12 scale-x-[-1] text-8xl drop-shadow-[0_0_18px_rgba(255,255,255,0.75)]">
+            🪽
+          </div>
+        </>
       )}
       {stage !== 'hatchling' && (
         <>
@@ -648,10 +684,12 @@ function CompanionAvatar({
 
       <div
         aria-label={`${STAGE_LABEL_HE[stage]} בשם ${petName} מעולם ${themeName}`}
-        className={`relative z-10 flex ${bodySize} animate-[bounce_3s_ease-in-out_infinite] flex-col items-center rounded-[48%_48%_42%_42%] border-4 border-white/35 shadow-2xl`}
+        className={`relative z-10 flex ${bodySize} animate-[bounce_3s_ease-in-out_infinite] flex-col items-center rounded-[48%_48%_42%_42%] border-4 shadow-2xl ${
+          isLegendary ? 'border-yellow-200/75' : 'border-white/35'
+        }`}
         style={{
           background: `radial-gradient(circle at 35% 22%, rgba(255,255,255,0.8), transparent 18%), linear-gradient(145deg, ${visuals.eggColor}, ${visuals.eggColor}99 55%, rgba(20,10,45,0.9))`,
-          boxShadow: `0 0 ${stage === 'grown' ? 70 : 48}px ${visuals.eggColor}85`,
+          boxShadow: `0 0 ${isLegendary ? 95 : stage === 'grown' ? 70 : 48}px ${visuals.eggColor}85`,
         }}
       >
         <div
@@ -678,6 +716,11 @@ function CompanionAvatar({
         <div className="relative z-10 mt-auto mb-5 rounded-full border border-white/35 bg-white/20 px-3 py-2 text-3xl drop-shadow-lg">
           {visuals.motif}
         </div>
+        {isLegendary && (
+          <div className="absolute -bottom-3 z-20 rounded-full border border-yellow-200/50 bg-purple-950/90 px-3 py-1 text-[10px] font-black tracking-wide text-yellow-200 shadow-lg">
+            אגדי
+          </div>
+        )}
       </div>
 
       <div className="absolute bottom-0 h-5 w-40 rounded-[50%] bg-black/35 blur-sm" />
@@ -700,12 +743,31 @@ function EvolutionCeremony({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-purple-950/90 p-4 backdrop-blur-md"
+      className={`fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden p-4 backdrop-blur-md ${
+        stage === 'legendary' ? 'bg-indigo-950/95' : 'bg-purple-950/90'
+      }`}
       role="dialog"
       aria-modal="true"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.2),transparent_60%)]" />
-      <div className="relative w-full max-w-md rounded-3xl border border-yellow-300/60 bg-gradient-to-b from-purple-900 via-magic-panel to-indigo-950 p-7 text-center shadow-[0_0_90px_rgba(250,204,21,0.45)]">
+      <div
+        className={`absolute inset-0 ${
+          stage === 'legendary'
+            ? 'animate-pulse bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.38),rgba(192,38,211,0.16)_38%,transparent_68%)]'
+            : 'bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.2),transparent_60%)]'
+        }`}
+      />
+      <div
+        className={`relative w-full max-w-md rounded-3xl bg-gradient-to-b from-purple-900 via-magic-panel to-indigo-950 p-7 text-center ${
+          stage === 'legendary'
+            ? 'border-2 border-yellow-200 shadow-[0_0_130px_rgba(250,204,21,0.72)]'
+            : 'border border-yellow-300/60 shadow-[0_0_90px_rgba(250,204,21,0.45)]'
+        }`}
+      >
+        {stage === 'legendary' && (
+          <div className="mb-2 animate-pulse text-sm font-black tracking-[0.28em] text-yellow-200">
+            LEGENDARY
+          </div>
+        )}
         <CompanionAvatar
           stage={stage}
           visuals={visuals}

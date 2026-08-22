@@ -1,17 +1,24 @@
 import type { ThemeId } from './themes';
 
-export type CompanionStage = 'egg' | 'hatchling' | 'young' | 'grown';
+export type CompanionStage =
+  | 'egg'
+  | 'hatchling'
+  | 'young'
+  | 'grown'
+  | 'legendary';
 
 export const COMPANION_STAGE_ORDER: CompanionStage[] = [
   'egg',
   'hatchling',
   'young',
   'grown',
+  'legendary',
 ];
 
 export const HATCH_BOND_REQUIRED = 30;
 export const YOUNG_BOND_REQUIRED = 90;
 export const GROWN_BOND_REQUIRED = 180;
+export const LEGENDARY_BOND_REQUIRED = 600;
 
 export type CompanionNextStage = {
   stage: CompanionStage;
@@ -25,7 +32,8 @@ export function companionStageForBond(
 ): CompanionStage {
   let stageFromBond: CompanionStage = 'egg';
 
-  if (bond >= GROWN_BOND_REQUIRED) stageFromBond = 'grown';
+  if (bond >= LEGENDARY_BOND_REQUIRED) stageFromBond = 'legendary';
+  else if (bond >= GROWN_BOND_REQUIRED) stageFromBond = 'grown';
   else if (bond >= YOUNG_BOND_REQUIRED) stageFromBond = 'young';
   else if (bond >= HATCH_BOND_REQUIRED) stageFromBond = 'hatchling';
 
@@ -57,6 +65,14 @@ export function nextCompanionStage(stage: CompanionStage): CompanionNextStage {
       stage: 'grown',
       bondRequired: GROWN_BOND_REQUIRED,
       labelHe: 'גדילה לחיית מחמד בוגרת',
+    };
+  }
+
+  if (stage === 'grown') {
+    return {
+      stage: 'legendary',
+      bondRequired: LEGENDARY_BOND_REQUIRED,
+      labelHe: 'התפתחות אגדית',
     };
   }
 
