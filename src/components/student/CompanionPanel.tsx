@@ -24,6 +24,7 @@ import { useGameStore, type StudentState } from '../../store/useGameStore';
 import CompanionFlourishEffects from './CompanionFlourishEffects';
 import CompanionSkillsPanel from './CompanionSkillsPanel';
 import CompanionBehaviorProfile from './CompanionBehaviorProfile';
+import CompanionTraitChallengePanel from './CompanionTraitChallengePanel';
 
 type Props = {
   student: StudentState;
@@ -484,6 +485,8 @@ export default function CompanionPanel({ student }: Props) {
             </>
           )}
         </div>
+
+        <CompanionTraitChallengePanel companion={companion} />
 
         <CompanionBehaviorProfile companion={companion} />
 

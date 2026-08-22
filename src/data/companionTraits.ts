@@ -108,11 +108,32 @@ export function getCompanionTraitCounts(
     resourcefulness: 0,
   };
 
+  const countedDays = new Set<string>();
+
   memories.forEach(memory => {
+    const date = new Date(memory.awardedAt);
+    const dayKey = [
+      date.getFullYear(),
+      String(date.getMonth() + 1).padStart(2, '0'),
+      String(date.getDate()).padStart(2, '0'),
+    ].join('-');
+    const evidenceKey = `${memory.traitId}:${dayKey}`;
+
+    if (countedDays.has(evidenceKey)) return;
+    countedDays.add(evidenceKey);
     counts[memory.traitId] += 1;
   });
 
   return counts;
+}
+
+export function getCompanionTraitEvidenceCount(
+  memories: CompanionBehaviorMemory[]
+): number {
+  return Object.values(getCompanionTraitCounts(memories)).reduce(
+    (sum, count) => sum + count,
+    0
+  );
 }
 
 export function getDominantCompanionTrait(

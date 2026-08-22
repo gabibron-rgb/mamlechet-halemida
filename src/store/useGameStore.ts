@@ -17,7 +17,14 @@ import {
   companionTraitForReason,
   normalizeCompanionBehaviorMemories,
   type CompanionBehaviorMemory,
+  type CompanionTraitId,
 } from '../data/companionTraits';
+import {
+  getLatestCompanionTraitChallenge,
+  normalizeCompanionTraitChallenges,
+  reconcileLatestCompanionTraitChallenge,
+  type CompanionTraitChallenge,
+} from '../data/companionTraitChallenges';
 
 export type StudentId = string;
 
@@ -53,6 +60,7 @@ export type CompanionState = {
   unlockedSkills: string[];
   treasuresFound: number;
   behaviorMemories: CompanionBehaviorMemory[];
+  traitChallenges: CompanionTraitChallenge[];
 };
 
 export type CompanionSkillUnlockResult =
@@ -124,6 +132,14 @@ type GameStore = {
     amount: number,
     sourceActivityId: string
   ) => Promise<void>;
+  assignCompanionTraitChallenge: (
+    studentId: StudentId,
+    traitId: CompanionTraitId,
+    targetDays: number
+  ) => Promise<boolean>;
+  cancelCompanionTraitChallenge: (
+    studentId: StudentId
+  ) => Promise<boolean>;
   awardCompanionFlourish: (
     studentId: StudentId,
     flourishId: string,
@@ -259,6 +275,7 @@ function defaultStudent(name: string, classId: string): StudentState {
       unlockedSkills: [],
       treasuresFound: 0,
       behaviorMemories: [],
+      traitChallenges: [],
     },
     pastRewards: [],
     trophies: [],
@@ -330,6 +347,9 @@ function studentFromSupabase(row: any, classId: string): StudentState {
           : 0,
       behaviorMemories: normalizeCompanionBehaviorMemories(
         meta.companion?.behaviorMemories
+      ),
+      traitChallenges: normalizeCompanionTraitChallenges(
+        meta.companion?.traitChallenges
       ),
     },
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
@@ -601,6 +621,7 @@ export const useGameStore = create<GameStore>()(
         const safeAmount = Math.max(0, Math.round(amount));
         const cleanActivityId = sourceActivityId.trim();
         const traitId = companionTraitForReason(reasonId);
+        const awardedAt = Date.now();
         let updatedStudent: StudentState | null = null;
 
         set(state => {
@@ -625,11 +646,16 @@ export const useGameStore = create<GameStore>()(
                     traitId,
                     reasonId: reasonId as string,
                     pointAmount: safeAmount,
-                    awardedAt: Date.now(),
+                    awardedAt,
                     source: 'points' as const,
                   },
                 ]
               : behaviorMemories;
+          const nextChallenges = reconcileLatestCompanionTraitChallenge(
+            student.companion.traitChallenges ?? [],
+            nextMemories,
+            awardedAt
+          );
 
           updatedStudent = {
             ...student,
@@ -639,6 +665,7 @@ export const useGameStore = create<GameStore>()(
               petPoints:
                 (student.companion.petPoints ?? 0) + safeAmount,
               behaviorMemories: nextMemories,
+              traitChallenges: nextChallenges,
             },
           };
 
@@ -668,6 +695,15 @@ export const useGameStore = create<GameStore>()(
           const student = state.students[studentId];
           if (!student) return state;
 
+          const nextMemories = (
+            student.companion.behaviorMemories ?? []
+          ).filter(memory => memory.id !== cleanActivityId);
+          const nextChallenges = reconcileLatestCompanionTraitChallenge(
+            student.companion.traitChallenges ?? [],
+            nextMemories,
+            Date.now()
+          );
+
           updatedStudent = {
             ...student,
             points: Math.max(0, student.points - safeAmount),
@@ -677,9 +713,8 @@ export const useGameStore = create<GameStore>()(
                 0,
                 (student.companion.petPoints ?? 0) - safeAmount
               ),
-              behaviorMemories: (
-                student.companion.behaviorMemories ?? []
-              ).filter(memory => memory.id !== cleanActivityId),
+              behaviorMemories: nextMemories,
+              traitChallenges: nextChallenges,
             },
           };
 
@@ -696,6 +731,84 @@ export const useGameStore = create<GameStore>()(
         }
       },
 
+      assignCompanionTraitChallenge: async (
+        studentId,
+        traitId,
+        targetDays
+      ) => {
+        const safeTargetDays = Math.max(1, Math.min(30, Math.round(targetDays)));
+        let updatedStudent: StudentState | null = null;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const challenges = student.companion.traitChallenges ?? [];
+          const latest = getLatestCompanionTraitChallenge(challenges);
+          if (latest && latest.completedAt === null) return state;
+
+          updatedStudent = {
+            ...student,
+            companion: {
+              ...student.companion,
+              traitChallenges: [
+                ...challenges,
+                {
+                  id: genId('trait-challenge'),
+                  traitId,
+                  targetDays: safeTargetDays,
+                  assignedAt: Date.now(),
+                  completedAt: null,
+                },
+              ],
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+        await syncStudentToSupabase(updatedStudent);
+        return true;
+      },
+
+      cancelCompanionTraitChallenge: async studentId => {
+        let updatedStudent: StudentState | null = null;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const challenges = student.companion.traitChallenges ?? [];
+          const latest = getLatestCompanionTraitChallenge(challenges);
+          if (!latest || latest.completedAt !== null) return state;
+
+          updatedStudent = {
+            ...student,
+            companion: {
+              ...student.companion,
+              traitChallenges: challenges.slice(0, -1),
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+        await syncStudentToSupabase(updatedStudent);
+        return true;
+      },
+
       awardCompanionFlourish: async (
         studentId,
         flourishId,
@@ -705,6 +818,7 @@ export const useGameStore = create<GameStore>()(
         const cleanFlourishId = flourishId.trim();
         const safePointBonus = Math.max(0, Math.round(pointBonus));
         const flourish = getCompanionFlourish(cleanFlourishId);
+        const awardedAt = Date.now();
 
         if (!flourish) return false;
 
@@ -727,11 +841,16 @@ export const useGameStore = create<GameStore>()(
                     traitId,
                     reasonId: flourish.reasonId,
                     pointAmount: safePointBonus,
-                    awardedAt: Date.now(),
+                    awardedAt,
                     source: 'flourish' as const,
                   },
                 ]
               : behaviorMemories;
+          const nextChallenges = reconcileLatestCompanionTraitChallenge(
+            student.companion.traitChallenges ?? [],
+            nextMemories,
+            awardedAt
+          );
 
           updatedStudent = {
             ...student,
@@ -745,6 +864,7 @@ export const useGameStore = create<GameStore>()(
               celebratedStages:
                 student.companion.celebratedStages ?? ['egg'],
               behaviorMemories: nextMemories,
+              traitChallenges: nextChallenges,
             },
           };
 
@@ -778,6 +898,15 @@ export const useGameStore = create<GameStore>()(
           const ownedFlourishes = student.companion.ownedFlourishes ?? [];
           if (!ownedFlourishes.includes(cleanFlourishId)) return state;
 
+          const nextMemories = (
+            student.companion.behaviorMemories ?? []
+          ).filter(memory => memory.id !== `flourish:${cleanFlourishId}`);
+          const nextChallenges = reconcileLatestCompanionTraitChallenge(
+            student.companion.traitChallenges ?? [],
+            nextMemories,
+            Date.now()
+          );
+
           updatedStudent = {
             ...student,
             points: Math.max(0, student.points - safePointBonus),
@@ -793,9 +922,8 @@ export const useGameStore = create<GameStore>()(
               activeFlourishes: (
                 student.companion.activeFlourishes ?? []
               ).filter(id => id !== cleanFlourishId),
-              behaviorMemories: (
-                student.companion.behaviorMemories ?? []
-              ).filter(memory => memory.id !== `flourish:${cleanFlourishId}`),
+              behaviorMemories: nextMemories,
+              traitChallenges: nextChallenges,
             },
           };
 

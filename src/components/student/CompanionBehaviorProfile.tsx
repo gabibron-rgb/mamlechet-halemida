@@ -1,5 +1,6 @@
 import {
   COMPANION_TRAITS,
+  getCompanionTraitEvidenceCount,
   getCompanionTraitCounts,
   getDominantCompanionTrait,
 } from '../../data/companionTraits';
@@ -13,6 +14,7 @@ type Props = {
 export default function CompanionBehaviorProfile({ companion }: Props) {
   const memories = companion.behaviorMemories ?? [];
   const counts = getCompanionTraitCounts(memories);
+  const evidenceCount = getCompanionTraitEvidenceCount(memories);
   const dominantTrait = getDominantCompanionTrait(memories);
   const highestCount = Math.max(1, ...Object.values(counts));
   const recentMemories = [...memories]
@@ -28,11 +30,11 @@ export default function CompanionBehaviorProfile({ companion }: Props) {
           </h3>
           <p className="mt-1 max-w-xl text-xs leading-5 text-magic-soft/65">
             האופי נבנה רק מהתנהגויות שהמורה בחרה לציין בזמן הענקת נקודות.
-            כל הענקה מנומקת יוצרת זיכרון אחד, ללא קשר לכמות הנקודות.
+            אותה תכונה יכולה להתחזק פעם אחת בלבד בכל יום לימודים.
           </p>
         </div>
         <div className="rounded-xl bg-black/20 px-4 py-2 text-center text-xs font-bold text-violet-100">
-          {memories.length} זיכרונות מהכיתה
+          {evidenceCount} ימי הוכחה מהכיתה
         </div>
       </div>
 
@@ -85,7 +87,7 @@ export default function CompanionBehaviorProfile({ companion }: Props) {
                     {trait.nameHe}
                   </div>
                   <div className="mt-0.5 text-[9px] text-magic-soft/45">
-                    {count} זיכרונות
+                    {count} ימים
                   </div>
                 </div>
                 <div className="text-2xl">{trait.emoji}</div>

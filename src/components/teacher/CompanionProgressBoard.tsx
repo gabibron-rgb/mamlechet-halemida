@@ -7,9 +7,17 @@ import {
   type CompanionStage,
 } from '../../data/companionWorlds';
 import { COMPANION_SKILLS } from '../../data/companionSkills';
-import { getDominantCompanionTrait } from '../../data/companionTraits';
+import {
+  getCompanionTrait,
+  getDominantCompanionTrait,
+} from '../../data/companionTraits';
+import {
+  getCompanionTraitChallengeProgress,
+  getLatestCompanionTraitChallenge,
+} from '../../data/companionTraitChallenges';
 import { THEMES, type ThemeId } from '../../data/themes';
 import type { StudentState } from '../../store/useGameStore';
+import CompanionTraitChallengeModal from './CompanionTraitChallengeModal';
 
 type Props = {
   students: StudentState[];
@@ -54,6 +62,9 @@ function hasPendingCeremony(student: StudentState): boolean {
 export default function CompanionProgressBoard({ students }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>('name');
+  const [challengeStudentId, setChallengeStudentId] = useState<string | null>(
+    null
+  );
 
   const rows = useMemo(() => {
     const nextRows = students.map(student => {
@@ -72,6 +83,18 @@ export default function CompanionProgressBoard({ students }: Props) {
       const dominantTrait = getDominantCompanionTrait(
         companion.behaviorMemories ?? []
       );
+      const latestChallenge = getLatestCompanionTraitChallenge(
+        companion.traitChallenges ?? []
+      );
+      const challengeTrait = latestChallenge
+        ? getCompanionTrait(latestChallenge.traitId)
+        : null;
+      const challengeProgress = latestChallenge
+        ? getCompanionTraitChallengeProgress(
+            latestChallenge,
+            companion.behaviorMemories ?? []
+          )
+        : 0;
 
       return {
         student,
@@ -81,6 +104,9 @@ export default function CompanionProgressBoard({ students }: Props) {
         progress,
         visuals,
         dominantTrait,
+        latestChallenge,
+        challengeTrait,
+        challengeProgress,
         pendingCeremony: hasPendingCeremony(student),
         stageIndex: COMPANION_STAGE_ORDER.indexOf(companion.stage),
       };
@@ -131,6 +157,15 @@ export default function CompanionProgressBoard({ students }: Props) {
     (sum, student) => sum + Math.max(0, student.companion.bond ?? 0),
     0
   );
+  const activeChallengeCount = students.filter(student => {
+    const latest = getLatestCompanionTraitChallenge(
+      student.companion.traitChallenges ?? []
+    );
+    return latest?.completedAt === null;
+  }).length;
+  const challengeStudent = challengeStudentId
+    ? students.find(student => student.id === challengeStudentId) ?? null
+    : null;
 
   return (
     <section className="mb-4 rounded-3xl border border-emerald-300/15 bg-magic-panel/80 p-6">
@@ -138,7 +173,7 @@ export default function CompanionProgressBoard({ students }: Props) {
         <div>
           <h2 className="font-bold text-magic-accent">🐾 מעקב חיות הכיתה</h2>
           <p className="mt-1 text-xs text-magic-soft/65">
-            תצוגה לקריאה בלבד — הנתונים מתעדכנים יחד עם רשימת התלמידים.
+            מעקב אחר התפתחות החיות והגדרת אתגרי אופי אישיים.
           </p>
         </div>
         <button
@@ -151,10 +186,11 @@ export default function CompanionProgressBoard({ students }: Props) {
         </button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-5">
         <SummaryBox label="בחרו חיה" value={`${unlockedCount}/${students.length}`} />
         <SummaryBox label="מחכות לטקס" value={pendingCount} accent={pendingCount > 0} />
         <SummaryBox label="חיות אגדיות" value={legendaryCount} legendary />
+        <SummaryBox label="אתגרי אופי פעילים" value={activeChallengeCount} />
         <SummaryBox label="סה״כ נקודות קשר" value={totalBond} />
       </div>
 
@@ -208,9 +244,29 @@ export default function CompanionProgressBoard({ students }: Props) {
                               {row.dominantTrait.nameHe}
                             </div>
                           )}
+                          {row.latestChallenge && row.challengeTrait && (
+                            <div className="mt-1 text-[11px] font-bold text-cyan-200">
+                              {row.challengeTrait.emoji} אתגר{' '}
+                              {row.challengeTrait.nameHe}:{' '}
+                              {row.latestChallenge.completedAt
+                                ? 'הושלם'
+                                : `${row.challengeProgress}/${row.latestChallenge.targetDays} ימים`}
+                            </div>
+                          )}
                         </div>
-                        <div className="self-start rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-magic-soft/60 sm:self-auto">
-                          🔒 טרם נפתחה
+                        <div className="flex flex-col gap-2 sm:items-end">
+                          <div className="self-start rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-bold text-magic-soft/60 sm:self-auto">
+                            🔒 טרם נפתחה
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setChallengeStudentId(student.id)}
+                            className="rounded-xl border border-cyan-300/25 bg-cyan-500/10 px-3 py-2 text-[11px] font-black text-cyan-100 hover:bg-cyan-500/20"
+                          >
+                            {row.latestChallenge?.completedAt === null
+                              ? 'צפייה באתגר 🧭'
+                              : 'הגדרת אתגר אופי 🧭'}
+                          </button>
                         </div>
                       </div>
                     </article>
@@ -252,6 +308,15 @@ export default function CompanionProgressBoard({ students }: Props) {
                       </div>
 
                       <div className="flex flex-wrap items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setChallengeStudentId(student.id)}
+                          className="rounded-full border border-cyan-300/25 bg-cyan-500/10 px-3 py-1 text-[11px] font-black text-cyan-100 hover:bg-cyan-500/20"
+                        >
+                          {row.latestChallenge?.completedAt === null
+                            ? 'האתגר הפעיל 🧭'
+                            : 'אתגר אופי חדש 🧭'}
+                        </button>
                         {row.dominantTrait && (
                           <span className="rounded-full border border-violet-300/25 bg-violet-500/10 px-3 py-1 text-[11px] font-black text-violet-100">
                             {row.dominantTrait.emoji} אופי: {row.dominantTrait.nameHe}
@@ -291,6 +356,24 @@ export default function CompanionProgressBoard({ students }: Props) {
                       />
                     </div>
 
+                    {row.latestChallenge && row.challengeTrait && (
+                      <div
+                        className="mt-3 rounded-xl border border-cyan-300/15 bg-cyan-500/5 px-3 py-2 text-xs"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="font-black text-cyan-100">
+                            {row.challengeTrait.emoji} אתגר{' '}
+                            {row.challengeTrait.nameHe}
+                          </span>
+                          <span className="font-bold text-magic-soft/60">
+                            {row.latestChallenge.completedAt
+                              ? 'הושלם 🏅'
+                              : `${row.challengeProgress}/${row.latestChallenge.targetDays} ימים`}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="mt-3">
                       <div className="mb-1 flex justify-between gap-3 text-[10px] font-bold text-magic-soft/55">
                         <span>
@@ -322,6 +405,12 @@ export default function CompanionProgressBoard({ students }: Props) {
           )}
         </div>
       )}
+
+      <CompanionTraitChallengeModal
+        open={challengeStudentId !== null}
+        onClose={() => setChallengeStudentId(null)}
+        student={challengeStudent}
+      />
     </section>
   );
 }
