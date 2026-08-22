@@ -23,6 +23,9 @@ type OpenedReward = {
   descriptionHe?: string;
   rarity: keyof typeof RARITY_LABEL_HE;
   pityTriggered: boolean;
+  themeId?: string;
+  collectionOwned?: number;
+  collectionTotal?: number;
   isPreview?: boolean;
 };
 
@@ -327,12 +330,26 @@ export default function Inventory({ student, onGoRoom }: Props) {
       },
     });
 
+    const rewardThemeItems = ITEMS.filter(
+      item => item.source === 'box' && item.theme === reward.item.theme
+    );
+    const ownedBeforeOpening = new Set(ownedItemIds);
+    const ownedInRewardTheme = rewardThemeItems.filter(item =>
+      ownedBeforeOpening.has(item.id)
+    ).length;
+
     setOpenedReward({
       itemId: reward.item.id,
       nameHe: reward.item.nameHe,
       descriptionHe: reward.item.descriptionHe,
       rarity: reward.item.rarity,
       pityTriggered: reward.pityTriggered,
+      themeId: reward.item.theme,
+      collectionOwned: Math.min(
+        ownedInRewardTheme + 1,
+        rewardThemeItems.length
+      ),
+      collectionTotal: rewardThemeItems.length,
     });
 
     setMessage(null);
@@ -590,6 +607,60 @@ export default function Inventory({ student, onGoRoom }: Props) {
                 ? 'התצוגה אינה צורכת קופסה ואינה מוסיפה חפץ למלאי'
                 : REWARD_SUBTITLE_HE[openedReward.rarity]}
             </div>
+
+            {!openedReward.isPreview &&
+              openedReward.collectionOwned !== undefined &&
+              openedReward.collectionTotal !== undefined && (
+                <div
+                  className={`mb-4 rounded-2xl border px-4 py-3 ${
+                    openedReward.collectionOwned ===
+                    openedReward.collectionTotal
+                      ? 'border-yellow-300/60 bg-yellow-400/15'
+                      : 'border-emerald-300/35 bg-emerald-400/10'
+                  }`}
+                >
+                  <div
+                    className={`font-black ${
+                      openedReward.collectionOwned ===
+                      openedReward.collectionTotal
+                        ? 'text-lg text-yellow-300'
+                        : 'text-emerald-300'
+                    }`}
+                  >
+                    {openedReward.collectionOwned ===
+                    openedReward.collectionTotal
+                      ? `🏆 השלמת את אוסף ${themeNameOf(openedReward.themeId ?? null)}!`
+                      : '🌟 חדש באוסף!'}
+                  </div>
+
+                  <div className="mt-1 text-xs font-bold text-white/75">
+                    אוסף {themeNameOf(openedReward.themeId ?? null)}:{' '}
+                    {openedReward.collectionOwned}/
+                    {openedReward.collectionTotal}
+                  </div>
+
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-black/30">
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        openedReward.collectionOwned ===
+                        openedReward.collectionTotal
+                          ? 'bg-yellow-300'
+                          : 'bg-emerald-400'
+                      }`}
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          Math.round(
+                            (openedReward.collectionOwned /
+                              Math.max(openedReward.collectionTotal, 1)) *
+                              100
+                          )
+                        )}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
 
             <div
               className={`relative mb-4 overflow-hidden rounded-2xl border p-4 ${
