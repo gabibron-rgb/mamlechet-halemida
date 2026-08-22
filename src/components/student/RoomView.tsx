@@ -2,12 +2,13 @@ import { useRef, useState, type CSSProperties, type PointerEvent, type RefObject
 import { getItemById, type Zone } from '../../data/items';
 import { COSMETIC_BY_ID } from '../../data/cosmetics';
 import { useGameStore, type InventoryEntry, type StudentState } from '../../store/useGameStore';
-import type { Rarity } from '../../data/boxes';
+import { RARITY_LABEL_HE, type Rarity } from '../../data/boxes';
 import RarityBadge from '../shared/RarityBadge';
 import ItemSprite from './ItemSprite';
 import { getRoomSurface, snapItemToRoomSurface } from '../../data/roomSurfaces';
 import type { DisplayKind } from '../../data/roomSurfaces';
 import { ITEM_SPRITES } from '../../data/itemSprites';
+import { THEMES, type ThemeId } from '../../data/themes';
 
 type Props = {
   student: StudentState;
@@ -63,6 +64,18 @@ const RARITY_SCALE_LIMITS: Record<Rarity, { min: number; max: number; step: numb
     step: 0.1,
   },
 };
+
+const EXTRA_THEME_NAMES: Record<string, string> = {
+  ballet: 'בלט',
+};
+
+function themeNameOf(themeId: string): string {
+  return (
+    THEMES.find(theme => theme.id === themeId)?.nameHe ??
+    EXTRA_THEME_NAMES[themeId] ??
+    themeId
+  );
+}
 
 type InferDisplayKindItem = {
   id?: string;
@@ -719,6 +732,9 @@ function PlacementPanel({
   student: StudentState;
   onAddToRoom: (inventoryIndex: number) => void;
 }) {
+  const [themeFilter, setThemeFilter] = useState('all');
+  const [rarityFilter, setRarityFilter] = useState<'all' | Rarity>('all');
+
   const unplaced = student.inventory
     .map((entry, inventoryIndex) => ({ entry, inventoryIndex }))
     .filter(({ entry }) => {
@@ -733,26 +749,121 @@ function PlacementPanel({
       if (alreadyInRoom) return false;
 
       return getItemById(entry.itemId) || COSMETIC_BY_ID[entry.itemId];
+    })
+    .map(({ entry, inventoryIndex }) => {
+      const item = getItemById(entry.itemId);
+      const cosmetic = COSMETIC_BY_ID[entry.itemId];
+
+      return {
+        entry,
+        inventoryIndex,
+        name: item?.nameHe ?? cosmetic?.nameHe ?? entry.itemId,
+        description: item?.descriptionHe ?? cosmetic?.descHe ?? '',
+        rarity: (item?.rarity ?? cosmetic?.rarity ?? 'common') as Rarity,
+        themeId: item?.theme ?? null,
+      };
     });
 
   if (unplaced.length === 0) {
     return null;
   }
 
+  const themeOptions = [
+    ...new Set(
+      unplaced
+        .map(item => item.themeId)
+        .filter((themeId): themeId is ThemeId => themeId !== null)
+    ),
+  ].sort((a, b) => themeNameOf(a).localeCompare(themeNameOf(b), 'he'));
+
+  const visibleItems = unplaced.filter(item => {
+    if (themeFilter !== 'all' && item.themeId !== themeFilter) return false;
+    if (rarityFilter !== 'all' && item.rarity !== rarityFilter) return false;
+    return true;
+  });
+
+  const hasActiveFilters = themeFilter !== 'all' || rarityFilter !== 'all';
+
+  function resetFilters() {
+    setThemeFilter('all');
+    setRarityFilter('all');
+  }
+
   return (
     <div className="mt-5 rounded-3xl border border-white/10 bg-white/5 p-4">
-      <h3 className="mb-3 text-lg font-bold text-white">חפצים שאפשר להוסיף לחדר</h3>
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold text-white">
+            חפצים שאפשר להוסיף לחדר
+          </h3>
+          <div className="text-xs text-magic-soft/55">
+            מוצגים {visibleItems.length} מתוך {unplaced.length}
+          </div>
+        </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        {unplaced.map(({ entry, inventoryIndex }) => {
-          const item = getItemById(entry.itemId);
-          const cosmetic = COSMETIC_BY_ID[entry.itemId];
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="rounded-lg border border-magic-accent/30 px-3 py-1.5 text-xs font-bold text-magic-accent hover:bg-magic-accent/10"
+          >
+            איפוס
+          </button>
+        )}
+      </div>
 
-          const name = item?.nameHe ?? cosmetic?.nameHe ?? entry.itemId;
-          const description = item?.descriptionHe ?? cosmetic?.descHe ?? '';
-          const rarity = (item?.rarity ?? cosmetic?.rarity ?? 'common') as Rarity;
+      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <label className="text-xs font-bold text-magic-soft/65">
+          נושא
+          <select
+            value={themeFilter}
+            onChange={event => setThemeFilter(event.target.value)}
+            className="mt-1 w-full rounded-xl border border-white/10 bg-magic-bg px-3 py-2 text-sm text-white outline-none focus:border-magic-accent/60"
+          >
+            <option value="all">כל הנושאים</option>
+            {themeOptions.map(themeId => (
+              <option key={themeId} value={themeId}>
+                {themeNameOf(themeId)}
+              </option>
+            ))}
+          </select>
+        </label>
 
-          return (
+        <label className="text-xs font-bold text-magic-soft/65">
+          נדירות
+          <select
+            value={rarityFilter}
+            onChange={event =>
+              setRarityFilter(event.target.value as 'all' | Rarity)
+            }
+            className="mt-1 w-full rounded-xl border border-white/10 bg-magic-bg px-3 py-2 text-sm text-white outline-none focus:border-magic-accent/60"
+          >
+            <option value="all">כל הנדירויות</option>
+            {(Object.keys(RARITY_LABEL_HE) as Rarity[]).map(rarity => (
+              <option key={rarity} value={rarity}>
+                {RARITY_LABEL_HE[rarity]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      {visibleItems.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-white/15 bg-black/10 px-4 py-8 text-center">
+          <div className="mb-2 text-3xl">🔎</div>
+          <div className="font-bold text-white">אין חפצים שמתאימים לסינון</div>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="mt-3 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/15"
+          >
+            הצג את כל החפצים
+          </button>
+        </div>
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {visibleItems.map(
+            ({ entry, inventoryIndex, name, description, rarity }) => (
             <div
               key={`${inventoryIndex}-${entry.itemId}`}
               className="rounded-2xl border border-white/10 bg-black/20 p-3"
@@ -774,9 +885,10 @@ function PlacementPanel({
                 הוסף לחדר
               </button>
             </div>
-          );
-        })}
-      </div>
+            )
+          )}
+        </div>
+      )}
     </div>
   );
 }

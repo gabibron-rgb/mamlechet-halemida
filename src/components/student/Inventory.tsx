@@ -27,6 +27,19 @@ type BoxPreview = {
   theme: ThemeId;
 };
 
+type KindFilter = 'all' | 'item' | 'box' | 'cosmetic';
+type PlacementFilter = 'all' | 'placed' | 'unplaced';
+
+type InventoryRow = {
+  entry: StudentState['inventory'][number];
+  originalIndex: number;
+  kind: Exclude<KindFilter, 'all'>;
+  themeId: string | null;
+  rarity: Rarity | null;
+  isPlaced: boolean;
+  searchText: string;
+};
+
 const RARITY_ORDER: Rarity[] = [
   'common',
   'uncommon',
@@ -34,6 +47,20 @@ const RARITY_ORDER: Rarity[] = [
   'epic',
   'legendary',
 ];
+
+const EXTRA_THEME_NAMES: Record<string, string> = {
+  ballet: 'בלט',
+};
+
+function themeNameOf(themeId: string | null): string {
+  if (!themeId) return '';
+
+  return (
+    THEMES.find((theme) => theme.id === themeId)?.nameHe ??
+    EXTRA_THEME_NAMES[themeId] ??
+    themeId
+  );
+}
 
 function formatPercent(value: number): string {
   const percentage = value * 100;
@@ -48,12 +75,105 @@ export default function Inventory({ student }: Props) {
   const [message, setMessage] = useState<string | null>(null);
   const [openedReward, setOpenedReward] = useState<OpenedReward | null>(null);
   const [boxPreview, setBoxPreview] = useState<BoxPreview | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [kindFilter, setKindFilter] = useState<KindFilter>('all');
+  const [themeFilter, setThemeFilter] = useState('all');
+  const [rarityFilter, setRarityFilter] = useState<'all' | Rarity>('all');
+  const [placementFilter, setPlacementFilter] =
+    useState<PlacementFilter>('all');
 
   const ownedItemIds = new Set(
     student.inventory
       .filter((entry) => entry.kind !== 'box')
       .map((entry) => entry.itemId)
   );
+
+  const inventoryRows: InventoryRow[] = student.inventory
+    .map((entry, originalIndex): InventoryRow | null => {
+      if (entry.kind === 'box') {
+        if (!entry.boxTier || !BOX_TIERS[entry.boxTier]) return null;
+
+        const themeId =
+          entry.boxTheme ?? student.unlockedThemes[0] ?? 'generic';
+        const box = BOX_TIERS[entry.boxTier];
+
+        return {
+          entry,
+          originalIndex,
+          kind: 'box',
+          themeId,
+          rarity: null,
+          isPlaced: false,
+          searchText: `${box.nameHe} ${themeNameOf(themeId)}`.toLowerCase(),
+        };
+      }
+
+      const item = getItemById(entry.itemId);
+      const cosmetic = COSMETIC_BY_ID[entry.itemId];
+      if (!item && !cosmetic) return null;
+
+      const name = item?.nameHe ?? cosmetic?.nameHe ?? '';
+      const description = item?.descriptionHe ?? cosmetic?.descHe ?? '';
+      const themeId = item?.theme ?? null;
+      const rarity = item?.rarity ?? cosmetic?.rarity ?? null;
+      const isCosmetic = entry.kind === 'cosmetic' || (!item && !!cosmetic);
+      const isPlaced =
+        entry.placedZone !== null && entry.placedZone !== undefined
+          ? true
+          : entry.roomX !== null &&
+            entry.roomX !== undefined &&
+            entry.roomY !== null &&
+            entry.roomY !== undefined;
+
+      return {
+        entry,
+        originalIndex,
+        kind: isCosmetic ? 'cosmetic' : 'item',
+        themeId,
+        rarity,
+        isPlaced,
+        searchText: `${name} ${description} ${themeNameOf(themeId)}`.toLowerCase(),
+      };
+    })
+    .filter((row): row is InventoryRow => row !== null);
+
+  const inventoryThemeOptions = [
+    ...new Set(
+      inventoryRows
+        .map((row) => row.themeId)
+        .filter((themeId): themeId is string => themeId !== null)
+    ),
+  ].sort((a, b) => themeNameOf(a).localeCompare(themeNameOf(b), 'he'));
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const visibleInventoryRows = inventoryRows.filter((row) => {
+    if (kindFilter !== 'all' && row.kind !== kindFilter) return false;
+    if (themeFilter !== 'all' && row.themeId !== themeFilter) return false;
+    if (rarityFilter !== 'all' && row.rarity !== rarityFilter) return false;
+
+    if (placementFilter !== 'all') {
+      if (row.kind === 'box') return false;
+      if (placementFilter === 'placed' && !row.isPlaced) return false;
+      if (placementFilter === 'unplaced' && row.isPlaced) return false;
+    }
+
+    return !normalizedSearch || row.searchText.includes(normalizedSearch);
+  });
+
+  const hasActiveFilters =
+    searchQuery !== '' ||
+    kindFilter !== 'all' ||
+    themeFilter !== 'all' ||
+    rarityFilter !== 'all' ||
+    placementFilter !== 'all';
+
+  function resetFilters() {
+    setSearchQuery('');
+    setKindFilter('all');
+    setThemeFilter('all');
+    setRarityFilter('all');
+    setPlacementFilter('all');
+  }
 
   const previewBox = boxPreview ? BOX_TIERS[boxPreview.tier] : null;
   const previewTheme = boxPreview
@@ -308,19 +428,128 @@ export default function Inventory({ student }: Props) {
         </div>
       )}
 
-      <div className="text-magic-soft/70 text-xs mb-2 text-left" dir="ltr">
-        {student.inventory.length} / {student.capacities.inventory}
+      <div className="mb-4 rounded-2xl border border-white/10 bg-magic-bg/30 p-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <div className="font-black text-white">חיפוש וסינון</div>
+            <div className="text-xs text-magic-soft/55">
+              מצא/י במהירות את מה שחיפשת במלאי
+            </div>
+          </div>
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="shrink-0 rounded-lg border border-magic-accent/30 px-3 py-1.5 text-xs font-bold text-magic-accent hover:bg-magic-accent/10"
+            >
+              איפוס
+            </button>
+          )}
+        </div>
+
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="חיפוש לפי שם החפץ..."
+          className="mb-3 w-full rounded-xl border border-white/10 bg-magic-bg/70 px-4 py-2.5 text-sm text-white outline-none placeholder:text-magic-soft/35 focus:border-magic-accent/60"
+        />
+
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <label className="text-xs font-bold text-magic-soft/65">
+            סוג
+            <select
+              value={kindFilter}
+              onChange={(event) =>
+                setKindFilter(event.target.value as KindFilter)
+              }
+              className="mt-1 w-full rounded-xl border border-white/10 bg-magic-bg px-3 py-2 text-sm text-white outline-none focus:border-magic-accent/60"
+            >
+              <option value="all">הכול</option>
+              <option value="item">חפצים</option>
+              <option value="box">קופסאות</option>
+              <option value="cosmetic">פרסים קוסמטיים</option>
+            </select>
+          </label>
+
+          <label className="text-xs font-bold text-magic-soft/65">
+            נושא
+            <select
+              value={themeFilter}
+              onChange={(event) => setThemeFilter(event.target.value)}
+              className="mt-1 w-full rounded-xl border border-white/10 bg-magic-bg px-3 py-2 text-sm text-white outline-none focus:border-magic-accent/60"
+            >
+              <option value="all">כל הנושאים</option>
+              {inventoryThemeOptions.map((themeId) => (
+                <option key={themeId} value={themeId}>
+                  {themeNameOf(themeId)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="text-xs font-bold text-magic-soft/65">
+            נדירות
+            <select
+              value={rarityFilter}
+              onChange={(event) =>
+                setRarityFilter(event.target.value as 'all' | Rarity)
+              }
+              className="mt-1 w-full rounded-xl border border-white/10 bg-magic-bg px-3 py-2 text-sm text-white outline-none focus:border-magic-accent/60"
+            >
+              <option value="all">כל הנדירויות</option>
+              {RARITY_ORDER.map((rarity) => (
+                <option key={rarity} value={rarity}>
+                  {RARITY_LABEL_HE[rarity]}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="text-xs font-bold text-magic-soft/65">
+            מיקום
+            <select
+              value={placementFilter}
+              onChange={(event) =>
+                setPlacementFilter(event.target.value as PlacementFilter)
+              }
+              className="mt-1 w-full rounded-xl border border-white/10 bg-magic-bg px-3 py-2 text-sm text-white outline-none focus:border-magic-accent/60"
+            >
+              <option value="all">כל החפצים</option>
+              <option value="placed">מונחים בחדר</option>
+              <option value="unplaced">לא מונחים בחדר</option>
+            </select>
+          </label>
+        </div>
       </div>
 
+      <div className="mb-2 flex items-center justify-between text-xs text-magic-soft/70">
+        <span>
+          מוצגים {visibleInventoryRows.length} מתוך {inventoryRows.length}
+        </span>
+        <span dir="ltr">
+          {student.inventory.length} / {student.capacities.inventory}
+        </span>
+      </div>
+
+      {visibleInventoryRows.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-white/15 bg-magic-bg/20 px-4 py-10 text-center">
+          <div className="mb-2 text-3xl">🔎</div>
+          <div className="font-bold text-white">לא נמצאו פריטים מתאימים</div>
+          <div className="mt-1 text-xs text-magic-soft/55">
+            אפשר לשנות את החיפוש או לאפס את המסננים.
+          </div>
+        </div>
+      ) : (
       <div className="grid grid-cols-2 gap-3">
-        {student.inventory.map((entry, idx) => {
+        {visibleInventoryRows.map(({ entry, originalIndex: idx, isPlaced }) => {
           if (entry.kind === 'box' && entry.boxTier) {
             const boxTier = entry.boxTier;
             const boxTheme =
               entry.boxTheme ?? student.unlockedThemes[0] ?? 'generic';
             const box = BOX_TIERS[boxTier];
-            const theme = THEMES.find((t) => t.id === boxTheme);
-            const themeName = theme?.nameHe ?? 'כללי';
+            const themeName = themeNameOf(boxTheme) || 'כללי';
 
             return (
               <div
@@ -396,6 +625,12 @@ export default function Inventory({ student }: Props) {
                 </div>
               )}
 
+              {isPlaced && (
+                <div className="mt-2 text-[10px] font-bold text-sky-300">
+                  🏠 מונח בחדר
+                </div>
+              )}
+
               {item && canSell(item) ? (
                 <button
                   type="button"
@@ -413,6 +648,7 @@ export default function Inventory({ student }: Props) {
           );
         })}
       </div>
+      )}
     </div>
   );
 }
