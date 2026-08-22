@@ -8,6 +8,7 @@ import type { CapacityKey } from '../data/levels';
 import { genId } from '../utils/storage';
 import type { BoxTier } from '../data/boxes';
 import { supabase } from '../lib/supabaseClient';
+import { getCompanionFlourish } from '../data/companionFlourishes';
 
 export type StudentId = string;
 
@@ -92,6 +93,16 @@ type GameStore = {
   ) => void;
   removeTrophy: (studentId: StudentId, trophyId: string) => void;
   markTrophySeen: (studentId: StudentId, trophyId: string) => void;
+  awardCompanionFlourish: (
+    studentId: StudentId,
+    flourishId: string,
+    pointBonus: number
+  ) => Promise<boolean>;
+  undoCompanionFlourishAward: (
+    studentId: StudentId,
+    flourishId: string,
+    pointBonus: number
+  ) => Promise<void>;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -266,6 +277,12 @@ function studentFromSupabase(row: any, classId: string): StudentState {
       celebratedStages: Array.isArray(meta.companion?.celebratedStages)
         ? meta.companion.celebratedStages
         : ['egg'],
+      activeFlourishes: Array.isArray(meta.companion?.activeFlourishes)
+        ? meta.companion.activeFlourishes
+        : [],
+      ownedFlourishes: Array.isArray(meta.companion?.ownedFlourishes)
+        ? meta.companion.ownedFlourishes
+        : [],
     },
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
@@ -524,6 +541,99 @@ export const useGameStore = create<GameStore>()(
 
         if (updatedStudent) {
           void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      awardCompanionFlourish: async (
+        studentId,
+        flourishId,
+        pointBonus
+      ) => {
+        let updatedStudent: StudentState | null = null;
+        const cleanFlourishId = flourishId.trim();
+        const safePointBonus = Math.max(0, Math.round(pointBonus));
+
+        if (!getCompanionFlourish(cleanFlourishId)) return false;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const ownedFlourishes = student.companion.ownedFlourishes ?? [];
+          if (ownedFlourishes.includes(cleanFlourishId)) return state;
+
+          updatedStudent = {
+            ...student,
+            points: student.points + safePointBonus,
+            companion: {
+              ...student.companion,
+              petPoints:
+                (student.companion.petPoints ?? 0) + safePointBonus,
+              ownedFlourishes: [...ownedFlourishes, cleanFlourishId],
+              activeFlourishes: student.companion.activeFlourishes ?? [],
+              celebratedStages:
+                student.companion.celebratedStages ?? ['egg'],
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+
+        await syncStudentToSupabase(updatedStudent);
+        return true;
+      },
+
+      undoCompanionFlourishAward: async (
+        studentId,
+        flourishId,
+        pointBonus
+      ) => {
+        let updatedStudent: StudentState | null = null;
+        const cleanFlourishId = flourishId.trim();
+        const safePointBonus = Math.max(0, Math.round(pointBonus));
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const ownedFlourishes = student.companion.ownedFlourishes ?? [];
+          if (!ownedFlourishes.includes(cleanFlourishId)) return state;
+
+          updatedStudent = {
+            ...student,
+            points: Math.max(0, student.points - safePointBonus),
+            companion: {
+              ...student.companion,
+              petPoints: Math.max(
+                0,
+                (student.companion.petPoints ?? 0) - safePointBonus
+              ),
+              ownedFlourishes: ownedFlourishes.filter(
+                id => id !== cleanFlourishId
+              ),
+              activeFlourishes: (
+                student.companion.activeFlourishes ?? []
+              ).filter(id => id !== cleanFlourishId),
+            },
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          await syncStudentToSupabase(updatedStudent);
         }
       },
 

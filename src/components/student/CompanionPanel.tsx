@@ -3,6 +3,7 @@ import { useState } from 'react';
 import {
   COMPANION_STAGE_ORDER,
   COMPANION_VISUALS,
+  MAX_ACTIVE_FLOURISHES,
   companionStageForBond,
   nextCompanionStage,
   type CompanionStage,
@@ -17,7 +18,9 @@ import {
   COMPANION_INTERACTIONS,
   type CompanionInteractionId,
 } from '../../logic/companion';
+import { COMPANION_FLOURISHES } from '../../data/companionFlourishes';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
+import CompanionFlourishEffects from './CompanionFlourishEffects';
 
 type Props = {
   student: StudentState;
@@ -189,6 +192,34 @@ export default function CompanionPanel({ student }: Props) {
     showMessage(`השם ${cleanName} נשמר בהצלחה ✨`);
   }
 
+  function toggleFlourish(flourishId: string) {
+    const ownedFlourishes = companion.ownedFlourishes ?? [];
+    const activeFlourishes = companion.activeFlourishes ?? [];
+
+    if (!ownedFlourishes.includes(flourishId)) return;
+
+    const isActive = activeFlourishes.includes(flourishId);
+
+    if (!isActive && activeFlourishes.length >= MAX_ACTIVE_FLOURISHES) {
+      showMessage(`אפשר להפעיל עד ${MAX_ACTIVE_FLOURISHES} עיטורים במקביל`);
+      return;
+    }
+
+    const nextActiveFlourishes = isActive
+      ? activeFlourishes.filter(id => id !== flourishId)
+      : [...activeFlourishes, flourishId];
+
+    updateStudent(student.id, {
+      companion: {
+        ...companion,
+        activeFlourishes: nextActiveFlourishes,
+        ownedFlourishes,
+      },
+    });
+
+    showMessage(isActive ? 'העיטור הוסר מהחיה' : 'העיטור הופעל בהצלחה ✨');
+  }
+
   if (!companion.unlocked && !canUnlock) {
     const progress = Math.min(
       100,
@@ -356,6 +387,7 @@ export default function CompanionPanel({ student }: Props) {
           visuals={companionVisuals}
           themeName={themeNameOf(companion.theme)}
           petName={companionDisplayName}
+          activeFlourishes={companion.activeFlourishes ?? []}
         />
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -480,6 +512,69 @@ export default function CompanionPanel({ student }: Props) {
                 </div>
               </div>
             )}
+        </div>
+
+        <div className="mt-4 rounded-3xl border border-fuchsia-300/20 bg-fuchsia-500/10 p-5 text-right">
+          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+            <div>
+              <h3 className="text-xl font-black text-white">אותות ועיטורים</h3>
+              <p className="mt-1 text-xs text-magic-soft/60">
+                אותות מיוחדים שהמורה מעניקה על התנהגות ומאמץ בכיתה.
+              </p>
+            </div>
+            <div className="rounded-xl bg-black/20 px-3 py-2 text-center text-xs font-bold text-fuchsia-200">
+              פעילים: {(companion.activeFlourishes ?? []).length}/
+              {MAX_ACTIVE_FLOURISHES}
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {COMPANION_FLOURISHES.map(flourish => {
+              const owned = (companion.ownedFlourishes ?? []).includes(
+                flourish.id
+              );
+              const active = (companion.activeFlourishes ?? []).includes(
+                flourish.id
+              );
+
+              return (
+                <button
+                  key={flourish.id}
+                  type="button"
+                  disabled={!owned}
+                  onClick={() => toggleFlourish(flourish.id)}
+                  className={`rounded-2xl border p-3 text-center transition-all ${
+                    active
+                      ? 'border-fuchsia-200 bg-fuchsia-400/20 shadow-[0_0_20px_rgba(232,121,249,0.2)]'
+                      : owned
+                        ? 'border-white/15 bg-magic-bg/45 hover:border-fuchsia-300/40'
+                        : 'cursor-not-allowed border-white/5 bg-black/10 opacity-35'
+                  }`}
+                >
+                  <div className={`text-3xl ${owned ? '' : 'grayscale'}`}>
+                    {owned ? flourish.emoji : '🔒'}
+                  </div>
+                  <div className="mt-2 text-xs font-black text-white">
+                    {flourish.nameHe}
+                  </div>
+                  <div className="mt-1 min-h-8 text-[9px] leading-4 text-magic-soft/55">
+                    {flourish.descriptionHe}
+                  </div>
+                  <div
+                    className={`mt-2 text-[10px] font-black ${
+                      active
+                        ? 'text-fuchsia-200'
+                        : owned
+                          ? 'text-emerald-200'
+                          : 'text-magic-soft/45'
+                    }`}
+                  >
+                    {active ? '✓ פעיל' : owned ? 'לחיצה להפעלה' : 'טרם התקבל'}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {import.meta.env.DEV && (
@@ -614,15 +709,18 @@ function CompanionAvatar({
   visuals,
   themeName,
   petName,
+  activeFlourishes = [],
 }: {
   stage: CompanionStage;
   visuals: CompanionWorldVisuals;
   themeName: string;
   petName: string;
+  activeFlourishes?: string[];
 }) {
   if (stage === 'egg') {
     return (
       <div className="relative mx-auto my-8 flex h-56 w-48 items-center justify-center">
+        <CompanionFlourishEffects activeFlourishes={activeFlourishes} />
         <div
           aria-label={`ביצה קסומה מעולם ${themeName}`}
           className="relative flex h-52 w-40 animate-[bounce_3s_ease-in-out_infinite] items-center justify-center overflow-hidden rounded-[50%_50%_46%_46%] border-4 border-white/35 shadow-2xl"
@@ -653,6 +751,7 @@ function CompanionAvatar({
 
   return (
     <div className="relative mx-auto my-8 flex h-60 w-60 items-end justify-center">
+      <CompanionFlourishEffects activeFlourishes={activeFlourishes} />
       {(stage === 'grown' || isLegendary) && (
         <div
           className={`absolute top-0 z-30 text-5xl ${

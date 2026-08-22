@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useClassStore } from '../../store/useClassStore';
 import { useGameStore } from '../../store/useGameStore';
 import { REASONS } from '../../data/reasons';
+import { getCompanionFlourish } from '../../data/companionFlourishes';
 
 type Props = { classId: string };
 
@@ -10,6 +11,9 @@ export default function ActivityLog({ classId }: Props) {
   const students = useGameStore(s => s.students);
   const undoAward = useClassStore(s => s.undoAward);
   const addPoints = useGameStore(s => s.addPoints);
+  const undoCompanionFlourishAward = useGameStore(
+    s => s.undoCompanionFlourishAward
+  );
 
   const activity = useMemo(
     () => allActivity.filter(a => a.classId === classId).slice(0, 15),
@@ -19,6 +23,17 @@ export default function ActivityLog({ classId }: Props) {
   function handleUndo(entryId: string) {
     const entry = undoAward(entryId);
     if (!entry) return;
+
+    if (entry.flourishId) {
+      entry.studentIds.forEach(id =>
+        void undoCompanionFlourishAward(
+          id,
+          entry.flourishId as string,
+          entry.amount
+        )
+      );
+      return;
+    }
 
     entry.studentIds.forEach(id => addPoints(id, -entry.amount));
   }
@@ -40,6 +55,9 @@ export default function ActivityLog({ classId }: Props) {
           .join(', ');
 
         const reason = REASONS.find(r => r.id === entry.reasonId);
+        const flourish = entry.flourishId
+          ? getCompanionFlourish(entry.flourishId)
+          : null;
         const timeAgo = formatTime(entry.createdAt);
 
         return (
@@ -65,6 +83,11 @@ export default function ActivityLog({ classId }: Props) {
                 )}
               </span>
               <span className="text-magic-soft/50 text-xs">{timeAgo}</span>
+              {flourish && (
+                <span className="mt-0.5 text-xs font-bold text-fuchsia-200/75">
+                  {flourish.emoji} {flourish.nameHe}
+                </span>
+              )}
             </div>
 
             {!entry.undone && (

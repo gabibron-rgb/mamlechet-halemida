@@ -45,8 +45,6 @@ function buildStudentFromSupabase(row: any): StudentState {
       bond: 0,
       lastCareDate: null,
       careXpToday: 0,
-      activeFlourishes: [],
-      ownedFlourishes: [],
       ...(meta.companion ?? {}),
       name:
         typeof meta.companion?.name === 'string' && meta.companion.name.trim()
@@ -59,6 +57,12 @@ function buildStudentFromSupabase(row: any): StudentState {
       celebratedStages: Array.isArray(meta.companion?.celebratedStages)
         ? meta.companion.celebratedStages
         : ['egg'],
+      activeFlourishes: Array.isArray(meta.companion?.activeFlourishes)
+        ? meta.companion.activeFlourishes
+        : [],
+      ownedFlourishes: Array.isArray(meta.companion?.ownedFlourishes)
+        ? meta.companion.ownedFlourishes
+        : [],
     },
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],

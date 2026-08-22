@@ -5,6 +5,7 @@ import {
   type CompanionStage,
 } from '../../data/companionWorlds';
 import type { CompanionState } from '../../store/useGameStore';
+import CompanionFlourishEffects from './CompanionFlourishEffects';
 
 type Props = {
   companion: CompanionState;
@@ -125,6 +126,11 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
           {companion.name}
         </div>
       )}
+
+      <CompanionFlourishEffects
+        activeFlourishes={companion.activeFlourishes ?? []}
+        variant="room"
+      />
 
       {isLegendary && (
         <div className="absolute -inset-3 animate-pulse rounded-full border border-yellow-200/55 shadow-[0_0_28px_rgba(250,204,21,0.7)]" />

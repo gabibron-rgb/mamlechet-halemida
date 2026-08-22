@@ -17,6 +17,7 @@ export type ActivityEntry = {
   amount: number;         // can be negative for corrections
   reasonId: string | null;
   note?: string;
+  flourishId?: string;
   createdAt: number;
   undone: boolean;
 };

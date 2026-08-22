@@ -8,6 +8,7 @@ import ActivityLog from '../components/teacher/ActivityLog';
 import TrophyAwardModal from '../components/teacher/TrophyAwardModal';
 import TrophyManagementModal from '../components/teacher/TrophyManagementModal';
 import CompanionProgressBoard from '../components/teacher/CompanionProgressBoard';
+import FlourishAwardModal from '../components/teacher/FlourishAwardModal';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ export default function TeacherHome() {
   const [preselected, setPreselected] = useState<string | null>(null);
   const [trophyStudentId, setTrophyStudentId] = useState<string | null>(null);
   const [managedTrophyStudentId, setManagedTrophyStudentId] = useState<string | null>(null);
+  const [flourishStudentId, setFlourishStudentId] = useState<string | null>(null);
 
   const trophyStudent = trophyStudentId
     ? students.find(student => student.id === trophyStudentId) ?? null
@@ -52,6 +54,10 @@ export default function TeacherHome() {
 
   const managedTrophyStudent = managedTrophyStudentId
     ? students.find(student => student.id === managedTrophyStudentId) ?? null
+    : null;
+
+  const flourishStudent = flourishStudentId
+    ? students.find(student => student.id === flourishStudentId) ?? null
     : null;
 
   if (!cls) {
@@ -134,7 +140,14 @@ export default function TeacherHome() {
                       {st.points} נק׳ · רמה {st.level} · {st.xp} XP · {st.trophies.length} גביעים
                     </span>
                   </div>
-                  <div className="grid grid-cols-3 gap-2 sm:flex">
+                  <div className="grid grid-cols-2 gap-2 sm:flex">
+                    <button
+                      type="button"
+                      onClick={() => setFlourishStudentId(st.id)}
+                      className="rounded-lg border border-fuchsia-300/35 bg-fuchsia-500/10 px-3 py-2 text-xs font-bold text-fuchsia-200 transition-colors hover:bg-fuchsia-500/20 sm:text-sm"
+                    >
+                      🐾 אות חיה
+                    </button>
                     <button
                       type="button"
                       onClick={() => setTrophyStudentId(st.id)}
@@ -191,6 +204,13 @@ export default function TeacherHome() {
         open={managedTrophyStudentId !== null}
         onClose={() => setManagedTrophyStudentId(null)}
         student={managedTrophyStudent}
+      />
+
+      <FlourishAwardModal
+        open={flourishStudentId !== null}
+        onClose={() => setFlourishStudentId(null)}
+        classId={cls.id}
+        student={flourishStudent}
       />
     </div>
   );
