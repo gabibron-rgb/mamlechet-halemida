@@ -36,6 +36,7 @@ type BoxPreview = {
 
 type KindFilter = 'all' | 'item' | 'box' | 'cosmetic';
 type PlacementFilter = 'all' | 'placed' | 'unplaced';
+type InventorySort = 'newest' | 'oldest' | 'rarity' | 'theme' | 'name';
 
 type InventoryRow = {
   entry: StudentState['inventory'][number];
@@ -44,6 +45,7 @@ type InventoryRow = {
   themeId: string | null;
   rarity: Rarity | null;
   isPlaced: boolean;
+  displayName: string;
   searchText: string;
 };
 
@@ -105,6 +107,50 @@ function formatPercent(value: number): string {
     : `${Number(percentage.toFixed(1))}%`;
 }
 
+function compareInventoryRows(
+  first: InventoryRow,
+  second: InventoryRow,
+  sortMode: InventorySort
+): number {
+  const firstTime = first.entry.acquiredAt ?? first.originalIndex;
+  const secondTime = second.entry.acquiredAt ?? second.originalIndex;
+
+  if (sortMode === 'newest') {
+    return secondTime - firstTime || second.originalIndex - first.originalIndex;
+  }
+
+  if (sortMode === 'oldest') {
+    return firstTime - secondTime || first.originalIndex - second.originalIndex;
+  }
+
+  if (sortMode === 'rarity') {
+    const firstRarityRank = first.rarity
+      ? RARITY_ORDER.indexOf(first.rarity)
+      : -1;
+    const secondRarityRank = second.rarity
+      ? RARITY_ORDER.indexOf(second.rarity)
+      : -1;
+    const rarityDifference =
+      secondRarityRank - firstRarityRank;
+
+    return (
+      rarityDifference ||
+      first.displayName.localeCompare(second.displayName, 'he')
+    );
+  }
+
+  if (sortMode === 'theme') {
+    return (
+      themeNameOf(first.themeId).localeCompare(
+        themeNameOf(second.themeId),
+        'he'
+      ) || first.displayName.localeCompare(second.displayName, 'he')
+    );
+  }
+
+  return first.displayName.localeCompare(second.displayName, 'he');
+}
+
 export default function Inventory({ student, onGoRoom }: Props) {
   const updateStudent = useGameStore((s) => s.updateStudent);
 
@@ -117,6 +163,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
   const [rarityFilter, setRarityFilter] = useState<'all' | Rarity>('all');
   const [placementFilter, setPlacementFilter] =
     useState<PlacementFilter>('all');
+  const [sortMode, setSortMode] = useState<InventorySort>('newest');
 
   const ownedItemIds = new Set(
     student.inventory
@@ -140,6 +187,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
           themeId,
           rarity: null,
           isPlaced: false,
+          displayName: box.nameHe,
           searchText: `${box.nameHe} ${themeNameOf(themeId)}`.toLowerCase(),
         };
       }
@@ -168,6 +216,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
         themeId,
         rarity,
         isPlaced,
+        displayName: name,
         searchText: `${name} ${description} ${themeNameOf(themeId)}`.toLowerCase(),
       };
     })
@@ -182,26 +231,31 @@ export default function Inventory({ student, onGoRoom }: Props) {
   ].sort((a, b) => themeNameOf(a).localeCompare(themeNameOf(b), 'he'));
 
   const normalizedSearch = searchQuery.trim().toLowerCase();
-  const visibleInventoryRows = inventoryRows.filter((row) => {
-    if (kindFilter !== 'all' && row.kind !== kindFilter) return false;
-    if (themeFilter !== 'all' && row.themeId !== themeFilter) return false;
-    if (rarityFilter !== 'all' && row.rarity !== rarityFilter) return false;
+  const visibleInventoryRows = inventoryRows
+    .filter((row) => {
+      if (kindFilter !== 'all' && row.kind !== kindFilter) return false;
+      if (themeFilter !== 'all' && row.themeId !== themeFilter) return false;
+      if (rarityFilter !== 'all' && row.rarity !== rarityFilter) return false;
 
-    if (placementFilter !== 'all') {
-      if (row.kind === 'box') return false;
-      if (placementFilter === 'placed' && !row.isPlaced) return false;
-      if (placementFilter === 'unplaced' && row.isPlaced) return false;
-    }
+      if (placementFilter !== 'all') {
+        if (row.kind === 'box') return false;
+        if (placementFilter === 'placed' && !row.isPlaced) return false;
+        if (placementFilter === 'unplaced' && row.isPlaced) return false;
+      }
 
-    return !normalizedSearch || row.searchText.includes(normalizedSearch);
-  });
+      return !normalizedSearch || row.searchText.includes(normalizedSearch);
+    })
+    .sort((first, second) =>
+      compareInventoryRows(first, second, sortMode)
+    );
 
   const hasActiveFilters =
     searchQuery !== '' ||
     kindFilter !== 'all' ||
     themeFilter !== 'all' ||
     rarityFilter !== 'all' ||
-    placementFilter !== 'all';
+    placementFilter !== 'all' ||
+    sortMode !== 'newest';
 
   const isRareReward = openedReward?.rarity === 'rare';
   const isEpicReward = openedReward?.rarity === 'epic';
@@ -215,6 +269,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
     setThemeFilter('all');
     setRarityFilter('all');
     setPlacementFilter('all');
+    setSortMode('newest');
   }
 
   function previewRewardCelebration(rarity: 'rare' | 'epic' | 'legendary') {
@@ -831,7 +886,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
       <div className="mb-4 rounded-2xl border border-white/10 bg-magic-bg/30 p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
-            <div className="font-black text-white">חיפוש וסינון</div>
+            <div className="font-black text-white">חיפוש, סינון ומיון</div>
             <div className="text-xs text-magic-soft/55">
               מצא/י במהירות את מה שחיפשת במלאי
             </div>
@@ -856,7 +911,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
           className="mb-3 w-full rounded-xl border border-white/10 bg-magic-bg/70 px-4 py-2.5 text-sm text-white outline-none placeholder:text-magic-soft/35 focus:border-magic-accent/60"
         />
 
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-5">
           <label className="text-xs font-bold text-magic-soft/65">
             סוג
             <select
@@ -919,6 +974,23 @@ export default function Inventory({ student, onGoRoom }: Props) {
               <option value="all">כל החפצים</option>
               <option value="placed">מונחים בחדר</option>
               <option value="unplaced">לא מונחים בחדר</option>
+            </select>
+          </label>
+
+          <label className="text-xs font-bold text-magic-soft/65">
+            מיון
+            <select
+              value={sortMode}
+              onChange={(event) =>
+                setSortMode(event.target.value as InventorySort)
+              }
+              className="mt-1 w-full rounded-xl border border-white/10 bg-magic-bg px-3 py-2 text-sm text-white outline-none focus:border-magic-accent/60"
+            >
+              <option value="newest">החדשים קודם</option>
+              <option value="oldest">הישנים קודם</option>
+              <option value="rarity">מהנדיר לרגיל</option>
+              <option value="theme">לפי נושא</option>
+              <option value="name">לפי שם</option>
             </select>
           </label>
         </div>
