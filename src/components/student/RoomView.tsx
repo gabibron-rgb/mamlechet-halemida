@@ -9,6 +9,11 @@ import { getRoomSurface, snapItemToRoomSurface } from '../../data/roomSurfaces';
 import type { DisplayKind } from '../../data/roomSurfaces';
 import { ITEM_SPRITES } from '../../data/itemSprites';
 import { THEMES, type ThemeId } from '../../data/themes';
+import RoomCompanion from './RoomCompanion';
+import {
+  COMPANION_STAGE_ORDER,
+  type CompanionStage,
+} from '../../data/companionWorlds';
 
 type Props = {
   student: StudentState;
@@ -67,6 +72,14 @@ const RARITY_SCALE_LIMITS: Record<Rarity, { min: number; max: number; step: numb
 
 const EXTRA_THEME_NAMES: Record<string, string> = {
   ballet: 'בלט',
+};
+
+const COMPANION_STAGE_LABEL_HE: Record<CompanionStage, string> = {
+  egg: 'ביצה',
+  hatchling: 'קטנטנה',
+  young: 'צעירה',
+  grown: 'בוגרת',
+  legendary: 'אגדית',
 };
 
 function themeNameOf(themeId: string): string {
@@ -446,6 +459,7 @@ function getRarityRoomEffect(rarity?: string) {
 
 function RoomScene({
   placedItems,
+  companion,
   onItemClick,
   roomRef,
   onMoveItem,
@@ -453,6 +467,7 @@ function RoomScene({
   selectedInventoryIndex,
 }: {
   placedItems: DisplayItem[];
+  companion: StudentState['companion'];
   onItemClick: (item: DisplayItem) => void;
   roomRef: RefObject<HTMLDivElement | null>;
   onMoveItem: (
@@ -627,6 +642,8 @@ function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
       />
 
       <div className="absolute inset-0 bg-black/5" />
+
+      <RoomCompanion companion={companion} isEditing={isEditing} />
 
       {placedItems.map(item => {
         const rarityEffect = getRarityRoomEffect(item.rarity);
@@ -903,6 +920,18 @@ export default function RoomView({ student }: Props) {
   const fullscreenRef = useRef<HTMLDivElement | null>(null);
   const roomRef = useRef<HTMLDivElement | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [previewCompanionStage, setPreviewCompanionStage] =
+    useState<CompanionStage | null>(null);
+
+  const roomCompanion =
+    import.meta.env.DEV && previewCompanionStage
+      ? {
+          ...student.companion,
+          unlocked: true,
+          theme: student.companion.theme ?? ('chess' as const),
+          stage: previewCompanionStage,
+        }
+      : student.companion;
 
   function toggleFullscreen() {
     const el = fullscreenRef.current;
@@ -1187,12 +1216,46 @@ export default function RoomView({ student }: Props) {
 
         <RoomScene
           placedItems={placedItems}
+          companion={roomCompanion}
           onItemClick={setSelectedItem}
           roomRef={roomRef}
           onMoveItem={moveItemInRoom}
           isEditing={isEditing}
           selectedInventoryIndex={activeSelectedItem?.inventoryIndex ?? null}
         />
+
+        {import.meta.env.DEV && (
+          <div className="mt-3 rounded-2xl border border-dashed border-fuchsia-300/25 bg-fuchsia-500/5 p-3">
+            <div className="text-center text-[11px] font-black text-fuchsia-200">
+              בדיקת החיה בחדר — מקומית בלבד
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
+              {COMPANION_STAGE_ORDER.map(stage => (
+                <button
+                  key={stage}
+                  type="button"
+                  onClick={() => setPreviewCompanionStage(stage)}
+                  className={`rounded-lg px-2 py-1.5 text-[10px] font-bold ${
+                    roomCompanion.stage === stage && previewCompanionStage
+                      ? 'bg-fuchsia-300 text-purple-950'
+                      : 'bg-magic-bg/55 text-magic-soft'
+                  }`}
+                >
+                  {COMPANION_STAGE_LABEL_HE[stage]}
+                </button>
+              ))}
+            </div>
+            {previewCompanionStage && (
+              <button
+                type="button"
+                onClick={() => setPreviewCompanionStage(null)}
+                className="mx-auto mt-2 block rounded-lg bg-white/5 px-3 py-1.5 text-[10px] font-bold text-magic-soft hover:bg-white/10"
+              >
+                חזרה לחיה האמיתית
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="mt-3 text-center text-sm text-magic-soft/70">
           {isEditing
