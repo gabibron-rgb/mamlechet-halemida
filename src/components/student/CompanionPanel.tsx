@@ -20,9 +20,18 @@ import {
 import { COMPANION_FLOURISHES } from '../../data/companionFlourishes';
 import {
   companionStageForProgress,
+  getCompanionBehaviorDayCount,
   getCompanionEvolutionProgress,
 } from '../../data/companionEvolution';
 import { getCompanionInteractionBondBonus } from '../../data/companionSkills';
+import {
+  COMPANION_TRAITS,
+  getCompanionTraitCounts,
+} from '../../data/companionTraits';
+import {
+  COMPANION_TRAIT_CHALLENGE_TITLES,
+  type CompanionTraitChallenge,
+} from '../../data/companionTraitChallenges';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import CompanionFlourishEffects from './CompanionFlourishEffects';
 import CompanionSkillsPanel from './CompanionSkillsPanel';
@@ -400,6 +409,9 @@ export default function CompanionPanel({ student }: Props) {
           stage={ceremonyStage}
           visuals={companionVisuals}
           petName={companionDisplayName}
+          bond={companion.bond}
+          behaviorMemories={companion.behaviorMemories ?? []}
+          traitChallenges={companion.traitChallenges ?? []}
           onClose={() => {
             if (isPreviewCeremony) {
               setCelebratedStage(null);
@@ -974,67 +986,295 @@ function CompanionAvatar({
   );
 }
 
+const EVOLUTION_SPARKS = [
+  { left: '8%', top: '12%', symbol: '✦', delay: '0ms' },
+  { left: '18%', top: '72%', symbol: '✨', delay: '420ms' },
+  { left: '29%', top: '18%', symbol: '✧', delay: '180ms' },
+  { left: '42%', top: '8%', symbol: '✦', delay: '620ms' },
+  { left: '58%', top: '15%', symbol: '✨', delay: '300ms' },
+  { left: '73%', top: '10%', symbol: '✧', delay: '760ms' },
+  { left: '88%', top: '24%', symbol: '✦', delay: '120ms' },
+  { left: '92%', top: '69%', symbol: '✨', delay: '520ms' },
+  { left: '66%', top: '84%', symbol: '✧', delay: '240ms' },
+  { left: '33%', top: '88%', symbol: '✦', delay: '680ms' },
+] as const;
+
+const EVOLUTION_STAGE_REVEAL: Record<
+  Exclude<CompanionStage, 'egg'>,
+  { eyebrow: string; stageName: string; icon: string }
+> = {
+  hatchling: {
+    eyebrow: 'התחלה חדשה',
+    stageName: 'שלב קטנטנה',
+    icon: '🐾',
+  },
+  young: {
+    eyebrow: 'הקשר מתחזק',
+    stageName: 'שלב צעירה',
+    icon: '✨',
+  },
+  grown: {
+    eyebrow: 'דרך של אופי',
+    stageName: 'שלב בוגרת',
+    icon: '👑',
+  },
+  legendary: {
+    eyebrow: 'LEGENDARY',
+    stageName: 'שלב אגדי',
+    icon: '🌟',
+  },
+};
+
 function EvolutionCeremony({
   stage,
   visuals,
   petName,
+  bond,
+  behaviorMemories,
+  traitChallenges,
   onClose,
 }: {
   stage: Exclude<CompanionStage, 'egg'>;
   visuals: CompanionWorldVisuals;
   petName: string;
+  bond: number;
+  behaviorMemories: StudentState['companion']['behaviorMemories'];
+  traitChallenges: CompanionTraitChallenge[];
   onClose: () => void;
 }) {
+  const [step, setStep] = useState<'journey' | 'reveal'>('journey');
   const content = STAGE_CEREMONY[stage];
+  const stageReveal = EVOLUTION_STAGE_REVEAL[stage];
+  const behaviorDays = getCompanionBehaviorDayCount(behaviorMemories);
+  const traitCounts = getCompanionTraitCounts(behaviorMemories);
+  const strongestTraits = [...COMPANION_TRAITS]
+    .filter(trait => traitCounts[trait.id] > 0)
+    .sort((first, second) => traitCounts[second.id] - traitCounts[first.id])
+    .slice(0, 3);
+  const completedChallenges = traitChallenges.filter(
+    challenge => challenge.completedAt !== null
+  );
+  const recentChallenge = completedChallenges.at(-1) ?? null;
+  const previousStageIndex = Math.max(0, COMPANION_STAGE_ORDER.indexOf(stage) - 1);
+  const previousStage = COMPANION_STAGE_ORDER[previousStageIndex] ?? 'egg';
+  const isLegendary = stage === 'legendary';
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden p-4 backdrop-blur-md ${
-        stage === 'legendary' ? 'bg-indigo-950/95' : 'bg-purple-950/90'
+      className={`fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden p-3 backdrop-blur-lg sm:p-5 ${
+        isLegendary ? 'bg-indigo-950/95' : 'bg-purple-950/92'
       }`}
       role="dialog"
       aria-modal="true"
+      aria-label={`טקס ההתפתחות של ${petName}`}
     >
       <div
         className={`absolute inset-0 ${
-          stage === 'legendary'
-            ? 'animate-pulse bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.38),rgba(192,38,211,0.16)_38%,transparent_68%)]'
-            : 'bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.2),transparent_60%)]'
+          isLegendary
+            ? 'animate-pulse bg-[radial-gradient(circle_at_center,rgba(250,204,21,0.42),rgba(192,38,211,0.18)_38%,transparent_68%)]'
+            : 'bg-[radial-gradient(circle_at_center,rgba(216,180,254,0.26),rgba(250,204,21,0.12)_42%,transparent_72%)]'
         }`}
       />
+
+      <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+        {EVOLUTION_SPARKS.map((spark, index) => (
+          <span
+            key={index}
+            className={`absolute animate-pulse select-none ${
+              isLegendary ? 'text-yellow-200' : 'text-purple-200'
+            } ${index % 3 === 0 ? 'text-3xl' : 'text-xl'}`}
+            style={{
+              left: spark.left,
+              top: spark.top,
+              animationDelay: spark.delay,
+            }}
+          >
+            {spark.symbol}
+          </span>
+        ))}
+      </div>
+
       <div
-        className={`relative w-full max-w-md rounded-3xl bg-gradient-to-b from-purple-900 via-magic-panel to-indigo-950 p-7 text-center ${
-          stage === 'legendary'
-            ? 'border-2 border-yellow-200 shadow-[0_0_130px_rgba(250,204,21,0.72)]'
-            : 'border border-yellow-300/60 shadow-[0_0_90px_rgba(250,204,21,0.45)]'
+        className={`relative max-h-[94vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] bg-gradient-to-b from-purple-900 via-magic-panel to-indigo-950 p-5 text-center text-white sm:p-8 ${
+          isLegendary
+            ? 'border-2 border-yellow-200 shadow-[0_0_140px_rgba(250,204,21,0.62)]'
+            : 'border border-purple-200/35 shadow-[0_0_110px_rgba(192,132,252,0.42)]'
         }`}
       >
-        {stage === 'legendary' && (
-          <div className="mb-2 animate-pulse text-sm font-black tracking-[0.28em] text-yellow-200">
-            LEGENDARY
+        <div className="absolute -left-16 -top-16 h-44 w-44 rounded-full bg-fuchsia-400/15 blur-3xl" />
+        <div className="absolute -bottom-20 -right-14 h-52 w-52 rounded-full bg-yellow-300/15 blur-3xl" />
+
+        {step === 'journey' ? (
+          <div className="relative">
+            <div
+              className={`text-xs font-black uppercase tracking-[0.28em] ${
+                isLegendary ? 'text-yellow-200' : 'text-purple-200/80'
+              }`}
+            >
+              {stageReveal.eyebrow}
+            </div>
+            <h2 className="mt-3 text-4xl font-black text-yellow-300 drop-shadow sm:text-5xl">
+              הגיע הרגע...
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-white/80 sm:text-base">
+              ההתפתחות של <span className="font-black text-white">{petName}</span> לא קרתה רק
+              בגלל מד שהתמלא. הדרך שלך בכיתה היא חלק ממה שהביא אתכם לכאן.
+            </p>
+
+            <div className="relative mx-auto my-6 flex h-36 w-36 items-center justify-center">
+              <div
+                className="absolute inset-0 animate-ping rounded-full border border-yellow-200/25"
+                style={{ animationDuration: '2.4s' }}
+              />
+              <div
+                className="absolute inset-3 animate-pulse rounded-full blur-xl"
+                style={{ backgroundColor: `${visuals.eggColor}55` }}
+              />
+              <div
+                className="relative flex h-28 w-28 items-center justify-center rounded-full border-2 border-white/30 bg-black/20 text-6xl shadow-2xl"
+                style={{
+                  boxShadow: `0 0 55px ${visuals.eggColor}80`,
+                }}
+              >
+                {visuals.motif}
+              </div>
+            </div>
+
+            <div className="mx-auto max-w-xl rounded-2xl border border-white/10 bg-black/15 p-4 text-right">
+              <div className="text-center text-xs font-black tracking-wide text-purple-200/70">
+                הדברים שבנו את ההתפתחות הזאת
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                <EvolutionJourneyStat label="קשר" value={String(bond)} emoji="💞" />
+                <EvolutionJourneyStat
+                  label="ימי התנהגות"
+                  value={String(behaviorDays)}
+                  emoji="📅"
+                />
+                <EvolutionJourneyStat
+                  label="אתגרי אופי"
+                  value={String(completedChallenges.length)}
+                  emoji="🏅"
+                />
+              </div>
+
+              {strongestTraits.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {strongestTraits.map(trait => (
+                    <div
+                      key={trait.id}
+                      className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2.5"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{trait.emoji}</span>
+                        <span className="font-black text-white">{trait.nameHe}</span>
+                      </div>
+                      <div className="text-xs font-bold text-purple-100/75">
+                        {traitCounts[trait.id]} {traitCounts[trait.id] === 1 ? 'יום הוכחה' : 'ימי הוכחה'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {recentChallenge && (
+                <div className="mt-3 rounded-xl border border-yellow-200/20 bg-yellow-300/10 px-3 py-3 text-center">
+                  <div className="text-[10px] font-black uppercase tracking-widest text-yellow-200/60">
+                    אתגר אופי שהושלם
+                  </div>
+                  <div className="mt-1 font-black text-yellow-100">
+                    🏆 {COMPANION_TRAIT_CHALLENGE_TITLES[recentChallenge.traitId]}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setStep('reveal')}
+              className="mt-6 w-full rounded-2xl bg-gradient-to-l from-yellow-300 to-amber-400 px-6 py-4 text-base font-black text-purple-950 shadow-lg transition-transform hover:scale-[1.015]"
+            >
+              לגלות את הצורה החדשה ✨
+            </button>
+          </div>
+        ) : (
+          <div className="relative">
+            <div
+              className={`text-xs font-black uppercase tracking-[0.3em] ${
+                isLegendary ? 'animate-pulse text-yellow-200' : 'text-purple-200/80'
+              }`}
+            >
+              {stageReveal.eyebrow}
+            </div>
+
+            <div className="mt-2 text-5xl" aria-hidden="true">
+              {stageReveal.icon}
+            </div>
+
+            <CompanionAvatar
+              stage={stage}
+              visuals={visuals}
+              themeName={visuals.nameHe}
+              petName={petName}
+            />
+
+            <div className="inline-flex rounded-full border border-yellow-200/35 bg-yellow-300/10 px-4 py-1.5 text-xs font-black text-yellow-100">
+              {STAGE_LABEL_HE[previousStage]} → {stageReveal.stageName}
+            </div>
+
+            <h2 className="mt-4 text-3xl font-black text-yellow-300 drop-shadow sm:text-4xl">
+              {content.title}
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-6 text-white/80 sm:text-base">
+              {content.description}
+              <br />
+              <span className="font-black text-white">
+                ההתפתחות הזאת מספרת גם משהו על הדרך שלך בכיתה.
+              </span>
+            </p>
+
+            {strongestTraits.length > 0 && (
+              <div className="mx-auto mt-5 flex max-w-lg flex-wrap justify-center gap-2">
+                {strongestTraits.map(trait => (
+                  <span
+                    key={trait.id}
+                    className="rounded-full border border-white/12 bg-white/5 px-3 py-2 text-xs font-black text-white"
+                  >
+                    {trait.emoji} {trait.nameHe} · {traitCounts[trait.id]}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-7 w-full rounded-2xl bg-gradient-to-l from-yellow-300 to-amber-400 px-6 py-4 text-base font-black text-purple-950 shadow-lg transition-transform hover:scale-[1.015]"
+            >
+              {content.button}
+            </button>
           </div>
         )}
-        <CompanionAvatar
-          stage={stage}
-          visuals={visuals}
-          themeName={visuals.nameHe}
-          petName={petName}
-        />
-        <div className="text-3xl font-black text-yellow-300">
-          {content.title}
-        </div>
-        <p className="mt-3 text-sm leading-6 text-white/80">
-          <span className="font-black text-white">{petName}</span>{' '}
-          {content.description}
-        </p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-6 w-full rounded-xl bg-yellow-300 py-3 font-black text-purple-950 hover:bg-yellow-200"
-        >
-          {content.button}
-        </button>
       </div>
+    </div>
+  );
+}
+
+function EvolutionJourneyStat({
+  label,
+  value,
+  emoji,
+}: {
+  label: string;
+  value: string;
+  emoji: string;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-white/5 px-2 py-3">
+      <div className="text-xl">{emoji}</div>
+      <div className="mt-1 text-lg font-black text-white">{value}</div>
+      <div className="text-[9px] font-bold text-purple-100/60">{label}</div>
     </div>
   );
 }
