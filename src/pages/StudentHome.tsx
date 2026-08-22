@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSessionStore } from '../store/useSessionStore';
 import { useGameStore } from '../store/useGameStore';
 import { xpToNextLevel } from '../logic/leveling';
+import { COMPANION_STAGE_ORDER } from '../data/companionWorlds';
 
 import Shop from '../components/student/Shop';
 import Inventory from '../components/student/Inventory';
@@ -100,6 +101,18 @@ export default function StudentHome() {
     .filter(trophy => !seenTrophyIds.has(trophy.id))
     .sort((first, second) => first.awardedAt - second.awardedAt);
   const activeUnseenTrophy = unseenTrophies[0] ?? null;
+  const companionStageIndex = COMPANION_STAGE_ORDER.indexOf(
+    student.companion.stage
+  );
+  const celebratedCompanionStages = new Set(
+    student.companion.celebratedStages ?? ['egg']
+  );
+  const hasPendingCompanionEvolution = COMPANION_STAGE_ORDER.some(
+    (stage, index) =>
+      stage !== 'egg' &&
+      index <= companionStageIndex &&
+      !celebratedCompanionStages.has(stage)
+  );
 
   return (
     <div className="min-h-screen p-6">
@@ -214,7 +227,7 @@ export default function StudentHome() {
             active={tab === 'companion'}
             onClick={() => setTab('companion')}
           >
-            🐾 חיית מחמד
+            🐾 חיית מחמד{hasPendingCompanionEvolution ? ' ✨' : ''}
           </TabButton>
 
           <TabButton

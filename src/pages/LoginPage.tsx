@@ -38,7 +38,7 @@ function buildStudentFromSupabase(row: any): StudentState {
       petArea: meta.capacities?.petArea ?? 1000,
     },
 
-    companion: meta.companion ?? {
+    companion: {
       unlocked: false,
       theme: null,
       stage: 'egg',
@@ -47,6 +47,18 @@ function buildStudentFromSupabase(row: any): StudentState {
       careXpToday: 0,
       activeFlourishes: [],
       ownedFlourishes: [],
+      ...(meta.companion ?? {}),
+      name:
+        typeof meta.companion?.name === 'string' && meta.companion.name.trim()
+          ? meta.companion.name.trim()
+          : null,
+      petPoints:
+        typeof meta.companion?.petPoints === 'number'
+          ? Math.max(0, meta.companion.petPoints)
+          : 0,
+      celebratedStages: Array.isArray(meta.companion?.celebratedStages)
+        ? meta.companion.celebratedStages
+        : ['egg'],
     },
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],

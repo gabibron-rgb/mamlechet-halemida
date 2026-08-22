@@ -2,6 +2,67 @@ import type { ThemeId } from './themes';
 
 export type CompanionStage = 'egg' | 'hatchling' | 'young' | 'grown';
 
+export const COMPANION_STAGE_ORDER: CompanionStage[] = [
+  'egg',
+  'hatchling',
+  'young',
+  'grown',
+];
+
+export const HATCH_BOND_REQUIRED = 30;
+export const YOUNG_BOND_REQUIRED = 90;
+export const GROWN_BOND_REQUIRED = 180;
+
+export type CompanionNextStage = {
+  stage: CompanionStage;
+  bondRequired: number;
+  labelHe: string;
+} | null;
+
+export function companionStageForBond(
+  bond: number,
+  currentStage: CompanionStage = 'egg'
+): CompanionStage {
+  let stageFromBond: CompanionStage = 'egg';
+
+  if (bond >= GROWN_BOND_REQUIRED) stageFromBond = 'grown';
+  else if (bond >= YOUNG_BOND_REQUIRED) stageFromBond = 'young';
+  else if (bond >= HATCH_BOND_REQUIRED) stageFromBond = 'hatchling';
+
+  return COMPANION_STAGE_ORDER.indexOf(stageFromBond) >
+    COMPANION_STAGE_ORDER.indexOf(currentStage)
+    ? stageFromBond
+    : currentStage;
+}
+
+export function nextCompanionStage(stage: CompanionStage): CompanionNextStage {
+  if (stage === 'egg') {
+    return {
+      stage: 'hatchling',
+      bondRequired: HATCH_BOND_REQUIRED,
+      labelHe: 'בקיעת הביצה',
+    };
+  }
+
+  if (stage === 'hatchling') {
+    return {
+      stage: 'young',
+      bondRequired: YOUNG_BOND_REQUIRED,
+      labelHe: 'גדילה לחיית מחמד צעירה',
+    };
+  }
+
+  if (stage === 'young') {
+    return {
+      stage: 'grown',
+      bondRequired: GROWN_BOND_REQUIRED,
+      labelHe: 'גדילה לחיית מחמד בוגרת',
+    };
+  }
+
+  return null;
+}
+
 export type CompanionWorldVisuals = {
   theme: ThemeId;
   nameHe: string;
@@ -57,5 +118,3 @@ export const COMPANION_VISUALS: Record<string, CompanionWorldVisuals> = {
 // Max active flourishes from teacher badges
 export const MAX_ACTIVE_FLOURISHES = 3;
 
-// Daily soft cap on companion-care XP
-export const DAILY_CARE_XP_CAP = 10;

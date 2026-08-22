@@ -31,10 +31,13 @@ export type InventoryEntry = {
 export type CompanionState = {
   unlocked: boolean;
   theme: ThemeId | null;
+  name: string | null;
   stage: CompanionStage;
   bond: number;
+  petPoints: number;
   lastCareDate: string | null;
   careXpToday: number;
+  celebratedStages: CompanionStage[];
   activeFlourishes: string[];
   ownedFlourishes: string[];
 };
@@ -198,10 +201,13 @@ function defaultStudent(name: string, classId: string): StudentState {
     companion: {
       unlocked: false,
       theme: null,
+      name: null,
       stage: 'egg',
       bond: 0,
+      petPoints: 0,
       lastCareDate: null,
       careXpToday: 0,
+      celebratedStages: ['egg'],
       activeFlourishes: [],
       ownedFlourishes: [],
     },
@@ -246,7 +252,21 @@ function studentFromSupabase(row: any, classId: string): StudentState {
       petArea: 999,
     },
 
-    companion: meta.companion ?? base.companion,
+    companion: {
+      ...base.companion,
+      ...(meta.companion ?? {}),
+      name:
+        typeof meta.companion?.name === 'string' && meta.companion.name.trim()
+          ? meta.companion.name.trim()
+          : null,
+      petPoints:
+        typeof meta.companion?.petPoints === 'number'
+          ? Math.max(0, meta.companion.petPoints)
+          : 0,
+      celebratedStages: Array.isArray(meta.companion?.celebratedStages)
+        ? meta.companion.celebratedStages
+        : ['egg'],
+    },
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
@@ -552,10 +572,19 @@ export const useGameStore = create<GameStore>()(
           if (!cur) return state;
 
           nextPoints = Math.max(0, cur.points + delta);
+          const nextPetPoints = Math.max(
+            0,
+            (cur.companion.petPoints ?? 0) + delta
+          );
 
           updatedStudent = {
             ...cur,
             points: nextPoints,
+            companion: {
+              ...cur.companion,
+              petPoints: nextPetPoints,
+              celebratedStages: cur.companion.celebratedStages ?? ['egg'],
+            },
           };
 
           return {
