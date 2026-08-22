@@ -229,6 +229,15 @@ type GameStore = {
     metric: ClassGoalMetric,
     contributionId: string
   ) => Promise<void>;
+  awardClassGoalExcellence: (
+    classId: string,
+    goalId: string
+  ) => Promise<boolean>;
+  undoClassGoalExcellence: (
+    classId: string,
+    goalId: string,
+    batchId: string
+  ) => Promise<boolean>;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -475,6 +484,49 @@ function studentFromSupabase(row: any, classId: string): StudentState {
     pendingLevelUps: meta.pendingLevelUps ?? 0,
     pendingThemeUnlocks: meta.pendingThemeUnlocks ?? 0,
   };
+}
+
+
+function classGoalDayKey(timestamp: number): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jerusalem',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(new Date(timestamp));
+
+  const values = Object.fromEntries(
+    parts.map(part => [part.type, part.value])
+  );
+
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function dailyBehaviorContributionId(
+  goalId: string,
+  studentId: string,
+  timestamp: number
+): string {
+  return `behavior-day:${goalId}:${studentId}:${classGoalDayKey(timestamp)}`;
+}
+
+function isMemoryEligibleForGoalDay(
+  memory: CompanionBehaviorMemory,
+  goal: StudentClassGoal,
+  dayKey: string
+): boolean {
+  if (classGoalDayKey(memory.awardedAt) !== dayKey) return false;
+  if (memory.awardedAt < goal.createdAt) return false;
+  if (goal.completedAt !== null && memory.awardedAt > goal.completedAt) return false;
+  if (goal.cancelledAt !== null && memory.awardedAt > goal.cancelledAt) return false;
+  return true;
+}
+
+function classExcellenceContributionPrefix(
+  goalId: string,
+  batchId: string
+): string {
+  return `class-excellence:${goalId}:${batchId}:`;
 }
 
 export const useGameStore = create<GameStore>()(
@@ -826,13 +878,60 @@ export const useGameStore = create<GameStore>()(
         if (updatedStudent) {
           await syncStudentToSupabase(updatedStudent);
 
-          const classId = get().students[studentId]?.classId;
-          if (classId && traitId && cleanActivityId && safeAmount > 0) {
-            await get().recordClassGoalContribution(
-              classId,
-              'behavior',
-              `behavior:${studentId}:${cleanActivityId}`
+          const latestStudent = get().students[studentId];
+          const classId = latestStudent?.classId;
+          const activeBehaviorGoal = latestStudent?.classGoals
+            .filter(goal => goal.metric === 'behavior' && isClassGoalActive(goal))
+            .sort((first, second) => second.createdAt - first.createdAt)[0] ?? null;
+
+          if (
+            classId &&
+            activeBehaviorGoal &&
+            traitId &&
+            cleanActivityId &&
+            safeAmount > 0
+          ) {
+            const awardedDayKey = classGoalDayKey(awardedAt);
+            const legacyPrefix = `behavior:${studentId}:`;
+            const behaviorMemories = latestStudent?.companion.behaviorMemories ?? [];
+            const alreadyCountedToday = activeBehaviorGoal.contributionIds.some(
+              contributionId => {
+                if (
+                  contributionId === dailyBehaviorContributionId(
+                    activeBehaviorGoal.id,
+                    studentId,
+                    awardedAt
+                  )
+                ) {
+                  return true;
+                }
+
+                if (!contributionId.startsWith(legacyPrefix)) return false;
+                const legacyActivityId = contributionId.slice(legacyPrefix.length);
+                const matchingMemory = behaviorMemories.find(
+                  memory => memory.id === legacyActivityId
+                );
+                return matchingMemory
+                  ? isMemoryEligibleForGoalDay(
+                      matchingMemory,
+                      activeBehaviorGoal,
+                      awardedDayKey
+                    )
+                  : false;
+              }
             );
+
+            if (!alreadyCountedToday) {
+              await get().recordClassGoalContribution(
+                classId,
+                'behavior',
+                dailyBehaviorContributionId(
+                  activeBehaviorGoal.id,
+                  studentId,
+                  awardedAt
+                )
+              );
+            }
           }
         }
       },
@@ -845,21 +944,22 @@ export const useGameStore = create<GameStore>()(
         const safeAmount = Math.max(0, Math.round(amount));
         const cleanActivityId = sourceActivityId.trim();
         let updatedStudent: StudentState | null = null;
-        let removedBehaviorContribution = false;
+        let removedMemory: CompanionBehaviorMemory | null = null;
+        let remainingMemories: CompanionBehaviorMemory[] = [];
 
         set(state => {
           const student = state.students[studentId];
           if (!student) return state;
 
-          removedBehaviorContribution = (
+          removedMemory = (
             student.companion.behaviorMemories ?? []
-          ).some(memory => memory.id === cleanActivityId);
-          const nextMemories = (
+          ).find(memory => memory.id === cleanActivityId) ?? null;
+          remainingMemories = (
             student.companion.behaviorMemories ?? []
           ).filter(memory => memory.id !== cleanActivityId);
           const nextChallenges = reconcileLatestCompanionTraitChallenge(
             student.companion.traitChallenges ?? [],
-            nextMemories,
+            remainingMemories,
             Date.now()
           );
           const journalEntries = (
@@ -880,7 +980,7 @@ export const useGameStore = create<GameStore>()(
                 0,
                 (student.companion.petPoints ?? 0) - safeAmount
               ),
-              behaviorMemories: nextMemories,
+              behaviorMemories: remainingMemories,
               traitChallenges: nextChallenges,
               journalEntries: nextJournalEntries,
             },
@@ -897,13 +997,45 @@ export const useGameStore = create<GameStore>()(
         if (updatedStudent) {
           await syncStudentToSupabase(updatedStudent);
 
-          const classId = get().students[studentId]?.classId;
-          if (classId && removedBehaviorContribution && cleanActivityId) {
-            await get().removeClassGoalContribution(
-              classId,
-              'behavior',
-              `behavior:${studentId}:${cleanActivityId}`
+          const studentAfterUndo = get().students[studentId];
+          const classId = studentAfterUndo?.classId;
+          const memoryToRemove = removedMemory as CompanionBehaviorMemory | null;
+          if (classId && memoryToRemove) {
+            const removedDayKey = classGoalDayKey(memoryToRemove.awardedAt);
+            const behaviorGoals = (studentAfterUndo?.classGoals ?? []).filter(
+              goal => goal.metric === 'behavior'
             );
+            let removedDailyContribution = false;
+
+            for (const goal of behaviorGoals) {
+              const contributionId = dailyBehaviorContributionId(
+                goal.id,
+                studentId,
+                memoryToRemove.awardedAt
+              );
+              if (!goal.contributionIds.includes(contributionId)) continue;
+
+              const anotherEligibleMemoryExists = remainingMemories.some(memory =>
+                isMemoryEligibleForGoalDay(memory, goal, removedDayKey)
+              );
+
+              if (anotherEligibleMemoryExists) continue;
+
+              await get().removeClassGoalContribution(
+                classId,
+                'behavior',
+                contributionId
+              );
+              removedDailyContribution = true;
+            }
+
+            if (!removedDailyContribution) {
+              await get().removeClassGoalContribution(
+                classId,
+                'behavior',
+                `behavior:${studentId}:${cleanActivityId}`
+              );
+            }
           }
         }
       },
@@ -1628,6 +1760,150 @@ export const useGameStore = create<GameStore>()(
         if (updatedStudents.length > 0) {
           await Promise.all(updatedStudents.map(syncStudentToSupabase));
         }
+      },
+
+      awardClassGoalExcellence: async (classId, goalId) => {
+        const cleanClassId = classId.trim();
+        const cleanGoalId = goalId.trim();
+        if (!cleanClassId || !cleanGoalId) return false;
+
+        const referenceStudent = Object.values(get().students).find(
+          student => student.classId === cleanClassId
+        );
+        const referenceGoal = referenceStudent?.classGoals.find(
+          goal => goal.id === cleanGoalId
+        );
+
+        if (
+          !referenceGoal ||
+          referenceGoal.metric !== 'behavior' ||
+          !isClassGoalActive(referenceGoal)
+        ) {
+          return false;
+        }
+
+        const batchId = genId('excellent');
+        const prefix = classExcellenceContributionPrefix(cleanGoalId, batchId);
+        const contributionIds = Array.from(
+          { length: 5 },
+          (_, index) => `${prefix}${index + 1}`
+        );
+        const at = Date.now();
+        const updatedStudents: StudentState[] = [];
+
+        set(state => {
+          const nextStudents = { ...state.students };
+
+          for (const student of Object.values(nextStudents)) {
+            if (student.classId !== cleanClassId) continue;
+
+            let changed = false;
+            const classGoals = (student.classGoals ?? []).map(goal => {
+              if (
+                goal.id !== cleanGoalId ||
+                goal.metric !== 'behavior' ||
+                !isClassGoalActive(goal)
+              ) {
+                return goal;
+              }
+
+              let nextGoal = goal;
+              for (const contributionId of contributionIds) {
+                const candidate = withClassGoalContribution(
+                  nextGoal,
+                  contributionId,
+                  at
+                );
+                if (candidate !== nextGoal) changed = true;
+                nextGoal = candidate;
+              }
+              return nextGoal;
+            });
+
+            if (!changed) continue;
+
+            const updatedStudent: StudentState = { ...student, classGoals };
+            nextStudents[student.id] = updatedStudent;
+            updatedStudents.push(updatedStudent);
+          }
+
+          return updatedStudents.length > 0
+            ? { students: nextStudents }
+            : state;
+        });
+
+        if (updatedStudents.length === 0) return false;
+        await Promise.all(updatedStudents.map(syncStudentToSupabase));
+        return true;
+      },
+
+      undoClassGoalExcellence: async (classId, goalId, batchId) => {
+        const cleanClassId = classId.trim();
+        const cleanGoalId = goalId.trim();
+        const cleanBatchId = batchId.trim();
+        if (!cleanClassId || !cleanGoalId || !cleanBatchId) return false;
+
+        const referenceStudent = Object.values(get().students).find(
+          student => student.classId === cleanClassId
+        );
+        const hasAnotherActiveGoal = (referenceStudent?.classGoals ?? []).some(
+          goal => goal.id !== cleanGoalId && isClassGoalActive(goal)
+        );
+        if (hasAnotherActiveGoal) return false;
+
+        const prefix = classExcellenceContributionPrefix(
+          cleanGoalId,
+          cleanBatchId
+        );
+        const updatedStudents: StudentState[] = [];
+
+        set(state => {
+          const nextStudents = { ...state.students };
+
+          for (const student of Object.values(nextStudents)) {
+            if (student.classId !== cleanClassId) continue;
+
+            let changed = false;
+            const classGoals = (student.classGoals ?? []).map(goal => {
+              if (goal.id !== cleanGoalId || goal.cancelledAt !== null) {
+                return goal;
+              }
+
+              const contributionIds = goal.contributionIds.filter(id => {
+                if (!id.startsWith(prefix)) return true;
+                changed = true;
+                return false;
+              });
+
+              if (contributionIds.length === goal.contributionIds.length) {
+                return goal;
+              }
+
+              return {
+                ...goal,
+                contributionIds,
+                completedAt:
+                  contributionIds.length >= goal.target
+                    ? goal.completedAt
+                    : null,
+              };
+            });
+
+            if (!changed) continue;
+
+            const updatedStudent: StudentState = { ...student, classGoals };
+            nextStudents[student.id] = updatedStudent;
+            updatedStudents.push(updatedStudent);
+          }
+
+          return updatedStudents.length > 0
+            ? { students: nextStudents }
+            : state;
+        });
+
+        if (updatedStudents.length === 0) return false;
+        await Promise.all(updatedStudents.map(syncStudentToSupabase));
+        return true;
       },
 
       updateInventoryEntry: (studentId, inventoryIndex, patch) => {

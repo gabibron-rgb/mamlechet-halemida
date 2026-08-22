@@ -17,7 +17,7 @@ export const CLASS_GOAL_METRICS: Record<ClassGoalMetric, ClassGoalMetricDefiniti
   behavior: {
     id: 'behavior',
     labelHe: 'התנהגות והשקעה בכיתה',
-    helperHe: 'כל הענקת נקודות עם סיבת התנהגות מוכרת מוסיפה צעד אחד ליעד הכיתתי.',
+    helperHe: 'כל תלמיד יכול להוסיף צעד אחד ביום דרך נקודות עם סיבה מוכרת. המורה יכול להוסיף +5 על מצוינות כיתתית.',
     emoji: '🌟',
   },
 };

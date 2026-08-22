@@ -18,7 +18,10 @@ type Props = {
 export default function ClassGoalBoard({ classId, students, onCreateGoal }: Props) {
   const [expanded, setExpanded] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
   const cancelClassGoal = useGameStore(s => s.cancelClassGoal);
+  const awardClassGoalExcellence = useGameStore(s => s.awardClassGoalExcellence);
+  const undoClassGoalExcellence = useGameStore(s => s.undoClassGoalExcellence);
   const goals = useMemo(() => mergeClassGoals(students), [students]);
   const active = goals
     .filter(isClassGoalActive)
@@ -31,7 +34,37 @@ export default function ClassGoalBoard({ classId, students, onCreateGoal }: Prop
   async function cancelActiveGoal() {
     if (!active || busy) return;
     setBusy(true);
+    setFeedback(null);
     await cancelClassGoal(classId, active.id);
+    setBusy(false);
+  }
+
+  async function addClassExcellence(goal: StudentClassGoal) {
+    if (busy || goal.metric !== 'behavior' || !isClassGoalActive(goal)) return;
+    setBusy(true);
+    setFeedback(null);
+    const success = await awardClassGoalExcellence(classId, goal.id);
+    setFeedback(
+      success
+        ? '🌟 מצוינות כיתתית! נוספו עד 5 צעדים ליעד.'
+        : 'לא ניתן היה להוסיף מצוינות כיתתית ליעד.'
+    );
+    setBusy(false);
+  }
+
+  async function undoLatestClassExcellence(goal: StudentClassGoal) {
+    if (busy) return;
+    const batchId = latestExcellenceBatchId(goal);
+    if (!batchId) return;
+
+    setBusy(true);
+    setFeedback(null);
+    const success = await undoClassGoalExcellence(classId, goal.id, batchId);
+    setFeedback(
+      success
+        ? '↩️ תוספת המצוינות הכיתתית האחרונה בוטלה.'
+        : 'לא ניתן היה לבטל את תוספת המצוינות.'
+    );
     setBusy(false);
   }
 
@@ -58,8 +91,20 @@ export default function ClassGoalBoard({ classId, students, onCreateGoal }: Prop
 
       {expanded && (
         <div className="mt-5">
+          {feedback && (
+            <div className="mb-4 rounded-2xl border border-amber-300/20 bg-amber-500/10 px-4 py-3 text-center text-sm font-bold text-amber-100">
+              {feedback}
+            </div>
+          )}
+
           {active ? (
-            <ActiveGoalCard goal={active} busy={busy} onCancel={cancelActiveGoal} />
+            <ActiveGoalCard
+              goal={active}
+              busy={busy}
+              onCancel={cancelActiveGoal}
+              onAddExcellence={addClassExcellence}
+              onUndoExcellence={undoLatestClassExcellence}
+            />
           ) : (
             <div className="rounded-2xl border border-white/10 bg-magic-bg/30 p-5 text-center text-sm text-magic-soft/65">
               צרו מטרה אחת שכל הכיתה מתקדמת אליה יחד. אין דירוג אישי ואין פרס נקודות — רק הישג משותף.
@@ -72,17 +117,34 @@ export default function ClassGoalBoard({ classId, students, onCreateGoal }: Prop
                 הישגים כיתתיים אחרונים
               </div>
               <div className="flex flex-col gap-2">
-                {completed.map(goal => (
-                  <div
-                    key={goal.id}
-                    className="flex flex-col gap-1 rounded-2xl border border-emerald-300/10 bg-emerald-500/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
-                    <span className="font-bold text-white">🏆 {goal.title}</span>
-                    <span className="text-xs font-black text-emerald-200">
-                      ⭐ כוכב ממלכה · {goal.target} צעדים
-                    </span>
-                  </div>
-                ))}
+                {completed.map(goal => {
+                  const excellenceBatchId = latestExcellenceBatchId(goal);
+
+                  return (
+                    <div
+                      key={goal.id}
+                      className="flex flex-col gap-2 rounded-2xl border border-emerald-300/10 bg-emerald-500/8 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="flex flex-col gap-1">
+                        <span className="font-bold text-white">🏆 {goal.title}</span>
+                        <span className="text-xs font-black text-emerald-200">
+                          ⭐ כוכב ממלכה · {goal.target} צעדים
+                        </span>
+                      </div>
+
+                      {excellenceBatchId && active === null && (
+                        <button
+                          type="button"
+                          onClick={() => void undoLatestClassExcellence(goal)}
+                          disabled={busy}
+                          className="rounded-lg border border-amber-300/20 bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-100 transition-colors hover:bg-amber-500/20 disabled:opacity-40"
+                        >
+                          ↩️ בטל מצוינות אחרונה
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -96,15 +158,20 @@ function ActiveGoalCard({
   goal,
   busy,
   onCancel,
+  onAddExcellence,
+  onUndoExcellence,
 }: {
   goal: StudentClassGoal;
   busy: boolean;
   onCancel: () => Promise<void>;
+  onAddExcellence: (goal: StudentClassGoal) => Promise<void>;
+  onUndoExcellence: (goal: StudentClassGoal) => Promise<void>;
 }) {
   const progress = classGoalProgress(goal);
   const pct = Math.min(100, Math.round((progress / goal.target) * 100));
   const metric = classGoalMetricDefinition(goal.metric);
   const overdue = isClassGoalOverdue(goal);
+  const excellenceBatchId = latestExcellenceBatchId(goal);
 
   return (
     <div className={`rounded-2xl border p-4 ${overdue ? 'border-rose-300/25 bg-rose-500/8' : 'border-cyan-300/20 bg-cyan-500/8'}`}>
@@ -133,6 +200,41 @@ function ActiveGoalCard({
         />
       </div>
 
+      {goal.metric === 'behavior' && (
+        <div className="mt-4 rounded-2xl border border-amber-300/20 bg-amber-500/10 p-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-sm font-black text-amber-100">
+                🌟 מצוינות כיתתית
+              </div>
+              <div className="mt-0.5 text-[10px] leading-4 text-magic-soft/60">
+                כל תלמיד תורם ליעד פעם אחת ביום. לשיעור יוצא מן הכלל אפשר להוסיף 5 צעדים לכל הכיתה.
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              {excellenceBatchId && (
+                <button
+                  type="button"
+                  onClick={() => void onUndoExcellence(goal)}
+                  disabled={busy}
+                  className="rounded-xl border border-amber-200/20 bg-magic-bg/40 px-3 py-2 text-xs font-bold text-amber-100 disabled:opacity-40"
+                >
+                  ↩️ בטל אחרון
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => void onAddExcellence(goal)}
+                disabled={busy}
+                className="rounded-xl bg-amber-300 px-4 py-2 text-sm font-black text-magic-bg transition-transform hover:scale-105 disabled:opacity-40"
+              >
+                {busy ? 'מעדכן...' : '🌟 +5 מצוינות כיתתית'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mt-3 flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
         <span className={overdue ? 'font-bold text-rose-200' : 'text-magic-soft/55'}>
           {goal.dueAt !== null ? `${overdue ? '⚠️ עבר היעד · ' : '🗓️ עד '}${formatDate(goal.dueAt)}` : 'ללא תאריך סיום'}
@@ -143,7 +245,7 @@ function ActiveGoalCard({
           disabled={busy}
           className="rounded-lg border border-white/10 bg-magic-bg/45 px-3 py-1.5 font-bold text-magic-soft/65 disabled:opacity-40"
         >
-          {busy ? 'מבטל...' : 'בטל יעד'}
+          {busy ? 'מעדכן...' : 'בטל יעד'}
         </button>
       </div>
     </div>
@@ -172,6 +274,18 @@ function mergeClassGoals(students: StudentState[]): StudentClassGoal[] {
   }
 
   return Array.from(byId.values());
+}
+
+function latestExcellenceBatchId(goal: StudentClassGoal): string | null {
+  const prefix = `class-excellence:${goal.id}:`;
+  const contributionId = goal.contributionIds[goal.contributionIds.length - 1];
+  if (!contributionId?.startsWith(prefix)) return null;
+
+  const rest = contributionId.slice(prefix.length);
+  const unitSeparator = rest.lastIndexOf(':');
+  if (unitSeparator <= 0) return null;
+
+  return rest.slice(0, unitSeparator);
 }
 
 function formatDate(timestamp: number): string {
