@@ -15,8 +15,14 @@ import {
   type CompanionStage,
 } from '../../data/companionWorlds';
 
+export type RoomViewStudent = Pick<
+  StudentState,
+  'id' | 'name' | 'inventory' | 'companion'
+>;
+
 type Props = {
-  student: StudentState;
+  student: RoomViewStudent;
+  readOnly?: boolean;
 };
 
 type DisplayItem = {
@@ -245,7 +251,7 @@ function InfoModal({
 }: {
   item: DisplayItem;
   onClose: () => void;
-  onRemove: () => void;
+  onRemove?: () => void;
 }) {
   return (
     <div
@@ -277,13 +283,15 @@ function InfoModal({
         </div>
 
         <div className="mt-5 flex gap-2">
-          <button
-            type="button"
-            onClick={onRemove}
-            className="flex-1 rounded-xl bg-red-500/80 px-4 py-2 font-semibold text-white hover:bg-red-500"
-          >
-            הסר מהחדר
-          </button>
+          {onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="flex-1 rounded-xl bg-red-500/80 px-4 py-2 font-semibold text-white hover:bg-red-500"
+            >
+              הסר מהחדר
+            </button>
+          )}
 
           <button
             type="button"
@@ -750,7 +758,7 @@ function PlacementPanel({
   student,
   onAddToRoom,
 }: {
-  student: StudentState;
+  student: RoomViewStudent;
   onAddToRoom: (inventoryIndex: number) => void;
 }) {
   const [themeFilter, setThemeFilter] = useState('all');
@@ -914,7 +922,7 @@ function PlacementPanel({
   );
 }
 
-export default function RoomView({ student }: Props) {
+export default function RoomView({ student, readOnly = false }: Props) {
   const updateStudent = useGameStore(s => s.updateStudent);
   const [selectedItem, setSelectedItem] = useState<DisplayItem | null>(null);
   const fullscreenRef = useRef<HTMLDivElement | null>(null);
@@ -1177,7 +1185,9 @@ export default function RoomView({ student }: Props) {
             </h2>
 
             <p className="text-sm text-magic-soft/70">
-              לחץ על חפץ כדי לראות מידע או להסיר אותו מהחדר.
+              {readOnly
+                ? 'מצב צפייה בלבד — אפשר להסתכל על החפצים והחיה, בלי לשנות דבר בחדר.'
+                : 'לחץ על חפץ כדי לראות מידע או להסיר אותו מהחדר.'}
             </p>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -1189,20 +1199,22 @@ export default function RoomView({ student }: Props) {
                 מסך מלא
               </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedItem(null);
-                  setIsEditing(prev => !prev);
-                }}
-                className={`rounded-xl px-4 py-2 text-sm font-bold ${
-                  isEditing
-                    ? 'bg-green-400 text-indigo-950 hover:bg-green-300'
-                    : 'bg-white/10 text-white hover:bg-white/15'
-                }`}
-              >
-                {isEditing ? 'סיים עריכה' : 'ערוך חדר'}
-              </button>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedItem(null);
+                    setIsEditing(prev => !prev);
+                  }}
+                  className={`rounded-xl px-4 py-2 text-sm font-bold ${
+                    isEditing
+                      ? 'bg-green-400 text-indigo-950 hover:bg-green-300'
+                      : 'bg-white/10 text-white hover:bg-white/15'
+                  }`}
+                >
+                  {isEditing ? 'סיים עריכה' : 'ערוך חדר'}
+                </button>
+              )}
             </div>
           </div>
 
@@ -1220,11 +1232,13 @@ export default function RoomView({ student }: Props) {
           onItemClick={setSelectedItem}
           roomRef={roomRef}
           onMoveItem={moveItemInRoom}
-          isEditing={isEditing}
-          selectedInventoryIndex={activeSelectedItem?.inventoryIndex ?? null}
+          isEditing={readOnly ? false : isEditing}
+          selectedInventoryIndex={
+            readOnly ? null : activeSelectedItem?.inventoryIndex ?? null
+          }
         />
 
-        {import.meta.env.DEV && (
+        {import.meta.env.DEV && !readOnly && (
           <div className="mt-3 rounded-2xl border border-dashed border-fuchsia-300/25 bg-fuchsia-500/5 p-3">
             <div className="text-center text-[11px] font-black text-fuchsia-200">
               בדיקת החיה בחדר — מקומית בלבד
@@ -1258,12 +1272,14 @@ export default function RoomView({ student }: Props) {
         )}
 
         <div className="mt-3 text-center text-sm text-magic-soft/70">
-          {isEditing
-            ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי בחדר.'
-            : 'לחץ על חפץ כדי לראות מידע עליו. כדי להזיז חפצים, עבור למצב עריכה.'}
+          {readOnly
+            ? 'ביקור בחדר — זהו מצב צפייה בלבד.'
+            : isEditing
+              ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי בחדר.'
+              : 'לחץ על חפץ כדי לראות מידע עליו. כדי להזיז חפצים, עבור למצב עריכה.'}
         </div>
 
-        {isEditing && activeSelectedItem && (
+        {!readOnly && isEditing && activeSelectedItem && (
           <div className="mt-4 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/20 p-3">
             <div className="text-sm font-semibold text-white">
               עריכת חפץ: {activeSelectedItem.nameHe}
@@ -1336,7 +1352,7 @@ export default function RoomView({ student }: Props) {
         )}
       </div>
 
-      {isEditing && (
+      {!readOnly && isEditing && (
         <PlacementPanel
           student={student}
           onAddToRoom={addItemToRoom}
@@ -1347,7 +1363,11 @@ export default function RoomView({ student }: Props) {
         <InfoModal
           item={selectedItem}
           onClose={() => setSelectedItem(null)}
-          onRemove={() => removeFromRoom(selectedItem.inventoryIndex)}
+          onRemove={
+            readOnly
+              ? undefined
+              : () => removeFromRoom(selectedItem.inventoryIndex)
+          }
         />
       )}
     </div>
