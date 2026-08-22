@@ -10,7 +10,6 @@ import { getBoxRewardPool, openBoxReward } from '../../logic/boxes';
 import { THEMES } from '../../data/themes';
 import type { ThemeId } from '../../data/themes';
 import Modal from '../shared/Modal';
-import ItemSprite from './ItemSprite';
 
 type Props = {
   student: StudentState;
@@ -219,28 +218,25 @@ export default function Inventory({ student }: Props) {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     {rarityItems.map((item) => {
                       const isOwned = ownedItemIds.has(item.id);
 
                       return (
                         <div
                           key={item.id}
-                          className={`rounded-xl border p-2 text-center ${
+                          className={`flex min-h-12 items-center justify-between gap-3 rounded-xl border px-3 py-2 ${
                             isOwned
                               ? 'border-emerald-400/35 bg-emerald-500/10'
                               : 'border-white/10 bg-magic-bg/40'
                           }`}
                         >
-                          <div className="mx-auto mb-2 h-20 w-20">
-                            <ItemSprite itemId={item.id} rarity={item.rarity} />
-                          </div>
-                          <div className="text-xs font-bold text-white">
+                          <div className="text-sm font-bold text-white">
                             {item.nameHe}
                           </div>
                           {isOwned && (
-                            <div className="mt-1 text-[10px] font-bold text-emerald-300">
-                              כבר בבעלותך ✓
+                            <div className="shrink-0 text-[10px] font-bold text-emerald-300">
+                              בבעלותך ✓
                             </div>
                           )}
                         </div>
