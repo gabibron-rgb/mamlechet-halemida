@@ -7,6 +7,7 @@ import AwardModal from '../components/teacher/AwardModal';
 import ActivityLog from '../components/teacher/ActivityLog';
 import TrophyAwardModal from '../components/teacher/TrophyAwardModal';
 import TrophyManagementModal from '../components/teacher/TrophyManagementModal';
+import CompanionProgressBoard from '../components/teacher/CompanionProgressBoard';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
@@ -162,6 +163,8 @@ export default function TeacherHome() {
             </ul>
           )}
         </div>
+
+        <CompanionProgressBoard students={students} />
 
         {/* Activity log */}
         <div className="bg-magic-panel/80 rounded-3xl p-6">
