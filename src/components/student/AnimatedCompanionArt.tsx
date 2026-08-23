@@ -87,6 +87,7 @@ function layerStyle(layer: CompanionArtLayer): LayerStyle {
     width: `${layer.width ?? 100}%`,
     zIndex: layer.zIndex ?? 10,
     transformOrigin: layer.transformOrigin ?? '50% 50%',
+    transform: `translate(-50%, -50%) rotate(${layer.rotation ?? 0}deg) scaleX(${layer.flipX ? -1 : 1})`,
     animationDuration: layer.animationDurationMs ? `${layer.animationDurationMs}ms` : undefined,
     animationDelay:
       layer.animationDelayMs !== undefined ? `${layer.animationDelayMs}ms` : undefined,
@@ -135,15 +136,15 @@ export function CompanionAnimationStyles() {
         83%, 84%, 93%, 94% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)); }
       }
       @keyframes companionLayerHeadBlinkOverlay {
-        0%, 81%, 86%, 91%, 96%, 100% {
+        0%, 78%, 88%, 100% {
           opacity: 0;
           transform: translate(-50%, -50%) translateY(0) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x));
         }
-        83%, 84% {
+        80%, 86% {
           opacity: 1;
           transform: translate(-50%, -50%) translateY(-1.5px) rotate(calc(var(--companion-layer-rotation) - 1.8deg)) scaleX(var(--companion-layer-scale-x));
         }
-        93%, 94% {
+        92%, 96% {
           opacity: 1;
           transform: translate(-50%, -50%) translateY(1px) rotate(calc(var(--companion-layer-rotation) + 1.2deg)) scaleX(var(--companion-layer-scale-x));
         }
@@ -199,28 +200,28 @@ export function CompanionAnimationStyles() {
 
       /* Running cycle used only while the companion crosses the room. */
       @keyframes companionRunFrontA {
-        0%, 100% { transform: translate(-50%, -50%) rotate(-13deg); }
-        50% { transform: translate(-50%, -50%) rotate(14deg) translateY(-1px); }
+        0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 13deg)) scaleX(var(--companion-layer-scale-x)); }
+        50% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) + 14deg)) translateY(-1px) scaleX(var(--companion-layer-scale-x)); }
       }
       @keyframes companionRunFrontB {
-        0%, 100% { transform: translate(-50%, -50%) rotate(14deg); }
-        50% { transform: translate(-50%, -50%) rotate(-13deg) translateY(-1px); }
+        0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) + 14deg)) scaleX(var(--companion-layer-scale-x)); }
+        50% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 13deg)) translateY(-1px) scaleX(var(--companion-layer-scale-x)); }
       }
       @keyframes companionRunBackA {
-        0%, 100% { transform: translate(-50%, -50%) rotate(11deg); }
-        50% { transform: translate(-50%, -50%) rotate(-11deg) translateY(-1px); }
+        0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) + 11deg)) scaleX(var(--companion-layer-scale-x)); }
+        50% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 11deg)) translateY(-1px) scaleX(var(--companion-layer-scale-x)); }
       }
       @keyframes companionRunBackB {
-        0%, 100% { transform: translate(-50%, -50%) rotate(-11deg); }
-        50% { transform: translate(-50%, -50%) rotate(11deg) translateY(-1px); }
+        0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 11deg)) scaleX(var(--companion-layer-scale-x)); }
+        50% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) + 11deg)) translateY(-1px) scaleX(var(--companion-layer-scale-x)); }
       }
       @keyframes companionRunHead {
-        0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(-1deg); }
-        50% { transform: translate(-50%, -50%) translateY(-2px) rotate(1.2deg); }
+        0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(calc(var(--companion-layer-rotation) - 1deg)) scaleX(var(--companion-layer-scale-x)); }
+        50% { transform: translate(-50%, -50%) translateY(-2px) rotate(calc(var(--companion-layer-rotation) + 1.2deg)) scaleX(var(--companion-layer-scale-x)); }
       }
       @keyframes companionRunTail {
-        0%, 100% { transform: translate(-50%, -50%) rotate(-11deg); }
-        50% { transform: translate(-50%, -50%) rotate(14deg); }
+        0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 11deg)) scaleX(var(--companion-layer-scale-x)); }
+        50% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) + 14deg)) scaleX(var(--companion-layer-scale-x)); }
       }
       .companion-running [data-companion-layer-animation="frontLegLeft"] {
         animation: companionRunFrontA 0.46s ease-in-out infinite !important;

@@ -1567,13 +1567,14 @@ function CompanionAvatar({
         }}
       >
         {formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? (
-          <AnimatedCompanionArt
-            art={formArt}
-            alt={formArt?.nameHe ?? `${petName} — ${STAGE_LABEL_HE[stage]}`}
-            stage={stage}
-            motion={false}
-            className="absolute inset-0 z-20"
-          />
+          <div className="absolute inset-0 z-20">
+            <AnimatedCompanionArt
+              art={formArt}
+              alt={formArt?.nameHe ?? `${petName} — ${STAGE_LABEL_HE[stage]}`}
+              stage={stage}
+              motion={false}
+            />
+          </div>
         ) : null}
         <div
           className={`absolute -left-2 top-3 h-16 w-10 -rotate-[28deg] rounded-[80%_20%_55%_45%] border-2 border-white/25 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}

@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 import {
   COMPANION_VISUALS,
@@ -42,13 +42,48 @@ function randomBetween(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
+const GROUND_WALK_POINTS = [
+  // Left side: stay near the front edge so the pet never appears on the table.
+  { x: 12, y: 96 },
+  { x: 24, y: 95.5 },
+  { x: 36, y: 94.5 },
+
+  // Open centre/right floor: allow visible depth changes as well as sideways travel.
+  { x: 46, y: 92 },
+  { x: 56, y: 89.5 },
+  { x: 64, y: 95.5 },
+  { x: 73, y: 91 },
+  { x: 82, y: 93.5 },
+  { x: 90, y: 95.5 },
+] as const;
+
+function randomGroundDestination(
+  currentX: number,
+  currentY: number
+): { x: number; y: number } {
+  const distantPoints = GROUND_WALK_POINTS.filter(point => {
+    const horizontalChange = Math.abs(point.x - currentX);
+    const depthChange = Math.abs(point.y - currentY);
+    return horizontalChange >= 10 || depthChange >= 2.2;
+  });
+  const pool = distantPoints.length > 0 ? distantPoints : GROUND_WALK_POINTS;
+  const point = pool[Math.floor(Math.random() * pool.length)];
+
+  return {
+    x: Math.max(9, Math.min(92, point.x + randomBetween(-2, 2))),
+    y: Math.max(88.8, Math.min(96.5, point.y + randomBetween(-0.7, 0.7))),
+  };
+}
+
 export default function RoomCompanion({ companion, isEditing }: Props) {
   const [isWalking, setIsWalking] = useState(false);
   const [position, setPosition] = useState<RoomPosition>({
     x: 82,
-    y: 84,
+    y: 93.5,
     facing: 'left',
   });
+  const positionRef = useRef(position);
+  const [movementDurationMs, setMovementDurationMs] = useState(2400);
 
   const visuals = companion.theme
     ? COMPANION_VISUALS[companion.theme]
@@ -67,51 +102,100 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     if (!companion.unlocked || !visuals) return;
 
     if (isEgg) {
-      setPosition({ x: 82, y: 84, facing: 'left' });
+      const eggPosition: RoomPosition = { x: 82, y: 84, facing: 'left' };
+      positionRef.current = eggPosition;
+      setPosition(eggPosition);
+      setIsWalking(false);
       return;
     }
 
-    if (isEditing) return;
-
-    let movementTimer: number | undefined;
-    let walkingTimer: number | undefined;
-
-    function scheduleMove() {
-      movementTimer = window.setTimeout(
-        () => {
-          setIsWalking(true);
-          setPosition(current => {
-            const nextX = randomBetween(17, 86);
-            const nextY = isChessPegasus
-              ? randomBetween(30, 69)
-              : randomBetween(74, 89);
-
-            return {
-              x: Number(nextX.toFixed(1)),
-              y: Number(nextY.toFixed(1)),
-              facing: nextX < current.x ? 'left' : 'right',
-            };
-          });
-
-          walkingTimer = window.setTimeout(() => {
-            setIsWalking(false);
-          }, 2500);
-
-          scheduleMove();
-        },
-        randomBetween(3600, 6200)
-      );
+    if (isEditing) {
+      setIsWalking(false);
+      return;
     }
 
-    scheduleMove();
+    let idleTimer: number | undefined;
+    let turnTimer: number | undefined;
+    let walkingTimer: number | undefined;
+    let cancelled = false;
+
+    function scheduleNextMove(delayMs = randomBetween(1300, 3200)) {
+      idleTimer = window.setTimeout(beginMove, delayMs);
+    }
+
+    function finishWalk(durationMs: number) {
+      walkingTimer = window.setTimeout(() => {
+        if (cancelled) return;
+        setIsWalking(false);
+        scheduleNextMove();
+      }, durationMs + 80);
+    }
+
+    function startWalk(
+      destination: { x: number; y: number },
+      facing: RoomPosition['facing'],
+      durationMs: number
+    ) {
+      if (cancelled) return;
+
+      const nextPosition: RoomPosition = {
+        x: Number(destination.x.toFixed(1)),
+        y: Number(destination.y.toFixed(1)),
+        facing,
+      };
+
+      setMovementDurationMs(durationMs);
+      setIsWalking(true);
+      positionRef.current = nextPosition;
+      setPosition(nextPosition);
+      finishWalk(durationMs);
+    }
+
+    function beginMove() {
+      if (cancelled) return;
+
+      const current = positionRef.current;
+      const destination = isChessPegasus
+        ? {
+            x: randomBetween(17, 86),
+            y: randomBetween(30, 69),
+          }
+        : randomGroundDestination(current.x, current.y);
+
+      const nextFacing: RoomPosition['facing'] =
+        destination.x < current.x ? 'left' : 'right';
+      const distance = Math.hypot(
+        destination.x - current.x,
+        (destination.y - current.y) * 1.8
+      );
+      const durationMs = Math.round(
+        Math.max(1500, Math.min(2900, 1250 + distance * 24))
+      );
+
+      // Turn first, then start walking. This prevents the 2D sprite from
+      // visibly moonwalking when the next destination is behind it.
+      if (nextFacing !== current.facing) {
+        const turnedPosition: RoomPosition = {
+          ...current,
+          facing: nextFacing,
+        };
+        positionRef.current = turnedPosition;
+        setPosition(turnedPosition);
+        turnTimer = window.setTimeout(() => {
+          startWalk(destination, nextFacing, durationMs);
+        }, 220);
+      } else {
+        startWalk(destination, nextFacing, durationMs);
+      }
+    }
+
+    scheduleNextMove(randomBetween(700, 1500));
 
     return () => {
-      if (movementTimer !== undefined) {
-        window.clearTimeout(movementTimer);
-      }
-      if (walkingTimer !== undefined) {
-        window.clearTimeout(walkingTimer);
-      }
+      cancelled = true;
+      if (idleTimer !== undefined) window.clearTimeout(idleTimer);
+      if (turnTimer !== undefined) window.clearTimeout(turnTimer);
+      if (walkingTimer !== undefined) window.clearTimeout(walkingTimer);
     };
   }, [companion.unlocked, isChessPegasus, isEditing, isEgg, visuals]);
 
@@ -126,8 +210,11 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     ? getCompanionFormArt(companion.theme, companion.stage)
     : null;
   const stageSizeClass = isChessHatchling
-    ? 'h-24 w-24 sm:h-32 sm:w-32'
+    ? 'h-20 w-20 sm:h-28 sm:w-28'
     : STAGE_SIZE[companion.stage];
+  const facingScale = isChessHatchling
+    ? position.facing === 'left' ? 1 : -1
+    : position.facing === 'left' ? -1 : 1;
 
   return (
     <>
@@ -145,7 +232,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         transform: `translate(-50%, -100%) scale(${depthScale})`,
         transformOrigin: 'bottom center',
         transitionProperty: 'left, top, opacity',
-        transitionDuration: isEditing ? '180ms' : '2400ms',
+        transitionDuration: isEditing ? '180ms' : `${movementDurationMs}ms`,
         transitionTimingFunction: 'ease-in-out',
       }}
     >
@@ -193,14 +280,16 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
 
       <div
         className={`companion-motion relative flex ${stageSizeClass} items-center justify-center drop-shadow-xl motion-reduce:animate-none ${
-          isLegendary
+          isChessPegasus
             ? 'animate-[companionLegendaryFloat_2.9s_ease-in-out_infinite]'
-            : isMagical
-              ? 'animate-[companionMagicFloat_3.1s_ease-in-out_infinite]'
-              : 'animate-[companionPetFloat_3.2s_ease-in-out_infinite]'
+            : ''
         }`}
         style={{
-          '--companion-facing': position.facing === 'left' ? -1 : 1,
+          '--companion-facing': facingScale,
+          // Ground companions do not use the global float animation anymore,
+          // so apply their facing directly instead of relying on a keyframe.
+          transform: isChessPegasus ? undefined : `scaleX(${facingScale})`,
+          transformOrigin: 'center bottom',
         } as CSSProperties}
       >
         {isEgg ? (
@@ -230,13 +319,16 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
             }}
           >
             {formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? (
-              <AnimatedCompanionArt
-                art={formArt}
-                alt={formArt?.nameHe ?? displayName}
-                stage={companion.stage}
-                motion={false}
+              <div
                 className={`absolute inset-0 z-30 ${isWalking ? 'companion-running' : ''}`}
-              />
+              >
+                <AnimatedCompanionArt
+                  art={formArt}
+                  alt={formArt?.nameHe ?? displayName}
+                  stage={companion.stage}
+                  motion={false}
+                />
+              </div>
             ) : null}
             <div
               className={`absolute -left-1 top-1 h-2/5 w-1/4 -rotate-[25deg] rounded-full border border-white/25 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}
@@ -271,8 +363,12 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       </div>
 
       <div
-        className={`absolute left-1/2 h-2 -translate-x-1/2 rounded-[50%] bg-black/35 blur-[2px] ${
-          isChessPegasus ? '-bottom-7 w-16 opacity-50' : '-bottom-1 w-4/5'
+        className={`absolute left-1/2 -translate-x-1/2 rounded-[50%] bg-black/35 ${
+          isChessPegasus
+            ? '-bottom-7 h-2 w-16 opacity-50 blur-[2px]'
+            : isChessHatchling
+              ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
+              : '-bottom-1 h-2 w-4/5 blur-[2px]'
         }`}
       />
     </div>

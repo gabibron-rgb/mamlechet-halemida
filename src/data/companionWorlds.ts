@@ -135,6 +135,7 @@ export type CompanionFormArt = {
   nameHe?: string;
 };
 
+// CHESS_HATCHLING_RIG_UPDATED_2026_08_23
 export const COMPANION_FORM_ART: Partial<
   Record<ThemeId, Partial<Record<CompanionEvolutionStage, CompanionFormArt>>>
 > = {
@@ -145,8 +146,8 @@ export const COMPANION_FORM_ART: Partial<
         {
           id: 'tail',
           src: '/assets/companions/chess/form1/chess-form1-tail.png',
-          x: 76.4,
-          y: 47.9,
+          x: 73.8,
+          y: 35.1,
           width: 30,
           rotation: -3,
           zIndex: 2,
@@ -157,11 +158,11 @@ export const COMPANION_FORM_ART: Partial<
         {
           id: 'back-left-leg',
           src: '/assets/companions/chess/form1/chess-form1-back-left-leg.png',
-          x: 60.7,
-          y: 71.4,
+          x: 43.5,
+          y: 64.7,
           width: 15.4,
           zIndex: 4,
-          transformOrigin: '50% 12%',
+          transformOrigin: '55% 12%',
           animation: 'backLegLeft',
           animationDurationMs: 5100,
           animationDelayMs: -1100,
@@ -169,8 +170,8 @@ export const COMPANION_FORM_ART: Partial<
         {
           id: 'back-right-leg',
           src: '/assets/companions/chess/form1/chess-form1-back-right-leg.png',
-          x: 70.7,
-          y: 71.4,
+          x: 65.8,
+          y: 69.7,
           width: 16,
           zIndex: 5,
           transformOrigin: '50% 12%',
@@ -181,8 +182,8 @@ export const COMPANION_FORM_ART: Partial<
         {
           id: 'body',
           src: '/assets/companions/chess/form1/chess-form1-body.png',
-          x: 50,
-          y: 50.7,
+          x: 38,
+          y: 45.1,
           width: 52.9,
           zIndex: 8,
           animation: 'bodyBreath',
@@ -191,8 +192,8 @@ export const COMPANION_FORM_ART: Partial<
         {
           id: 'front-left-leg',
           src: '/assets/companions/chess/form1/chess-form1-front-left-leg.png',
-          x: 35.7,
-          y: 71.4,
+          x: 13.7,
+          y: 71.5,
           width: 14.9,
           zIndex: 11,
           transformOrigin: '50% 12%',
@@ -203,8 +204,8 @@ export const COMPANION_FORM_ART: Partial<
         {
           id: 'front-right-leg',
           src: '/assets/companions/chess/form1/chess-form1-front-right-leg.png',
-          x: 45,
-          y: 71.4,
+          x: 26.4,
+          y: 74.5,
           width: 14.3,
           zIndex: 12,
           transformOrigin: '50% 12%',
@@ -215,8 +216,8 @@ export const COMPANION_FORM_ART: Partial<
         {
           id: 'head',
           src: '/assets/companions/chess/form1/chess-form1-head.png',
-          x: 29.3,
-          y: 27.1,
+          x: 22.6,
+          y: 13.4,
           width: 35.4,
           zIndex: 20,
           transformOrigin: '58% 78%',
@@ -226,20 +227,20 @@ export const COMPANION_FORM_ART: Partial<
         {
           id: 'head-closed',
           src: '/assets/companions/chess/form1/chess-form1-head-closed.png',
-          x: 29.3,
-          y: 27.1,
+          x: 22.5,
+          y: 13.2,
           width: 35.4,
           zIndex: 24,
           transformOrigin: '58% 78%',
           animation: 'headBlinkOverlay',
-          animationDurationMs: 5200,
-          animationDelayMs: -700,
+          animationDurationMs: 3400,
+          animationDelayMs: -1200,
         },
         {
           id: 'pendant',
           src: '/assets/companions/chess/form1/chess-form1-pendant.png',
-          x: 38.1,
-          y: 48.6,
+          x: 57,
+          y: 45.9,
           width: 6.3,
           zIndex: 26,
           transformOrigin: '50% 6%',
