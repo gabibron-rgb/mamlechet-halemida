@@ -4,6 +4,7 @@ import {
   ACHIEVEMENTS,
   ACHIEVEMENT_CATEGORY_LABELS,
   ACHIEVEMENT_DIFFICULTY_LABELS,
+  achievementHasMissingDurableReward,
   achievementHasReward,
   achievementNeedsThemeChoice,
   achievementProgress,
@@ -16,6 +17,7 @@ import { studentTitleDisplayLabel } from '../../data/studentTitles';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import SpecialJourneysPanel from './SpecialJourneysPanel';
 import StudentTitlesPanel from './StudentTitlesPanel';
+import { getExclusiveAchievementItem } from '../../data/exclusiveAchievementRewards';
 
 type Props = {
   student: StudentState;
@@ -116,7 +118,8 @@ export default function AchievementsPanel({ student }: Props) {
     return (
       record &&
       achievementHasReward(achievement) &&
-      record.rewardClaimedAt === null
+      (record.rewardClaimedAt === null ||
+        achievementHasMissingDurableReward(achievement, student))
     );
   }).length;
 
@@ -306,8 +309,19 @@ function AchievementCard({
   const progress = achievementProgress(definition, student);
   const achieved = record !== null;
   const hasReward = achievementHasReward(definition);
-  const rewardClaimed = record?.rewardClaimedAt != null;
-  const needsTheme = achievementNeedsThemeChoice(definition);
+  const hasMissingDurableReward = achievementHasMissingDurableReward(
+    definition,
+    student
+  );
+  const rewardClaimed =
+    record?.rewardClaimedAt != null && !hasMissingDurableReward;
+  const needsTheme =
+    achievementNeedsThemeChoice(definition) && record?.rewardClaimedAt == null;
+  const hasExclusiveReward = (definition.rewards ?? []).some(reward =>
+    reward.kind === 'inventoryItem'
+      ? getExclusiveAchievementItem(reward.itemId) !== null
+      : reward.kind === 'specialUnlock' && reward.unlockKind === 'room'
+  );
 
   return (
     <div
@@ -370,6 +384,11 @@ function AchievementCard({
               .map(reward => rewardLabelForStudent(reward, student))
               .join(' + ')}
           </div>
+          {hasExclusiveReward && (
+            <div className="mt-2 rounded-lg border border-yellow-200/15 bg-black/15 px-2 py-1.5 text-[10px] font-black text-yellow-100/80">
+              🔒 בלעדי להישג — אי אפשר להשיג בקופסאות או בחנות
+            </div>
+          )}
 
           {achieved && !rewardClaimed && needsTheme && (
             <label className="mt-3 block text-[11px] font-bold text-magic-soft/70">

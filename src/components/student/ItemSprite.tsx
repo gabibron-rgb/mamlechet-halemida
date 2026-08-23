@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Rarity } from '../../data/boxes';
 import { ITEM_SPRITES } from '../../data/itemSprites';
+import { getExclusiveAchievementItem } from '../../data/exclusiveAchievementRewards';
 import KingdomBannerSprite from './KingdomBannerSprite';
 
 type Props = {
@@ -9,7 +10,13 @@ type Props = {
   fitWithinFrame?: boolean;
 };
 
-const ITEM_IMAGE_SRC: Record<string, string> = {};
+const ITEM_IMAGE_SRC: Record<string, string> = {
+  achievement_collector_statuette: '/assets/items/achievement-collector-statuette.png',
+  achievement_crystal_showcase: '/assets/items/achievement-crystal-showcase.png',
+  achievement_kingdom_treasure_statue: '/assets/items/achievement-kingdom-treasure-statue.png',
+  achievement_legends_pedestal: '/assets/items/achievement-legends-pedestal.png',
+  achievement_hall_of_fame_banner: '/assets/items/achievement-hall-of-fame-banner.png',
+};
 
 function auraClass(rarity?: Rarity): string {
   if (rarity === 'legendary') return 'drop-shadow-[0_0_14px_rgba(250,204,21,0.85)]';
@@ -331,18 +338,35 @@ export default function ItemSprite({
     return <KingdomBannerSprite rarity={rarity} />;
   }
 
+  const exclusiveReward = getExclusiveAchievementItem(itemId);
   const imageSrc = ITEM_IMAGE_SRC[itemId];
 
+  // If an exclusive reward has a real image asset, always prefer it.
   if (imageSrc) {
     return (
       <ImageItem
         src={imageSrc}
-        alt={itemId}
-        rarity={rarity}
+        alt={exclusiveReward?.nameHe ?? itemId}
+        rarity={rarity ?? exclusiveReward?.rarity}
         style={{
           filter: rarityEffect,
         }}
       />
+    );
+  }
+
+  // Fallback for future exclusive rewards that do not have an image yet.
+  if (exclusiveReward) {
+    return (
+      <Shell rarity={rarity ?? exclusiveReward.rarity}>
+        <div className="relative flex h-[82%] w-[82%] items-center justify-center rounded-[28%] border border-yellow-200/40 bg-gradient-to-br from-indigo-950/80 via-purple-900/75 to-amber-950/70 shadow-xl">
+          <div className="absolute inset-[8%] rounded-[24%] border border-white/15" />
+          <div className="text-[3.4rem] leading-none drop-shadow-[0_5px_8px_rgba(0,0,0,0.55)]">
+            {exclusiveReward.emoji}
+          </div>
+          <div className="absolute bottom-[7%] left-[18%] right-[18%] h-[7%] rounded-full bg-yellow-200/30" />
+        </div>
+      </Shell>
     );
   }
 

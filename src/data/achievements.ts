@@ -109,6 +109,7 @@ export type AchievementStudentLike = {
   missions: StudentMission[];
   classGoals: StudentClassGoal[];
   trophies: Array<{ trophyTheme: string }>;
+  specialUnlocks?: Array<{ kind: SpecialUnlockKind; unlockId: string }>;
 };
 
 export type AchievementProgress = {
@@ -145,6 +146,14 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     category: 'collection',
     difficulty: 'medium',
     condition: { kind: 'uniqueCollectibles', target: 25 },
+    rewards: [
+      {
+        kind: 'inventoryItem',
+        itemId: 'achievement_collector_statuette',
+        inventoryKind: 'item',
+        labelHe: '🏺 פסלון האספן — פריט בלעדי להישג',
+      },
+    ],
   },
   {
     id: 'collector_50',
@@ -155,7 +164,12 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     difficulty: 'hard',
     condition: { kind: 'uniqueCollectibles', target: 50 },
     rewards: [
-      { kind: 'box', tier: 'silver', labelHe: 'קופסת כסף לבחירת נושא' },
+      {
+        kind: 'inventoryItem',
+        itemId: 'achievement_crystal_showcase',
+        inventoryKind: 'item',
+        labelHe: '💎 ויטרינת הקריסטל — פריט בלעדי להישג',
+      },
     ],
   },
   {
@@ -167,7 +181,18 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     difficulty: 'legendary',
     condition: { kind: 'uniqueCollectibles', target: 100 },
     rewards: [
-      { kind: 'box', tier: 'golden', labelHe: 'קופסת זהב לבחירת נושא' },
+      {
+        kind: 'inventoryItem',
+        itemId: 'achievement_kingdom_treasure_statue',
+        inventoryKind: 'item',
+        labelHe: '👑 פסל אוצר הממלכה — פריט בלעדי להישג',
+      },
+      {
+        kind: 'specialUnlock',
+        unlockKind: 'room',
+        unlockId: 'room_treasure_gallery',
+        labelHe: '🏰 חדר נוסף: גלריית האוצרות',
+      },
     ],
   },
   {
@@ -232,6 +257,23 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     category: 'collection',
     difficulty: 'medium',
     condition: { kind: 'legendaryCollectibles', target: 1 },
+  },
+  {
+    id: 'legendary_5',
+    titleHe: 'חמש אגדות',
+    descriptionHe: 'לגלות חמישה חפצי Legendary שונים מתוך קופסאות.',
+    emoji: '🔥',
+    category: 'collection',
+    difficulty: 'hard',
+    condition: { kind: 'legendaryCollectibles', target: 5 },
+    rewards: [
+      {
+        kind: 'inventoryItem',
+        itemId: 'achievement_legends_pedestal',
+        inventoryKind: 'item',
+        labelHe: '🔥 כן האגדות — פריט בלעדי להישג',
+      },
+    ],
   },
   {
     id: 'mission_1',
@@ -336,6 +378,12 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
         unlockKind: 'title',
         unlockId: 'title_six_lights',
         labelHe: 'התואר “ששת האורות”',
+      },
+      {
+        kind: 'inventoryItem',
+        itemId: 'achievement_hall_of_fame_banner',
+        inventoryKind: 'item',
+        labelHe: '🏛️ דגל היכל התהילה — פריט בלעדי להישג',
       },
     ],
   },
@@ -631,6 +679,30 @@ export function reconcileAchievementRecords(
 
 export function achievementById(id: string): AchievementDefinition | null {
   return ACHIEVEMENTS.find(achievement => achievement.id === id) ?? null;
+}
+
+export function achievementHasMissingDurableReward(
+  definition: AchievementDefinition,
+  student: AchievementStudentLike
+): boolean {
+  return (definition.rewards ?? []).some(reward => {
+    if (reward.kind === 'inventoryItem') {
+      return !(student.inventory ?? []).some(entry => entry.itemId === reward.itemId);
+    }
+
+    if (reward.kind === 'themeUnlock') {
+      return !(student.unlockedThemes ?? []).includes(reward.themeId);
+    }
+
+    if (reward.kind === 'specialUnlock') {
+      return !(student.specialUnlocks ?? []).some(
+        unlock =>
+          unlock.kind === reward.unlockKind && unlock.unlockId === reward.unlockId
+      );
+    }
+
+    return false;
+  });
 }
 
 export function achievementHasReward(definition: AchievementDefinition): boolean {

@@ -52,6 +52,7 @@ import {
 } from '../data/classKingdom';
 import {
   achievementById,
+  achievementHasMissingDurableReward,
   achievementHasReward,
   normalizeAchievementRecords,
   normalizeSpecialUnlocks,
@@ -82,6 +83,7 @@ export type InventoryEntry = {
   roomY?: number | null;
   roomScale?: number | null;
   roomRotation?: number | null;
+  roomId?: 'main' | 'treasure_gallery' | null;
 
   boxTier?: BoxTier;
   boxTheme?: ThemeId;
@@ -2226,11 +2228,18 @@ export const useGameStore = create<GameStore>()(
           const record = reconciled.records.find(
             entry => entry.achievementId === achievementId
           );
-          if (!record || record.rewardClaimedAt !== null) return state;
+          if (!record) return state;
+
+          const hasRetroactiveDurableReward =
+            record.rewardClaimedAt !== null &&
+            achievementHasMissingDurableReward(definition, student);
+          if (record.rewardClaimedAt !== null && !hasRetroactiveDurableReward) {
+            return state;
+          }
 
           const rewards = definition.rewards ?? [];
           const boxRewards = rewards.filter(reward => reward.kind === 'box');
-          if (boxRewards.length > 0) {
+          if (boxRewards.length > 0 && record.rewardClaimedAt === null) {
             if (!themeId) return state;
             if (
               themeId !== 'generic' &&
@@ -2248,6 +2257,7 @@ export const useGameStore = create<GameStore>()(
 
           for (const reward of rewards) {
             if (reward.kind === 'box') {
+              if (record.rewardClaimedAt !== null) continue;
               const selectedTheme = themeId as ThemeId;
               nextInventory.push({
                 id: `achievement_box_${achievementId}_${reward.tier}_${selectedTheme}_${now}_${nextInventory.length}`,
@@ -2263,6 +2273,9 @@ export const useGameStore = create<GameStore>()(
             }
 
             if (reward.kind === 'inventoryItem') {
+              if (nextInventory.some(entry => entry.itemId === reward.itemId)) {
+                continue;
+              }
               nextInventory.push({
                 id: `achievement_item_${achievementId}_${reward.itemId}_${now}_${nextInventory.length}`,
                 itemId: reward.itemId,
@@ -2308,7 +2321,7 @@ export const useGameStore = create<GameStore>()(
 
           const nextRecords = reconciled.records.map(entry =>
             entry.achievementId === achievementId
-              ? { ...entry, rewardClaimedAt: now }
+              ? { ...entry, rewardClaimedAt: entry.rewardClaimedAt ?? now }
               : entry
           );
 

@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from 'react';
 import { getItemById, type Zone } from '../../data/items';
 import { COSMETIC_BY_ID } from '../../data/cosmetics';
 import { useGameStore, type InventoryEntry, type StudentState } from '../../store/useGameStore';
@@ -14,11 +14,18 @@ import {
   COMPANION_STAGE_ORDER,
   type CompanionStage,
 } from '../../data/companionWorlds';
+import {
+  availableStudentRooms,
+  getExclusiveAchievementItem,
+  type StudentRoomId,
+} from '../../data/exclusiveAchievementRewards';
 
 export type RoomViewStudent = Pick<
   StudentState,
   'id' | 'name' | 'inventory' | 'companion'
->;
+> & {
+  specialUnlocks?: StudentState['specialUnlocks'];
+};
 
 type Props = {
   student: RoomViewStudent;
@@ -174,7 +181,14 @@ if (
   return 'floorItem';
 }
 
-function entryDisplay(entry: InventoryEntry, inventoryIndex: number): DisplayItem | null {
+function entryDisplay(
+  entry: InventoryEntry,
+  inventoryIndex: number,
+  roomId: StudentRoomId
+): DisplayItem | null {
+  const entryRoomId = (entry.roomId ?? 'main') as StudentRoomId;
+  if (entryRoomId !== roomId) return null;
+
   const isInRoom =
     entry.roomX !== null &&
     entry.roomX !== undefined &&
@@ -204,6 +218,24 @@ function entryDisplay(entry: InventoryEntry, inventoryIndex: number): DisplayIte
       theme: item.theme,
       modelRef: item.modelRef,
       displayKind: inferDisplayKind(item, displayZone),
+    };
+  }
+
+  const exclusiveReward = getExclusiveAchievementItem(entry.itemId);
+
+  if (exclusiveReward) {
+    return {
+      inventoryIndex,
+      entry,
+      itemId: entry.itemId,
+      nameHe: exclusiveReward.nameHe,
+      descriptionHe: exclusiveReward.descriptionHe,
+      rarity: exclusiveReward.rarity,
+      zone: displayZone,
+      size: exclusiveReward.size,
+      theme: 'achievement',
+      modelRef: exclusiveReward.id,
+      displayKind: exclusiveReward.displayKind,
     };
   }
 
@@ -237,6 +269,9 @@ function entryDisplay(entry: InventoryEntry, inventoryIndex: number): DisplayIte
 function getAllowedZones(entry: InventoryEntry): Zone[] {
   const item = getItemById(entry.itemId);
   if (item) return item.zones;
+
+  const exclusiveReward = getExclusiveAchievementItem(entry.itemId);
+  if (exclusiveReward) return exclusiveReward.zones;
 
   const cosmetic = COSMETIC_BY_ID[entry.itemId];
   if (cosmetic) return ['special'];
@@ -306,37 +341,47 @@ function InfoModal({
   );
 }
 
-function itemRoomStyle(item: DisplayItem): CSSProperties {
+function itemRoomStyle(item: DisplayItem, roomId: StudentRoomId): CSSProperties {
   const x = item.entry.roomX ?? 50;
   const y = item.entry.roomY ?? 50;
 
-  const surface = getRoomSurface(x, y);
+  const surface = getRoomSurface(x, y, roomId);
 
   const baseScale = item.entry.roomScale ?? 1;
   const rotation = item.entry.roomRotation ?? 0;
+  const isFreeGallery = roomId === 'treasure_gallery';
+  const effectiveDisplayKind = isFreeGallery
+    ? item.displayKind === 'rug'
+      ? 'rug'
+      : item.displayKind === 'wallDecor'
+        ? 'wallDecor'
+        : item.displayKind === 'furniture'
+          ? 'furniture'
+          : 'floorItem'
+    : item.displayKind;
 
   const spriteData =
     ITEM_SPRITES[item.itemId] ??
     (item.modelRef ? ITEM_SPRITES[item.modelRef] : undefined);
 
-  let spriteOffsetX = spriteData?.roomOffsetX ?? 0;
-let spriteOffsetY = spriteData?.roomOffsetY ?? 0;
+  let spriteOffsetX = isFreeGallery ? 0 : (spriteData?.roomOffsetX ?? 0);
+let spriteOffsetY = isFreeGallery ? 0 : (spriteData?.roomOffsetY ?? 0);
 
-let spriteWidthScale = spriteData?.roomWidthScale ?? 1;
-let spriteHeightScale = spriteData?.roomHeightScale ?? 1;
+let spriteWidthScale = isFreeGallery ? 1 : (spriteData?.roomWidthScale ?? 1);
+let spriteHeightScale = isFreeGallery ? 1 : (spriteData?.roomHeightScale ?? 1);
 
 // התאמות מיוחדות לפי סוג מיקום.
 // זה לא משנה חפצים ישנים, אלא רק חפצים שיש להם בפועל
 // roomShelfOffsetY / roomFloorOffsetY / וכו' בתוך ה-sprite שלהם.
-if (spriteData) {
-  if (item.displayKind === 'shelfItem') {
+if (spriteData && !isFreeGallery) {
+  if (effectiveDisplayKind === 'shelfItem') {
     spriteOffsetX = spriteData.roomShelfOffsetX ?? spriteOffsetX;
     spriteOffsetY = spriteData.roomShelfOffsetY ?? spriteOffsetY;
     spriteWidthScale = spriteData.roomShelfWidthScale ?? spriteWidthScale;
     spriteHeightScale = spriteData.roomShelfHeightScale ?? spriteHeightScale;
   }
 
-  if (item.displayKind === 'floorItem') {
+  if (effectiveDisplayKind === 'floorItem') {
     spriteOffsetX = spriteData.roomFloorOffsetX ?? spriteOffsetX;
     spriteOffsetY = spriteData.roomFloorOffsetY ?? spriteOffsetY;
     spriteWidthScale = spriteData.roomFloorWidthScale ?? spriteWidthScale;
@@ -344,7 +389,7 @@ if (spriteData) {
   }
 }
 
-  const spriteRotation = spriteData?.roomRotation ?? 0;
+  const spriteRotation = isFreeGallery ? 0 : (spriteData?.roomRotation ?? 0);
 
   let width = 90;
   let height = 90;
@@ -352,7 +397,7 @@ if (spriteData) {
   let anchorY = '-50%';
   let extraTransform = '';
 
-  if (item.displayKind === 'rug') {
+  if (effectiveDisplayKind === 'rug') {
     width = surface.rugWidth;
     height = surface.rugHeight;
     zIndex = surface.floorZIndex;
@@ -360,7 +405,7 @@ if (spriteData) {
     extraTransform = '';
   }
 
-  if (item.displayKind === 'wallDecor') {
+  if (effectiveDisplayKind === 'wallDecor') {
     width = surface.wallWidth;
     height = surface.wallHeight;
     zIndex = surface.wallZIndex;
@@ -368,7 +413,7 @@ if (spriteData) {
     extraTransform = '';
   }
 
-  if (item.displayKind === 'tableItem') {
+  if (effectiveDisplayKind === 'tableItem') {
   width = surface.tableItemWidth;
   height = surface.tableItemHeight;
   zIndex = surface.tableZIndex;
@@ -383,7 +428,7 @@ if (spriteData) {
     : '';
 }
 
-  if (item.displayKind === 'shelfItem') {
+  if (effectiveDisplayKind === 'shelfItem') {
     width = surface.shelfItemWidth;
     height = surface.shelfItemHeight;
     zIndex = surface.shelfZIndex;
@@ -391,7 +436,7 @@ if (spriteData) {
     extraTransform = '';
   }
 
-  if (item.displayKind === 'floorItem') {
+  if (effectiveDisplayKind === 'floorItem') {
     width = surface.floorItemWidth;
     height = surface.floorItemHeight;
     zIndex = surface.floorZIndex;
@@ -399,7 +444,7 @@ if (spriteData) {
     extraTransform = '';
   }
 
-  if (item.displayKind === 'furniture') {
+  if (effectiveDisplayKind === 'furniture') {
     width = surface.furnitureWidth;
     height = surface.furnitureHeight;
     zIndex = surface.furnitureZIndex;
@@ -411,14 +456,14 @@ if (spriteData) {
   let kindHeightMultiplier = 1;
   let kindOffsetY = 0;
 
-  if (item.itemId === 'animals_fox_statue') {
-    if (item.displayKind === 'shelfItem') {
+  if (!isFreeGallery && item.itemId === 'animals_fox_statue') {
+    if (effectiveDisplayKind === 'shelfItem') {
       kindWidthMultiplier = 1.8;
       kindHeightMultiplier = 1.8;
       kindOffsetY = 12;
     }
 
-    if (item.displayKind === 'floorItem') {
+    if (effectiveDisplayKind === 'floorItem') {
       kindWidthMultiplier = 2.6;
       kindHeightMultiplier = 2.6;
       kindOffsetY = 18;
@@ -428,7 +473,7 @@ if (spriteData) {
   const finalWidth = width * spriteWidthScale * kindWidthMultiplier;
   const finalHeight = height * spriteHeightScale * kindHeightMultiplier;
   const finalRotation = rotation + spriteRotation;
-  const finalAnchorY = spriteData?.roomAnchorY ?? anchorY;
+  const finalAnchorY = isFreeGallery ? anchorY : (spriteData?.roomAnchorY ?? anchorY);
 
   return {
     left: `calc(${x}% + ${spriteOffsetX}px)`,
@@ -473,6 +518,7 @@ function RoomScene({
   onMoveItem,
   isEditing,
   selectedInventoryIndex,
+  roomId,
 }: {
   placedItems: DisplayItem[];
   companion: StudentState['companion'];
@@ -488,6 +534,7 @@ function RoomScene({
   ) => void;
   isEditing: boolean;
   selectedInventoryIndex: number | null;
+  roomId: StudentRoomId;
 }) {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
 
@@ -580,6 +627,13 @@ function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
   return allowedZones[0] ?? 'floor';
 }
 
+function galleryFreeZone(item: DisplayItem): Zone {
+  const allowedZones = getAllowedZones(item.entry);
+  const currentZone = item.entry.placedZone;
+  if (currentZone && allowedZones.includes(currentZone)) return currentZone;
+  return allowedZones[0] ?? 'floor';
+}
+
   function getRoomPercent(event: PointerEvent<HTMLButtonElement>) {
     const room = roomRef.current;
     if (!room) return null;
@@ -620,6 +674,18 @@ function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
+    if (roomId === 'treasure_gallery') {
+      onMoveItem(
+        inventoryIndex,
+        Math.max(3, Math.min(97, x)),
+        Math.max(5, Math.min(95, y)),
+        item.entry.roomScale ?? 1,
+        item.entry.roomRotation ?? 0,
+        galleryFreeZone(item)
+      );
+      return;
+    }
+
     const zone = chooseZoneFromPoint(item, x, y);
     const displayKind = item.displayKind === 'rug' ? 'rug' : displayKindForZone(zone);
 
@@ -643,13 +709,29 @@ function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
       className="relative mx-auto aspect-[16/10] w-full max-w-6xl overflow-hidden rounded-2xl border border-yellow-300/20 bg-black shadow-2xl"
     >
       <img
-        src="/rooms/kingdom-room.png"
-        alt="החדר בממלכה"
-        className="absolute inset-0 h-full w-full object-cover object-top"
+        src={roomId === 'treasure_gallery' ? '/rooms/treasure-gallery-room.png' : '/rooms/kingdom-room.png'}
+        alt={roomId === 'treasure_gallery' ? 'גלריית האוצרות' : 'החדר בממלכה'}
+        className={`absolute inset-0 h-full w-full object-cover object-top ${
+          roomId === 'treasure_gallery' ? 'brightness-[0.9] saturate-[1.15]' : ''
+        }`}
         draggable={false}
       />
 
-      <div className="absolute inset-0 bg-black/5" />
+      <div
+        className={`absolute inset-0 ${
+          roomId === 'treasure_gallery'
+            ? 'bg-gradient-to-br from-yellow-300/10 via-transparent to-purple-950/15'
+            : 'bg-black/5'
+        }`}
+      />
+      {roomId === 'treasure_gallery' && (
+        <>
+          <div className="pointer-events-none absolute inset-3 rounded-xl border-2 border-yellow-300/25 shadow-[inset_0_0_35px_rgba(250,204,21,0.12)]" />
+          <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full border border-yellow-200/30 bg-black/30 px-4 py-1 text-xs font-black text-yellow-100 backdrop-blur-sm">
+            👑 גלריית האוצרות
+          </div>
+        </>
+      )}
 
       <RoomCompanion companion={companion} isEditing={isEditing} />
 
@@ -682,6 +764,18 @@ function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
   const point = getRoomPercent(event);
   if (!point) return;
 
+  if (roomId === 'treasure_gallery') {
+    onMoveItem(
+      item.inventoryIndex,
+      point.x,
+      point.y,
+      item.entry.roomScale ?? 1,
+      item.entry.roomRotation ?? 0,
+      galleryFreeZone(item)
+    );
+    return;
+  }
+
   const zone = chooseZoneFromPoint(item, point.x, point.y);
 
   const displayKind =
@@ -708,24 +802,35 @@ function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
               const point = getRoomPercent(event);
 
               if (point) {
-                const zone = chooseZoneFromPoint(item, point.x, point.y);
-                const displayKind =
-                  item.displayKind === 'rug' ? 'rug' : displayKindForZone(zone);
+                if (roomId === 'treasure_gallery') {
+                  onMoveItem(
+                    item.inventoryIndex,
+                    point.x,
+                    point.y,
+                    item.entry.roomScale ?? 1,
+                    item.entry.roomRotation ?? 0,
+                    galleryFreeZone(item)
+                  );
+                } else {
+                  const zone = chooseZoneFromPoint(item, point.x, point.y);
+                  const displayKind =
+                    item.displayKind === 'rug' ? 'rug' : displayKindForZone(zone);
 
-                const snapped = snapItemToRoomSurface(
-                  displayKind,
-                  point.x,
-                  point.y
-                );
+                  const snapped = snapItemToRoomSurface(
+                    displayKind,
+                    point.x,
+                    point.y
+                  );
 
-                onMoveItem(
-                  item.inventoryIndex,
-                  snapped.x,
-                  snapped.y,
-                  item.entry.roomScale ?? 1,
-                  item.entry.roomRotation ?? 0,
-                  zone
-                );
+                  onMoveItem(
+                    item.inventoryIndex,
+                    snapped.x,
+                    snapped.y,
+                    item.entry.roomScale ?? 1,
+                    item.entry.roomRotation ?? 0,
+                    zone
+                  );
+                }
               }
 
               setDraggingIndex(null);
@@ -737,7 +842,7 @@ function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
             } ${
               isEditing ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
             }`}
-            style={itemRoomStyle(item)}
+            style={itemRoomStyle(item, roomId)}
           >
             <div
               className="h-full w-full border-0 bg-transparent shadow-none ring-0 [&>*]:!h-full [&>*]:!w-full"
@@ -777,18 +882,24 @@ function PlacementPanel({
 
       if (alreadyInRoom) return false;
 
-      return getItemById(entry.itemId) || COSMETIC_BY_ID[entry.itemId];
+      return (
+        getItemById(entry.itemId) ||
+        COSMETIC_BY_ID[entry.itemId] ||
+        getExclusiveAchievementItem(entry.itemId)
+      );
     })
     .map(({ entry, inventoryIndex }) => {
       const item = getItemById(entry.itemId);
       const cosmetic = COSMETIC_BY_ID[entry.itemId];
+      const exclusiveReward = getExclusiveAchievementItem(entry.itemId);
 
       return {
         entry,
         inventoryIndex,
-        name: item?.nameHe ?? cosmetic?.nameHe ?? entry.itemId,
-        description: item?.descriptionHe ?? cosmetic?.descHe ?? '',
-        rarity: (item?.rarity ?? cosmetic?.rarity ?? 'common') as Rarity,
+        name: item?.nameHe ?? cosmetic?.nameHe ?? exclusiveReward?.nameHe ?? entry.itemId,
+        description:
+          item?.descriptionHe ?? cosmetic?.descHe ?? exclusiveReward?.descriptionHe ?? '',
+        rarity: (item?.rarity ?? cosmetic?.rarity ?? exclusiveReward?.rarity ?? 'common') as Rarity,
         themeId: item?.theme ?? null,
       };
     });
@@ -930,6 +1041,17 @@ export default function RoomView({ student, readOnly = false }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [previewCompanionStage, setPreviewCompanionStage] =
     useState<CompanionStage | null>(null);
+  const availableRooms = availableStudentRooms(student.specialUnlocks);
+  const [requestedRoomId, setRequestedRoomId] = useState<StudentRoomId>('main');
+  const activeRoom =
+    availableRooms.find(room => room.id === requestedRoomId) ?? availableRooms[0];
+  const activeRoomId = activeRoom?.id ?? 'main';
+
+  useEffect(() => {
+    setRequestedRoomId('main');
+    setSelectedItem(null);
+    setIsEditing(false);
+  }, [student.id]);
 
   const roomCompanion =
     import.meta.env.DEV && previewCompanionStage
@@ -953,7 +1075,9 @@ export default function RoomView({ student, readOnly = false }: Props) {
   }
 
   const placedItems = student.inventory
-    .map((entry, inventoryIndex) => entryDisplay(entry, inventoryIndex))
+    .map((entry, inventoryIndex) =>
+      entryDisplay(entry, inventoryIndex, activeRoomId)
+    )
     .filter((item): item is DisplayItem => item !== null);
 
   const activeSelectedItem =
@@ -1040,11 +1164,9 @@ export default function RoomView({ student, readOnly = false }: Props) {
     const x = item.entry.roomX ?? 50;
     const y = item.entry.roomY ?? 70;
 
-    const snapped = snapItemToRoomSurface(
-      item.displayKind,
-      x,
-      y
-    );
+    const snapped = activeRoomId === 'treasure_gallery'
+      ? { x, y, scale: 1, rotation: 0 }
+      : snapItemToRoomSurface(item.displayKind, x, y);
 
     const nextInventory = student.inventory.map((entry, idx) => {
       if (idx !== inventoryIndex) return entry;
@@ -1104,12 +1226,13 @@ export default function RoomView({ student, readOnly = false }: Props) {
 
       const item = getItemById(entry.itemId);
       const cosmetic = COSMETIC_BY_ID[entry.itemId];
+      const exclusiveReward = getExclusiveAchievementItem(entry.itemId);
 
       const displayKind = inferDisplayKind(
         {
           itemId: entry.itemId,
-          modelRef: item?.modelRef ?? cosmetic?.id,
-          displayKind: item?.displayKind,
+          modelRef: item?.modelRef ?? cosmetic?.id ?? exclusiveReward?.id,
+          displayKind: item?.displayKind ?? exclusiveReward?.displayKind,
         },
         defaultZone
       );
@@ -1127,11 +1250,13 @@ export default function RoomView({ student, readOnly = false }: Props) {
                   ? { x: 50, y: 78 }
                   : { x: 50, y: 76 };
 
-      const snapped = snapItemToRoomSurface(
-        displayKind,
-        startPoint.x,
-        startPoint.y
-      );
+      const snapped = activeRoomId === 'treasure_gallery'
+        ? { x: 50, y: 55, scale: 1, rotation: 0 }
+        : snapItemToRoomSurface(
+            displayKind,
+            startPoint.x,
+            startPoint.y
+          );
 
       return {
         ...entry,
@@ -1141,6 +1266,7 @@ export default function RoomView({ student, readOnly = false }: Props) {
         roomY: entry.roomY ?? snapped.y,
         roomScale: entry.roomScale ?? snapped.scale ?? 1,
         roomRotation: entry.roomRotation ?? snapped.rotation ?? 0,
+        roomId: activeRoomId,
       };
     });
 
@@ -1161,6 +1287,7 @@ export default function RoomView({ student, readOnly = false }: Props) {
         roomY: null,
         roomScale: undefined,
         roomRotation: undefined,
+        roomId: null,
       };
     });
 
@@ -1181,14 +1308,37 @@ export default function RoomView({ student, readOnly = false }: Props) {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-2xl font-black text-white">
-              הממלכה של {student.name}
+              {activeRoom?.emoji ?? '🏰'} {activeRoom?.nameHe ?? 'החדר הראשי'} של {student.name}
             </h2>
 
             <p className="text-sm text-magic-soft/70">
               {readOnly
                 ? 'מצב צפייה בלבד — אפשר להסתכל על החפצים והחיה, בלי לשנות דבר בחדר.'
-                : 'לחץ על חפץ כדי לראות מידע או להסיר אותו מהחדר.'}
+                : activeRoom?.descriptionHe ?? 'לחץ על חפץ כדי לראות מידע או להסיר אותו מהחדר.'}
             </p>
+
+            {availableRooms.length > 1 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {availableRooms.map(room => (
+                  <button
+                    key={room.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedItem(null);
+                      setIsEditing(false);
+                      setRequestedRoomId(room.id);
+                    }}
+                    className={`rounded-xl border px-3 py-1.5 text-xs font-black transition ${
+                      activeRoomId === room.id
+                        ? 'border-yellow-300/45 bg-yellow-300/15 text-yellow-100'
+                        : 'border-white/10 bg-white/5 text-magic-soft/70 hover:bg-white/10'
+                    }`}
+                  >
+                    {room.emoji} {room.shortNameHe}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="mt-3 flex flex-wrap gap-2">
               <button
@@ -1236,6 +1386,7 @@ export default function RoomView({ student, readOnly = false }: Props) {
           selectedInventoryIndex={
             readOnly ? null : activeSelectedItem?.inventoryIndex ?? null
           }
+          roomId={activeRoomId}
         />
 
         {import.meta.env.DEV && !readOnly && (

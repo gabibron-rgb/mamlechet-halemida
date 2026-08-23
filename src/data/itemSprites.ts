@@ -4433,7 +4433,83 @@ const mathFloatingAcademy: ItemSpriteData = {
   roomFloorHeightScale: 2.65,
 };
 
+
+const achievementCollectorStatuette: ItemSpriteData = {
+  src: '/assets/items/achievement-collector-statuette.png',
+  alt: 'פסלון האספן',
+  className: 'object-contain drop-shadow-[0_10px_16px_rgba(0,0,0,0.35)] drop-shadow-[0_0_10px_rgba(80,170,255,0.35)]',
+  roomOffsetX: 0,
+  roomOffsetY: 8,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetX: 0,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.2,
+  roomShelfHeightScale: 1.2,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 24,
+  roomFloorWidthScale: 1.65,
+  roomFloorHeightScale: 1.65,
+};
+
+const achievementCrystalShowcase: ItemSpriteData = {
+  src: '/assets/items/achievement-crystal-showcase.png',
+  alt: 'ויטרינת הקריסטל',
+  className: 'object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.35)] drop-shadow-[0_0_18px_rgba(120,180,255,0.45)]',
+  roomOffsetX: 0,
+  roomOffsetY: 4,
+  roomWidthScale: 1.95,
+  roomHeightScale: 1.95,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 44,
+  roomFloorWidthScale: 2.35,
+  roomFloorHeightScale: 2.35,
+};
+
+const achievementKingdomTreasureStatue: ItemSpriteData = {
+  src: '/assets/items/achievement-kingdom-treasure-statue.png',
+  alt: 'פסל אוצר הממלכה',
+  className: 'object-contain drop-shadow-[0_16px_26px_rgba(0,0,0,0.38)] drop-shadow-[0_0_24px_rgba(255,210,80,0.7)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 2.3,
+  roomHeightScale: 2.3,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 64,
+  roomFloorWidthScale: 2.95,
+  roomFloorHeightScale: 2.95,
+};
+
+const achievementLegendsPedestal: ItemSpriteData = {
+  src: '/assets/items/achievement-legends-pedestal.png',
+  alt: 'כן האגדות',
+  className: 'object-contain drop-shadow-[0_14px_22px_rgba(0,0,0,0.36)] drop-shadow-[0_0_22px_rgba(190,100,255,0.45)]',
+  roomOffsetX: 0,
+  roomOffsetY: 6,
+  roomWidthScale: 2.0,
+  roomHeightScale: 2.0,
+  roomFloorOffsetX: 0,
+  roomFloorOffsetY: 56,
+  roomFloorWidthScale: 2.55,
+  roomFloorHeightScale: 2.55,
+};
+
+const achievementHallOfFameBanner: ItemSpriteData = {
+  src: '/assets/items/achievement-hall-of-fame-banner.png',
+  alt: 'דגל היכל התהילה',
+  className: 'object-contain drop-shadow-[0_12px_20px_rgba(0,0,0,0.34)] drop-shadow-[0_0_16px_rgba(255,215,90,0.42)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.2,
+  roomHeightScale: 1.2,
+};
+
 export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
+  achievement_collector_statuette: achievementCollectorStatuette,
+  achievement_crystal_showcase: achievementCrystalShowcase,
+  achievement_kingdom_treasure_statue: achievementKingdomTreasureStatue,
+  achievement_legends_pedestal: achievementLegendsPedestal,
+  achievement_hall_of_fame_banner: achievementHallOfFameBanner,
   // Math box
   math_calculator: mathCalculator,
   math_geometry_notebook: mathGeometryNotebook,

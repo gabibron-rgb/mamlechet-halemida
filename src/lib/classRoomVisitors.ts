@@ -16,6 +16,7 @@ export type ClassRoomVisitor = {
   inventory: InventoryEntry[];
   companion: CompanionState;
   trophies: StudentState['trophies'];
+  specialUnlocks: StudentState['specialUnlocks'];
   activeTitleLabel: string | null;
 };
 
@@ -148,6 +149,9 @@ export async function fetchClassRoomVisitors(
     inventory: Array.isArray(row.inventory) ? row.inventory : [],
     companion: visitorCompanion(row.meta),
     trophies: visitorTrophies(row.meta),
+    specialUnlocks: normalizeSpecialUnlocks(row.meta?.specialUnlocks).filter(
+      unlock => unlock.kind === 'room'
+    ),
     activeTitleLabel: row.gender
       ? visitorActiveTitleLabel(row.meta, normalizeGender(row.gender))
       : null,

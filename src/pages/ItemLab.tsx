@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, PointerEvent } from 'react';
-import { ITEMS } from '../data/items';
-import type { Item, Zone } from '../data/items';
+import type { Zone } from '../data/items';
+import { ITEM_LAB_ITEMS, ITEM_LAB_SOURCE_LABEL_HE } from '../data/itemLabCatalog';
+import type { ItemLabItem, ItemLabSource } from '../data/itemLabCatalog';
 import { ITEM_SPRITES } from '../data/itemSprites';
 import type { ItemSpriteData } from '../data/itemSprites';
 import {
@@ -9,27 +10,41 @@ import {
   RARITY_LABEL_HE,
 } from '../data/boxes';
 import type { Rarity } from '../data/boxes';
-import { getRoomSurface, snapItemToRoomSurface } from '../data/roomSurfaces';
-import type { DisplayKind } from '../data/roomSurfaces';
-import type { ThemeId } from '../data/themes';
+import {
+  chooseRoomZone,
+  getDefaultRoomPoint,
+  getRoomSurface,
+  getRoomZoneRegions,
+  snapItemToRoomSurface,
+} from '../data/roomSurfaces';
+import type { DisplayKind, RoomLayoutId } from '../data/roomSurfaces';
+import { THEMES } from '../data/themes';
+import ItemSprite from '../components/student/ItemSprite';
 
-const LAB_THEMES: Array<{ id: ThemeId; nameHe: string }> = [
-  { id: 'generic', nameHe: 'כללי' },
-  { id: 'chess', nameHe: 'שחמט' },
-  { id: 'space', nameHe: 'חלל' },
-  { id: 'nature', nameHe: 'טבע' },
-  { id: 'animals', nameHe: 'חיות' },
-  { id: 'building', nameHe: 'בנייה' },
-  { id: 'sports', nameHe: 'ספורט' },
-  { id: 'music', nameHe: 'מוזיקה' },
-  { id: 'books', nameHe: 'ספרים' },
-  { id: 'math', nameHe: 'מתמטיקה' },
-  { id: 'fantasy', nameHe: 'פנטזיה' },
-  { id: 'robotics', nameHe: 'רובוטיקה' },
-  { id: 'art', nameHe: 'אומנות' },
-  { id: 'science', nameHe: 'מדע' },
-  { id: 'ballet', nameHe: 'בלט' },
+const LAB_THEMES: Array<{ id: string; nameHe: string }> = [
+  { id: 'all', nameHe: 'כל הנושאים' },
+  ...THEMES.map(theme => ({ id: theme.id, nameHe: theme.nameHe })),
+  { id: 'achievement', nameHe: 'הישגים' },
 ];
+
+const SOURCE_ORDER: ItemLabSource[] = [
+  'box',
+  'levelReward',
+  'shop',
+  'teacherTrophy',
+  'classUnlock',
+  'achievement',
+];
+
+const ROOM_LABEL_HE: Record<RoomLayoutId, string> = {
+  main: 'החדר הראשי',
+  treasure_gallery: 'גלריית האוצרות',
+};
+
+const ROOM_BACKGROUND: Record<RoomLayoutId, string> = {
+  main: '/rooms/kingdom-room.png',
+  treasure_gallery: '/rooms/treasure-gallery-room.png',
+};
 
 const RARITIES: Rarity[] = [
   'common',
@@ -58,78 +73,18 @@ const ZONE_LABEL_HE: Record<Zone, string> = {
   petarea: 'אזור חיות',
 };
 
-const PREVIEW_POINT: Record<Zone, { x: number; y: number }> = {
-  wall: { x: 50, y: 36 },
-  desk: { x: 28, y: 65 },
-  shelf: { x: 72, y: 54.9 },
-  floor: { x: 46, y: 82 },
-  special: { x: 52, y: 34 },
-  petarea: { x: 72, y: 82 },
-};
-
 type PreviewPoint = { x: number; y: number };
 
-function previewPositionKey(itemId: string, zone: Zone): string {
-  return `${itemId}:${zone}`;
+function previewPositionKey(
+  itemId: string,
+  zone: Zone,
+  roomId: RoomLayoutId,
+): string {
+  return `${roomId}:${itemId}:${zone}`;
 }
 
-function choosePreviewZone(
-  item: Item,
-  currentZone: Zone,
-  x: number,
-  y: number,
-): Zone {
-  const allowedZones = item.zones;
-
-  if (
-    allowedZones.includes('shelf') &&
-    x >= 58 &&
-    x <= 86 &&
-    y >= 36 &&
-    y <= 68
-  ) {
-    return 'shelf';
-  }
-
-  if (
-    allowedZones.includes('desk') &&
-    x >= 10 &&
-    x <= 48 &&
-    y >= 55 &&
-    y <= 68
-  ) {
-    return 'desk';
-  }
-
-  if (
-    allowedZones.includes('special') &&
-    x >= 38 &&
-    x <= 68 &&
-    y >= 14 &&
-    y <= 42
-  ) {
-    return 'special';
-  }
-
-  if (allowedZones.includes('wall') && y >= 12 && y <= 66) {
-    return 'wall';
-  }
-
-  if (
-    allowedZones.includes('petarea') &&
-    x >= 55 &&
-    x <= 90 &&
-    y >= 68
-  ) {
-    return 'petarea';
-  }
-
-  if (allowedZones.includes('floor') && y >= 68) {
-    return 'floor';
-  }
-
-  if (allowedZones.includes(currentZone)) return currentZone;
-  return allowedZones[0] ?? 'floor';
+function isComponentRenderedItem(itemId: string): boolean {
+  return itemId === 'banner_kingdom';
 }
 
 type NumericSpriteKey =
@@ -226,11 +181,11 @@ function spriteDraftsMatch(
   return textValuesMatch && numericValuesMatch;
 }
 
-function spriteForItem(item: Item): ItemSpriteData | undefined {
+function spriteForItem(item: ItemLabItem): ItemSpriteData | undefined {
   return ITEM_SPRITES[item.id] ?? ITEM_SPRITES[item.modelRef];
 }
 
-function createSpriteDraft(item: Item): ItemSpriteData {
+function createSpriteDraft(item: ItemLabItem): ItemSpriteData {
   const existing = spriteForItem(item);
 
   if (existing) {
@@ -245,13 +200,13 @@ function createSpriteDraft(item: Item): ItemSpriteData {
   };
 }
 
-function createDefaultDrafts(items: Item[]): Record<string, ItemSpriteData> {
+function createDefaultDrafts(items: ItemLabItem[]): Record<string, ItemSpriteData> {
   return Object.fromEntries(
     items.map(item => [item.id, createSpriteDraft(item)]),
   );
 }
 
-function loadSavedLabState(items: Item[]): SavedLabState {
+function loadSavedLabState(items: ItemLabItem[]): SavedLabState {
   const defaultDrafts = createDefaultDrafts(items);
 
   try {
@@ -296,7 +251,7 @@ function loadSavedLabState(items: Item[]): SavedLabState {
   }
 }
 
-function displayKindForZone(item: Item, zone: Zone): DisplayKind {
+function displayKindForZone(item: ItemLabItem, zone: Zone): DisplayKind {
   if (item.displayKind === 'rug' || item.id.includes('rug')) {
     return 'rug';
   }
@@ -365,28 +320,38 @@ function getRarityEffect(rarity: Rarity): string | undefined {
 }
 
 function previewStyle(
-  item: Item,
+  item: ItemLabItem,
   zone: Zone,
   draft: ItemSpriteData,
   point: PreviewPoint,
+  roomId: RoomLayoutId,
 ): CSSProperties {
   const { x, y } = point;
-  const surface = getRoomSurface(x, y);
-  const displayKind = displayKindForZone(item, zone);
+  const surface = getRoomSurface(x, y, roomId);
+  const isFreeGallery = roomId === 'treasure_gallery';
+  const displayKind = isFreeGallery
+    ? item.displayKind === 'rug' || item.id.includes('rug')
+      ? 'rug'
+      : item.displayKind === 'wallDecor'
+        ? 'wallDecor'
+        : item.displayKind === 'furniture'
+          ? 'furniture'
+          : 'floorItem'
+    : displayKindForZone(item, zone);
 
   let spriteOffsetX = draft.roomOffsetX ?? 0;
   let spriteOffsetY = draft.roomOffsetY ?? 0;
   let spriteWidthScale = draft.roomWidthScale ?? 1;
   let spriteHeightScale = draft.roomHeightScale ?? 1;
 
-  if (displayKind === 'shelfItem') {
+  if (!isFreeGallery && displayKind === 'shelfItem') {
     spriteOffsetX = draft.roomShelfOffsetX ?? spriteOffsetX;
     spriteOffsetY = draft.roomShelfOffsetY ?? spriteOffsetY;
     spriteWidthScale = draft.roomShelfWidthScale ?? spriteWidthScale;
     spriteHeightScale = draft.roomShelfHeightScale ?? spriteHeightScale;
   }
 
-  if (displayKind === 'floorItem') {
+  if (!isFreeGallery && displayKind === 'floorItem') {
     spriteOffsetX = draft.roomFloorOffsetX ?? spriteOffsetX;
     spriteOffsetY = draft.roomFloorOffsetY ?? spriteOffsetY;
     spriteWidthScale = draft.roomFloorWidthScale ?? spriteWidthScale;
@@ -438,6 +403,13 @@ function previewStyle(
     anchorY = '-100%';
   }
 
+  if (displayKind === 'furniture') {
+    width = surface.furnitureWidth;
+    height = surface.furnitureHeight;
+    zIndex = surface.furnitureZIndex;
+    anchorY = '-100%';
+  }
+
   let kindWidthMultiplier = 1;
   let kindHeightMultiplier = 1;
   let kindOffsetY = 0;
@@ -476,7 +448,7 @@ function escapeSingleQuotes(value: string): string {
   return value.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
 }
 
-function spriteDefinitionCode(item: Item, draft: ItemSpriteData): string {
+function spriteDefinitionCode(item: ItemLabItem, draft: ItemSpriteData): string {
   const lines = [
     `const ${camelCaseId(item.id)}: ItemSpriteData = {`,
     `  src: '${escapeSingleQuotes(draft.src)}',`,
@@ -502,7 +474,7 @@ function spriteDefinitionCode(item: Item, draft: ItemSpriteData): string {
   return lines.join('\n');
 }
 
-function spriteMappingLine(item: Item): string {
+function spriteMappingLine(item: ItemLabItem): string {
   const mappingKey = /^[A-Za-z_$][\w$]*$/.test(item.id)
     ? item.id
     : `'${escapeSingleQuotes(item.id)}'`;
@@ -510,7 +482,7 @@ function spriteMappingLine(item: Item): string {
   return `  ${mappingKey}: ${camelCaseId(item.id)},`;
 }
 
-function spriteCode(item: Item, draft: ItemSpriteData): string {
+function spriteCode(item: ItemLabItem, draft: ItemSpriteData): string {
   return [
     spriteDefinitionCode(item, draft),
     '',
@@ -520,7 +492,7 @@ function spriteCode(item: Item, draft: ItemSpriteData): string {
 }
 
 function allEditedSpriteCode(
-  items: Item[],
+  items: ItemLabItem[],
   drafts: Record<string, ItemSpriteData>,
 ): string {
   const definitions = items.map(item =>
@@ -549,22 +521,42 @@ function itemImageClass(draft: ItemSpriteData): string {
 }
 
 export default function ItemLab() {
-  const boxItems = useMemo(
-    () => ITEMS.filter(item => item.source === 'box'),
-    [],
+  const allItems = useMemo(() => ITEM_LAB_ITEMS, []);
+  const availableSources = useMemo(
+    () => SOURCE_ORDER.filter(source => allItems.some(item => item.source === source)),
+    [allItems],
   );
 
-  const [theme, setTheme] = useState<ThemeId>('generic');
+  const [sourceFilter, setSourceFilter] = useState<'all' | ItemLabSource>('box');
+  const [theme, setTheme] = useState<string>('generic');
+  const [previewRoomId, setPreviewRoomId] = useState<RoomLayoutId>('main');
+
+  const sourceItems = useMemo(
+    () => sourceFilter === 'all'
+      ? allItems
+      : allItems.filter(item => item.source === sourceFilter),
+    [allItems, sourceFilter],
+  );
+
+  const visibleThemes = useMemo(() => {
+    const ids = new Set(sourceItems.map(item => item.theme));
+    return LAB_THEMES.filter(option => option.id === 'all' || ids.has(option.id));
+  }, [sourceItems]);
+
   const visibleItems = useMemo(
-    () => boxItems.filter(item => item.theme === theme),
-    [boxItems, theme],
+    () => theme === 'all'
+      ? sourceItems
+      : sourceItems.filter(item => item.theme === theme),
+    [sourceItems, theme],
   );
 
   const [selectedItemId, setSelectedItemId] = useState(
-    () => boxItems.find(item => item.theme === 'generic')?.id ?? '',
+    () => allItems.find(item => item.source === 'box' && item.theme === 'generic')?.id
+      ?? allItems[0]?.id
+      ?? '',
   );
   const [selectedZone, setSelectedZone] = useState<Zone>('desk');
-  const initialLabState = useMemo(() => loadSavedLabState(boxItems), [boxItems]);
+  const initialLabState = useMemo(() => loadSavedLabState(allItems), [allItems]);
   const [drafts, setDrafts] = useState<Record<string, ItemSpriteData>>(
     () => initialLabState.drafts,
   );
@@ -588,15 +580,22 @@ export default function ItemLab() {
     : null;
 
   const selectedPreviewPosition = selectedItem
-    ? previewPositions[previewPositionKey(selectedItem.id, selectedZone)] ??
-      PREVIEW_POINT[selectedZone]
-    : PREVIEW_POINT.floor;
+    ? previewPositions[
+        previewPositionKey(selectedItem.id, selectedZone, previewRoomId)
+      ] ?? getDefaultRoomPoint(selectedZone, previewRoomId)
+    : getDefaultRoomPoint('floor', previewRoomId);
 
   useEffect(() => {
     if (!visibleItems.some(item => item.id === selectedItemId)) {
       setSelectedItemId(visibleItems[0]?.id ?? '');
     }
   }, [selectedItemId, visibleItems]);
+
+  useEffect(() => {
+    if (!visibleThemes.some(option => option.id === theme)) {
+      setTheme('all');
+    }
+  }, [theme, visibleThemes]);
 
   useEffect(() => {
     if (!selectedItem) return;
@@ -622,22 +621,29 @@ export default function ItemLab() {
 
   const duplicateIds = useMemo(() => {
     const counts = new Map<string, number>();
-    ITEMS.forEach(item => counts.set(item.id, (counts.get(item.id) ?? 0) + 1));
+    allItems.forEach(item => counts.set(item.id, (counts.get(item.id) ?? 0) + 1));
     return [...counts.entries()]
       .filter(([, count]) => count > 1)
       .map(([id]) => id);
-  }, []);
+  }, [allItems]);
 
-  const missingSprites = visibleItems.filter(item => !spriteForItem(item));
+  const missingSprites = visibleItems.filter(
+    item => !spriteForItem(item) && !isComponentRenderedItem(item.id),
+  );
   const visibleAssetErrors = assetErrors.filter(id =>
     visibleItems.some(item => item.id === id),
   );
-  const editedItems = boxItems.filter(item => editedItemIds.includes(item.id));
+  const editedItems = allItems.filter(item => editedItemIds.includes(item.id));
 
   const totalTarget = RARITIES.reduce(
     (sum, rarity) => sum + TARGET_BY_RARITY[rarity],
     0,
   );
+
+  const showBoxTargets = sourceFilter === 'box' && theme !== 'all';
+  const activeSourceLabel = sourceFilter === 'all'
+    ? 'כל המקורות'
+    : ITEM_LAB_SOURCE_LABEL_HE[sourceFilter];
 
   function reportAsset(itemId: string, failed: boolean) {
     setAssetErrors(current => {
@@ -662,14 +668,34 @@ export default function ItemLab() {
     const x = Math.max(3, Math.min(97, rawX));
     const y = Math.max(5, Math.min(95, rawY));
 
-    const zone = choosePreviewZone(selectedItem, selectedZone, x, y);
+    if (previewRoomId === 'treasure_gallery') {
+      setPreviewPositions(current => ({
+        ...current,
+        [previewPositionKey(selectedItem.id, selectedZone, previewRoomId)]: { x, y },
+      }));
+      return;
+    }
+
+    const zone = chooseRoomZone(
+      selectedItem.zones,
+      selectedZone,
+      x,
+      y,
+      previewRoomId,
+    );
     const displayKind = displayKindForZone(selectedItem, zone);
-    const snapped = snapItemToRoomSurface(displayKind, x, y);
+    const snapped = snapItemToRoomSurface(
+      displayKind,
+      x,
+      y,
+      previewRoomId,
+      zone,
+    );
 
     setSelectedZone(zone);
     setPreviewPositions(current => ({
       ...current,
-      [previewPositionKey(selectedItem.id, zone)]: {
+      [previewPositionKey(selectedItem.id, zone, previewRoomId)]: {
         x: snapped.x,
         y: snapped.y,
       },
@@ -679,7 +705,7 @@ export default function ItemLab() {
   function resetPreviewPosition() {
     if (!selectedItem) return;
 
-    const key = previewPositionKey(selectedItem.id, selectedZone);
+    const key = previewPositionKey(selectedItem.id, selectedZone, previewRoomId);
     setPreviewPositions(current => {
       if (!(key in current)) return current;
 
@@ -779,7 +805,7 @@ export default function ItemLab() {
       if (!shouldClear) return;
     }
 
-    setDrafts(createDefaultDrafts(boxItems));
+    setDrafts(createDefaultDrafts(allItems));
     setEditedItemIds([]);
     setCopied(false);
     setCopiedAll(false);
@@ -790,32 +816,64 @@ export default function ItemLab() {
     <main className="min-h-screen bg-[#120d25] px-4 py-6 text-white md:px-8" dir="rtl">
       <div className="mx-auto max-w-7xl">
         <header className="mb-6 rounded-3xl border border-violet-300/20 bg-violet-950/40 p-5 shadow-2xl">
-          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-            <div>
-              <div className="text-xs font-bold tracking-[0.24em] text-violet-300">
-                LOCAL DEVELOPMENT ONLY
-              </div>
-              <h1 className="mt-1 text-3xl font-black">מעבדת החפצים</h1>
-              <p className="mt-2 text-sm text-violet-100/70">
-                בדיקת מאגר הקופסאות וכיוון Sprites ללא כניסה לתלמיד וללא Supabase.
-              </p>
+          <div>
+            <div className="text-xs font-bold tracking-[0.24em] text-violet-300">
+              LOCAL DEVELOPMENT ONLY
             </div>
+            <h1 className="mt-1 text-3xl font-black">מעבדת החפצים</h1>
+            <p className="mt-2 text-sm text-violet-100/70">
+              בדיקת כל החפצים שניתנים להצבה בחדר: תיבות, עליות רמה, קוסמטיקה, חנות ופרסי הישגים.
+            </p>
 
-            <div className="flex flex-wrap gap-2">
-              {LAB_THEMES.map(option => (
+            <div className="mt-5">
+              <div className="mb-2 text-xs font-black text-white/45">מקור החפץ</div>
+              <div className="flex flex-wrap gap-2">
                 <button
-                  key={option.id}
                   type="button"
-                  onClick={() => setTheme(option.id)}
+                  onClick={() => setSourceFilter('all')}
                   className={`rounded-xl px-4 py-2 text-sm font-bold transition ${
-                    theme === option.id
-                      ? 'bg-violet-500 text-white'
+                    sourceFilter === 'all'
+                      ? 'bg-fuchsia-500 text-white'
                       : 'bg-white/5 text-violet-100/70 hover:bg-white/10'
                   }`}
                 >
-                  {option.nameHe}
+                  הכל ({allItems.length})
                 </button>
-              ))}
+                {availableSources.map(source => (
+                  <button
+                    key={source}
+                    type="button"
+                    onClick={() => setSourceFilter(source)}
+                    className={`rounded-xl px-4 py-2 text-sm font-bold transition ${
+                      sourceFilter === source
+                        ? 'bg-fuchsia-500 text-white'
+                        : 'bg-white/5 text-violet-100/70 hover:bg-white/10'
+                    }`}
+                  >
+                    {ITEM_LAB_SOURCE_LABEL_HE[source]} ({allItems.filter(item => item.source === source).length})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <div className="mb-2 text-xs font-black text-white/45">נושא</div>
+              <div className="flex flex-wrap gap-2">
+                {visibleThemes.map(option => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setTheme(option.id)}
+                    className={`rounded-xl px-4 py-2 text-sm font-bold transition ${
+                      theme === option.id
+                        ? 'bg-violet-500 text-white'
+                        : 'bg-white/5 text-violet-100/70 hover:bg-white/10'
+                    }`}
+                  >
+                    {option.nameHe}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </header>
@@ -824,7 +882,7 @@ export default function ItemLab() {
           {RARITIES.map(rarity => {
             const current = visibleItems.filter(item => item.rarity === rarity).length;
             const target = TARGET_BY_RARITY[rarity];
-            const complete = current === target;
+            const complete = showBoxTargets && current === target;
 
             return (
               <div
@@ -842,10 +900,14 @@ export default function ItemLab() {
                   {RARITY_LABEL_HE[rarity]}
                 </div>
                 <div className="mt-1 text-2xl font-black">
-                  {current}/{target}
+                  {showBoxTargets ? `${current}/${target}` : current}
                 </div>
                 <div className="mt-1 text-xs text-white/50">
-                  {complete ? 'היעד הושלם' : `חסרים ${Math.max(0, target - current)}`}
+                  {showBoxTargets
+                    ? complete
+                      ? 'היעד הושלם'
+                      : `חסרים ${Math.max(0, target - current)}`
+                    : 'חפצים בתצוגה'}
                 </div>
               </div>
             );
@@ -854,9 +916,10 @@ export default function ItemLab() {
 
         <section className="mb-6 grid gap-3 md:grid-cols-4">
           <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="text-sm text-white/60">חפצי קופסה בנושא</div>
-            <div className="mt-1 text-2xl font-black">
-              {visibleItems.length}/{totalTarget}
+            <div className="text-sm text-white/60">חפצים בתצוגה</div>
+            <div className="mt-1 text-2xl font-black">{visibleItems.length}</div>
+            <div className="mt-1 text-xs text-white/45">
+              {activeSourceLabel}{showBoxTargets ? ` · יעד ${totalTarget}` : ''}
             </div>
           </div>
           <div
@@ -948,15 +1011,15 @@ export default function ItemLab() {
 
         <section className="mb-6 rounded-3xl border border-white/10 bg-white/5 p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-black">חפצי הקופסה</h2>
-            <div className="text-sm text-white/50">לחיצה על חפץ פותחת אותו לכיוון</div>
+            <h2 className="text-xl font-black">קטלוג החפצים</h2>
+            <div className="text-sm text-white/50">לחיצה על חפץ פותחת אותו לכיוון · {activeSourceLabel}</div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             {visibleItems.map(item => {
               const draft = drafts[item.id] ?? createSpriteDraft(item);
               const isSelected = selectedItem?.id === item.id;
-              const hasSprite = !!spriteForItem(item);
+              const hasSprite = !!spriteForItem(item) || isComponentRenderedItem(item.id);
               const isEdited = editedItemIds.includes(item.id);
 
               return (
@@ -971,17 +1034,24 @@ export default function ItemLab() {
                   }`}
                 >
                   <div className="mb-3 flex aspect-square items-center justify-center overflow-hidden rounded-xl bg-black/25 p-3">
-                    <img
-                      src={draft.src}
-                      alt={draft.alt}
-                      className={itemImageClass(draft)}
-                      draggable={false}
-                      onError={() => reportAsset(item.id, true)}
-                      onLoad={() => reportAsset(item.id, false)}
-                    />
+                    {isComponentRenderedItem(item.id) ? (
+                      <ItemSprite itemId={item.id} rarity={item.rarity} fitWithinFrame />
+                    ) : (
+                      <img
+                        src={draft.src}
+                        alt={draft.alt}
+                        className={itemImageClass(draft)}
+                        draggable={false}
+                        onError={() => reportAsset(item.id, true)}
+                        onLoad={() => reportAsset(item.id, false)}
+                      />
+                    )}
                   </div>
                   <div className="truncate font-bold">{item.nameHe}</div>
                   <div className="mt-1 truncate text-[11px] text-white/45">{item.id}</div>
+                  <div className="mt-1 text-[10px] font-bold text-violet-200/65">
+                    {ITEM_LAB_SOURCE_LABEL_HE[item.source]}
+                  </div>
                   {isEdited && (
                     <div className="mt-2 inline-flex rounded-full bg-fuchsia-500/20 px-2 py-0.5 text-[10px] font-bold text-fuchsia-200">
                       נערך ונשמר
@@ -1012,27 +1082,51 @@ export default function ItemLab() {
                   <h2 className="text-2xl font-black">{selectedItem.nameHe}</h2>
                   <div className="mt-1 text-sm text-white/50">{selectedItem.id}</div>
                   <div className="mt-2 text-xs text-emerald-200/80">
-                    גררי את החפץ בחדר. הוא ייצמד ויעבור בין האזורים המותרים כמו בחדר התלמידים.
+                    {previewRoomId === 'treasure_gallery'
+                      ? 'גלריית האוצרות היא חדר הצבה חופשית: גררי את החפץ לכל מקום. אין snapping ואין כיווני מדף נפרדים.'
+                      : 'גררי את החפץ בחדר. הוא ייצמד ויעבור בין האזורים המותרים כמו בחדר התלמידים.'}
                   </div>
                 </div>
 
                 <div className="flex flex-col items-start gap-2 md:items-end">
                   <div className="flex flex-wrap gap-2">
-                    {selectedItem.zones.map(zone => (
+                    {(['main', 'treasure_gallery'] as RoomLayoutId[]).map(roomId => (
                       <button
-                        key={zone}
+                        key={roomId}
                         type="button"
-                        onClick={() => setSelectedZone(zone)}
-                        className={`rounded-xl px-3 py-2 text-sm font-bold ${
-                          selectedZone === zone
-                            ? 'bg-fuchsia-500 text-white'
-                            : 'bg-white/5 text-white/60 hover:bg-white/10'
+                        onClick={() => setPreviewRoomId(roomId)}
+                        className={`rounded-xl px-3 py-2 text-sm font-black ${
+                          previewRoomId === roomId
+                            ? 'bg-amber-400 text-amber-950'
+                            : 'bg-white/5 text-white/65 hover:bg-white/10'
                         }`}
                       >
-                        {ZONE_LABEL_HE[zone]}
+                        {roomId === 'main' ? '🏰' : '👑'} {ROOM_LABEL_HE[roomId]}
                       </button>
                     ))}
                   </div>
+                  {previewRoomId === 'main' ? (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedItem.zones.map(zone => (
+                        <button
+                          key={zone}
+                          type="button"
+                          onClick={() => setSelectedZone(zone)}
+                          className={`rounded-xl px-3 py-2 text-sm font-bold ${
+                            selectedZone === zone
+                              ? 'bg-fuchsia-500 text-white'
+                              : 'bg-white/5 text-white/60 hover:bg-white/10'
+                          }`}
+                        >
+                          {ZONE_LABEL_HE[zone]}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2 text-sm font-black text-amber-100">
+                      ✨ הצבה חופשית — ללא אזורים
+                    </div>
+                  )}
                   <button
                     type="button"
                     onClick={resetPreviewPosition}
@@ -1048,12 +1142,32 @@ export default function ItemLab() {
                 className="relative mx-auto aspect-[16/10] w-full max-w-5xl overflow-hidden rounded-2xl border border-yellow-300/20 bg-black shadow-2xl"
               >
                 <img
-                  src="/rooms/kingdom-room.png"
-                  alt="חדר בדיקה"
+                  src={ROOM_BACKGROUND[previewRoomId]}
+                  alt={`חדר בדיקה — ${ROOM_LABEL_HE[previewRoomId]}`}
                   className="absolute inset-0 h-full w-full object-cover object-top"
                   draggable={false}
                 />
                 <div className="absolute inset-0 bg-black/5" />
+                {previewRoomId === 'main' && getRoomZoneRegions(previewRoomId).map((region, index) => (
+                  <div
+                    key={`${region.zone}-${index}`}
+                    className={`pointer-events-none absolute rounded-lg border border-dashed text-[9px] font-black ${
+                      region.zone === selectedZone
+                        ? 'border-yellow-200/80 bg-yellow-200/10 text-yellow-50'
+                        : 'border-white/20 bg-black/5 text-white/45'
+                    }`}
+                    style={{
+                      left: `${region.xMin}%`,
+                      top: `${region.yMin}%`,
+                      width: `${region.xMax - region.xMin}%`,
+                      height: `${region.yMax - region.yMin}%`,
+                    }}
+                  >
+                    <span className="absolute right-1 top-1 rounded bg-black/55 px-1.5 py-0.5">
+                      {region.labelHe}
+                    </span>
+                  </div>
+                ))}
                 <button
                   type="button"
                   aria-label={`גרירת ${selectedItem.nameHe} בחדר הבדיקה`}
@@ -1085,22 +1199,31 @@ export default function ItemLab() {
                     selectedZone,
                     selectedDraft,
                     selectedPreviewPosition,
+                    previewRoomId,
                   )}
                 >
-                  <img
-                    src={selectedDraft.src}
-                    alt={selectedDraft.alt}
-                    className={itemImageClass(selectedDraft)}
-                    draggable={false}
-                    onError={() => reportAsset(selectedItem.id, true)}
-                    onLoad={() => reportAsset(selectedItem.id, false)}
-                  />
+                  {isComponentRenderedItem(selectedItem.id) ? (
+                    <ItemSprite
+                      itemId={selectedItem.id}
+                      rarity={selectedItem.rarity}
+                      fitWithinFrame
+                    />
+                  ) : (
+                    <img
+                      src={selectedDraft.src}
+                      alt={selectedDraft.alt}
+                      className={itemImageClass(selectedDraft)}
+                      draggable={false}
+                      onError={() => reportAsset(selectedItem.id, true)}
+                      onLoad={() => reportAsset(selectedItem.id, false)}
+                    />
+                  )}
                 </button>
 
                 <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/65 px-3 py-2 text-left text-xs text-white/75" dir="ltr">
                   x: {selectedPreviewPosition.x.toFixed(1)} · y: {selectedPreviewPosition.y.toFixed(1)}
                   <span className="ml-2 text-fuchsia-200" dir="rtl">
-                    {ZONE_LABEL_HE[selectedZone]}
+                    {previewRoomId === 'treasure_gallery' ? 'הצבה חופשית' : ZONE_LABEL_HE[selectedZone]} · {ROOM_LABEL_HE[previewRoomId]}
                   </span>
                 </div>
               </div>
@@ -1109,22 +1232,28 @@ export default function ItemLab() {
             <aside className="rounded-3xl border border-white/10 bg-white/5 p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-black">כיוון: {ZONE_LABEL_HE[selectedZone]}</h2>
+                  <h2 className="text-xl font-black">{previewRoomId === 'treasure_gallery' ? 'גלריה: הצבה חופשית' : `כיוון: ${ZONE_LABEL_HE[selectedZone]}`}</h2>
                   <p className="mt-1 text-xs text-white/50">
                     השינויים נשמרים מקומית גם אחרי רענון, אך אינם משנים את קובצי הקוד.
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={resetZoneOverrides}
-                  className="rounded-lg bg-white/5 px-3 py-2 text-xs font-bold text-white/60 hover:bg-white/10"
-                >
-                  איפוס אזור
-                </button>
+                {previewRoomId === 'main' && (
+                  <button
+                    type="button"
+                    onClick={resetZoneOverrides}
+                    className="rounded-lg bg-white/5 px-3 py-2 text-xs font-bold text-white/60 hover:bg-white/10"
+                  >
+                    איפוס אזור
+                  </button>
+                )}
               </div>
 
               <div className="mt-5 space-y-5">
-                {controlsForZone(selectedZone).map(control => {
+                {previewRoomId === 'treasure_gallery' ? (
+                  <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm leading-6 text-amber-50/90">
+                    בגלריה לא שומרים כיווני מדף/רצפה נוספים. התלמיד יכול למקם, להגדיל, להקטין ולסובב כל חפץ בעצמו בלי לשנות את ההגדרות של החדר הראשי.
+                  </div>
+                ) : controlsForZone(selectedZone).map(control => {
                   const value = effectiveNumber(selectedDraft, control.key);
 
                   return (

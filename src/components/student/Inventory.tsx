@@ -11,6 +11,7 @@ import { THEMES } from '../../data/themes';
 import type { ThemeId } from '../../data/themes';
 import Modal from '../shared/Modal';
 import ItemSprite from './ItemSprite';
+import { getExclusiveAchievementItem } from '../../data/exclusiveAchievementRewards';
 
 type Props = {
   student: StudentState;
@@ -194,12 +195,14 @@ export default function Inventory({ student, onGoRoom }: Props) {
 
       const item = getItemById(entry.itemId);
       const cosmetic = COSMETIC_BY_ID[entry.itemId];
-      if (!item && !cosmetic) return null;
+      const exclusiveReward = getExclusiveAchievementItem(entry.itemId);
+      if (!item && !cosmetic && !exclusiveReward) return null;
 
-      const name = item?.nameHe ?? cosmetic?.nameHe ?? '';
-      const description = item?.descriptionHe ?? cosmetic?.descHe ?? '';
+      const name = item?.nameHe ?? cosmetic?.nameHe ?? exclusiveReward?.nameHe ?? '';
+      const description =
+        item?.descriptionHe ?? cosmetic?.descHe ?? exclusiveReward?.descriptionHe ?? '';
       const themeId = item?.theme ?? null;
-      const rarity = item?.rarity ?? cosmetic?.rarity ?? null;
+      const rarity = item?.rarity ?? cosmetic?.rarity ?? exclusiveReward?.rarity ?? null;
       const isCosmetic = entry.kind === 'cosmetic' || (!item && !!cosmetic);
       const isPlaced =
         entry.placedZone !== null && entry.placedZone !== undefined
@@ -1071,13 +1074,15 @@ export default function Inventory({ student, onGoRoom }: Props) {
 
           const item = getItemById(entry.itemId);
           const cosmetic = COSMETIC_BY_ID[entry.itemId];
+          const exclusiveReward = getExclusiveAchievementItem(entry.itemId);
 
-          if (!item && !cosmetic) return null;
+          if (!item && !cosmetic && !exclusiveReward) return null;
 
-          const name = item?.nameHe ?? cosmetic?.nameHe;
-          const description = item?.descriptionHe ?? cosmetic?.descHe;
-          const rarity = item?.rarity ?? cosmetic?.rarity;
-          const icon = cosmetic?.icon ?? '✨';
+          const name = item?.nameHe ?? cosmetic?.nameHe ?? exclusiveReward?.nameHe;
+          const description =
+            item?.descriptionHe ?? cosmetic?.descHe ?? exclusiveReward?.descriptionHe;
+          const rarity = item?.rarity ?? cosmetic?.rarity ?? exclusiveReward?.rarity;
+          const icon = cosmetic?.icon ?? exclusiveReward?.emoji ?? '✨';
 
           return (
             <div
@@ -1086,7 +1091,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
             >
               <div className="mb-3 rounded-xl bg-black/15 p-2">
                 <div className="mx-auto h-28 w-28 max-w-full">
-                  {item ? (
+                  {item || exclusiveReward ? (
                     <ItemSprite
                       itemId={entry.itemId}
                       rarity={rarity}
@@ -1113,7 +1118,9 @@ export default function Inventory({ student, onGoRoom }: Props) {
 
               {isPlaced && (
                 <div className="mt-2 text-[10px] font-bold text-sky-300">
-                  🏠 מונח בחדר
+                  {entry.roomId === 'treasure_gallery'
+                    ? '👑 מונח בגלריית האוצרות'
+                    : '🏠 מונח בחדר הראשי'}
                 </div>
               )}
 
@@ -1127,7 +1134,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
                 </button>
               ) : (
                 <span className="text-magic-soft/40 text-xs mt-2 block">
-                  פרס קוסמטי
+                  {exclusiveReward ? '🔒 פרס הישג בלעדי — לא ניתן למכירה' : 'פרס קוסמטי'}
                 </span>
               )}
             </div>
