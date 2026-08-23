@@ -83,12 +83,52 @@ export function companionEvolutionLevel(
   return COMPANION_EVOLUTION_STAGE_BY_ID[stage].level;
 }
 
+export type CompanionLayerAnimation =
+  | 'none'
+  | 'bodyBreath'
+  | 'headIdle'
+  | 'blink'
+  | 'earLeft'
+  | 'earRight'
+  | 'frontLegLeft'
+  | 'frontLegRight'
+  | 'backLegLeft'
+  | 'backLegRight'
+  | 'mane'
+  | 'wingLeft'
+  | 'wingRight'
+  | 'tail'
+  | 'pulse'
+  | 'sparkle';
+
+export type CompanionArtLayer = {
+  id: string;
+  src: string;
+  /** מיקום יחסי בתוך קנבס של 100x100. */
+  x?: number;
+  y?: number;
+  width?: number;
+  rotation?: number;
+  flipX?: boolean;
+  zIndex?: number;
+  transformOrigin?: string;
+  animation?: CompanionLayerAnimation;
+  /** אופציונלי: מאפשר לכל איבר לזוז בקצב מעט שונה כדי למנוע תחושה רובוטית. */
+  animationDurationMs?: number;
+  /** ערך שלילי מתחיל את האנימציה באמצע המחזור וכך מסנכרן פחות שכבות. */
+  animationDelayMs?: number;
+  className?: string;
+};
+
 export type CompanionFormArt = {
   /**
-   * מוכן לתמונות אמיתיות: ברגע שניצור משפחת חיות לעולם מסוים,
-   * פשוט מוסיפים כאן נתיב לכל אחת מחמש הצורות.
+   * תאימות לאחור: תמונת PNG אחת עדיין נתמכת.
+   * משפחות חדשות יכולות לעבור ל-layers כדי לקבל ריג 2.5D מלא:
+   * גוף, ראש, עיניים, אוזניים, רגליים, רעמה, כנפיים, זנב, הילה ואביזרים.
+   * כל איבר יכול לקבל אנימציה עצמאית בלי להחליף את כל התמונה בכל frame.
    */
   imageSrc?: string;
+  layers?: CompanionArtLayer[];
   nameHe?: string;
 };
 

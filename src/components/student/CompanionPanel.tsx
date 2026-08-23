@@ -46,6 +46,7 @@ import CompanionBehaviorProfile from './CompanionBehaviorProfile';
 import CompanionTraitChallengePanel from './CompanionTraitChallengePanel';
 import CompanionJournal from './CompanionJournal';
 import CompanionReactionCard from './CompanionReactionCard';
+import AnimatedCompanionArt, { CompanionAnimationStyles } from './AnimatedCompanionArt';
 
 type Props = {
   student: StudentState;
@@ -571,6 +572,7 @@ export default function CompanionPanel({ student }: Props) {
 
   return (
     <>
+      <CompanionAnimationStyles />
       {message && (
         <div className="fixed bottom-6 left-1/2 z-[120] w-[min(92vw,34rem)] -translate-x-1/2 rounded-2xl border border-white/15 bg-slate-950/95 px-4 py-3 text-center text-sm font-black text-white shadow-2xl backdrop-blur">
           {message}
@@ -1529,10 +1531,10 @@ function CompanionAvatar({
       )}
       {isChessPegasus && (
         <>
-          <div className="absolute left-0 top-24 z-0 -rotate-12 text-8xl drop-shadow-[0_0_18px_rgba(255,255,255,0.75)]">
+          <div className="absolute left-0 top-24 z-0 origin-bottom-right animate-[companionWingLeft_1.35s_ease-in-out_infinite] text-8xl drop-shadow-[0_0_18px_rgba(255,255,255,0.75)] motion-reduce:animate-none">
             🪽
           </div>
-          <div className="absolute right-0 top-24 z-0 rotate-12 scale-x-[-1] text-8xl drop-shadow-[0_0_18px_rgba(255,255,255,0.75)]">
+          <div className="absolute right-0 top-24 z-0 origin-bottom-left animate-[companionWingRight_1.35s_ease-in-out_infinite] text-8xl drop-shadow-[0_0_18px_rgba(255,255,255,0.75)] motion-reduce:animate-none">
             🪽
           </div>
         </>
@@ -1546,36 +1548,43 @@ function CompanionAvatar({
 
       <div
         aria-label={`${STAGE_LABEL_HE[stage]} בשם ${petName} מעולם ${themeName}`}
-        className={`relative z-10 flex ${bodySize} animate-[bounce_3s_ease-in-out_infinite] flex-col items-center rounded-[48%_48%_42%_42%] border-4 shadow-2xl ${
-          formArt?.imageSrc ? 'border-transparent' : isLegendary ? 'border-yellow-200/75' : isMagical ? 'border-fuchsia-200/65' : 'border-white/35'
+        className={`companion-motion relative z-10 flex ${bodySize} flex-col items-center rounded-[48%_48%_42%_42%] border-4 shadow-2xl motion-reduce:animate-none ${
+          isLegendary
+            ? 'animate-[companionLegendaryFloat_2.9s_ease-in-out_infinite]'
+            : isMagical
+              ? 'animate-[companionMagicFloat_3.1s_ease-in-out_infinite]'
+              : 'animate-[companionPetFloat_3.2s_ease-in-out_infinite]'
+        } ${
+          formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'border-transparent' : isLegendary ? 'border-yellow-200/75' : isMagical ? 'border-fuchsia-200/65' : 'border-white/35'
         }`}
         style={{
-          background: formArt?.imageSrc
+          background: formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0
             ? 'transparent'
             : `radial-gradient(circle at 35% 22%, rgba(255,255,255,0.8), transparent 18%), linear-gradient(145deg, ${visuals.eggColor}, ${visuals.eggColor}99 55%, rgba(20,10,45,0.9))`,
-          boxShadow: formArt?.imageSrc
+          boxShadow: formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0
             ? 'none'
             : `0 0 ${isLegendary ? 95 : isMagical ? 82 : stage === 'grown' ? 70 : 48}px ${visuals.eggColor}85`,
         }}
       >
-        {formArt?.imageSrc ? (
-          <img
-            src={formArt.imageSrc}
-            alt={formArt.nameHe ?? `${petName} — ${STAGE_LABEL_HE[stage]}`}
-            draggable={false}
-            className="absolute inset-0 z-20 h-full w-full object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.35)]"
+        {formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? (
+          <AnimatedCompanionArt
+            art={formArt}
+            alt={formArt?.nameHe ?? `${petName} — ${STAGE_LABEL_HE[stage]}`}
+            stage={stage}
+            motion={false}
+            className="absolute inset-0 z-20"
           />
         ) : null}
         <div
-          className={`absolute -left-2 top-3 h-16 w-10 -rotate-[28deg] rounded-[80%_20%_55%_45%] border-2 border-white/25 ${formArt?.imageSrc ? 'opacity-0' : ''}`}
+          className={`absolute -left-2 top-3 h-16 w-10 -rotate-[28deg] rounded-[80%_20%_55%_45%] border-2 border-white/25 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}
           style={{ backgroundColor: visuals.eggColor }}
         />
         <div
-          className={`absolute -right-2 top-3 h-16 w-10 rotate-[28deg] rounded-[20%_80%_45%_55%] border-2 border-white/25 ${formArt?.imageSrc ? 'opacity-0' : ''}`}
+          className={`absolute -right-2 top-3 h-16 w-10 rotate-[28deg] rounded-[20%_80%_45%_55%] border-2 border-white/25 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}
           style={{ backgroundColor: visuals.eggColor }}
         />
 
-        <div className={`relative z-10 mt-10 flex gap-5 ${formArt?.imageSrc ? 'opacity-0' : ''}`}>
+        <div className={`relative z-10 mt-10 flex gap-5 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}>
           {[0, 1].map(eye => (
             <div
               key={eye}
@@ -1586,8 +1595,8 @@ function CompanionAvatar({
           ))}
         </div>
 
-        <div className={`relative z-10 mt-3 h-4 w-8 rounded-b-full border-b-4 border-indigo-950/80 ${formArt?.imageSrc ? 'opacity-0' : ''}`} />
-        <div className={`relative z-10 mt-auto mb-5 rounded-full border border-white/35 bg-white/20 px-3 py-2 text-3xl drop-shadow-lg ${formArt?.imageSrc ? 'opacity-0' : ''}`}>
+        <div className={`relative z-10 mt-3 h-4 w-8 rounded-b-full border-b-4 border-indigo-950/80 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`} />
+        <div className={`relative z-10 mt-auto mb-5 rounded-full border border-white/35 bg-white/20 px-3 py-2 text-3xl drop-shadow-lg ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}>
           {visuals.motif}
         </div>
         {(isMagical || isLegendary) && (
