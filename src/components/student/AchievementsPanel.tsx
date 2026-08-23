@@ -12,6 +12,8 @@ import {
 } from '../../data/achievements';
 import { THEMES, type ThemeId } from '../../data/themes';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
+import SpecialJourneysPanel from './SpecialJourneysPanel';
+import StudentTitlesPanel from './StudentTitlesPanel';
 
 type Props = {
   student: StudentState;
@@ -132,6 +134,8 @@ export default function AchievementsPanel({ student }: Props) {
 
   return (
     <section className="mt-8 border-t border-white/10 pt-8 text-right">
+      <StudentTitlesPanel student={student} />
+
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-2 text-4xl">🏅</div>
@@ -228,40 +232,25 @@ export default function AchievementsPanel({ student }: Props) {
         </div>
       </div>
 
-      {(student.specialUnlocks ?? []).length > 0 && (
+      {(student.specialUnlocks ?? []).some(unlock => unlock.kind !== 'title') && (
         <div className="mt-6 rounded-3xl border border-yellow-300/20 bg-yellow-300/5 p-5">
           <div className="mb-3 font-black text-yellow-100">✨ פרסים מיוחדים שכבר פתחת</div>
           <div className="flex flex-wrap gap-2">
-            {(student.specialUnlocks ?? []).map(unlock => (
-              <div
-                key={`${unlock.kind}:${unlock.unlockId}`}
-                className="rounded-xl border border-yellow-300/20 bg-black/15 px-3 py-2 text-xs font-bold text-yellow-50"
-              >
-                {unlock.kind === 'title' ? '👑' : '✨'} {unlock.labelHe}
-              </div>
-            ))}
+            {(student.specialUnlocks ?? [])
+              .filter(unlock => unlock.kind !== 'title')
+              .map(unlock => (
+                <div
+                  key={`${unlock.kind}:${unlock.unlockId}`}
+                  className="rounded-xl border border-yellow-300/20 bg-black/15 px-3 py-2 text-xs font-bold text-yellow-50"
+                >
+                  ✨ {unlock.labelHe}
+                </div>
+              ))}
           </div>
         </div>
       )}
 
-      <div className="mt-8 overflow-hidden rounded-3xl border border-fuchsia-400/25 bg-gradient-to-l from-fuchsia-950/35 via-indigo-950/35 to-cyan-950/25 p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="text-2xl font-black text-white">🗺️ מסעות מיוחדים</div>
-            <p className="mt-2 max-w-2xl text-sm text-magic-soft/70">
-              יש בממלכה דברים שלא קונים ולא מוצאים במקרה בקופסה. מסעות נדירים
-              יוכלו בעתיד לפתוח חיות מיוחדות, חדרים סודיים, דמויות, תארים ועוד.
-            </p>
-          </div>
-          <div className="shrink-0 rounded-2xl border border-white/10 bg-black/20 px-5 py-4 text-center">
-            <div className="text-3xl">🔒</div>
-            <div className="mt-1 text-xs font-black text-white">המסע הראשון עוד לא נפתח</div>
-          </div>
-        </div>
-        <div className="mt-4 text-xs font-bold text-fuchsia-100/60">
-          רמז: לא כל דבר מיוחד בממלכה יופיע מראש ברשימה.
-        </div>
-      </div>
+      <SpecialJourneysPanel student={student} />
     </section>
   );
 }

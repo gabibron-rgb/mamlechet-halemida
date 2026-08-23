@@ -6,6 +6,7 @@ import { useSessionStore } from '../store/useSessionStore';
 import { useGameStore } from '../store/useGameStore';
 import { xpToNextLevel } from '../logic/leveling';
 import { COMPANION_STAGE_ORDER } from '../data/companionWorlds';
+import { studentTitleDisplayLabel } from '../data/studentTitles';
 
 import Shop from '../components/student/Shop';
 import Inventory from '../components/student/Inventory';
@@ -124,15 +125,27 @@ export default function StudentHome() {
   const activeMissionCount = (student.missions ?? []).filter(
     mission => mission.completedAt === null && mission.cancelledAt === null
   ).length;
+  const activeTitle = (student.specialUnlocks ?? []).find(
+    unlock =>
+      unlock.kind === 'title' &&
+      unlock.unlockId === student.activeTitleUnlockId
+  ) ?? null;
 
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-black text-magic-accent">
-            שלום {student.name} 👋
-          </h1>
+        <div className="flex justify-between items-start gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-black text-magic-accent">
+              שלום {student.name} 👋
+            </h1>
+            {activeTitle && (
+              <div className="mt-2 inline-flex rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-black text-yellow-100">
+                👑 {studentTitleDisplayLabel(activeTitle.labelHe)}
+              </div>
+            )}
+          </div>
 
           <button
             type="button"

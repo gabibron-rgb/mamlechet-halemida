@@ -13,11 +13,24 @@ import { normalizeStudentMissions } from '../data/missions';
 import { normalizeStudentClassGoals } from '../data/classGoals';
 import { normalizeClassKingdomClaimedRewards } from '../data/classKingdom';
 import { normalizeAchievementRecords, normalizeSpecialUnlocks } from '../data/achievements';
+import { normalizeJourneyRecords } from '../data/specialJourneys';
 
 type Mode = 'choose' | 'student' | 'teacher';
 
 function buildStudentFromSupabase(row: any): StudentState {
   const meta = row.meta ?? {};
+  const specialUnlocks = normalizeSpecialUnlocks(meta.specialUnlocks);
+  const requestedActiveTitleId =
+    typeof meta.activeTitleUnlockId === 'string' && meta.activeTitleUnlockId.trim()
+      ? meta.activeTitleUnlockId.trim()
+      : null;
+  const activeTitleUnlockId =
+    requestedActiveTitleId &&
+    specialUnlocks.some(
+      unlock => unlock.kind === 'title' && unlock.unlockId === requestedActiveTitleId
+    )
+      ? requestedActiveTitleId
+      : null;
 
   return {
     id: row.id,
@@ -94,7 +107,9 @@ function buildStudentFromSupabase(row: any): StudentState {
       meta.claimedClassKingdomRewards
     ),
     achievementRecords: normalizeAchievementRecords(meta.achievementRecords),
-    specialUnlocks: normalizeSpecialUnlocks(meta.specialUnlocks),
+    journeyRecords: normalizeJourneyRecords(meta.journeyRecords),
+    specialUnlocks,
+    activeTitleUnlockId,
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],

@@ -127,6 +127,11 @@ export default function ClassRoomsPanel({
             <h2 className="mt-1 text-2xl font-black text-magic-accent">
               החדר של {selectedVisitor.name}
             </h2>
+            {selectedVisitor.activeTitleLabel && (
+              <div className="mt-2 inline-flex rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-black text-yellow-100">
+                👑 {selectedVisitor.activeTitleLabel}
+              </div>
+            )}
             <p className="mt-1 text-xs text-magic-soft/60">
               צפייה בלבד — שום דבר שתעשה כאן לא משנה את החדר של {selectedVisitor.name}.
             </p>
@@ -255,6 +260,11 @@ export default function ClassRoomsPanel({
                     <div className="text-xl font-black text-white">
                       {visitor.name}
                     </div>
+                    {visitor.activeTitleLabel && (
+                      <div className="mt-1 text-[11px] font-black text-yellow-100/85">
+                        👑 {visitor.activeTitleLabel}
+                      </div>
+                    )}
                     <div className="mt-1 text-xs text-magic-soft/50">
                       🏠 {placedCount} חפצים מוצבים
                     </div>

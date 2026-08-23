@@ -1,6 +1,8 @@
 import { supabase } from './supabaseClient';
 import { COMPANION_STAGE_ORDER, type CompanionStage } from '../data/companionWorlds';
 import { THEMES, type ThemeId } from '../data/themes';
+import { normalizeSpecialUnlocks } from '../data/achievements';
+import { studentTitleDisplayLabel } from '../data/studentTitles';
 import type {
   CompanionState,
   InventoryEntry,
@@ -14,6 +16,7 @@ export type ClassRoomVisitor = {
   inventory: InventoryEntry[];
   companion: CompanionState;
   trophies: StudentState['trophies'];
+  activeTitleLabel: string | null;
 };
 
 function numberOrZero(value: unknown): number {
@@ -92,6 +95,23 @@ function visitorTrophies(meta: any): StudentState['trophies'] {
     .filter((entry: StudentState['trophies'][number]) => entry.id);
 }
 
+
+function visitorActiveTitleLabel(meta: any): string | null {
+  const activeTitleUnlockId =
+    typeof meta?.activeTitleUnlockId === 'string' && meta.activeTitleUnlockId.trim()
+      ? meta.activeTitleUnlockId.trim()
+      : null;
+
+  if (!activeTitleUnlockId) return null;
+
+  const title = normalizeSpecialUnlocks(meta?.specialUnlocks).find(
+    unlock =>
+      unlock.kind === 'title' && unlock.unlockId === activeTitleUnlockId
+  );
+
+  return title ? studentTitleDisplayLabel(title.labelHe) : null;
+}
+
 export async function fetchClassRoomVisitors(
   classId: string
 ): Promise<ClassRoomVisitor[]> {
@@ -119,5 +139,6 @@ export async function fetchClassRoomVisitors(
     inventory: Array.isArray(row.inventory) ? row.inventory : [],
     companion: visitorCompanion(row.meta),
     trophies: visitorTrophies(row.meta),
+    activeTitleLabel: visitorActiveTitleLabel(row.meta),
   }));
 }

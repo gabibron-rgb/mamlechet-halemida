@@ -59,6 +59,13 @@ import {
   type AchievementRecord,
   type SpecialUnlockEntry,
 } from '../data/achievements';
+import {
+  journeyById,
+  journeyNeedsThemeChoice,
+  normalizeJourneyRecords,
+  reconcileJourneyRecords,
+  type JourneyRecord,
+} from '../data/specialJourneys';
 
 export type StudentId = string;
 
@@ -136,7 +143,9 @@ export type StudentState = {
   classGoals: StudentClassGoal[];
   claimedClassKingdomRewards: number[];
   achievementRecords: AchievementRecord[];
+  journeyRecords: JourneyRecord[];
   specialUnlocks: SpecialUnlockEntry[];
+  activeTitleUnlockId: string | null;
   pastRewards: string[];
   trophies: { id: string; trophyTheme: string; caption: string; awardedAt: number }[];
   seenTrophyIds: string[];
@@ -266,6 +275,20 @@ type GameStore = {
     achievementId: string,
     themeId?: ThemeId
   ) => Promise<boolean>;
+  reconcileSpecialJourneys: (studentId: StudentId) => Promise<{
+    newlyDiscoveredIds: string[];
+    newlyCompletedStageIds: Array<{ journeyId: string; stageId: string }>;
+    newlyCompletedIds: string[];
+  }>;
+  claimSpecialJourneyReward: (
+    studentId: StudentId,
+    journeyId: string,
+    themeId?: ThemeId
+  ) => Promise<boolean>;
+  setActiveTitle: (
+    studentId: StudentId,
+    unlockId: string | null
+  ) => Promise<boolean>;
 
   updateInventoryEntry: (
     studentId: StudentId,
@@ -321,7 +344,9 @@ async function syncStudentToSupabase(student: StudentState) {
       classGoals: student.classGoals ?? [],
       claimedClassKingdomRewards: student.claimedClassKingdomRewards ?? [],
       achievementRecords: student.achievementRecords ?? [],
+      journeyRecords: student.journeyRecords ?? [],
       specialUnlocks: student.specialUnlocks ?? [],
+      activeTitleUnlockId: student.activeTitleUnlockId ?? null,
       pastRewards: student.pastRewards,
       trophies: student.trophies,
       seenTrophyIds: student.seenTrophyIds ?? [],
@@ -429,7 +454,9 @@ function defaultStudent(name: string, classId: string): StudentState {
     classGoals: [],
     claimedClassKingdomRewards: [],
     achievementRecords: [],
+    journeyRecords: [],
     specialUnlocks: [],
+    activeTitleUnlockId: null,
     pastRewards: [],
     trophies: [],
     seenTrophyIds: [],
@@ -455,6 +482,18 @@ function withReconciledAchievements(student: StudentState): StudentState {
 function studentFromSupabase(row: any, classId: string): StudentState {
   const base = defaultStudent(row.name ?? 'תלמיד/ה', classId);
   const meta = row.meta ?? {};
+  const specialUnlocks = normalizeSpecialUnlocks(meta.specialUnlocks);
+  const requestedActiveTitleId =
+    typeof meta.activeTitleUnlockId === 'string' && meta.activeTitleUnlockId.trim()
+      ? meta.activeTitleUnlockId.trim()
+      : null;
+  const activeTitleUnlockId =
+    requestedActiveTitleId &&
+    specialUnlocks.some(
+      unlock => unlock.kind === 'title' && unlock.unlockId === requestedActiveTitleId
+    )
+      ? requestedActiveTitleId
+      : null;
 
   return {
     ...base,
@@ -527,7 +566,9 @@ function studentFromSupabase(row: any, classId: string): StudentState {
       meta.claimedClassKingdomRewards
     ),
     achievementRecords: normalizeAchievementRecords(meta.achievementRecords),
-    specialUnlocks: normalizeSpecialUnlocks(meta.specialUnlocks),
+    journeyRecords: normalizeJourneyRecords(meta.journeyRecords),
+    specialUnlocks,
+    activeTitleUnlockId,
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
@@ -2123,6 +2164,7 @@ export const useGameStore = create<GameStore>()(
           let nextInventory = [...student.inventory];
           let nextUnlockedThemes = [...student.unlockedThemes];
           let nextSpecialUnlocks = [...(student.specialUnlocks ?? [])];
+          let nextActiveTitleUnlockId = student.activeTitleUnlockId ?? null;
 
           for (const reward of rewards) {
             if (reward.kind === 'box') {
@@ -2178,6 +2220,9 @@ export const useGameStore = create<GameStore>()(
                   unlockedAt: now,
                 });
               }
+              if (reward.unlockKind === 'title' && !nextActiveTitleUnlockId) {
+                nextActiveTitleUnlockId = reward.unlockId;
+              }
             }
           }
 
@@ -2192,6 +2237,7 @@ export const useGameStore = create<GameStore>()(
             inventory: nextInventory,
             unlockedThemes: nextUnlockedThemes,
             specialUnlocks: nextSpecialUnlocks,
+            activeTitleUnlockId: nextActiveTitleUnlockId,
             achievementRecords: nextRecords,
           };
 
@@ -2206,6 +2252,225 @@ export const useGameStore = create<GameStore>()(
         if (!updatedStudent) return false;
         await syncStudentToSupabase(updatedStudent);
         return true;
+      },
+
+      reconcileSpecialJourneys: async (studentId) => {
+        let updatedStudent: StudentState | null = null;
+        let newlyDiscoveredIds: string[] = [];
+        let newlyCompletedStageIds: Array<{ journeyId: string; stageId: string }> = [];
+        let newlyCompletedIds: string[] = [];
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const reconciled = reconcileJourneyRecords(
+            student,
+            student.journeyRecords ?? []
+          );
+          newlyDiscoveredIds = reconciled.newlyDiscoveredIds;
+          newlyCompletedStageIds = reconciled.newlyCompletedStageIds;
+          newlyCompletedIds = reconciled.newlyCompletedIds;
+
+          if (
+            newlyDiscoveredIds.length === 0 &&
+            newlyCompletedStageIds.length === 0 &&
+            newlyCompletedIds.length === 0
+          ) {
+            return state;
+          }
+
+          updatedStudent = {
+            ...student,
+            journeyRecords: reconciled.records,
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          await syncStudentToSupabase(updatedStudent);
+        }
+
+        return {
+          newlyDiscoveredIds,
+          newlyCompletedStageIds,
+          newlyCompletedIds,
+        };
+      },
+
+      claimSpecialJourneyReward: async (studentId, journeyId, themeId) => {
+        const journey = journeyById(journeyId);
+        if (!journey || journey.rewards.length === 0) return false;
+
+        let updatedStudent: StudentState | null = null;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const reconciled = reconcileJourneyRecords(
+            student,
+            student.journeyRecords ?? []
+          );
+          const record = reconciled.records.find(
+            entry => entry.journeyId === journeyId
+          );
+
+          if (
+            !record ||
+            record.completedAt === null ||
+            record.rewardClaimedAt !== null
+          ) {
+            return state;
+          }
+
+          if (journeyNeedsThemeChoice(journey)) {
+            if (!themeId) return state;
+            if (
+              themeId !== 'generic' &&
+              !student.unlockedThemes.includes(themeId)
+            ) {
+              return state;
+            }
+          }
+
+          const now = Date.now();
+          let nextInventory = [...student.inventory];
+          let nextUnlockedThemes = [...student.unlockedThemes];
+          let nextSpecialUnlocks = [...(student.specialUnlocks ?? [])];
+          let nextActiveTitleUnlockId = student.activeTitleUnlockId ?? null;
+
+          for (const reward of journey.rewards) {
+            if (reward.kind === 'box') {
+              const selectedTheme = themeId as ThemeId;
+              nextInventory.push({
+                id: `journey_box_${journeyId}_${reward.tier}_${selectedTheme}_${now}_${nextInventory.length}`,
+                itemId: `box_${reward.tier}_${selectedTheme}`,
+                kind: 'box',
+                boxTier: reward.tier,
+                boxTheme: selectedTheme,
+                acquiredAt: now,
+                placedZone: null,
+                placedSlot: null,
+              });
+              continue;
+            }
+
+            if (reward.kind === 'inventoryItem') {
+              nextInventory.push({
+                id: `journey_item_${journeyId}_${reward.itemId}_${now}_${nextInventory.length}`,
+                itemId: reward.itemId,
+                kind: reward.inventoryKind,
+                acquiredAt: now,
+                placedZone: null,
+                placedSlot: null,
+                roomX: null,
+                roomY: null,
+                roomScale: 1,
+                roomRotation: 0,
+              });
+              continue;
+            }
+
+            if (reward.kind === 'themeUnlock') {
+              if (!nextUnlockedThemes.includes(reward.themeId)) {
+                nextUnlockedThemes.push(reward.themeId);
+              }
+              continue;
+            }
+
+            if (reward.kind === 'specialUnlock') {
+              const alreadyUnlocked = nextSpecialUnlocks.some(
+                entry =>
+                  entry.kind === reward.unlockKind &&
+                  entry.unlockId === reward.unlockId
+              );
+
+              if (!alreadyUnlocked) {
+                nextSpecialUnlocks.push({
+                  unlockId: reward.unlockId,
+                  kind: reward.unlockKind,
+                  labelHe: reward.labelHe,
+                  sourceAchievementId: `journey:${journeyId}`,
+                  unlockedAt: now,
+                });
+              }
+              if (reward.unlockKind === 'title' && !nextActiveTitleUnlockId) {
+                nextActiveTitleUnlockId = reward.unlockId;
+              }
+            }
+          }
+
+          const nextRecords = reconciled.records.map(entry =>
+            entry.journeyId === journeyId
+              ? { ...entry, rewardClaimedAt: now }
+              : entry
+          );
+
+          updatedStudent = {
+            ...student,
+            inventory: nextInventory,
+            unlockedThemes: nextUnlockedThemes,
+            specialUnlocks: nextSpecialUnlocks,
+            activeTitleUnlockId: nextActiveTitleUnlockId,
+            journeyRecords: nextRecords,
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (!updatedStudent) return false;
+        await syncStudentToSupabase(updatedStudent);
+        return true;
+      },
+
+      setActiveTitle: async (studentId, unlockId) => {
+        let updatedStudent: StudentState | null = null;
+        let accepted = false;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          if (unlockId !== null) {
+            const ownsTitle = (student.specialUnlocks ?? []).some(
+              unlock => unlock.kind === 'title' && unlock.unlockId === unlockId
+            );
+            if (!ownsTitle) return state;
+          }
+
+          accepted = true;
+          if ((student.activeTitleUnlockId ?? null) === unlockId) return state;
+
+          updatedStudent = {
+            ...student,
+            activeTitleUnlockId: unlockId,
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          await syncStudentToSupabase(updatedStudent);
+        }
+
+        return accepted;
       },
 
       updateInventoryEntry: (studentId, inventoryIndex, patch) => {

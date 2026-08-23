@@ -42,6 +42,7 @@ import CompanionSkillsPanel from './CompanionSkillsPanel';
 import CompanionBehaviorProfile from './CompanionBehaviorProfile';
 import CompanionTraitChallengePanel from './CompanionTraitChallengePanel';
 import CompanionJournal from './CompanionJournal';
+import SpecialCompanionsPanel from './SpecialCompanionsPanel';
 import CompanionReactionCard from './CompanionReactionCard';
 
 type Props = {
@@ -987,6 +988,8 @@ export default function CompanionPanel({ student }: Props) {
         </div>
 
         <CompanionJournal companion={companion} />
+
+        <SpecialCompanionsPanel student={student} />
 
         {import.meta.env.DEV && (
           <div className="mt-4 rounded-2xl border border-dashed border-fuchsia-300/30 bg-fuchsia-500/5 p-4">
