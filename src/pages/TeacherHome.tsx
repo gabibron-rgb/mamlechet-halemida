@@ -14,15 +14,22 @@ import MissionCreateModal from '../components/teacher/MissionCreateModal';
 import ClassGoalBoard from '../components/teacher/ClassGoalBoard';
 import ClassGoalCreateModal from '../components/teacher/ClassGoalCreateModal';
 import ClassKingdomSummary from '../components/teacher/ClassKingdomSummary';
+import StudentManagementModal from '../components/teacher/StudentManagementModal';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
   const currentClassId = useSessionStore(s => s.currentClassId);
+  const currentTeacherId = useSessionStore(s => s.currentTeacherId);
   const selectTeacherClass = useSessionStore(s => s.selectTeacherClass);
   const logout = useSessionStore(s => s.logout);
 
   const cls = useClassStore(s =>
     currentClassId ? s.classes[currentClassId] : undefined
+  );
+  const classesMap = useClassStore(s => s.classes);
+  const teacherClasses = useMemo(
+    () => Object.values(classesMap),
+    [classesMap]
   );
 
   // IMPORTANT: select the raw map, derive the array in useMemo.
@@ -53,6 +60,8 @@ export default function TeacherHome() {
   const [trophyStudentId, setTrophyStudentId] = useState<string | null>(null);
   const [managedTrophyStudentId, setManagedTrophyStudentId] = useState<string | null>(null);
   const [flourishStudentId, setFlourishStudentId] = useState<string | null>(null);
+  const [managedStudentId, setManagedStudentId] = useState<string | null>(null);
+  const [transferFeedback, setTransferFeedback] = useState<string | null>(null);
   const [missionCreateOpen, setMissionCreateOpen] = useState(false);
   const [classGoalCreateOpen, setClassGoalCreateOpen] = useState(false);
 
@@ -66,6 +75,10 @@ export default function TeacherHome() {
 
   const flourishStudent = flourishStudentId
     ? students.find(student => student.id === flourishStudentId) ?? null
+    : null;
+
+  const managedStudent = managedStudentId
+    ? students.find(student => student.id === managedStudentId) ?? null
     : null;
 
   if (!cls) {
@@ -87,6 +100,18 @@ export default function TeacherHome() {
   function openAwardFor(studentId: string | null) {
     setPreselected(studentId);
     setAwardOpen(true);
+  }
+
+  async function handleStudentTransferred(
+    studentName: string,
+    targetClass: { id: string; nameHe: string }
+  ) {
+    setManagedStudentId(null);
+    setTransferFeedback(`${studentName} הועבר/ה בהצלחה ל${targetClass.nameHe}.`);
+
+    if (currentClassId) {
+      await loadStudentsFromSupabase(currentClassId);
+    }
   }
 
   return (
@@ -150,6 +175,20 @@ export default function TeacherHome() {
           onCreateMission={() => setMissionCreateOpen(true)}
         />
 
+        {transferFeedback && (
+          <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-emerald-300/20 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-100">
+            <span>✓ {transferFeedback}</span>
+            <button
+              type="button"
+              onClick={() => setTransferFeedback(null)}
+              className="text-emerald-100/60 hover:text-emerald-100"
+              aria-label="סגירת הודעת ההעברה"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         {/* Student list */}
         <div className="bg-magic-panel/80 rounded-3xl p-6 mb-4">
           <h2 className="text-magic-accent font-bold mb-3">
@@ -203,6 +242,15 @@ export default function TeacherHome() {
                     >
                       +נקודות
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setManagedStudentId(st.id)}
+                      className="rounded-lg border border-white/10 bg-magic-bg/35 px-3 py-2 text-sm font-black text-magic-soft/55 transition-colors hover:bg-magic-bg/65 hover:text-magic-soft"
+                      title="פעולות נוספות"
+                      aria-label={`פעולות נוספות עבור ${st.name}`}
+                    >
+                      ⋯
+                    </button>
                   </div>
                 </li>
               ))}
@@ -250,6 +298,16 @@ export default function TeacherHome() {
         open={managedTrophyStudentId !== null}
         onClose={() => setManagedTrophyStudentId(null)}
         student={managedTrophyStudent}
+      />
+
+      <StudentManagementModal
+        open={managedStudentId !== null}
+        onClose={() => setManagedStudentId(null)}
+        teacherId={currentTeacherId}
+        student={managedStudent}
+        currentClass={cls}
+        teacherClasses={teacherClasses}
+        onTransferred={handleStudentTransferred}
       />
 
       <FlourishAwardModal

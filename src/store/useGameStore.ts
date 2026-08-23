@@ -646,6 +646,20 @@ export const useGameStore = create<GameStore>()(
 
         set((state) => {
           const nextStudents = { ...state.students };
+          const loadedIds = new Set(studentsFromDb.map(student => student.id));
+
+          // Remove persisted Supabase students that are no longer members of
+          // this class (for example after a teacher transfers them). Keep
+          // local-only test students untouched.
+          for (const [studentId, student] of Object.entries(nextStudents)) {
+            if (
+              student.classId === classId &&
+              student.supabaseId &&
+              !loadedIds.has(studentId)
+            ) {
+              delete nextStudents[studentId];
+            }
+          }
 
           for (const student of studentsFromDb) {
             nextStudents[student.id] = student;
