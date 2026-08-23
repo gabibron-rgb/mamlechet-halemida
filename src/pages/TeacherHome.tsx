@@ -18,6 +18,7 @@ import ClassKingdomSummary from '../components/teacher/ClassKingdomSummary';
 export default function TeacherHome() {
   const navigate = useNavigate();
   const currentClassId = useSessionStore(s => s.currentClassId);
+  const selectTeacherClass = useSessionStore(s => s.selectTeacherClass);
   const logout = useSessionStore(s => s.logout);
 
   const cls = useClassStore(s =>
@@ -99,12 +100,24 @@ export default function TeacherHome() {
   ברוכים הבאים לממלכת הלמידה
 </p>
           </div>
-          <button
-            onClick={() => { logout(); navigate('/'); }}
-            className="text-magic-soft/60 text-sm hover:text-magic-soft"
-          >
-            יציאה
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                selectTeacherClass(null);
+                navigate('/teacher/classes');
+              }}
+              className="rounded-xl border border-magic-soft/20 px-3 py-2 text-sm font-bold text-magic-soft transition-colors hover:bg-magic-soft/10"
+            >
+              🏫 הכיתות שלי
+            </button>
+            <button
+              onClick={() => { logout(); navigate('/'); }}
+              className="text-magic-soft/60 text-sm hover:text-magic-soft"
+            >
+              יציאה
+            </button>
+          </div>
         </div>
 
         {/* Quick group award */}

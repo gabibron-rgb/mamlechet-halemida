@@ -4,7 +4,7 @@ import { useClassStore } from '../store/useClassStore';
 import { useGameStore, type StudentState } from '../store/useGameStore';
 import { useSessionStore } from '../store/useSessionStore';
 import { getStudentByLoginName } from '../lib/supabaseStudents';
-import { getClassByCodeAndTeacherCode } from '../lib/supabaseClasses';
+import { getTeacherByCredentials, getClassesByTeacherId } from '../lib/supabaseTeachers';
 import { DEFAULT_UNLOCKED_THEMES } from '../data/themes';
 import { normalizeCompanionBehaviorMemories } from '../data/companionTraits';
 import { normalizeCompanionTraitChallenges } from '../data/companionTraitChallenges';
@@ -114,7 +114,7 @@ export default function LoginPage() {
   const [studentLoginName, setStudentLoginName] = useState('');
   const [studentLoginCode, setStudentLoginCode] = useState('');
 
-  const [teacherClassCode, setTeacherClassCode] = useState('');
+  const [teacherLoginName, setTeacherLoginName] = useState('');
   const [teacherLoginCode, setTeacherLoginCode] = useState('');
 
   const [error, setError] = useState<string | null>(null);
@@ -182,11 +182,11 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const cleanTeacherClassCode = teacherClassCode.trim();
+      const cleanTeacherLoginName = teacherLoginName.trim().toLowerCase();
       const cleanTeacherLoginCode = teacherLoginCode.trim();
 
-      if (!cleanTeacherClassCode) {
-        setError('צריך להקליד קוד כיתה');
+      if (!cleanTeacherLoginName) {
+        setError('צריך להקליד שם משתמש למורה');
         return;
       }
 
@@ -195,20 +195,22 @@ export default function LoginPage() {
         return;
       }
 
-      const cls = await getClassByCodeAndTeacherCode(
-        cleanTeacherClassCode,
+      const teacher = await getTeacherByCredentials(
+        cleanTeacherLoginName,
         cleanTeacherLoginCode
       );
 
-      if (!cls) {
-        setError('קוד הכיתה או קוד המורה לא נכונים');
+      if (!teacher) {
+        setError('שם המשתמש או קוד המורה לא נכונים');
         return;
       }
 
-      useClassStore.setState((state) => ({
-        classes: {
-          ...state.classes,
-          [cls.id]: {
+      const classes = await getClassesByTeacherId(teacher.id);
+
+      const teacherClasses = Object.fromEntries(
+        classes.map((cls) => [
+          cls.id,
+          {
             id: cls.id,
             code: cls.code,
             nameHe: cls.name_he,
@@ -216,19 +218,25 @@ export default function LoginPage() {
               ? new Date(cls.created_at).getTime()
               : Date.now(),
           },
-        },
-        world: {
-          ...state.world,
-          [cls.id]: state.world[cls.id] ?? {
-            classId: cls.id,
-            donatedTotal: 0,
-            unlockedMilestones: [],
-          },
-        },
+        ])
+      );
+
+      useClassStore.setState((state) => ({
+        classes: teacherClasses,
+        world: Object.fromEntries(
+          Object.keys(teacherClasses).map((classId) => [
+            classId,
+            state.world[classId] ?? {
+              classId,
+              donatedTotal: 0,
+              unlockedMilestones: [],
+            },
+          ])
+        ),
       }));
 
-      loginTeacher(cls.id);
-      navigate('/teacher');
+      loginTeacher(teacher.id, teacher.name_he || teacher.login_name);
+      navigate('/teacher/classes');
     } catch (err) {
       console.error('Teacher login failed:', err);
       setError('הייתה שגיאה בכניסת מורה. בדוק את Supabase או את הקונסול.');
@@ -323,15 +331,16 @@ export default function LoginPage() {
         {mode === 'teacher' && (
           <div className="flex flex-col gap-3 text-right">
             <p className="text-magic-soft/70 text-sm text-center mb-1">
-              הקלד/י קוד כיתה וקוד מורה
+              כניסה אחת לכל הכיתות שלך
             </p>
 
-            <label className="text-magic-soft text-sm">קוד כיתה</label>
+            <label className="text-magic-soft text-sm">שם משתמש למורה</label>
             <input
               type="text"
-              value={teacherClassCode}
-              onChange={(e) => setTeacherClassCode(e.target.value)}
-              placeholder="לדוגמה: gimel1"
+              value={teacherLoginName}
+              onChange={(e) => setTeacherLoginName(e.target.value)}
+              placeholder="שם המשתמש שלך"
+              autoComplete="username"
               className="bg-magic-bg/60 border border-magic-soft/30 rounded-xl p-3 text-white placeholder-magic-soft/40"
             />
 
@@ -340,7 +349,11 @@ export default function LoginPage() {
               type="password"
               value={teacherLoginCode}
               onChange={(e) => setTeacherLoginCode(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isLoading) void handleTeacherLogin();
+              }}
               placeholder="קוד המורה"
+              autoComplete="current-password"
               className="bg-magic-bg/60 border border-magic-soft/30 rounded-xl p-3 text-white placeholder-magic-soft/40"
             />
 
@@ -349,7 +362,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className="bg-magic-accent text-magic-bg font-bold py-3 px-6 rounded-2xl hover:scale-105 transition-transform mt-2 disabled:opacity-60 disabled:hover:scale-100"
             >
-              {isLoading ? 'בודק...' : 'כניסה למורה'}
+              {isLoading ? 'בודק...' : 'כניסה לחשבון המורה'}
             </button>
 
             <button

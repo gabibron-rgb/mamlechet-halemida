@@ -6,6 +6,7 @@ export type SupabaseClass = {
   name_he: string;
   teacher_code: string | null;
   login_alias: string | null;
+  teacher_id: string | null;
   created_at: string;
 };
 
@@ -26,7 +27,7 @@ export async function getClassByCodeAndTeacherCode(
 
   const { data, error } = await supabase
     .from('classes')
-    .select('id, code, name_he, teacher_code, login_alias, created_at')
+    .select('id, code, name_he, teacher_code, login_alias, teacher_id, created_at')
     .eq('teacher_code', cleanTeacherCode)
     .or(`code.eq.${cleanClassInput},login_alias.eq.${cleanClassInput}`)
     .maybeSingle();
