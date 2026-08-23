@@ -39,6 +39,7 @@ function buildStudentFromSupabase(row: any): StudentState {
 
     name: row.name ?? row.login_name,
     classId: row.class_id,
+    gender: row.gender === 'male' || row.gender === 'female' ? row.gender : null,
 
     points: row.points ?? 0,
     xp: row.xp ?? 0,

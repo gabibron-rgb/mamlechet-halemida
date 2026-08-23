@@ -66,7 +66,7 @@ import {
   reconcileJourneyRecords,
   type JourneyRecord,
 } from '../data/specialJourneys';
-import { reconcileBasicStudentTitles } from '../data/studentTitles';
+import { reconcileBasicStudentTitles, type StudentGender } from '../data/studentTitles';
 
 export type StudentId = string;
 
@@ -127,6 +127,7 @@ export type StudentState = {
 
   name: string;
   classId: string;
+  gender: StudentGender | null;
   points: number;
   xp: number;
   level: number;
@@ -162,6 +163,7 @@ type GameStore = {
   createStudent: (name: string, classId: string) => StudentId;
   getStudent: (id: StudentId) => StudentState | undefined;
   updateStudent: (id: StudentId, patch: Partial<StudentState>) => void;
+  setStudentGender: (id: StudentId, gender: StudentGender) => Promise<boolean>;
   awardTrophy: (studentId: StudentId, trophyTheme: string, caption: string) => void;
   updateTrophy: (
     studentId: StudentId,
@@ -333,6 +335,7 @@ async function syncStudentToSupabase(student: StudentState) {
   const studentName = student.name?.trim();
 
   const payload = {
+    gender: student.gender,
     points: student.points,
     xp: student.xp,
     level: student.level,
@@ -421,6 +424,7 @@ function defaultStudent(name: string, classId: string): StudentState {
     id: genId('stu'),
     name,
     classId,
+    gender: null,
     points: 0,
     xp: 0,
     level: 1,
@@ -505,6 +509,7 @@ function studentFromSupabase(row: any, classId: string): StudentState {
 
     name: row.name ?? base.name,
     classId,
+    gender: row.gender === 'male' || row.gender === 'female' ? row.gender : null,
 
     points: row.points ?? 0,
     xp: row.xp ?? 0,
@@ -736,6 +741,63 @@ export const useGameStore = create<GameStore>()(
         if (updatedStudent) {
           void syncStudentToSupabase(updatedStudent);
         }
+      },
+
+      setStudentGender: async (id, gender) => {
+        const student = get().students[id];
+        if (!student) return false;
+
+        const supabaseId = student.supabaseId ?? (isUuid(student.id) ? student.id : null);
+        const loginName = student.loginName?.trim();
+        const studentName = student.name?.trim();
+
+        let query = supabase
+          .from('students')
+          .update({
+            gender,
+            updated_at: new Date().toISOString(),
+          })
+          .select('id, gender');
+
+        if (supabaseId) {
+          query = query.eq('id', supabaseId);
+        } else if (loginName) {
+          query = query.eq('login_name', loginName);
+        } else if (studentName) {
+          query = query.eq('name', studentName);
+        } else {
+          console.warn('Cannot save student gender: missing id/loginName/name', student);
+          return false;
+        }
+
+        const { data, error } = await query.maybeSingle();
+
+        if (error) {
+          console.error('Error saving student gender to Supabase:', error);
+          return false;
+        }
+
+        if (!data) {
+          console.warn('No matching student found while saving gender:', student);
+          return false;
+        }
+
+        set(state => {
+          const current = state.students[id];
+          if (!current) return state;
+
+          return {
+            students: {
+              ...state.students,
+              [id]: {
+                ...current,
+                gender,
+              },
+            },
+          };
+        });
+
+        return true;
       },
 
       awardTrophy: (studentId, trophyTheme, caption) => {

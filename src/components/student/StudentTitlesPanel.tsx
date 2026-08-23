@@ -58,7 +58,7 @@ export default function StudentTitlesPanel({ student }: Props) {
         <div className="rounded-2xl border border-yellow-300/15 bg-black/15 px-4 py-3 text-center">
           <div className="text-[10px] font-bold text-magic-soft/45">מוצג עכשיו</div>
           <div className="mt-1 text-sm font-black text-yellow-100">
-            {activeTitle ? `👑 ${studentTitleDisplayLabel(activeTitle.labelHe)}` : 'ללא תואר'}
+            {activeTitle ? `👑 ${studentTitleDisplayLabel(activeTitle.unlockId, activeTitle.labelHe, student.gender)}` : 'ללא תואר'}
           </div>
         </div>
       </div>
@@ -69,7 +69,13 @@ export default function StudentTitlesPanel({ student }: Props) {
         </div>
       )}
 
-      {titles.length === 0 ? (
+      {!student.gender && (
+        <div className="mt-4 rounded-2xl border border-sky-300/20 bg-sky-400/8 px-4 py-4 text-center text-sm text-sky-100/80">
+          התארים שלך כבר נשמרים, אבל המורה עדיין צריך להגדיר אם להציג אותם בניסוח לבן או לבת. אחרי ההגדרה הם יופיעו כאן אוטומטית.
+        </div>
+      )}
+
+      {!student.gender ? null : titles.length === 0 ? (
         <div className="mt-4 rounded-2xl border border-dashed border-white/10 bg-black/10 px-4 py-5 text-center text-sm text-magic-soft/50">
           תואר בסיסי אמור להיפתח כאן אוטומטית. אם עדיין לא מופיע תואר, כדאי לרענן את המסך.
         </div>
@@ -92,7 +98,7 @@ export default function StudentTitlesPanel({ student }: Props) {
                 }`}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <div className="font-black text-yellow-50">👑 {studentTitleDisplayLabel(title.labelHe)}</div>
+                  <div className="font-black text-yellow-50">👑 {studentTitleDisplayLabel(title.unlockId, title.labelHe, student.gender)}</div>
                   {selected && (
                     <span className="rounded-full bg-yellow-300 px-2 py-0.5 text-[9px] font-black text-indigo-950">
                       מוצג
@@ -109,7 +115,7 @@ export default function StudentTitlesPanel({ student }: Props) {
         </div>
       )}
 
-      {activeTitle && (
+      {student.gender && activeTitle && (
         <button
           type="button"
           disabled={busyId !== null}

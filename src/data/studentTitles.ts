@@ -1,12 +1,89 @@
 import { ITEMS } from './items';
 import type { SpecialUnlockEntry } from './achievements';
 
-export function studentTitleDisplayLabel(labelHe: string): string {
+export type StudentGender = 'male' | 'female';
+
+type GenderedTitleLabel = {
+  male: string;
+  female: string;
+};
+
+const TITLE_LABELS: Record<string, GenderedTitleLabel> = {
+  title_kingdom_resident: {
+    male: 'תושב הממלכה',
+    female: 'תושבת הממלכה',
+  },
+  title_young_adventurer: {
+    male: 'הרפתקן צעיר',
+    female: 'הרפתקנית צעירה',
+  },
+  title_beginner_collector: {
+    male: 'אספן מתחיל',
+    female: 'אספנית מתחילה',
+  },
+  title_room_designer: {
+    male: 'מעצב החדר',
+    female: 'מעצבת החדר',
+  },
+  title_animal_friend: {
+    male: 'ידיד החיות',
+    female: 'ידידת החיות',
+  },
+  title_mission_doer: {
+    male: 'מבצע המשימות',
+    female: 'מבצעת המשימות',
+  },
+  title_kingdom_partner: {
+    male: 'שותף לממלכה',
+    female: 'שותפה לממלכה',
+  },
+  title_kingdom_collector: {
+    male: 'אספן הממלכה',
+    female: 'אספנית הממלכה',
+  },
+  title_master_collector: {
+    male: 'אוצר האוספים',
+    female: 'אוצר האוספים',
+  },
+  title_legendary_companion: {
+    male: 'חברות אגדית',
+    female: 'חברות אגדית',
+  },
+  title_six_lights: {
+    male: 'ששת האורות',
+    female: 'ששת האורות',
+  },
+  title_friend_of_the_unicorn: {
+    male: 'ידיד חד־הקרן',
+    female: 'ידידת חד־הקרן',
+  },
+};
+
+function cleanStoredTitleLabel(labelHe: string): string {
   const clean = labelHe.trim();
   const quoted = clean.match(/^התואר\s+[“\"](.+)[”\"]$/);
   if (quoted?.[1]) return quoted[1].trim();
 
   return clean.replace(/^התואר\s+/, '').replace(/^[“\"]|[”\"]$/g, '').trim();
+}
+
+export function studentTitleDisplayLabel(
+  unlockId: string,
+  labelHe: string,
+  gender: StudentGender | null | undefined
+): string {
+  const variants = TITLE_LABELS[unlockId];
+
+  if (variants) {
+    if (variants.male === variants.female) return variants.male;
+    if (gender === 'male') return variants.male;
+    if (gender === 'female') return variants.female;
+    return 'ממתין להגדרת בן/בת';
+  }
+
+  const fallback = cleanStoredTitleLabel(labelHe);
+  if (!gender && fallback.includes('/')) return 'ממתין להגדרת בן/בת';
+  return fallback;
 }
 
 export type BasicStudentTitleDefinition = {
@@ -82,43 +159,43 @@ function contributedCompletedClassGoalCount(student: BasicTitleStudentLike): num
 export const BASIC_STUDENT_TITLES: BasicStudentTitleDefinition[] = [
   {
     unlockId: 'title_kingdom_resident',
-    labelHe: 'התואר “תושב/ת הממלכה”',
-    descriptionHe: 'תואר בסיסי שפתוח לכל תלמיד ותלמידה בממלכה.',
+    labelHe: 'התואר “תושב הממלכה”',
+    descriptionHe: 'תואר בסיסי שפתוח לכל תלמיד בממלכה.',
     isUnlocked: () => true,
   },
   {
     unlockId: 'title_young_adventurer',
-    labelHe: 'התואר “הרפתקן/ית צעיר/ה”',
+    labelHe: 'התואר “הרפתקן צעיר”',
     descriptionHe: 'להגיע לרמה 2.',
     isUnlocked: student => student.level >= 2,
   },
   {
     unlockId: 'title_beginner_collector',
-    labelHe: 'התואר “אספן/ית מתחיל/ה”',
+    labelHe: 'התואר “אספן מתחיל”',
     descriptionHe: 'לאסוף 10 חפצים שונים.',
     isUnlocked: student => uniqueCollectibleCount(student) >= 10,
   },
   {
     unlockId: 'title_room_designer',
-    labelHe: 'התואר “מעצב/ת החדר”',
+    labelHe: 'התואר “מעצב החדר”',
     descriptionHe: 'להציב לפחות 5 חפצים בחדר.',
     isUnlocked: student => roomItemCount(student) >= 5,
   },
   {
     unlockId: 'title_animal_friend',
-    labelHe: 'התואר “חבר/ת החיות”',
+    labelHe: 'התואר “ידיד החיות”',
     descriptionHe: 'לפתוח את חיית המחמד הראשונה.',
     isUnlocked: student => student.companion?.unlocked === true,
   },
   {
     unlockId: 'title_mission_doer',
-    labelHe: 'התואר “מבצע/ת המשימות”',
+    labelHe: 'התואר “מבצע המשימות”',
     descriptionHe: 'להשלים 3 משימות אישיות.',
     isUnlocked: student => completedMissionCount(student) >= 3,
   },
   {
     unlockId: 'title_kingdom_partner',
-    labelHe: 'התואר “שותף/ה לממלכה”',
+    labelHe: 'התואר “שותף לממלכה”',
     descriptionHe: 'לתרום ליעד כיתתי שהושלם.',
     isUnlocked: student => contributedCompletedClassGoalCount(student) >= 1,
   },

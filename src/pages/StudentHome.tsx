@@ -140,9 +140,9 @@ export default function StudentHome() {
             <h1 className="text-2xl font-black text-magic-accent">
               שלום {student.name} 👋
             </h1>
-            {activeTitle && (
+            {student.gender && activeTitle && (
               <div className="mt-2 inline-flex rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-black text-yellow-100">
-                👑 {studentTitleDisplayLabel(activeTitle.labelHe)}
+                👑 {studentTitleDisplayLabel(activeTitle.unlockId, activeTitle.labelHe, student.gender)}
               </div>
             )}
           </div>

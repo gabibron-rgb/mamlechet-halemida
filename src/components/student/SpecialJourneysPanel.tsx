@@ -10,11 +10,27 @@ import {
   type SpecialJourneyDefinition,
 } from '../../data/specialJourneys';
 import { THEMES, type ThemeId } from '../../data/themes';
+import { studentTitleDisplayLabel } from '../../data/studentTitles';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 
 type Props = {
   student: StudentState;
 };
+
+function journeyRewardLabelForStudent(
+  reward: SpecialJourneyDefinition['rewards'][number],
+  student: StudentState
+): string {
+  if (reward.kind === 'specialUnlock' && reward.unlockKind === 'title') {
+    return `התואר “${studentTitleDisplayLabel(
+      reward.unlockId,
+      reward.labelHe,
+      student.gender
+    )}”`;
+  }
+
+  return journeyRewardLabel(reward);
+}
 
 function rewardEmoji(kind: string): string {
   if (kind === 'pet') return '🦄';
@@ -117,7 +133,7 @@ export default function SpecialJourneysPanel({ student }: Props) {
 
     setMessage(
       `${journey.emoji} המסע הושלם והפרס נאסף: ${journey.rewards
-        .map(journeyRewardLabel)
+        .map(reward => journeyRewardLabelForStudent(reward, student))
         .join(' + ')}`
     );
   }
@@ -347,7 +363,7 @@ function JourneyCard({
               {reward.kind === 'specialUnlock'
                 ? rewardEmoji(reward.unlockKind)
                 : '🎁'}{' '}
-              {journeyRewardLabel(reward)}
+              {journeyRewardLabelForStudent(reward, student)}
             </span>
           ))}
         </div>

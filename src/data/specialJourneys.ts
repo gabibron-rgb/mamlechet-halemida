@@ -123,7 +123,7 @@ export const SPECIAL_JOURNEYS: SpecialJourneyDefinition[] = [
         kind: 'specialUnlock',
         unlockKind: 'title',
         unlockId: 'title_friend_of_the_unicorn',
-        labelHe: 'התואר “ידיד/ת חד־הקרן”',
+        labelHe: 'התואר “ידיד חד־הקרן”',
       },
     ],
   },

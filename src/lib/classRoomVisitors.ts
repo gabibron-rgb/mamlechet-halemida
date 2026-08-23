@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient';
 import { COMPANION_STAGE_ORDER, type CompanionStage } from '../data/companionWorlds';
 import { THEMES, type ThemeId } from '../data/themes';
 import { normalizeSpecialUnlocks } from '../data/achievements';
-import { studentTitleDisplayLabel } from '../data/studentTitles';
+import { studentTitleDisplayLabel, type StudentGender } from '../data/studentTitles';
 import type {
   CompanionState,
   InventoryEntry,
@@ -43,6 +43,10 @@ function normalizeStage(value: unknown): CompanionStage {
   }
 
   return 'egg';
+}
+
+function normalizeGender(value: unknown): StudentGender | null {
+  return value === 'male' || value === 'female' ? value : null;
 }
 
 function visitorCompanion(meta: any): CompanionState {
@@ -96,7 +100,10 @@ function visitorTrophies(meta: any): StudentState['trophies'] {
 }
 
 
-function visitorActiveTitleLabel(meta: any): string | null {
+function visitorActiveTitleLabel(
+  meta: any,
+  gender: StudentGender | null
+): string | null {
   const activeTitleUnlockId =
     typeof meta?.activeTitleUnlockId === 'string' && meta.activeTitleUnlockId.trim()
       ? meta.activeTitleUnlockId.trim()
@@ -109,7 +116,9 @@ function visitorActiveTitleLabel(meta: any): string | null {
       unlock.kind === 'title' && unlock.unlockId === activeTitleUnlockId
   );
 
-  return title ? studentTitleDisplayLabel(title.labelHe) : null;
+  return title
+    ? studentTitleDisplayLabel(title.unlockId, title.labelHe, gender)
+    : null;
 }
 
 export async function fetchClassRoomVisitors(
@@ -120,7 +129,7 @@ export async function fetchClassRoomVisitors(
 
   const { data, error } = await supabase
     .from('students')
-    .select('id, name, class_id, inventory, meta')
+    .select('id, name, class_id, gender, inventory, meta')
     .eq('class_id', cleanClassId)
     .order('name', { ascending: true });
 
@@ -139,6 +148,8 @@ export async function fetchClassRoomVisitors(
     inventory: Array.isArray(row.inventory) ? row.inventory : [],
     companion: visitorCompanion(row.meta),
     trophies: visitorTrophies(row.meta),
-    activeTitleLabel: visitorActiveTitleLabel(row.meta),
+    activeTitleLabel: row.gender
+      ? visitorActiveTitleLabel(row.meta, normalizeGender(row.gender))
+      : null,
   }));
 }

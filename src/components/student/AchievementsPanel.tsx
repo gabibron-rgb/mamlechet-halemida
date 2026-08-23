@@ -9,8 +9,10 @@ import {
   achievementProgress,
   achievementRewardLabel,
   type AchievementDefinition,
+  type AchievementReward,
 } from '../../data/achievements';
 import { THEMES, type ThemeId } from '../../data/themes';
+import { studentTitleDisplayLabel } from '../../data/studentTitles';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import SpecialJourneysPanel from './SpecialJourneysPanel';
 import StudentTitlesPanel from './StudentTitlesPanel';
@@ -25,6 +27,21 @@ function formatDate(timestamp: number): string {
     month: '2-digit',
     year: 'numeric',
   }).format(new Date(timestamp));
+}
+
+function rewardLabelForStudent(
+  reward: AchievementReward,
+  student: StudentState
+): string {
+  if (reward.kind === 'specialUnlock' && reward.unlockKind === 'title') {
+    return `התואר “${studentTitleDisplayLabel(
+      reward.unlockId,
+      reward.labelHe,
+      student.gender
+    )}”`;
+  }
+
+  return achievementRewardLabel(reward);
 }
 
 function difficultyClass(definition: AchievementDefinition): string {
@@ -127,7 +144,7 @@ export default function AchievementsPanel({ student }: Props) {
     }
 
     const rewardText = (definition.rewards ?? [])
-      .map(achievementRewardLabel)
+      .map(reward => rewardLabelForStudent(reward, student))
       .join(' + ');
     setMessage(`🎉 הפרס נאסף: ${rewardText}`);
   }
@@ -349,7 +366,9 @@ function AchievementCard({
         <div className="mt-4 rounded-xl border border-yellow-300/20 bg-yellow-300/5 p-3">
           <div className="text-xs font-black text-yellow-100">🎁 פרס הישג</div>
           <div className="mt-1 text-xs text-yellow-50/75">
-            {(definition.rewards ?? []).map(achievementRewardLabel).join(' + ')}
+            {(definition.rewards ?? [])
+              .map(reward => rewardLabelForStudent(reward, student))
+              .join(' + ')}
           </div>
 
           {achieved && !rewardClaimed && needsTheme && (

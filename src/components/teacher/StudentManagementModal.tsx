@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { transferStudentWithinTeacherClasses } from '../../lib/studentTransfers';
 import type { ClassDef } from '../../store/useClassStore';
-import type { StudentState } from '../../store/useGameStore';
+import { useGameStore, type StudentState } from '../../store/useGameStore';
 import Modal from '../shared/Modal';
 
 type Props = {
@@ -27,6 +27,11 @@ export default function StudentManagementModal({
   const [confirming, setConfirming] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [genderSaving, setGenderSaving] = useState(false);
+  const [genderMessage, setGenderMessage] = useState<string | null>(null);
+  const [genderError, setGenderError] = useState<string | null>(null);
+
+  const setStudentGender = useGameStore(state => state.setStudentGender);
 
   const targetClasses = useMemo(
     () =>
@@ -45,14 +50,39 @@ export default function StudentManagementModal({
     setConfirming(false);
     setSaving(false);
     setError(null);
+    setGenderSaving(false);
+    setGenderMessage(null);
+    setGenderError(null);
   }, [open, student?.id]);
 
   function close() {
-    if (saving) return;
+    if (saving || genderSaving) return;
     setTargetClassId('');
     setConfirming(false);
     setError(null);
     onClose();
+  }
+
+  async function saveGender(gender: 'male' | 'female') {
+    if (!student || genderSaving) return;
+
+    setGenderSaving(true);
+    setGenderMessage(null);
+    setGenderError(null);
+
+    const ok = await setStudentGender(student.id, gender);
+    setGenderSaving(false);
+
+    if (!ok) {
+      setGenderError('לא הצלחתי לשמור את ההגדרה ב־Supabase. כדאי לנסות שוב.');
+      return;
+    }
+
+    setGenderMessage(
+      gender === 'male'
+        ? 'נשמר: התארים יוצגו מעכשיו בניסוח לבן.'
+        : 'נשמר: התארים יוצגו מעכשיו בניסוח לבת.'
+    );
   }
 
   async function confirmTransfer() {
@@ -93,6 +123,67 @@ export default function StudentManagementModal({
               {currentClass.nameHe} · רמה {student.level} · {student.points} נק׳
             </div>
           </div>
+
+          <section className="rounded-2xl border border-sky-300/15 bg-sky-500/5 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-black text-white">ניסוח תארים</div>
+                <p className="mt-1 text-xs leading-5 text-magic-soft/55">
+                  מגדירים פעם אחת אם התלמיד בן או בת. הבחירה נשמרת ישירות ב־Supabase ומשמשת להצגת התארים בניסוח המתאים.
+                </p>
+              </div>
+              <div className="shrink-0 rounded-full border border-white/10 bg-magic-bg/55 px-3 py-1 text-[10px] font-black text-magic-soft/70">
+                {student.gender === 'male'
+                  ? 'בן'
+                  : student.gender === 'female'
+                    ? 'בת'
+                    : 'טרם הוגדר'}
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                disabled={genderSaving}
+                onClick={() => void saveGender('male')}
+                className={`rounded-xl border px-3 py-2.5 text-sm font-black transition disabled:opacity-45 ${
+                  student.gender === 'male'
+                    ? 'border-sky-300/55 bg-sky-300/15 text-sky-100'
+                    : 'border-white/10 bg-magic-bg/45 text-magic-soft hover:border-sky-300/30 hover:text-sky-100'
+                }`}
+              >
+                👦 בן
+              </button>
+              <button
+                type="button"
+                disabled={genderSaving}
+                onClick={() => void saveGender('female')}
+                className={`rounded-xl border px-3 py-2.5 text-sm font-black transition disabled:opacity-45 ${
+                  student.gender === 'female'
+                    ? 'border-fuchsia-300/55 bg-fuchsia-300/15 text-fuchsia-100'
+                    : 'border-white/10 bg-magic-bg/45 text-magic-soft hover:border-fuchsia-300/30 hover:text-fuchsia-100'
+                }`}
+              >
+                👧 בת
+              </button>
+            </div>
+
+            {genderSaving && (
+              <div className="mt-3 text-center text-xs font-bold text-magic-soft/55">
+                שומר ב־Supabase...
+              </div>
+            )}
+            {genderMessage && !genderSaving && (
+              <div className="mt-3 rounded-xl border border-emerald-300/20 bg-emerald-500/10 px-3 py-2 text-center text-xs font-bold text-emerald-100/85">
+                ✓ {genderMessage}
+              </div>
+            )}
+            {genderError && !genderSaving && (
+              <div className="mt-3 rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-center text-xs font-bold text-red-200">
+                {genderError}
+              </div>
+            )}
+          </section>
 
           {!confirming ? (
             <section className="rounded-2xl border border-white/10 bg-magic-bg/30 p-4">
