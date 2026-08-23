@@ -66,6 +66,7 @@ import {
   reconcileJourneyRecords,
   type JourneyRecord,
 } from '../data/specialJourneys';
+import { reconcileBasicStudentTitles } from '../data/studentTitles';
 
 export type StudentId = string;
 
@@ -2107,11 +2108,28 @@ export const useGameStore = create<GameStore>()(
             student.achievementRecords ?? []
           );
           newlyAchievedIds = reconciled.newlyAchievedIds;
-          if (newlyAchievedIds.length === 0) return state;
 
-          updatedStudent = {
+          const studentWithAchievements = {
             ...student,
             achievementRecords: reconciled.records,
+          };
+          const titleReconciliation = reconcileBasicStudentTitles(
+            studentWithAchievements,
+            student.specialUnlocks ?? []
+          );
+
+          const titlesChanged = titleReconciliation.newlyUnlockedIds.length > 0;
+          if (newlyAchievedIds.length === 0 && !titlesChanged) return state;
+
+          const nextActiveTitleUnlockId =
+            student.activeTitleUnlockId ??
+            titleReconciliation.newlyUnlockedIds[0] ??
+            null;
+
+          updatedStudent = {
+            ...studentWithAchievements,
+            specialUnlocks: titleReconciliation.unlocks,
+            activeTitleUnlockId: nextActiveTitleUnlockId,
           };
 
           return {

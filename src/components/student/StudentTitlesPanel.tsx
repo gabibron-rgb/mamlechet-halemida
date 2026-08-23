@@ -8,8 +8,11 @@ type Props = {
 };
 
 function sourceLabel(sourceAchievementId: string): string {
-  return sourceAchievementId.startsWith('journey:') ? 'מסע מיוחד' : 'הישג';
+  if (sourceAchievementId.startsWith('journey:')) return 'מסע מיוחד';
+  if (sourceAchievementId.startsWith('basic-title:')) return 'תואר בסיסי';
+  return 'הישג';
 }
+
 
 export default function StudentTitlesPanel({ student }: Props) {
   const setActiveTitle = useGameStore(s => s.setActiveTitle);
@@ -48,7 +51,7 @@ export default function StudentTitlesPanel({ student }: Props) {
         <div>
           <div className="text-lg font-black text-yellow-100">👑 התואר שלי</div>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-magic-soft/60">
-            תארים נדירים נפתחים דרך הישגים ומסעות מיוחדים. אפשר לבחור תואר אחד שיופיע ליד השם שלך וגם כשחברים מבקרים בחדר שלך.
+            תארים נפתחים לאורך הדרך — חלקם פשוטים ומהירים, ואחרים נדירים ומגיעים מהישגים וממסעות מיוחדים. אפשר לבחור תואר אחד שיופיע ליד השם שלך וגם כשחברים מבקרים בחדר שלך.
           </p>
         </div>
 
@@ -68,7 +71,7 @@ export default function StudentTitlesPanel({ student }: Props) {
 
       {titles.length === 0 ? (
         <div className="mt-4 rounded-2xl border border-dashed border-white/10 bg-black/10 px-4 py-5 text-center text-sm text-magic-soft/50">
-          עדיין לא פתחת תואר. הישגים קשים ומסעות מיוחדים יתחילו למלא כאן את אוסף התארים שלך.
+          תואר בסיסי אמור להיפתח כאן אוטומטית. אם עדיין לא מופיע תואר, כדאי לרענן את המסך.
         </div>
       ) : (
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
