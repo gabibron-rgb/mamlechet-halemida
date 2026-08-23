@@ -5,25 +5,110 @@ export type CompanionStage =
   | 'hatchling'
   | 'young'
   | 'grown'
+  | 'magical'
   | 'legendary';
+
+export type CompanionEvolutionStage = Exclude<CompanionStage, 'egg'>;
+export type CompanionEvolutionLevel = 1 | 2 | 3 | 4 | 5;
 
 export const COMPANION_STAGE_ORDER: CompanionStage[] = [
   'egg',
   'hatchling',
   'young',
   'grown',
+  'magical',
   'legendary',
 ];
 
 export const HATCH_BOND_REQUIRED = 30;
 export const YOUNG_BOND_REQUIRED = 90;
 export const GROWN_BOND_REQUIRED = 180;
+export const MAGICAL_BOND_REQUIRED = 350;
 export const LEGENDARY_BOND_REQUIRED = 600;
 
+export type CompanionEvolutionStageDefinition = {
+  stage: CompanionEvolutionStage;
+  level: CompanionEvolutionLevel;
+  shortLabelHe: string;
+  labelHe: string;
+  descriptionHe: string;
+};
+
+export const COMPANION_EVOLUTION_STAGES: CompanionEvolutionStageDefinition[] = [
+  {
+    stage: 'hatchling',
+    level: 1,
+    shortLabelHe: 'קטנטנה',
+    labelHe: 'צורה 1 — קטנטנה',
+    descriptionHe: 'הצורה הראשונה לאחר הבקיעה. קטנה, סקרנית ורק מתחילה לגלות את העולם.',
+  },
+  {
+    stage: 'young',
+    level: 2,
+    shortLabelHe: 'צעירה',
+    labelHe: 'צורה 2 — צעירה',
+    descriptionHe: 'החיה כבר גדלה מעט והאופי שלה מתחיל להיות ברור יותר.',
+  },
+  {
+    stage: 'grown',
+    level: 3,
+    shortLabelHe: 'בוגרת',
+    labelHe: 'צורה 3 — בוגרת',
+    descriptionHe: 'צורה מרשימה ובטוחה יותר שנפתחת אחרי דרך משמעותית בכיתה.',
+  },
+  {
+    stage: 'magical',
+    level: 4,
+    shortLabelHe: 'קסומה',
+    labelHe: 'צורה 4 — קסומה',
+    descriptionHe: 'החיה מקבלת מאפיינים קסומים חדשים ומתחילה להיראות נדירה באמת.',
+  },
+  {
+    stage: 'legendary',
+    level: 5,
+    shortLabelHe: 'אגדית',
+    labelHe: 'צורה 5 — אגדית',
+    descriptionHe: 'צורת העל הנדירה ביותר, שמסמלת התמדה ארוכה והתנהגות משמעותית לאורך זמן.',
+  },
+];
+
+export const COMPANION_EVOLUTION_STAGE_BY_ID = Object.fromEntries(
+  COMPANION_EVOLUTION_STAGES.map(definition => [definition.stage, definition])
+) as Record<CompanionEvolutionStage, CompanionEvolutionStageDefinition>;
+
+export function companionEvolutionLevel(
+  stage: CompanionStage
+): CompanionEvolutionLevel | 0 {
+  if (stage === 'egg') return 0;
+  return COMPANION_EVOLUTION_STAGE_BY_ID[stage].level;
+}
+
+export type CompanionFormArt = {
+  /**
+   * מוכן לתמונות אמיתיות: ברגע שניצור משפחת חיות לעולם מסוים,
+   * פשוט מוסיפים כאן נתיב לכל אחת מחמש הצורות.
+   */
+  imageSrc?: string;
+  nameHe?: string;
+};
+
+export const COMPANION_FORM_ART: Partial<
+  Record<ThemeId, Partial<Record<CompanionEvolutionStage, CompanionFormArt>>>
+> = {};
+
+export function getCompanionFormArt(
+  theme: ThemeId,
+  stage: CompanionStage
+): CompanionFormArt | null {
+  if (stage === 'egg') return null;
+  return COMPANION_FORM_ART[theme]?.[stage] ?? null;
+}
+
 export type CompanionNextStage = {
-  stage: CompanionStage;
+  stage: CompanionEvolutionStage;
   bondRequired: number;
   labelHe: string;
+  evolutionLevel: CompanionEvolutionLevel;
 } | null;
 
 export function companionStageForBond(
@@ -33,6 +118,7 @@ export function companionStageForBond(
   let stageFromBond: CompanionStage = 'egg';
 
   if (bond >= LEGENDARY_BOND_REQUIRED) stageFromBond = 'legendary';
+  else if (bond >= MAGICAL_BOND_REQUIRED) stageFromBond = 'magical';
   else if (bond >= GROWN_BOND_REQUIRED) stageFromBond = 'grown';
   else if (bond >= YOUNG_BOND_REQUIRED) stageFromBond = 'young';
   else if (bond >= HATCH_BOND_REQUIRED) stageFromBond = 'hatchling';
@@ -48,7 +134,8 @@ export function nextCompanionStage(stage: CompanionStage): CompanionNextStage {
     return {
       stage: 'hatchling',
       bondRequired: HATCH_BOND_REQUIRED,
-      labelHe: 'בקיעת הביצה',
+      labelHe: 'בקיעת הביצה — צורה 1',
+      evolutionLevel: 1,
     };
   }
 
@@ -56,7 +143,8 @@ export function nextCompanionStage(stage: CompanionStage): CompanionNextStage {
     return {
       stage: 'young',
       bondRequired: YOUNG_BOND_REQUIRED,
-      labelHe: 'גדילה לחיית מחמד צעירה',
+      labelHe: 'התפתחות לצורה 2',
+      evolutionLevel: 2,
     };
   }
 
@@ -64,15 +152,26 @@ export function nextCompanionStage(stage: CompanionStage): CompanionNextStage {
     return {
       stage: 'grown',
       bondRequired: GROWN_BOND_REQUIRED,
-      labelHe: 'גדילה לחיית מחמד בוגרת',
+      labelHe: 'התפתחות לצורה 3',
+      evolutionLevel: 3,
     };
   }
 
   if (stage === 'grown') {
     return {
+      stage: 'magical',
+      bondRequired: MAGICAL_BOND_REQUIRED,
+      labelHe: 'התפתחות לצורה הקסומה — צורה 4',
+      evolutionLevel: 4,
+    };
+  }
+
+  if (stage === 'magical') {
+    return {
       stage: 'legendary',
       bondRequired: LEGENDARY_BOND_REQUIRED,
-      labelHe: 'התפתחות אגדית',
+      labelHe: 'התפתחות לצורה האגדית — צורה 5',
+      evolutionLevel: 5,
     };
   }
 
@@ -84,7 +183,7 @@ export type CompanionWorldVisuals = {
   nameHe: string;
   eggColor: string;
   eggPattern: string;
-  motif: string; // emoji-based motif for MVP
+  motif: string; // emoji-based motif until dedicated form images are added
   descriptionHe: string;
 };
 
@@ -133,4 +232,3 @@ export const COMPANION_VISUALS: Record<string, CompanionWorldVisuals> = {
 
 // Max active flourishes from teacher badges
 export const MAX_ACTIVE_FLOURISHES = 3;
-

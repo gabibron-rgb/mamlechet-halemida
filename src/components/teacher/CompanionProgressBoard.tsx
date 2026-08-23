@@ -32,6 +32,7 @@ const STAGE_LABEL_HE: Record<CompanionStage, string> = {
   hatchling: 'קטנטנה',
   young: 'צעירה',
   grown: 'בוגרת',
+  magical: 'קסומה',
   legendary: 'אגדית',
 };
 
@@ -40,6 +41,7 @@ const STAGE_STYLE: Record<CompanionStage, string> = {
   hatchling: 'border-cyan-300/25 bg-cyan-500/10 text-cyan-200',
   young: 'border-violet-300/25 bg-violet-500/10 text-violet-200',
   grown: 'border-yellow-300/25 bg-yellow-500/10 text-yellow-200',
+  magical: 'border-fuchsia-300/35 bg-fuchsia-500/10 text-fuchsia-100 shadow-[0_0_14px_rgba(232,121,249,0.10)]',
   legendary:
     'border-amber-200/60 bg-gradient-to-l from-fuchsia-500/20 to-yellow-400/20 text-yellow-200 shadow-[0_0_18px_rgba(250,204,21,0.16)]',
 };
@@ -54,6 +56,15 @@ function hasPendingCeremony(student: StudentState): boolean {
   const celebrated = new Set(
     student.companion.celebratedStages ?? ['egg']
   );
+
+  // תאימות לאחור: חיה שכבר חגגה Legendary לפני שהוספנו את הצורה הקסומה
+  // לא צריכה לקבל פתאום טקס ישן באמצע הדרך.
+  if (
+    student.companion.stage === 'legendary' &&
+    celebrated.has('legendary')
+  ) {
+    celebrated.add('magical');
+  }
 
   return COMPANION_STAGE_ORDER.some(
     (stage, index) =>

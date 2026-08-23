@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import {
   COMPANION_VISUALS,
+  getCompanionFormArt,
   type CompanionStage,
 } from '../../data/companionWorlds';
 import type { CompanionState } from '../../store/useGameStore';
@@ -23,6 +24,7 @@ const STAGE_SIZE: Record<CompanionStage, string> = {
   hatchling: 'h-12 w-12 sm:h-16 sm:w-16',
   young: 'h-14 w-14 sm:h-20 sm:w-20',
   grown: 'h-16 w-16 sm:h-24 sm:w-24',
+  magical: 'h-[4.5rem] w-[4.5rem] sm:h-[6.5rem] sm:w-[6.5rem]',
   legendary: 'h-20 w-20 sm:h-28 sm:w-28',
 };
 
@@ -31,6 +33,7 @@ const STAGE_LABEL_HE: Record<CompanionStage, string> = {
   hatchling: 'חיית מחמד קטנטנה',
   young: 'חיית מחמד צעירה',
   grown: 'חיית מחמד בוגרת',
+  magical: 'חיית מחמד קסומה',
   legendary: 'חיית מחמד אגדית',
 };
 
@@ -49,6 +52,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     ? COMPANION_VISUALS[companion.theme]
     : null;
   const isEgg = companion.stage === 'egg';
+  const isMagical = companion.stage === 'magical';
   const isLegendary = companion.stage === 'legendary';
   const isChessPegasus = isLegendary && companion.theme === 'chess';
   const hasLegendaryBond = (companion.unlockedSkills ?? []).includes(
@@ -105,6 +109,9 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     : Math.max(0.76, Math.min(1.08, 0.76 + (position.y - 70) * 0.018));
   const zIndex = isChessPegasus ? 720 : Math.round(500 + position.y);
   const displayName = companion.name?.trim() || visuals.nameHe;
+  const formArt = companion.theme
+    ? getCompanionFormArt(companion.theme, companion.stage)
+    : null;
 
   return (
     <div
@@ -147,6 +154,10 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         </>
       )}
 
+      {isMagical && (
+        <div className="absolute -inset-3 animate-pulse rounded-full border border-fuchsia-200/50 shadow-[0_0_26px_rgba(216,180,254,0.62)]" />
+      )}
+
       {isLegendary && (
         <div className="absolute -inset-3 animate-pulse rounded-full border border-yellow-200/55 shadow-[0_0_28px_rgba(250,204,21,0.7)]" />
       )}
@@ -183,29 +194,41 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         ) : (
           <div
             className={`relative flex h-full w-full flex-col items-center rounded-[48%_48%_43%_43%] border-2 ${
-              isLegendary ? 'border-yellow-200/75' : 'border-white/40'
+              formArt?.imageSrc ? 'border-transparent' : isLegendary ? 'border-yellow-200/75' : isMagical ? 'border-fuchsia-200/65' : 'border-white/40'
             }`}
             style={{
-              background: `radial-gradient(circle at 35% 20%, rgba(255,255,255,0.82), transparent 20%), linear-gradient(145deg, ${visuals.eggColor}, ${visuals.eggColor}a8 58%, rgba(25,12,48,0.94))`,
-              boxShadow: `0 0 ${isLegendary ? 28 : 16}px ${visuals.eggColor}85`,
+              background: formArt?.imageSrc
+                ? 'transparent'
+                : `radial-gradient(circle at 35% 20%, rgba(255,255,255,0.82), transparent 20%), linear-gradient(145deg, ${visuals.eggColor}, ${visuals.eggColor}a8 58%, rgba(25,12,48,0.94))`,
+              boxShadow: formArt?.imageSrc
+                ? 'none'
+                : `0 0 ${isLegendary ? 28 : isMagical ? 24 : 16}px ${visuals.eggColor}85`,
             }}
           >
+            {formArt?.imageSrc ? (
+              <img
+                src={formArt.imageSrc}
+                alt={formArt.nameHe ?? displayName}
+                draggable={false}
+                className="absolute inset-0 z-30 h-full w-full object-contain"
+              />
+            ) : null}
             <div
-              className="absolute -left-1 top-1 h-2/5 w-1/4 -rotate-[25deg] rounded-full border border-white/25"
+              className={`absolute -left-1 top-1 h-2/5 w-1/4 -rotate-[25deg] rounded-full border border-white/25 ${formArt?.imageSrc ? 'opacity-0' : ''}`}
               style={{ backgroundColor: visuals.eggColor }}
             />
             <div
-              className="absolute -right-1 top-1 h-2/5 w-1/4 rotate-[25deg] rounded-full border border-white/25"
+              className={`absolute -right-1 top-1 h-2/5 w-1/4 rotate-[25deg] rounded-full border border-white/25 ${formArt?.imageSrc ? 'opacity-0' : ''}`}
               style={{ backgroundColor: visuals.eggColor }}
             />
 
-            {(companion.stage === 'grown' || isLegendary) && (
+            {(companion.stage === 'grown' || isMagical || isLegendary) && (
               <div className="absolute -top-4 z-20 text-lg sm:-top-6 sm:text-2xl">
                 👑
               </div>
             )}
 
-            <div className="relative z-10 mt-[28%] flex gap-2 sm:gap-3">
+            <div className={`relative z-10 mt-[28%] flex gap-2 sm:gap-3 ${formArt?.imageSrc ? 'opacity-0' : ''}`}>
               <div className="flex h-3 w-3 items-center justify-center rounded-full bg-white sm:h-4 sm:w-4">
                 <div className="h-1.5 w-1.5 rounded-full bg-indigo-950" />
               </div>
@@ -214,8 +237,8 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
               </div>
             </div>
 
-            <div className="relative z-10 mt-1 h-1.5 w-4 rounded-b-full border-b-2 border-indigo-950/80" />
-            <div className="relative z-10 mt-auto mb-1 text-sm drop-shadow-md sm:mb-2 sm:text-xl">
+            <div className={`relative z-10 mt-1 h-1.5 w-4 rounded-b-full border-b-2 border-indigo-950/80 ${formArt?.imageSrc ? 'opacity-0' : ''}`} />
+            <div className={`relative z-10 mt-auto mb-1 text-sm drop-shadow-md sm:mb-2 sm:text-xl ${formArt?.imageSrc ? 'opacity-0' : ''}`}>
               {visuals.motif}
             </div>
           </div>

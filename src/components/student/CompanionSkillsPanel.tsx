@@ -22,6 +22,7 @@ const STAGE_LABEL_HE: Record<CompanionStage, string> = {
   hatchling: 'קטנטנה',
   young: 'צעירה',
   grown: 'בוגרת',
+  magical: 'קסומה',
   legendary: 'אגדית',
 };
 

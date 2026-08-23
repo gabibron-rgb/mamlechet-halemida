@@ -2,8 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 
 import {
   COMPANION_STAGE_ORDER,
+  COMPANION_EVOLUTION_STAGES,
   COMPANION_VISUALS,
   MAX_ACTIVE_FLOURISHES,
+  companionEvolutionLevel,
+  getCompanionFormArt,
   nextCompanionStage,
   type CompanionStage,
   type CompanionWorldVisuals,
@@ -42,7 +45,6 @@ import CompanionSkillsPanel from './CompanionSkillsPanel';
 import CompanionBehaviorProfile from './CompanionBehaviorProfile';
 import CompanionTraitChallengePanel from './CompanionTraitChallengePanel';
 import CompanionJournal from './CompanionJournal';
-import SpecialCompanionsPanel from './SpecialCompanionsPanel';
 import CompanionReactionCard from './CompanionReactionCard';
 
 type Props = {
@@ -56,6 +58,7 @@ const STAGE_LABEL_HE: Record<CompanionStage, string> = {
   hatchling: 'חיית מחמד קטנטנה',
   young: 'חיית מחמד צעירה',
   grown: 'חיית מחמד בוגרת',
+  magical: 'חיית מחמד קסומה',
   legendary: 'חיית מחמד אגדית',
 };
 
@@ -74,9 +77,14 @@ const STAGE_CEREMONY: Record<
     button: 'להמשיך לגדול יחד 💫',
   },
   grown: {
-    title: 'התפתחות מושלמת! 👑',
-    description: 'הקשר, ההתמדה והאופי שנבנה בכיתה הביאו את חיית המחמד לשלב הבוגר.',
-    button: 'להמשיך לעבר האגדה 🏆',
+    title: 'החיה התבגרה! 👑',
+    description: 'הקשר, ההתמדה והאופי שנבנה בכיתה הביאו את חיית המחמד לצורה השלישית שלה.',
+    button: 'להמשיך לעבר הקסם ✨',
+  },
+  magical: {
+    title: 'התפתחות קסומה! ✨🌙✨',
+    description: 'הדרך שעשיתם יחד פתחה צורה רביעית חדשה — נדירה, זוהרת ומלאת כוח קסום.',
+    button: 'להמשיך לעבר האגדה 🌟',
   },
   legendary: {
     title: 'התפתחות אגדית! 🌟👑🌟',
@@ -167,6 +175,8 @@ export default function CompanionPanel({ student }: Props) {
   const stageProgress = evolutionProgress?.overallPercent ?? 100;
   const displayStage =
     import.meta.env.DEV && previewStage ? previewStage : companion.stage;
+  const displayEvolutionLevel = companionEvolutionLevel(displayStage);
+  const actualEvolutionLevel = companionEvolutionLevel(companion.stage);
   const companionDisplayName =
     companion.name?.trim() || companionVisuals?.nameHe || 'חיית המחמד';
   const unlockedSkills = companion.unlockedSkills ?? [];
@@ -175,7 +185,13 @@ export default function CompanionPanel({ student }: Props) {
       !interaction.requiredSkillId ||
       unlockedSkills.includes(interaction.requiredSkillId)
   );
-  const celebratedStages = companion.celebratedStages ?? ['egg'];
+  const storedCelebratedStages = companion.celebratedStages ?? ['egg'];
+  const celebratedStages =
+    companion.stage === 'legendary' &&
+    storedCelebratedStages.includes('legendary') &&
+    !storedCelebratedStages.includes('magical')
+      ? [...storedCelebratedStages, 'magical' as CompanionStage]
+      : storedCelebratedStages;
   const actualStageIndex = COMPANION_STAGE_ORDER.indexOf(companion.stage);
   const pendingEvolutionStage =
     COMPANION_STAGE_ORDER.find(
@@ -848,7 +864,31 @@ export default function CompanionPanel({ student }: Props) {
             </div>
           </div>
 
-          <div className="mt-4 rounded-2xl border border-white/10 bg-magic-bg/35 p-4">
+          <div className="mt-4 grid grid-cols-5 gap-1.5">
+            {COMPANION_EVOLUTION_STAGES.map(stageDefinition => {
+              const reached = actualEvolutionLevel >= stageDefinition.level;
+              const active = displayEvolutionLevel === stageDefinition.level;
+
+              return (
+                <div
+                  key={stageDefinition.stage}
+                  title={stageDefinition.descriptionHe}
+                  className={`rounded-xl border px-1.5 py-2 text-center transition-all ${
+                    active
+                      ? 'border-fuchsia-200/60 bg-fuchsia-400/20 text-white shadow-[0_0_18px_rgba(232,121,249,0.18)]'
+                      : reached
+                        ? 'border-emerald-300/25 bg-emerald-500/10 text-emerald-100'
+                        : 'border-white/10 bg-black/15 text-magic-soft/45'
+                  }`}
+                >
+                  <div className="text-[9px] font-black">צורה {stageDefinition.level}</div>
+                  <div className="mt-0.5 text-[10px] font-bold">{stageDefinition.shortLabelHe}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-3 rounded-2xl border border-white/10 bg-magic-bg/35 p-4">
             <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold">
               <span className="text-magic-soft/65">
                 {nextStage ? nextStage.labelHe : 'כל שלבי ההתפתחות הושלמו'}
@@ -989,20 +1029,19 @@ export default function CompanionPanel({ student }: Props) {
 
         <CompanionJournal companion={companion} />
 
-        <SpecialCompanionsPanel student={student} />
-
         {import.meta.env.DEV && (
           <div className="mt-4 rounded-2xl border border-dashed border-fuchsia-300/30 bg-fuchsia-500/5 p-4">
             <div className="text-xs font-black text-fuchsia-200">
               בדיקת שלבי התפתחות — מקומית בלבד
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-6">
               {(
                 [
                   'egg',
                   'hatchling',
                   'young',
                   'grown',
+                  'magical',
                   'legendary',
                 ] as CompanionStage[]
               ).map(stage => (
@@ -1446,10 +1485,14 @@ function CompanionAvatar({
         ? 'h-44 w-40'
         : stage === 'grown'
           ? 'h-48 w-44'
-          : 'h-52 w-48';
+          : stage === 'magical'
+            ? 'h-[12.5rem] w-[11.5rem]'
+            : 'h-52 w-48';
   const eyeSize = stage === 'hatchling' ? 'h-7 w-7' : 'h-8 w-8';
+  const isMagical = stage === 'magical';
   const isLegendary = stage === 'legendary';
   const isChessPegasus = isLegendary && visuals.theme === 'chess';
+  const formArt = getCompanionFormArt(visuals.theme, stage);
 
   return (
     <div className="relative mx-auto my-8 flex h-60 w-60 items-end justify-center">
@@ -1465,7 +1508,7 @@ function CompanionAvatar({
           </div>
         </>
       )}
-      {(stage === 'grown' || isLegendary) && (
+      {(stage === 'grown' || isMagical || isLegendary) && (
         <div
           className={`absolute top-0 z-30 text-5xl ${
             isLegendary ? 'animate-pulse' : 'animate-bounce'
@@ -1473,6 +1516,13 @@ function CompanionAvatar({
         >
           👑
         </div>
+      )}
+      {isMagical && (
+        <>
+          <div className="absolute inset-5 animate-pulse rounded-full border-2 border-fuchsia-200/55 shadow-[0_0_62px_rgba(216,180,254,0.58)]" />
+          <div className="absolute left-5 top-20 animate-pulse text-2xl text-cyan-100">✦</div>
+          <div className="absolute right-5 top-12 animate-bounce text-xl text-fuchsia-100">✨</div>
+        </>
       )}
       {isLegendary && (
         <div className="absolute inset-4 animate-pulse rounded-full border-2 border-yellow-200/60 shadow-[0_0_70px_rgba(250,204,21,0.65)]" />
@@ -1497,23 +1547,35 @@ function CompanionAvatar({
       <div
         aria-label={`${STAGE_LABEL_HE[stage]} בשם ${petName} מעולם ${themeName}`}
         className={`relative z-10 flex ${bodySize} animate-[bounce_3s_ease-in-out_infinite] flex-col items-center rounded-[48%_48%_42%_42%] border-4 shadow-2xl ${
-          isLegendary ? 'border-yellow-200/75' : 'border-white/35'
+          formArt?.imageSrc ? 'border-transparent' : isLegendary ? 'border-yellow-200/75' : isMagical ? 'border-fuchsia-200/65' : 'border-white/35'
         }`}
         style={{
-          background: `radial-gradient(circle at 35% 22%, rgba(255,255,255,0.8), transparent 18%), linear-gradient(145deg, ${visuals.eggColor}, ${visuals.eggColor}99 55%, rgba(20,10,45,0.9))`,
-          boxShadow: `0 0 ${isLegendary ? 95 : stage === 'grown' ? 70 : 48}px ${visuals.eggColor}85`,
+          background: formArt?.imageSrc
+            ? 'transparent'
+            : `radial-gradient(circle at 35% 22%, rgba(255,255,255,0.8), transparent 18%), linear-gradient(145deg, ${visuals.eggColor}, ${visuals.eggColor}99 55%, rgba(20,10,45,0.9))`,
+          boxShadow: formArt?.imageSrc
+            ? 'none'
+            : `0 0 ${isLegendary ? 95 : isMagical ? 82 : stage === 'grown' ? 70 : 48}px ${visuals.eggColor}85`,
         }}
       >
+        {formArt?.imageSrc ? (
+          <img
+            src={formArt.imageSrc}
+            alt={formArt.nameHe ?? `${petName} — ${STAGE_LABEL_HE[stage]}`}
+            draggable={false}
+            className="absolute inset-0 z-20 h-full w-full object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.35)]"
+          />
+        ) : null}
         <div
-          className="absolute -left-2 top-3 h-16 w-10 -rotate-[28deg] rounded-[80%_20%_55%_45%] border-2 border-white/25"
+          className={`absolute -left-2 top-3 h-16 w-10 -rotate-[28deg] rounded-[80%_20%_55%_45%] border-2 border-white/25 ${formArt?.imageSrc ? 'opacity-0' : ''}`}
           style={{ backgroundColor: visuals.eggColor }}
         />
         <div
-          className="absolute -right-2 top-3 h-16 w-10 rotate-[28deg] rounded-[20%_80%_45%_55%] border-2 border-white/25"
+          className={`absolute -right-2 top-3 h-16 w-10 rotate-[28deg] rounded-[20%_80%_45%_55%] border-2 border-white/25 ${formArt?.imageSrc ? 'opacity-0' : ''}`}
           style={{ backgroundColor: visuals.eggColor }}
         />
 
-        <div className="relative z-10 mt-10 flex gap-5">
+        <div className={`relative z-10 mt-10 flex gap-5 ${formArt?.imageSrc ? 'opacity-0' : ''}`}>
           {[0, 1].map(eye => (
             <div
               key={eye}
@@ -1524,13 +1586,19 @@ function CompanionAvatar({
           ))}
         </div>
 
-        <div className="relative z-10 mt-3 h-4 w-8 rounded-b-full border-b-4 border-indigo-950/80" />
-        <div className="relative z-10 mt-auto mb-5 rounded-full border border-white/35 bg-white/20 px-3 py-2 text-3xl drop-shadow-lg">
+        <div className={`relative z-10 mt-3 h-4 w-8 rounded-b-full border-b-4 border-indigo-950/80 ${formArt?.imageSrc ? 'opacity-0' : ''}`} />
+        <div className={`relative z-10 mt-auto mb-5 rounded-full border border-white/35 bg-white/20 px-3 py-2 text-3xl drop-shadow-lg ${formArt?.imageSrc ? 'opacity-0' : ''}`}>
           {visuals.motif}
         </div>
-        {isLegendary && (
-          <div className="absolute -bottom-3 z-20 rounded-full border border-yellow-200/50 bg-purple-950/90 px-3 py-1 text-[10px] font-black tracking-wide text-yellow-200 shadow-lg">
-            אגדי
+        {(isMagical || isLegendary) && (
+          <div
+            className={`absolute -bottom-3 z-30 rounded-full border px-3 py-1 text-[10px] font-black tracking-wide shadow-lg ${
+              isLegendary
+                ? 'border-yellow-200/50 bg-purple-950/90 text-yellow-200'
+                : 'border-fuchsia-200/50 bg-indigo-950/90 text-fuchsia-100'
+            }`}
+          >
+            {isLegendary ? 'צורה 5 · אגדי' : 'צורה 4 · קסום'}
           </div>
         )}
       </div>
@@ -1559,22 +1627,27 @@ const EVOLUTION_STAGE_REVEAL: Record<
 > = {
   hatchling: {
     eyebrow: 'התחלה חדשה',
-    stageName: 'שלב קטנטנה',
+    stageName: 'צורה 1 — קטנטנה',
     icon: '🐾',
   },
   young: {
     eyebrow: 'הקשר מתחזק',
-    stageName: 'שלב צעירה',
+    stageName: 'צורה 2 — צעירה',
     icon: '✨',
   },
   grown: {
     eyebrow: 'דרך של אופי',
-    stageName: 'שלב בוגרת',
+    stageName: 'צורה 3 — בוגרת',
     icon: '👑',
+  },
+  magical: {
+    eyebrow: 'הקסם מתעורר',
+    stageName: 'צורה 4 — קסומה',
+    icon: '✨',
   },
   legendary: {
     eyebrow: 'LEGENDARY',
-    stageName: 'שלב אגדי',
+    stageName: 'צורה 5 — אגדית',
     icon: '🌟',
   },
 };

@@ -2,6 +2,7 @@ import {
   GROWN_BOND_REQUIRED,
   HATCH_BOND_REQUIRED,
   LEGENDARY_BOND_REQUIRED,
+  MAGICAL_BOND_REQUIRED,
   YOUNG_BOND_REQUIRED,
   COMPANION_STAGE_ORDER,
   type CompanionStage,
@@ -62,12 +63,19 @@ export const COMPANION_EVOLUTION_REQUIREMENTS: Record<
     distinctTraitsRequired: 3,
     completedChallengesRequired: 1,
   },
+  magical: {
+    stage: 'magical',
+    bondRequired: MAGICAL_BOND_REQUIRED,
+    behaviorDaysRequired: 16,
+    distinctTraitsRequired: 4,
+    completedChallengesRequired: 2,
+  },
   legendary: {
     stage: 'legendary',
     bondRequired: LEGENDARY_BOND_REQUIRED,
-    behaviorDaysRequired: 20,
-    distinctTraitsRequired: 4,
-    completedChallengesRequired: 3,
+    behaviorDaysRequired: 30,
+    distinctTraitsRequired: 5,
+    completedChallengesRequired: 4,
   },
 };
 
