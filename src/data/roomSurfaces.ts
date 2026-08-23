@@ -8,7 +8,7 @@ export type DisplayKind =
   | 'floorItem'
   | 'furniture';
 
-export type RoomLayoutId = 'main' | 'treasure_gallery';
+export type RoomLayoutId = 'main' | 'hobby_room' | 'treasure_gallery';
 
 export type RoomSurface = {
   zIndex: number;
@@ -59,9 +59,7 @@ const MAIN_ROOM_ZONE_REGIONS: RoomZoneRegion[] = [
 const TREASURE_GALLERY_ZONE_REGIONS: RoomZoneRegion[] = [];
 
 export function getRoomZoneRegions(roomId: RoomLayoutId = 'main'): RoomZoneRegion[] {
-  return roomId === 'treasure_gallery'
-    ? TREASURE_GALLERY_ZONE_REGIONS
-    : MAIN_ROOM_ZONE_REGIONS;
+  return roomId === 'main' ? MAIN_ROOM_ZONE_REGIONS : TREASURE_GALLERY_ZONE_REGIONS;
 }
 
 function pointInsideRegion(region: RoomZoneRegion, x: number, y: number): boolean {
@@ -75,9 +73,9 @@ export function chooseRoomZone(
   y: number,
   roomId: RoomLayoutId = 'main',
 ): Zone {
-  // בגלריית האוצרות אין אזורי הצבה בכלל. אנחנו שומרים zone רק כמטא־דאטה
+  // בחדרים הנוספים אין אזורי הצבה בכלל. אנחנו שומרים zone רק כמטא־דאטה
   // לצורך תאימות, אך המיקום עצמו חופשי ולא משתנה לפי הקואורדינטות.
-  if (roomId === 'treasure_gallery') {
+  if (roomId !== 'main') {
     if (currentZone && allowedZones.includes(currentZone)) return currentZone;
     return allowedZones[0] ?? 'floor';
   }
@@ -103,7 +101,7 @@ export function getDefaultRoomPoint(
   zone: Zone,
   roomId: RoomLayoutId = 'main',
 ): { x: number; y: number } {
-  if (roomId === 'treasure_gallery') {
+  if (roomId !== 'main') {
     return { x: 50, y: 55 };
   }
 
@@ -121,8 +119,8 @@ export function getRoomSurface(
   roomId: RoomLayoutId = 'main',
 ): RoomSurface {
   // y נמוך יותר במסך = רחוק יותר; y גבוה יותר = קרוב יותר לשחקן.
-  // בגלריה הרצפה מעט עמוקה יותר, לכן הפריטים הרחוקים מקבלים הקטנה עדינה.
-  const depthScale = roomId === 'treasure_gallery'
+  // בחדרים הנוספים ההצבה חופשית ולכן אין שינויי עומק אוטומטיים.
+  const depthScale = roomId !== 'main'
     ? 1
     : y < 45 ? 0.75 : y < 65 ? 0.9 : 1.1;
 
@@ -168,7 +166,7 @@ export function snapItemToRoomSurface(
   scale: number;
   rotation: number;
 } {
-  if (roomId === 'treasure_gallery') {
+  if (roomId !== 'main') {
     // Free Placement: אין snap, אין מדפים ואין מגבלות אזוריות.
     // רק שומרים את החפץ בתוך גבולות התמונה.
     return {

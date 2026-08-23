@@ -347,6 +347,15 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
     ],
   },
   {
+    id: 'level_6_room',
+    titleHe: 'הבית מתרחב',
+    descriptionHe: 'להגיע לרמה אישית 6 ולפתוח את חדר התחביבים.',
+    emoji: '🧩',
+    category: 'progress',
+    difficulty: 'easy',
+    condition: { kind: 'studentLevel', target: 6 },
+  },
+  {
     id: 'level_10',
     titleHe: 'ותיק בממלכה',
     descriptionHe: 'להגיע לרמה אישית 10.',

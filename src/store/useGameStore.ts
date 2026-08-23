@@ -83,7 +83,7 @@ export type InventoryEntry = {
   roomY?: number | null;
   roomScale?: number | null;
   roomRotation?: number | null;
-  roomId?: 'main' | 'treasure_gallery' | null;
+  roomId?: 'main' | 'hobby_room' | 'treasure_gallery' | null;
 
   boxTier?: BoxTier;
   boxTheme?: ThemeId;

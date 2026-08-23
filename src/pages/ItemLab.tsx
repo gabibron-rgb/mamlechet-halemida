@@ -38,11 +38,13 @@ const SOURCE_ORDER: ItemLabSource[] = [
 
 const ROOM_LABEL_HE: Record<RoomLayoutId, string> = {
   main: 'החדר הראשי',
+  hobby_room: 'חדר התחביבים',
   treasure_gallery: 'גלריית האוצרות',
 };
 
 const ROOM_BACKGROUND: Record<RoomLayoutId, string> = {
   main: '/rooms/kingdom-room.png',
+  hobby_room: '/rooms/hobby-room.png',
   treasure_gallery: '/rooms/treasure-gallery-room.png',
 };
 
@@ -328,8 +330,8 @@ function previewStyle(
 ): CSSProperties {
   const { x, y } = point;
   const surface = getRoomSurface(x, y, roomId);
-  const isFreeGallery = roomId === 'treasure_gallery';
-  const displayKind = isFreeGallery
+  const isFreeRoom = roomId !== 'main';
+  const displayKind = isFreeRoom
     ? item.displayKind === 'rug' || item.id.includes('rug')
       ? 'rug'
       : item.displayKind === 'wallDecor'
@@ -344,14 +346,14 @@ function previewStyle(
   let spriteWidthScale = draft.roomWidthScale ?? 1;
   let spriteHeightScale = draft.roomHeightScale ?? 1;
 
-  if (!isFreeGallery && displayKind === 'shelfItem') {
+  if (!isFreeRoom && displayKind === 'shelfItem') {
     spriteOffsetX = draft.roomShelfOffsetX ?? spriteOffsetX;
     spriteOffsetY = draft.roomShelfOffsetY ?? spriteOffsetY;
     spriteWidthScale = draft.roomShelfWidthScale ?? spriteWidthScale;
     spriteHeightScale = draft.roomShelfHeightScale ?? spriteHeightScale;
   }
 
-  if (!isFreeGallery && displayKind === 'floorItem') {
+  if (!isFreeRoom && displayKind === 'floorItem') {
     spriteOffsetX = draft.roomFloorOffsetX ?? spriteOffsetX;
     spriteOffsetY = draft.roomFloorOffsetY ?? spriteOffsetY;
     spriteWidthScale = draft.roomFloorWidthScale ?? spriteWidthScale;
@@ -668,7 +670,7 @@ export default function ItemLab() {
     const x = Math.max(3, Math.min(97, rawX));
     const y = Math.max(5, Math.min(95, rawY));
 
-    if (previewRoomId === 'treasure_gallery') {
+    if (previewRoomId !== 'main') {
       setPreviewPositions(current => ({
         ...current,
         [previewPositionKey(selectedItem.id, selectedZone, previewRoomId)]: { x, y },
@@ -1082,15 +1084,15 @@ export default function ItemLab() {
                   <h2 className="text-2xl font-black">{selectedItem.nameHe}</h2>
                   <div className="mt-1 text-sm text-white/50">{selectedItem.id}</div>
                   <div className="mt-2 text-xs text-emerald-200/80">
-                    {previewRoomId === 'treasure_gallery'
-                      ? 'גלריית האוצרות היא חדר הצבה חופשית: גררי את החפץ לכל מקום. אין snapping ואין כיווני מדף נפרדים.'
+                    {previewRoomId !== 'main'
+                      ? 'החדר הזה משתמש בהצבה חופשית: גררי את החפץ לכל מקום. אין snapping ואין כיווני מדף נפרדים.'
                       : 'גררי את החפץ בחדר. הוא ייצמד ויעבור בין האזורים המותרים כמו בחדר התלמידים.'}
                   </div>
                 </div>
 
                 <div className="flex flex-col items-start gap-2 md:items-end">
                   <div className="flex flex-wrap gap-2">
-                    {(['main', 'treasure_gallery'] as RoomLayoutId[]).map(roomId => (
+                    {(['main', 'hobby_room', 'treasure_gallery'] as RoomLayoutId[]).map(roomId => (
                       <button
                         key={roomId}
                         type="button"
@@ -1101,7 +1103,7 @@ export default function ItemLab() {
                             : 'bg-white/5 text-white/65 hover:bg-white/10'
                         }`}
                       >
-                        {roomId === 'main' ? '🏰' : '👑'} {ROOM_LABEL_HE[roomId]}
+                        {roomId === 'main' ? '🏰' : roomId === 'hobby_room' ? '🧩' : '👑'} {ROOM_LABEL_HE[roomId]}
                       </button>
                     ))}
                   </div>
@@ -1223,7 +1225,7 @@ export default function ItemLab() {
                 <div className="pointer-events-none absolute bottom-3 left-3 rounded-lg border border-white/10 bg-black/65 px-3 py-2 text-left text-xs text-white/75" dir="ltr">
                   x: {selectedPreviewPosition.x.toFixed(1)} · y: {selectedPreviewPosition.y.toFixed(1)}
                   <span className="ml-2 text-fuchsia-200" dir="rtl">
-                    {previewRoomId === 'treasure_gallery' ? 'הצבה חופשית' : ZONE_LABEL_HE[selectedZone]} · {ROOM_LABEL_HE[previewRoomId]}
+                    {previewRoomId !== 'main' ? 'הצבה חופשית' : ZONE_LABEL_HE[selectedZone]} · {ROOM_LABEL_HE[previewRoomId]}
                   </span>
                 </div>
               </div>
@@ -1232,7 +1234,7 @@ export default function ItemLab() {
             <aside className="rounded-3xl border border-white/10 bg-white/5 p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-black">{previewRoomId === 'treasure_gallery' ? 'גלריה: הצבה חופשית' : `כיוון: ${ZONE_LABEL_HE[selectedZone]}`}</h2>
+                  <h2 className="text-xl font-black">{previewRoomId !== 'main' ? `${ROOM_LABEL_HE[previewRoomId]}: הצבה חופשית` : `כיוון: ${ZONE_LABEL_HE[selectedZone]}`}</h2>
                   <p className="mt-1 text-xs text-white/50">
                     השינויים נשמרים מקומית גם אחרי רענון, אך אינם משנים את קובצי הקוד.
                   </p>
@@ -1249,9 +1251,9 @@ export default function ItemLab() {
               </div>
 
               <div className="mt-5 space-y-5">
-                {previewRoomId === 'treasure_gallery' ? (
+                {previewRoomId !== 'main' ? (
                   <div className="rounded-2xl border border-amber-300/20 bg-amber-300/10 p-4 text-sm leading-6 text-amber-50/90">
-                    בגלריה לא שומרים כיווני מדף/רצפה נוספים. התלמיד יכול למקם, להגדיל, להקטין ולסובב כל חפץ בעצמו בלי לשנות את ההגדרות של החדר הראשי.
+                    בחדרים הנוספים לא שומרים כיווני מדף/רצפה נפרדים. התלמיד יכול למקם, להגדיל, להקטין ולסובב כל חפץ בעצמו בלי לשנות את ההגדרות של החדר הראשי.
                   </div>
                 ) : controlsForZone(selectedZone).map(control => {
                   const value = effectiveNumber(selectedDraft, control.key);

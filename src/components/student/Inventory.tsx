@@ -1120,7 +1120,9 @@ export default function Inventory({ student, onGoRoom }: Props) {
                 <div className="mt-2 text-[10px] font-bold text-sky-300">
                   {entry.roomId === 'treasure_gallery'
                     ? '👑 מונח בגלריית האוצרות'
-                    : '🏠 מונח בחדר הראשי'}
+                    : entry.roomId === 'hobby_room'
+                      ? '🧩 מונח בחדר התחביבים'
+                      : '🏠 מונח בחדר הראשי'}
                 </div>
               )}
 

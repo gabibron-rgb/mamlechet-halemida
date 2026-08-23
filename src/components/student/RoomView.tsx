@@ -22,7 +22,7 @@ import {
 
 export type RoomViewStudent = Pick<
   StudentState,
-  'id' | 'name' | 'inventory' | 'companion'
+  'id' | 'name' | 'level' | 'inventory' | 'companion'
 > & {
   specialUnlocks?: StudentState['specialUnlocks'];
 };
@@ -349,8 +349,8 @@ function itemRoomStyle(item: DisplayItem, roomId: StudentRoomId): CSSProperties 
 
   const baseScale = item.entry.roomScale ?? 1;
   const rotation = item.entry.roomRotation ?? 0;
-  const isFreeGallery = roomId === 'treasure_gallery';
-  const effectiveDisplayKind = isFreeGallery
+  const isFreeRoom = roomId !== 'main';
+  const effectiveDisplayKind = isFreeRoom
     ? item.displayKind === 'rug'
       ? 'rug'
       : item.displayKind === 'wallDecor'
@@ -364,16 +364,16 @@ function itemRoomStyle(item: DisplayItem, roomId: StudentRoomId): CSSProperties 
     ITEM_SPRITES[item.itemId] ??
     (item.modelRef ? ITEM_SPRITES[item.modelRef] : undefined);
 
-  let spriteOffsetX = isFreeGallery ? 0 : (spriteData?.roomOffsetX ?? 0);
-let spriteOffsetY = isFreeGallery ? 0 : (spriteData?.roomOffsetY ?? 0);
+  let spriteOffsetX = isFreeRoom ? 0 : (spriteData?.roomOffsetX ?? 0);
+let spriteOffsetY = isFreeRoom ? 0 : (spriteData?.roomOffsetY ?? 0);
 
-let spriteWidthScale = isFreeGallery ? 1 : (spriteData?.roomWidthScale ?? 1);
-let spriteHeightScale = isFreeGallery ? 1 : (spriteData?.roomHeightScale ?? 1);
+let spriteWidthScale = isFreeRoom ? 1 : (spriteData?.roomWidthScale ?? 1);
+let spriteHeightScale = isFreeRoom ? 1 : (spriteData?.roomHeightScale ?? 1);
 
 // התאמות מיוחדות לפי סוג מיקום.
 // זה לא משנה חפצים ישנים, אלא רק חפצים שיש להם בפועל
 // roomShelfOffsetY / roomFloorOffsetY / וכו' בתוך ה-sprite שלהם.
-if (spriteData && !isFreeGallery) {
+if (spriteData && !isFreeRoom) {
   if (effectiveDisplayKind === 'shelfItem') {
     spriteOffsetX = spriteData.roomShelfOffsetX ?? spriteOffsetX;
     spriteOffsetY = spriteData.roomShelfOffsetY ?? spriteOffsetY;
@@ -389,7 +389,7 @@ if (spriteData && !isFreeGallery) {
   }
 }
 
-  const spriteRotation = isFreeGallery ? 0 : (spriteData?.roomRotation ?? 0);
+  const spriteRotation = isFreeRoom ? 0 : (spriteData?.roomRotation ?? 0);
 
   let width = 90;
   let height = 90;
@@ -456,7 +456,7 @@ if (spriteData && !isFreeGallery) {
   let kindHeightMultiplier = 1;
   let kindOffsetY = 0;
 
-  if (!isFreeGallery && item.itemId === 'animals_fox_statue') {
+  if (!isFreeRoom && item.itemId === 'animals_fox_statue') {
     if (effectiveDisplayKind === 'shelfItem') {
       kindWidthMultiplier = 1.8;
       kindHeightMultiplier = 1.8;
@@ -473,7 +473,7 @@ if (spriteData && !isFreeGallery) {
   const finalWidth = width * spriteWidthScale * kindWidthMultiplier;
   const finalHeight = height * spriteHeightScale * kindHeightMultiplier;
   const finalRotation = rotation + spriteRotation;
-  const finalAnchorY = isFreeGallery ? anchorY : (spriteData?.roomAnchorY ?? anchorY);
+  const finalAnchorY = isFreeRoom ? anchorY : (spriteData?.roomAnchorY ?? anchorY);
 
   return {
     left: `calc(${x}% + ${spriteOffsetX}px)`,
@@ -627,7 +627,7 @@ function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
   return allowedZones[0] ?? 'floor';
 }
 
-function galleryFreeZone(item: DisplayItem): Zone {
+function freeRoomZone(item: DisplayItem): Zone {
   const allowedZones = getAllowedZones(item.entry);
   const currentZone = item.entry.placedZone;
   if (currentZone && allowedZones.includes(currentZone)) return currentZone;
@@ -674,14 +674,14 @@ function galleryFreeZone(item: DisplayItem): Zone {
     const x = ((event.clientX - rect.left) / rect.width) * 100;
     const y = ((event.clientY - rect.top) / rect.height) * 100;
 
-    if (roomId === 'treasure_gallery') {
+    if (roomId !== 'main') {
       onMoveItem(
         inventoryIndex,
         Math.max(3, Math.min(97, x)),
         Math.max(5, Math.min(95, y)),
         item.entry.roomScale ?? 1,
         item.entry.roomRotation ?? 0,
-        galleryFreeZone(item)
+        freeRoomZone(item)
       );
       return;
     }
@@ -709,10 +709,26 @@ function galleryFreeZone(item: DisplayItem): Zone {
       className="relative mx-auto aspect-[16/10] w-full max-w-6xl overflow-hidden rounded-2xl border border-yellow-300/20 bg-black shadow-2xl"
     >
       <img
-        src={roomId === 'treasure_gallery' ? '/rooms/treasure-gallery-room.png' : '/rooms/kingdom-room.png'}
-        alt={roomId === 'treasure_gallery' ? 'גלריית האוצרות' : 'החדר בממלכה'}
+        src={
+          roomId === 'treasure_gallery'
+            ? '/rooms/treasure-gallery-room.png'
+            : roomId === 'hobby_room'
+              ? '/rooms/hobby-room.png'
+              : '/rooms/kingdom-room.png'
+        }
+        alt={
+          roomId === 'treasure_gallery'
+            ? 'גלריית האוצרות'
+            : roomId === 'hobby_room'
+              ? 'חדר התחביבים'
+              : 'החדר בממלכה'
+        }
         className={`absolute inset-0 h-full w-full object-cover object-top ${
-          roomId === 'treasure_gallery' ? 'brightness-[0.9] saturate-[1.15]' : ''
+          roomId === 'treasure_gallery'
+            ? 'brightness-[0.9] saturate-[1.15]'
+            : roomId === 'hobby_room'
+              ? 'brightness-[0.98] saturate-[1.05]'
+              : ''
         }`}
         draggable={false}
       />
@@ -721,14 +737,16 @@ function galleryFreeZone(item: DisplayItem): Zone {
         className={`absolute inset-0 ${
           roomId === 'treasure_gallery'
             ? 'bg-gradient-to-br from-yellow-300/10 via-transparent to-purple-950/15'
-            : 'bg-black/5'
+            : roomId === 'hobby_room'
+              ? 'bg-gradient-to-br from-sky-300/5 via-transparent to-indigo-950/10'
+              : 'bg-black/5'
         }`}
       />
-      {roomId === 'treasure_gallery' && (
+      {roomId !== 'main' && (
         <>
-          <div className="pointer-events-none absolute inset-3 rounded-xl border-2 border-yellow-300/25 shadow-[inset_0_0_35px_rgba(250,204,21,0.12)]" />
-          <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full border border-yellow-200/30 bg-black/30 px-4 py-1 text-xs font-black text-yellow-100 backdrop-blur-sm">
-            👑 גלריית האוצרות
+          <div className="pointer-events-none absolute inset-3 rounded-xl border-2 border-yellow-300/20 shadow-[inset_0_0_30px_rgba(250,204,21,0.08)]" />
+          <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full border border-yellow-200/25 bg-black/30 px-4 py-1 text-xs font-black text-yellow-100 backdrop-blur-sm">
+            {roomId === 'treasure_gallery' ? '👑 גלריית האוצרות' : '🧩 חדר התחביבים'}
           </div>
         </>
       )}
@@ -764,14 +782,14 @@ function galleryFreeZone(item: DisplayItem): Zone {
   const point = getRoomPercent(event);
   if (!point) return;
 
-  if (roomId === 'treasure_gallery') {
+  if (roomId !== 'main') {
     onMoveItem(
       item.inventoryIndex,
       point.x,
       point.y,
       item.entry.roomScale ?? 1,
       item.entry.roomRotation ?? 0,
-      galleryFreeZone(item)
+      freeRoomZone(item)
     );
     return;
   }
@@ -802,14 +820,14 @@ function galleryFreeZone(item: DisplayItem): Zone {
               const point = getRoomPercent(event);
 
               if (point) {
-                if (roomId === 'treasure_gallery') {
+                if (roomId !== 'main') {
                   onMoveItem(
                     item.inventoryIndex,
                     point.x,
                     point.y,
                     item.entry.roomScale ?? 1,
                     item.entry.roomRotation ?? 0,
-                    galleryFreeZone(item)
+                    freeRoomZone(item)
                   );
                 } else {
                   const zone = chooseZoneFromPoint(item, point.x, point.y);
@@ -1041,7 +1059,7 @@ export default function RoomView({ student, readOnly = false }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [previewCompanionStage, setPreviewCompanionStage] =
     useState<CompanionStage | null>(null);
-  const availableRooms = availableStudentRooms(student.specialUnlocks);
+  const availableRooms = availableStudentRooms(student.specialUnlocks, student.level);
   const [requestedRoomId, setRequestedRoomId] = useState<StudentRoomId>('main');
   const activeRoom =
     availableRooms.find(room => room.id === requestedRoomId) ?? availableRooms[0];
@@ -1164,7 +1182,7 @@ export default function RoomView({ student, readOnly = false }: Props) {
     const x = item.entry.roomX ?? 50;
     const y = item.entry.roomY ?? 70;
 
-    const snapped = activeRoomId === 'treasure_gallery'
+    const snapped = activeRoomId !== 'main'
       ? { x, y, scale: 1, rotation: 0 }
       : snapItemToRoomSurface(item.displayKind, x, y);
 
@@ -1250,7 +1268,7 @@ export default function RoomView({ student, readOnly = false }: Props) {
                   ? { x: 50, y: 78 }
                   : { x: 50, y: 76 };
 
-      const snapped = activeRoomId === 'treasure_gallery'
+      const snapped = activeRoomId !== 'main'
         ? { x: 50, y: 55, scale: 1, rotation: 0 }
         : snapItemToRoomSurface(
             displayKind,

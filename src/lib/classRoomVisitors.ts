@@ -13,6 +13,7 @@ export type ClassRoomVisitor = {
   id: string;
   name: string;
   classId: string;
+  level: number;
   inventory: InventoryEntry[];
   companion: CompanionState;
   trophies: StudentState['trophies'];
@@ -130,7 +131,7 @@ export async function fetchClassRoomVisitors(
 
   const { data, error } = await supabase
     .from('students')
-    .select('id, name, class_id, gender, inventory, meta')
+    .select('id, name, class_id, level, gender, inventory, meta')
     .eq('class_id', cleanClassId)
     .order('name', { ascending: true });
 
@@ -146,6 +147,7 @@ export async function fetchClassRoomVisitors(
         : 'תלמיד/ה',
     classId:
       typeof row.class_id === 'string' ? row.class_id : cleanClassId,
+    level: Math.max(1, Math.floor(numberOrZero(row.level) || 1)),
     inventory: Array.isArray(row.inventory) ? row.inventory : [],
     companion: visitorCompanion(row.meta),
     trophies: visitorTrophies(row.meta),

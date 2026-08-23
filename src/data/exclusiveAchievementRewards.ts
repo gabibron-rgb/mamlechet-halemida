@@ -81,7 +81,7 @@ export function getExclusiveAchievementItem(
   return EXCLUSIVE_ACHIEVEMENT_ITEM_BY_ID[itemId] ?? null;
 }
 
-export type StudentRoomId = 'main' | 'treasure_gallery';
+export type StudentRoomId = 'main' | 'hobby_room' | 'treasure_gallery';
 
 export type StudentRoomDefinition = {
   id: StudentRoomId;
@@ -90,6 +90,7 @@ export type StudentRoomDefinition = {
   emoji: string;
   descriptionHe: string;
   unlockId: string | null;
+  levelRequired: number;
 };
 
 export const STUDENT_ROOMS: StudentRoomDefinition[] = [
@@ -100,6 +101,16 @@ export const STUDENT_ROOMS: StudentRoomDefinition[] = [
     emoji: '🏰',
     descriptionHe: 'החדר הראשון של הממלכה שלך.',
     unlockId: null,
+    levelRequired: 1,
+  },
+  {
+    id: 'hobby_room',
+    nameHe: 'חדר התחביבים',
+    shortNameHe: 'חדר התחביבים',
+    emoji: '🧩',
+    descriptionHe: 'חדר נוסף וחופשי שנפתח ברמה 6 ונותן מקום לעוד אוספים, יצירות ותחביבים.',
+    unlockId: null,
+    levelRequired: 6,
   },
   {
     id: 'treasure_gallery',
@@ -108,17 +119,20 @@ export const STUDENT_ROOMS: StudentRoomDefinition[] = [
     emoji: '👑',
     descriptionHe: 'חדר נוסף ובלעדי לאספנים שהגיעו ל־100 חפצים שונים.',
     unlockId: 'room_treasure_gallery',
+    levelRequired: 1,
   },
 ];
 
 export function availableStudentRooms(
-  specialUnlocks: Array<{ kind: string; unlockId: string }> | undefined
+  specialUnlocks: Array<{ kind: string; unlockId: string }> | undefined,
+  studentLevel = 1
 ): StudentRoomDefinition[] {
   const unlockKeys = new Set(
     (specialUnlocks ?? []).map(unlock => `${unlock.kind}:${unlock.unlockId}`)
   );
 
-  return STUDENT_ROOMS.filter(
-    room => room.unlockId === null || unlockKeys.has(`room:${room.unlockId}`)
-  );
+  return STUDENT_ROOMS.filter(room => {
+    if (studentLevel < room.levelRequired) return false;
+    return room.unlockId === null || unlockKeys.has(`room:${room.unlockId}`);
+  });
 }
