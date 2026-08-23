@@ -43,6 +43,7 @@ function randomBetween(min: number, max: number): number {
 }
 
 export default function RoomCompanion({ companion, isEditing }: Props) {
+  const [isWalking, setIsWalking] = useState(false);
   const [position, setPosition] = useState<RoomPosition>({
     x: 82,
     y: 84,
@@ -56,6 +57,8 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   const isMagical = companion.stage === 'magical';
   const isLegendary = companion.stage === 'legendary';
   const isChessPegasus = isLegendary && companion.theme === 'chess';
+  const isChessHatchling =
+    companion.theme === 'chess' && companion.stage === 'hatchling';
   const hasLegendaryBond = (companion.unlockedSkills ?? []).includes(
     'legendary_bond'
   );
@@ -71,10 +74,12 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     if (isEditing) return;
 
     let movementTimer: number | undefined;
+    let walkingTimer: number | undefined;
 
     function scheduleMove() {
       movementTimer = window.setTimeout(
         () => {
+          setIsWalking(true);
           setPosition(current => {
             const nextX = randomBetween(17, 86);
             const nextY = isChessPegasus
@@ -88,9 +93,13 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
             };
           });
 
+          walkingTimer = window.setTimeout(() => {
+            setIsWalking(false);
+          }, 2500);
+
           scheduleMove();
         },
-        randomBetween(4200, 7200)
+        randomBetween(3600, 6200)
       );
     }
 
@@ -99,6 +108,9 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     return () => {
       if (movementTimer !== undefined) {
         window.clearTimeout(movementTimer);
+      }
+      if (walkingTimer !== undefined) {
+        window.clearTimeout(walkingTimer);
       }
     };
   }, [companion.unlocked, isChessPegasus, isEditing, isEgg, visuals]);
@@ -113,6 +125,9 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   const formArt = companion.theme
     ? getCompanionFormArt(companion.theme, companion.stage)
     : null;
+  const stageSizeClass = isChessHatchling
+    ? 'h-24 w-24 sm:h-32 sm:w-32'
+    : STAGE_SIZE[companion.stage];
 
   return (
     <>
@@ -130,7 +145,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         transform: `translate(-50%, -100%) scale(${depthScale})`,
         transformOrigin: 'bottom center',
         transitionProperty: 'left, top, opacity',
-        transitionDuration: isEditing ? '180ms' : '2800ms',
+        transitionDuration: isEditing ? '180ms' : '2400ms',
         transitionTimingFunction: 'ease-in-out',
       }}
     >
@@ -177,7 +192,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       )}
 
       <div
-        className={`companion-motion relative flex ${STAGE_SIZE[companion.stage]} items-center justify-center drop-shadow-xl motion-reduce:animate-none ${
+        className={`companion-motion relative flex ${stageSizeClass} items-center justify-center drop-shadow-xl motion-reduce:animate-none ${
           isLegendary
             ? 'animate-[companionLegendaryFloat_2.9s_ease-in-out_infinite]'
             : isMagical
@@ -220,7 +235,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
                 alt={formArt?.nameHe ?? displayName}
                 stage={companion.stage}
                 motion={false}
-                className="absolute inset-0 z-30"
+                className={`absolute inset-0 z-30 ${isWalking ? 'companion-running' : ''}`}
               />
             ) : null}
             <div

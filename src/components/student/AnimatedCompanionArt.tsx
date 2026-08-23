@@ -40,6 +40,10 @@ function layerAnimationClass(layer: CompanionArtLayer): string {
       return 'animate-[companionLayerHeadIdle_4.1s_ease-in-out_infinite]';
     case 'blink':
       return 'animate-[companionLayerBlink_5.4s_ease-in-out_infinite]';
+    case 'blinkOverlay':
+      return 'animate-[companionLayerBlinkOverlay_5.2s_linear_infinite]';
+    case 'headBlinkOverlay':
+      return 'animate-[companionLayerHeadBlinkOverlay_5.2s_linear_infinite]';
     case 'earLeft':
       return 'animate-[companionLayerEarLeft_4.7s_ease-in-out_infinite]';
     case 'earRight':
@@ -60,6 +64,8 @@ function layerAnimationClass(layer: CompanionArtLayer): string {
       return 'animate-[companionLayerWingRight_1.35s_ease-in-out_infinite]';
     case 'tail':
       return 'animate-[companionLayerTail_2.2s_ease-in-out_infinite]';
+    case 'pendant':
+      return 'animate-[companionLayerPendant_2.6s_ease-in-out_infinite]';
     case 'pulse':
       return 'animate-[companionLayerPulse_2.0s_ease-in-out_infinite]';
     case 'sparkle':
@@ -124,6 +130,24 @@ export function CompanionAnimationStyles() {
         0%, 82%, 86%, 91%, 95%, 100% { transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)) scaleY(1); }
         84%, 93% { transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)) scaleY(0.08); }
       }
+      @keyframes companionLayerBlinkOverlay {
+        0%, 81%, 86%, 91%, 96%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)); }
+        83%, 84%, 93%, 94% { opacity: 1; transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)); }
+      }
+      @keyframes companionLayerHeadBlinkOverlay {
+        0%, 81%, 86%, 91%, 96%, 100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) translateY(0) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x));
+        }
+        83%, 84% {
+          opacity: 1;
+          transform: translate(-50%, -50%) translateY(-1.5px) rotate(calc(var(--companion-layer-rotation) - 1.8deg)) scaleX(var(--companion-layer-scale-x));
+        }
+        93%, 94% {
+          opacity: 1;
+          transform: translate(-50%, -50%) translateY(1px) rotate(calc(var(--companion-layer-rotation) + 1.2deg)) scaleX(var(--companion-layer-scale-x));
+        }
+      }
       @keyframes companionLayerEarLeft {
         0%, 72%, 100% { transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)); }
         78% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 9deg)) scaleX(var(--companion-layer-scale-x)); }
@@ -167,6 +191,58 @@ export function CompanionAnimationStyles() {
       @keyframes companionLayerTail {
         0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 5deg)) scaleX(var(--companion-layer-scale-x)); }
         50% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) + 9deg)) scaleX(var(--companion-layer-scale-x)); }
+      }
+      @keyframes companionLayerPendant {
+        0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 4deg)) scaleX(var(--companion-layer-scale-x)); }
+        50% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) + 5deg)) scaleX(var(--companion-layer-scale-x)); }
+      }
+
+      /* Running cycle used only while the companion crosses the room. */
+      @keyframes companionRunFrontA {
+        0%, 100% { transform: translate(-50%, -50%) rotate(-13deg); }
+        50% { transform: translate(-50%, -50%) rotate(14deg) translateY(-1px); }
+      }
+      @keyframes companionRunFrontB {
+        0%, 100% { transform: translate(-50%, -50%) rotate(14deg); }
+        50% { transform: translate(-50%, -50%) rotate(-13deg) translateY(-1px); }
+      }
+      @keyframes companionRunBackA {
+        0%, 100% { transform: translate(-50%, -50%) rotate(11deg); }
+        50% { transform: translate(-50%, -50%) rotate(-11deg) translateY(-1px); }
+      }
+      @keyframes companionRunBackB {
+        0%, 100% { transform: translate(-50%, -50%) rotate(-11deg); }
+        50% { transform: translate(-50%, -50%) rotate(11deg) translateY(-1px); }
+      }
+      @keyframes companionRunHead {
+        0%, 100% { transform: translate(-50%, -50%) translateY(0) rotate(-1deg); }
+        50% { transform: translate(-50%, -50%) translateY(-2px) rotate(1.2deg); }
+      }
+      @keyframes companionRunTail {
+        0%, 100% { transform: translate(-50%, -50%) rotate(-11deg); }
+        50% { transform: translate(-50%, -50%) rotate(14deg); }
+      }
+      .companion-running [data-companion-layer-animation="frontLegLeft"] {
+        animation: companionRunFrontA 0.46s ease-in-out infinite !important;
+      }
+      .companion-running [data-companion-layer-animation="frontLegRight"] {
+        animation: companionRunFrontB 0.46s ease-in-out infinite !important;
+      }
+      .companion-running [data-companion-layer-animation="backLegLeft"] {
+        animation: companionRunBackB 0.46s ease-in-out infinite !important;
+      }
+      .companion-running [data-companion-layer-animation="backLegRight"] {
+        animation: companionRunBackA 0.46s ease-in-out infinite !important;
+      }
+      .companion-running [data-companion-layer-animation="headIdle"],
+      .companion-running [data-companion-layer-animation="headBlinkOverlay"] {
+        animation: companionRunHead 0.46s ease-in-out infinite !important;
+      }
+      .companion-running [data-companion-layer-animation="headBlinkOverlay"] {
+        opacity: 0 !important;
+      }
+      .companion-running [data-companion-layer-animation="tail"] {
+        animation: companionRunTail 0.58s ease-in-out infinite !important;
       }
       @keyframes companionLayerPulse {
         0%, 100% { transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)) scale(0.96); opacity: 0.55; }
@@ -219,6 +295,7 @@ export default function AnimatedCompanionArt({
             alt=""
             aria-hidden="true"
             draggable={false}
+            data-companion-layer-animation={layer.animation ?? 'none'}
             className={`companion-layer-motion absolute h-auto max-w-none select-none object-contain ${
               layer.animation && layer.animation !== 'none'
                 ? layerAnimationClass(layer)

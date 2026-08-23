@@ -4,6 +4,7 @@ import StudentHome from './pages/StudentHome';
 import TeacherHome from './pages/TeacherHome';
 import TeacherClassesPage from './pages/TeacherClassesPage';
 import ItemLab from './pages/ItemLab';
+import CompanionLab from './pages/CompanionLab';
 import { useSessionStore } from './store/useSessionStore';
 
 function ProtectedStudent() {
@@ -41,6 +42,12 @@ export default function App() {
         <Route
           path="/dev/items"
           element={import.meta.env.DEV ? <ItemLab /> : <Navigate to="/" replace />}
+        />
+        <Route
+          path="/dev/companions"
+          element={
+            import.meta.env.DEV ? <CompanionLab /> : <Navigate to="/" replace />
+          }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
