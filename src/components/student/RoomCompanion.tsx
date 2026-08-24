@@ -100,6 +100,8 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     companion.theme === 'chess' && companion.stage === 'grown';
   const isNonChessHatchling =
     companion.theme !== 'chess' && companion.stage === 'hatchling';
+  const isNonChessYoung =
+    companion.theme !== 'chess' && companion.stage === 'young';
   // New form-1 chess sprite faces right, same as the other frame-based companions.
   const isChessLeftFacingArt = false;
   const isChessKnightHop = isChessHatchling;
@@ -227,8 +229,8 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     ? 'h-20 w-20 sm:h-28 sm:w-28'
     : isNonChessHatchling
       ? 'h-24 w-24 sm:h-36 sm:w-36'
-      : isChessYoung
-        ? 'h-[7.5rem] w-[7.5rem] sm:h-40 sm:w-40'
+      : isChessYoung || isNonChessYoung
+        ? 'h-[9.375rem] w-[9.375rem] sm:h-[12.5rem] sm:w-[12.5rem]'
         : isChessGrown
           ? 'h-[8.5rem] w-[8.5rem] sm:h-44 sm:w-44'
           : STAGE_SIZE[companion.stage];
@@ -341,11 +343,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
             {hasCustomFormArt ? (
               <div
                 className={`absolute z-30 overflow-visible ${
-                  isChessHatchling
-                    ? isWalking
-                      ? '-inset-8 p-7'
-                      : '-inset-6 p-5'
-                    : 'inset-0'
+                  isChessHatchling ? '-inset-5 p-5' : 'inset-0'
                 } ${isWalking ? 'companion-running' : ''} ${
                   isWalking && isChessKnightHop ? 'companion-knight-hop' : ''
                 }`}
@@ -396,7 +394,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
           isChessPegasus
             ? '-bottom-7 h-2 w-16 opacity-50 blur-[2px]'
             : isChessHatchling
-              ? 'bottom-[8%] h-1.5 w-[68%] opacity-45 blur-[1.5px]'
+              ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
               : '-bottom-1 h-2 w-4/5 blur-[2px]'
         }`}
       />
