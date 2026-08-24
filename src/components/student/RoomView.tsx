@@ -10,6 +10,7 @@ import type { DisplayKind } from '../../data/roomSurfaces';
 import { ITEM_SPRITES } from '../../data/itemSprites';
 import { THEMES, type ThemeId } from '../../data/themes';
 import RoomCompanion from './RoomCompanion';
+import PersonalRoomGuests from './PersonalRoomGuests';
 import {
   COMPANION_STAGE_ORDER,
   type CompanionStage,
@@ -514,6 +515,7 @@ function getRarityRoomEffect(rarity?: string) {
 function RoomScene({
   placedItems,
   companion,
+  studentId,
   onItemClick,
   roomRef,
   onMoveItem,
@@ -523,6 +525,7 @@ function RoomScene({
 }: {
   placedItems: DisplayItem[];
   companion: StudentState['companion'];
+  studentId: string;
   onItemClick: (item: DisplayItem) => void;
   roomRef: RefObject<HTMLDivElement | null>;
   onMoveItem: (
@@ -753,6 +756,11 @@ function freeRoomZone(item: DisplayItem): Zone {
       )}
 
       <RoomCompanion companion={companion} isEditing={isEditing} />
+      <PersonalRoomGuests
+        studentId={studentId}
+        roomId={roomId}
+        isEditing={isEditing}
+      />
 
       {placedItems.map(item => {
         const rarityEffect = getRarityRoomEffect(item.rarity);
@@ -1398,6 +1406,7 @@ export default function RoomView({ student, readOnly = false }: Props) {
         <RoomScene
           placedItems={placedItems}
           companion={roomCompanion}
+          studentId={student.id}
           onItemClick={setSelectedItem}
           roomRef={roomRef}
           onMoveItem={moveItemInRoom}

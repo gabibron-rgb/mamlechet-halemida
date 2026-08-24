@@ -1480,24 +1480,39 @@ function CompanionAvatar({
     );
   }
 
+  const formArt = getCompanionFormArt(visuals.theme, stage);
+  const hasCustomFormArt = Boolean(
+    formArt?.frameAnimation?.staticSrc ||
+      formArt?.imageSrc ||
+      (formArt?.layers?.length ?? 0) > 0
+  );
+  const isChessHatchlingArt =
+    visuals.theme === 'chess' && stage === 'hatchling' && hasCustomFormArt;
+  const isChessYoungArt =
+    visuals.theme === 'chess' && stage === 'young' && hasCustomFormArt;
   const bodySize =
-    stage === 'hatchling'
-      ? 'h-36 w-36'
-      : stage === 'young'
-        ? 'h-44 w-40'
-        : stage === 'grown'
-          ? 'h-48 w-44'
-          : stage === 'magical'
-            ? 'h-[12.5rem] w-[11.5rem]'
-            : 'h-52 w-48';
+    isChessHatchlingArt
+      ? 'h-56 w-56'
+      : isChessYoungArt
+        ? 'h-64 w-64'
+        : stage === 'hatchling'
+          ? 'h-36 w-36'
+          : stage === 'young'
+            ? 'h-44 w-40'
+            : stage === 'grown'
+              ? 'h-48 w-44'
+              : stage === 'magical'
+                ? 'h-[12.5rem] w-[11.5rem]'
+                : 'h-52 w-48';
+  const avatarShellSize =
+    isChessHatchlingArt || isChessYoungArt ? 'h-80 w-80' : 'h-60 w-60';
   const eyeSize = stage === 'hatchling' ? 'h-7 w-7' : 'h-8 w-8';
   const isMagical = stage === 'magical';
   const isLegendary = stage === 'legendary';
   const isChessPegasus = isLegendary && visuals.theme === 'chess';
-  const formArt = getCompanionFormArt(visuals.theme, stage);
 
   return (
-    <div className="relative mx-auto my-8 flex h-60 w-60 items-end justify-center">
+    <div className={`relative mx-auto my-8 flex ${avatarShellSize} items-end justify-center`}>
       <CompanionFlourishEffects activeFlourishes={activeFlourishes} />
       {hasLegendaryBond && (
         <>
@@ -1555,37 +1570,38 @@ function CompanionAvatar({
               ? 'animate-[companionMagicFloat_3.1s_ease-in-out_infinite]'
               : 'animate-[companionPetFloat_3.2s_ease-in-out_infinite]'
         } ${
-          formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'border-transparent' : isLegendary ? 'border-yellow-200/75' : isMagical ? 'border-fuchsia-200/65' : 'border-white/35'
+          hasCustomFormArt ? 'border-transparent' : isLegendary ? 'border-yellow-200/75' : isMagical ? 'border-fuchsia-200/65' : 'border-white/35'
         }`}
         style={{
-          background: formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0
+          background: hasCustomFormArt
             ? 'transparent'
             : `radial-gradient(circle at 35% 22%, rgba(255,255,255,0.8), transparent 18%), linear-gradient(145deg, ${visuals.eggColor}, ${visuals.eggColor}99 55%, rgba(20,10,45,0.9))`,
-          boxShadow: formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0
+          boxShadow: hasCustomFormArt
             ? 'none'
             : `0 0 ${isLegendary ? 95 : isMagical ? 82 : stage === 'grown' ? 70 : 48}px ${visuals.eggColor}85`,
         }}
       >
-        {formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? (
+        {hasCustomFormArt ? (
           <div className="absolute inset-0 z-20">
             <AnimatedCompanionArt
               art={formArt}
               alt={formArt?.nameHe ?? `${petName} — ${STAGE_LABEL_HE[stage]}`}
               stage={stage}
               motion={false}
+              activity="idle"
             />
           </div>
         ) : null}
         <div
-          className={`absolute -left-2 top-3 h-16 w-10 -rotate-[28deg] rounded-[80%_20%_55%_45%] border-2 border-white/25 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}
+          className={`absolute -left-2 top-3 h-16 w-10 -rotate-[28deg] rounded-[80%_20%_55%_45%] border-2 border-white/25 ${hasCustomFormArt ? 'opacity-0' : ''}`}
           style={{ backgroundColor: visuals.eggColor }}
         />
         <div
-          className={`absolute -right-2 top-3 h-16 w-10 rotate-[28deg] rounded-[20%_80%_45%_55%] border-2 border-white/25 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}
+          className={`absolute -right-2 top-3 h-16 w-10 rotate-[28deg] rounded-[20%_80%_45%_55%] border-2 border-white/25 ${hasCustomFormArt ? 'opacity-0' : ''}`}
           style={{ backgroundColor: visuals.eggColor }}
         />
 
-        <div className={`relative z-10 mt-10 flex gap-5 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}>
+        <div className={`relative z-10 mt-10 flex gap-5 ${hasCustomFormArt ? 'opacity-0' : ''}`}>
           {[0, 1].map(eye => (
             <div
               key={eye}
@@ -1596,8 +1612,8 @@ function CompanionAvatar({
           ))}
         </div>
 
-        <div className={`relative z-10 mt-3 h-4 w-8 rounded-b-full border-b-4 border-indigo-950/80 ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`} />
-        <div className={`relative z-10 mt-auto mb-5 rounded-full border border-white/35 bg-white/20 px-3 py-2 text-3xl drop-shadow-lg ${formArt?.imageSrc || (formArt?.layers?.length ?? 0) > 0 ? 'opacity-0' : ''}`}>
+        <div className={`relative z-10 mt-3 h-4 w-8 rounded-b-full border-b-4 border-indigo-950/80 ${hasCustomFormArt ? 'opacity-0' : ''}`} />
+        <div className={`relative z-10 mt-auto mb-5 rounded-full border border-white/35 bg-white/20 px-3 py-2 text-3xl drop-shadow-lg ${hasCustomFormArt ? 'opacity-0' : ''}`}>
           {visuals.motif}
         </div>
         {(isMagical || isLegendary) && (

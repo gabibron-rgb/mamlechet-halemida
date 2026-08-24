@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 
 import type {
   CompanionArtLayer,
@@ -13,6 +13,7 @@ type Props = {
   fallback?: ReactNode;
   className?: string;
   motion?: boolean;
+  activity?: 'static' | 'idle' | 'run';
 };
 
 type LayerStyle = CSSProperties & {
@@ -223,6 +224,23 @@ export function CompanionAnimationStyles() {
         0%, 100% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) - 11deg)) scaleX(var(--companion-layer-scale-x)); }
         50% { transform: translate(-50%, -50%) rotate(calc(var(--companion-layer-rotation) + 14deg)) scaleX(var(--companion-layer-scale-x)); }
       }
+      @keyframes companionRunIntegratedBody {
+        0%, 100% {
+          transform: translate(-50%, -50%) translateY(0) rotate(calc(var(--companion-layer-rotation) - 0.8deg)) scaleX(var(--companion-layer-scale-x)) scaleY(1);
+        }
+        25% {
+          transform: translate(-50%, -50%) translateY(-2.4px) rotate(calc(var(--companion-layer-rotation) + 0.8deg)) scaleX(var(--companion-layer-scale-x)) scaleY(0.985);
+        }
+        50% {
+          transform: translate(-50%, -50%) translateY(0.8px) rotate(calc(var(--companion-layer-rotation) - 0.4deg)) scaleX(var(--companion-layer-scale-x)) scaleY(1.015);
+        }
+        75% {
+          transform: translate(-50%, -50%) translateY(-1.8px) rotate(calc(var(--companion-layer-rotation) + 0.6deg)) scaleX(var(--companion-layer-scale-x)) scaleY(0.99);
+        }
+      }
+      .companion-running [data-companion-integrated-body="true"] [data-companion-layer-animation="bodyBreath"] {
+        animation: companionRunIntegratedBody 0.48s ease-in-out infinite !important;
+      }
       .companion-running [data-companion-layer-animation="frontLegLeft"] {
         animation: companionRunFrontA 0.46s ease-in-out infinite !important;
       }
@@ -270,9 +288,62 @@ export default function AnimatedCompanionArt({
   fallback,
   className = '',
   motion = true,
+  activity = 'idle',
 }: Props) {
+  const frameAnimation = art?.frameAnimation;
+  const requestedFrames =
+    activity === 'run'
+      ? frameAnimation?.runFrames
+      : activity === 'idle'
+        ? frameAnimation?.idleFrames
+        : undefined;
+  const frameSources =
+    requestedFrames && requestedFrames.length > 0
+      ? requestedFrames
+      : frameAnimation?.staticSrc
+        ? [frameAnimation.staticSrc]
+        : [];
+  const [frameIndex, setFrameIndex] = useState(0);
+
+  useEffect(() => {
+    setFrameIndex(0);
+    if (frameSources.length <= 1 || activity === 'static') return;
+
+    const duration =
+      activity === 'run'
+        ? frameAnimation?.runFrameDurationMs ?? 110
+        : frameAnimation?.idleFrameDurationMs ?? 420;
+    const timer = window.setInterval(() => {
+      setFrameIndex(current => (current + 1) % frameSources.length);
+    }, duration);
+
+    return () => window.clearInterval(timer);
+  }, [activity, frameAnimation?.idleFrameDurationMs, frameAnimation?.runFrameDurationMs, frameSources.join('|')]);
+
   const layers = art?.layers ?? [];
   const hasLayeredArt = layers.length > 0;
+  const hasSeparateLegs = layers.some(layer =>
+    ['frontLegLeft', 'frontLegRight', 'backLegLeft', 'backLegRight'].includes(
+      layer.animation ?? ''
+    )
+  );
+
+  if (frameSources.length > 0) {
+    return (
+      <div
+        className={`relative h-full w-full ${className}`}
+        role="img"
+        aria-label={alt}
+      >
+        <img
+          src={frameSources[frameIndex] ?? frameSources[0]}
+          alt={alt}
+          draggable={false}
+          className="absolute inset-0 h-full w-full select-none object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.35)]"
+        />
+      </div>
+    );
+  }
 
   if (!hasLayeredArt && !art?.imageSrc) {
     return (
@@ -285,6 +356,7 @@ export default function AnimatedCompanionArt({
   return (
     <div
       className={`relative h-full w-full ${motion ? `companion-motion ${STAGE_MOTION[stage]}` : ''} ${className}`}
+      data-companion-integrated-body={hasLayeredArt && !hasSeparateLegs ? 'true' : 'false'}
       role="img"
       aria-label={alt}
     >

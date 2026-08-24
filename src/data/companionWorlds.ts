@@ -123,15 +123,29 @@ export type CompanionArtLayer = {
   className?: string;
 };
 
+export type CompanionMovementProfile = 'ground' | 'flying';
+
+export type CompanionFrameAnimation = {
+  /** פריים קבוע לתצוגת Static. */
+  staticSrc: string;
+  /** פריימים של נשימה/עמידה. אם חסר, staticSrc משמש כ-fallback. */
+  idleFrames?: string[];
+  /** פריימים של הליכה/ריצה. אם חסר, המנוע נופל חזרה לאנימציית הריג. */
+  runFrames?: string[];
+  idleFrameDurationMs?: number;
+  runFrameDurationMs?: number;
+};
+
 export type CompanionFormArt = {
   /**
    * תאימות לאחור: תמונת PNG אחת עדיין נתמכת.
-   * משפחות חדשות יכולות לעבור ל-layers כדי לקבל ריג 2.5D מלא:
-   * גוף, ראש, עיניים, אוזניים, רגליים, רעמה, כנפיים, זנב, הילה ואביזרים.
-   * כל איבר יכול לקבל אנימציה עצמאית בלי להחליף את כל התמונה בכל frame.
+   * layers משמש לריג 2.5D, ו-frameAnimation מאפשר אנימציית ספרייט
+   * של גוף מלא — הדרך היציבה לצורות שלא כדאי לפרק לרגליים נפרדות.
    */
   imageSrc?: string;
   layers?: CompanionArtLayer[];
+  frameAnimation?: CompanionFrameAnimation;
+  movementProfile?: CompanionMovementProfile;
   nameHe?: string;
 };
 
@@ -142,6 +156,7 @@ export const COMPANION_FORM_ART: Partial<
   chess: {
     hatchling: {
       nameHe: 'פרשון — הפרש הקטן',
+      movementProfile: 'ground',
       layers: [
         {
           id: 'tail',
@@ -250,6 +265,36 @@ export const COMPANION_FORM_ART: Partial<
         },
       ],
     },
+    young: {
+      nameHe: 'פרש צעיר — צורה 2',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/chess/form2/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/chess/form2/frames/idle-1.png',
+          '/assets/companions/chess/form2/frames/idle-1.png',
+          '/assets/companions/chess/form2/frames/idle-2.png',
+          '/assets/companions/chess/form2/frames/idle-1.png',
+          '/assets/companions/chess/form2/frames/idle-1.png',
+          '/assets/companions/chess/form2/frames/idle-4.png',
+          '/assets/companions/chess/form2/frames/idle-1.png',
+          '/assets/companions/chess/form2/frames/idle-1.png',
+          '/assets/companions/chess/form2/frames/idle-3.png',
+          '/assets/companions/chess/form2/frames/idle-1.png',
+        ],
+        runFrames: [
+          '/assets/companions/chess/form2/frames/run-1.png',
+          '/assets/companions/chess/form2/frames/run-2.png',
+          '/assets/companions/chess/form2/frames/run-3.png',
+          '/assets/companions/chess/form2/frames/run-4.png',
+          '/assets/companions/chess/form2/frames/run-5.png',
+          '/assets/companions/chess/form2/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 320,
+        runFrameDurationMs: 132,
+      },
+    },
+
   },
 };
 
