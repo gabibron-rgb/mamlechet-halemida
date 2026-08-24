@@ -44,15 +44,27 @@ function randomBetween(min: number, max: number): number {
 
 function destinationFor(
   movement: PersonalGuestMovement,
-  current: GuestPosition
+  current: GuestPosition,
+  index: number
 ): { x: number; y: number } {
-  const points = movement === 'flying' ? FLYING_POINTS : GROUND_POINTS;
+  const allPoints = movement === 'flying' ? FLYING_POINTS : GROUND_POINTS;
+  // Multiple personal guests use alternating ground points so they are less
+  // likely to stack directly on top of each other.
+  const points =
+    movement === 'ground'
+      ? allPoints.filter((_, pointIndex) => pointIndex % 2 === index % 2)
+      : allPoints;
+  const nearby = points.filter(point => {
+    const horizontal = Math.abs(point.x - current.x);
+    const vertical = Math.abs(point.y - current.y);
+    return horizontal >= 9 && horizontal <= 34 && vertical <= 5;
+  });
   const distant = points.filter(point => {
     const horizontal = Math.abs(point.x - current.x);
     const vertical = Math.abs(point.y - current.y);
-    return horizontal >= 10 || vertical >= 2;
+    return horizontal >= 9 || vertical >= 2;
   });
-  const pool = distant.length > 0 ? distant : points;
+  const pool = nearby.length > 0 ? nearby : distant.length > 0 ? distant : points;
   const point = pool[Math.floor(Math.random() * pool.length)];
 
   if (movement === 'flying') {
@@ -93,6 +105,7 @@ export default function PersonalRoomGuest({ config, index, isEditing }: Props) {
   const positionRef = useRef(position);
   const [isWalking, setIsWalking] = useState(false);
   const [movementDurationMs, setMovementDurationMs] = useState(2200);
+  const [frameIndex, setFrameIndex] = useState(0);
 
   useEffect(() => {
     const next = initialPosition(config, index);
@@ -111,7 +124,7 @@ export default function PersonalRoomGuest({ config, index, isEditing }: Props) {
     let walkingTimer: number | undefined;
     let cancelled = false;
 
-    function scheduleNextMove(delayMs = randomBetween(1800, 4200)) {
+    function scheduleNextMove(delayMs = randomBetween(2600, 6000)) {
       idleTimer = window.setTimeout(beginMove, delayMs);
     }
 
@@ -144,7 +157,7 @@ export default function PersonalRoomGuest({ config, index, isEditing }: Props) {
       if (cancelled) return;
 
       const current = positionRef.current;
-      const destination = destinationFor(movement, current);
+      const destination = destinationFor(movement, current, index);
       const facing: PersonalGuestFacing =
         destination.x < current.x ? 'left' : 'right';
       const distance = Math.hypot(
@@ -152,7 +165,9 @@ export default function PersonalRoomGuest({ config, index, isEditing }: Props) {
         (destination.y - current.y) * 1.8
       );
       const durationMs = Math.round(
-        Math.max(1500, Math.min(3000, 1250 + distance * 25))
+        movement === 'ground'
+          ? Math.max(2400, Math.min(4200, 1900 + distance * 45))
+          : Math.max(1500, Math.min(3000, 1250 + distance * 25))
       );
 
       if (facing !== current.facing) {
@@ -168,7 +183,7 @@ export default function PersonalRoomGuest({ config, index, isEditing }: Props) {
       }
     }
 
-    scheduleNextMove(randomBetween(900, 1800));
+    scheduleNextMove(randomBetween(1300, 2400));
 
     return () => {
       cancelled = true;
@@ -178,6 +193,33 @@ export default function PersonalRoomGuest({ config, index, isEditing }: Props) {
     };
   }, [isEditing, movement]);
 
+  const frameSources =
+    isWalking && (config.runFrames?.length ?? 0) > 0
+      ? config.runFrames ?? []
+      : (config.idleFrames?.length ?? 0) > 0
+        ? config.idleFrames ?? []
+        : [config.imageSrc];
+
+  useEffect(() => {
+    setFrameIndex(0);
+    if (frameSources.length <= 1) return;
+
+    const durationMs = isWalking
+      ? config.runFrameDurationMs ?? 125
+      : config.idleFrameDurationMs ?? 520;
+    const timer = window.setInterval(() => {
+      setFrameIndex(current => (current + 1) % frameSources.length);
+    }, durationMs);
+
+    return () => window.clearInterval(timer);
+  }, [
+    config.idleFrameDurationMs,
+    config.runFrameDurationMs,
+    frameSources.join('|'),
+    isWalking,
+  ]);
+
+  const currentImageSrc = frameSources[frameIndex] ?? frameSources[0] ?? config.imageSrc;
   const baseFacing = config.baseFacing ?? 'left';
   const facingScale = position.facing === baseFacing ? 1 : -1;
   const scale = config.scale ?? 1;
@@ -223,7 +265,7 @@ export default function PersonalRoomGuest({ config, index, isEditing }: Props) {
         }}
       >
         <img
-          src={config.imageSrc}
+          src={currentImageSrc}
           alt=""
           aria-hidden="true"
           draggable={false}

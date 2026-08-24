@@ -20,6 +20,11 @@ export type PersonalGuestConfig = {
   startY?: number;
   yOffsetPx?: number;
   shadowScale?: number;
+  /** Optional full-body frame animation for personal guests. */
+  idleFrames?: string[];
+  runFrames?: string[];
+  idleFrameDurationMs?: number;
+  runFrameDurationMs?: number;
 };
 
 export type PersonalFeature = {
@@ -33,6 +38,15 @@ export type PersonalFeature = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function stringArray(value: unknown, maxItems = 16): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value
+    .filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
+    .map(item => item.trim())
+    .slice(0, maxItems);
+  return items.length > 0 ? items : undefined;
 }
 
 export function personalGuestConfigFromFeature(
@@ -92,5 +106,15 @@ export function personalGuestConfigFromFeature(
       typeof feature.config.shadowScale === 'number'
         ? Math.max(0.35, Math.min(1.8, feature.config.shadowScale))
         : 1,
+    idleFrames: stringArray(feature.config.idleFrames),
+    runFrames: stringArray(feature.config.runFrames),
+    idleFrameDurationMs:
+      typeof feature.config.idleFrameDurationMs === 'number'
+        ? Math.max(80, Math.min(2000, feature.config.idleFrameDurationMs))
+        : 520,
+    runFrameDurationMs:
+      typeof feature.config.runFrameDurationMs === 'number'
+        ? Math.max(70, Math.min(600, feature.config.runFrameDurationMs))
+        : 125,
   };
 }
