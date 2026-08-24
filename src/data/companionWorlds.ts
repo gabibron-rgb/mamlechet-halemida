@@ -295,6 +295,33 @@ export const COMPANION_FORM_ART: Partial<
       },
     },
 
+    grown: {
+      nameHe: 'פרש מלכותי — צורה 3',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/chess/form3/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/chess/form3/frames/idle-1.png',
+          '/assets/companions/chess/form3/frames/idle-1.png',
+          '/assets/companions/chess/form3/frames/idle-2.png',
+          '/assets/companions/chess/form3/frames/idle-1.png',
+          '/assets/companions/chess/form3/frames/idle-3.png',
+          '/assets/companions/chess/form3/frames/idle-1.png',
+          '/assets/companions/chess/form3/frames/idle-4.png',
+          '/assets/companions/chess/form3/frames/idle-1.png',
+        ],
+        runFrames: [
+          '/assets/companions/chess/form3/frames/run-1.png',
+          '/assets/companions/chess/form3/frames/run-2.png',
+          '/assets/companions/chess/form3/frames/run-3.png',
+          '/assets/companions/chess/form3/frames/run-4.png',
+          '/assets/companions/chess/form3/frames/run-5.png',
+          '/assets/companions/chess/form3/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 360,
+        runFrameDurationMs: 125,
+      },
+    },
   },
 };
 

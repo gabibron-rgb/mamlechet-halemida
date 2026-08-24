@@ -96,6 +96,8 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     companion.theme === 'chess' && companion.stage === 'hatchling';
   const isChessYoung =
     companion.theme === 'chess' && companion.stage === 'young';
+  const isChessGrown =
+    companion.theme === 'chess' && companion.stage === 'grown';
   const isChessLeftFacingArt = isChessHatchling;
   const hasLegendaryBond = (companion.unlockedSkills ?? []).includes(
     'legendary_bond'
@@ -221,7 +223,9 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     ? 'h-20 w-20 sm:h-28 sm:w-28'
     : isChessYoung
       ? 'h-[7.5rem] w-[7.5rem] sm:h-40 sm:w-40'
-      : STAGE_SIZE[companion.stage];
+      : isChessGrown
+        ? 'h-[8.5rem] w-[8.5rem] sm:h-44 sm:w-44'
+        : STAGE_SIZE[companion.stage];
   const facingScale = isChessLeftFacingArt
     ? position.facing === 'left' ? 1 : -1
     : position.facing === 'left' ? -1 : 1;
@@ -350,7 +354,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
               style={{ backgroundColor: visuals.eggColor }}
             />
 
-            {(companion.stage === 'grown' || isMagical || isLegendary) && (
+            {!hasCustomFormArt && (companion.stage === 'grown' || isMagical || isLegendary) && (
               <div className="absolute -top-4 z-20 text-lg sm:-top-6 sm:text-2xl">
                 👑
               </div>

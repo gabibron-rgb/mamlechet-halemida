@@ -1490,12 +1490,16 @@ function CompanionAvatar({
     visuals.theme === 'chess' && stage === 'hatchling' && hasCustomFormArt;
   const isChessYoungArt =
     visuals.theme === 'chess' && stage === 'young' && hasCustomFormArt;
+  const isChessGrownArt =
+    visuals.theme === 'chess' && stage === 'grown' && hasCustomFormArt;
   const bodySize =
     isChessHatchlingArt
       ? 'h-56 w-56'
       : isChessYoungArt
         ? 'h-64 w-64'
-        : stage === 'hatchling'
+        : isChessGrownArt
+          ? 'h-72 w-72'
+          : stage === 'hatchling'
           ? 'h-36 w-36'
           : stage === 'young'
             ? 'h-44 w-40'
@@ -1505,7 +1509,9 @@ function CompanionAvatar({
                 ? 'h-[12.5rem] w-[11.5rem]'
                 : 'h-52 w-48';
   const avatarShellSize =
-    isChessHatchlingArt || isChessYoungArt ? 'h-80 w-80' : 'h-60 w-60';
+    isChessHatchlingArt || isChessYoungArt || isChessGrownArt
+      ? isChessGrownArt ? 'h-96 w-96' : 'h-80 w-80'
+      : 'h-60 w-60';
   const eyeSize = stage === 'hatchling' ? 'h-7 w-7' : 'h-8 w-8';
   const isMagical = stage === 'magical';
   const isLegendary = stage === 'legendary';
