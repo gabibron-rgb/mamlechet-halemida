@@ -98,7 +98,11 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     companion.theme === 'chess' && companion.stage === 'young';
   const isChessGrown =
     companion.theme === 'chess' && companion.stage === 'grown';
-  const isChessLeftFacingArt = isChessHatchling;
+  const isNonChessHatchling =
+    companion.theme !== 'chess' && companion.stage === 'hatchling';
+  // New form-1 chess sprite faces right, same as the other frame-based companions.
+  const isChessLeftFacingArt = false;
+  const isChessKnightHop = isChessHatchling;
   const hasLegendaryBond = (companion.unlockedSkills ?? []).includes(
     'legendary_bond'
   );
@@ -221,11 +225,13 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   );
   const stageSizeClass = isChessHatchling
     ? 'h-20 w-20 sm:h-28 sm:w-28'
-    : isChessYoung
-      ? 'h-[7.5rem] w-[7.5rem] sm:h-40 sm:w-40'
-      : isChessGrown
-        ? 'h-[8.5rem] w-[8.5rem] sm:h-44 sm:w-44'
-        : STAGE_SIZE[companion.stage];
+    : isNonChessHatchling
+      ? 'h-24 w-24 sm:h-36 sm:w-36'
+      : isChessYoung
+        ? 'h-[7.5rem] w-[7.5rem] sm:h-40 sm:w-40'
+        : isChessGrown
+          ? 'h-[8.5rem] w-[8.5rem] sm:h-44 sm:w-44'
+          : STAGE_SIZE[companion.stage];
   const facingScale = isChessLeftFacingArt
     ? position.facing === 'left' ? 1 : -1
     : position.facing === 'left' ? -1 : 1;
@@ -236,7 +242,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     <div
       role="img"
       aria-label={`${STAGE_LABEL_HE[companion.stage]} בשם ${displayName}`}
-      className={`pointer-events-none absolute select-none ${
+      className={`pointer-events-none absolute overflow-visible select-none ${
         isEditing ? 'opacity-60' : 'opacity-100'
       }`}
       style={{
@@ -293,7 +299,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       )}
 
       <div
-        className={`companion-motion relative flex ${stageSizeClass} items-center justify-center drop-shadow-xl motion-reduce:animate-none ${
+        className={`companion-motion relative flex overflow-visible ${stageSizeClass} items-center justify-center drop-shadow-xl motion-reduce:animate-none ${
           isChessPegasus
             ? 'animate-[companionLegendaryFloat_2.9s_ease-in-out_infinite]'
             : ''
@@ -320,7 +326,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
           </div>
         ) : (
           <div
-            className={`relative flex h-full w-full flex-col items-center rounded-[48%_48%_43%_43%] border-2 ${
+            className={`relative flex h-full w-full flex-col items-center overflow-visible rounded-[48%_48%_43%_43%] border-2 ${
               hasCustomFormArt ? 'border-transparent' : isLegendary ? 'border-yellow-200/75' : isMagical ? 'border-fuchsia-200/65' : 'border-white/40'
             }`}
             style={{
@@ -334,7 +340,15 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
           >
             {hasCustomFormArt ? (
               <div
-                className={`absolute inset-0 z-30 ${isWalking ? 'companion-running' : ''}`}
+                className={`absolute z-30 overflow-visible ${
+                  isChessHatchling
+                    ? isWalking
+                      ? '-inset-8 p-7'
+                      : '-inset-6 p-5'
+                    : 'inset-0'
+                } ${isWalking ? 'companion-running' : ''} ${
+                  isWalking && isChessKnightHop ? 'companion-knight-hop' : ''
+                }`}
               >
                 <AnimatedCompanionArt
                   art={formArt}
@@ -382,7 +396,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
           isChessPegasus
             ? '-bottom-7 h-2 w-16 opacity-50 blur-[2px]'
             : isChessHatchling
-              ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
+              ? 'bottom-[8%] h-1.5 w-[68%] opacity-45 blur-[1.5px]'
               : '-bottom-1 h-2 w-4/5 blur-[2px]'
         }`}
       />

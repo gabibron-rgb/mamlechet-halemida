@@ -46,6 +46,7 @@ import CompanionBehaviorProfile from './CompanionBehaviorProfile';
 import CompanionTraitChallengePanel from './CompanionTraitChallengePanel';
 import CompanionJournal from './CompanionJournal';
 import CompanionReactionCard from './CompanionReactionCard';
+import CompanionStoryPanel from './CompanionStoryPanel';
 import AnimatedCompanionArt, { CompanionAnimationStyles } from './AnimatedCompanionArt';
 
 type Props = {
@@ -53,6 +54,24 @@ type Props = {
 };
 
 const COMPANION_UNLOCK_LEVEL = 5;
+
+const LOCAL_COMPANION_TEST_THEMES: ThemeId[] = [
+  'science',
+  'space',
+  'animals',
+  'nature',
+  'robotics',
+  'fantasy',
+  'art',
+  'building',
+  'sports',
+  'music',
+  'books',
+  'math',
+  'generic',
+  'ballet',
+  'chess',
+];
 
 const STAGE_LABEL_HE: Record<CompanionStage, string> = {
   egg: 'ביצה קסומה',
@@ -181,6 +200,10 @@ export default function CompanionPanel({ student }: Props) {
   const companionDisplayName =
     companion.name?.trim() || companionVisuals?.nameHe || 'חיית המחמד';
   const unlockedSkills = companion.unlockedSkills ?? [];
+  const isLocalDebug =
+    typeof window !== 'undefined' &&
+    (window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1');
   const availableInteractions = COMPANION_INTERACTIONS.filter(
     interaction =>
       !interaction.requiredSkillId ||
@@ -289,6 +312,32 @@ export default function CompanionPanel({ student }: Props) {
   function showMessage(text: string) {
     setMessage(text);
     window.setTimeout(() => setMessage(null), 2400);
+  }
+
+
+  function debugSetHatchlingTheme(themeId: ThemeId) {
+    const bond = Math.max(companion.bond ?? 0, 30);
+
+    updateStudent(student.id, {
+      companion: {
+        ...companion,
+        unlocked: true,
+        theme: themeId,
+        stage: 'hatchling',
+        bond,
+        petPoints: companion.petPoints ?? 0,
+        lastCareDate: companion.lastCareDate ?? null,
+        careXpToday: companion.careXpToday ?? 0,
+        celebratedStages: companion.celebratedStages ?? ['egg'],
+        activeFlourishes: companion.activeFlourishes ?? [],
+        ownedFlourishes: companion.ownedFlourishes ?? [],
+        unlockedSkills,
+        treasuresFound: companion.treasuresFound ?? 0,
+      },
+    });
+
+    setSelectedTheme(themeId);
+    showMessage(`מצב בדיקה מקומי: צורה 1 של עולם ${themeNameOf(themeId)}`);
   }
 
   function confirmWorld() {
@@ -727,10 +776,35 @@ export default function CompanionPanel({ student }: Props) {
           hasLegendaryBond={unlockedSkills.includes('legendary_bond')}
         />
 
+        {isLocalDebug && (
+          <section className="mx-auto mt-4 max-w-2xl rounded-3xl border border-cyan-300/25 bg-cyan-500/10 p-4 text-right shadow-[0_0_24px_rgba(34,211,238,0.08)]">
+            <div className="text-sm font-black text-white">בדיקה מקומית בלבד — מעבר מהיר בין חיות</div>
+            <div className="mt-1 text-xs leading-5 text-magic-soft/70">הלחיצה תעביר מיד את החיה לצורה 1 של העולם שבחרת. נוח במיוחד לבודק חפצים בגרסה המקומית.</div>
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              {LOCAL_COMPANION_TEST_THEMES.map(themeId => (
+                <button
+                  key={themeId}
+                  type="button"
+                  onClick={() => debugSetHatchlingTheme(themeId)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-black transition-colors ${themeId === companion.theme ? 'bg-cyan-300 text-slate-950' : 'border border-white/10 bg-black/20 text-cyan-100 hover:bg-black/30'}`}
+                >
+                  {themeNameOf(themeId)}
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+
         <CompanionReactionCard
           companion={companion}
           petName={companionDisplayName}
           motif={companionVisuals.motif}
+        />
+
+        <CompanionStoryPanel
+          theme={companion.theme}
+          stage={displayStage}
+          petName={companionDisplayName}
         />
 
         <div className="mt-3 flex justify-center">
@@ -1490,16 +1564,12 @@ function CompanionAvatar({
     visuals.theme === 'chess' && stage === 'hatchling' && hasCustomFormArt;
   const isChessYoungArt =
     visuals.theme === 'chess' && stage === 'young' && hasCustomFormArt;
-  const isChessGrownArt =
-    visuals.theme === 'chess' && stage === 'grown' && hasCustomFormArt;
   const bodySize =
     isChessHatchlingArt
       ? 'h-56 w-56'
       : isChessYoungArt
         ? 'h-64 w-64'
-        : isChessGrownArt
-          ? 'h-72 w-72'
-          : stage === 'hatchling'
+        : stage === 'hatchling'
           ? 'h-36 w-36'
           : stage === 'young'
             ? 'h-44 w-40'
@@ -1509,9 +1579,7 @@ function CompanionAvatar({
                 ? 'h-[12.5rem] w-[11.5rem]'
                 : 'h-52 w-48';
   const avatarShellSize =
-    isChessHatchlingArt || isChessYoungArt || isChessGrownArt
-      ? isChessGrownArt ? 'h-96 w-96' : 'h-80 w-80'
-      : 'h-60 w-60';
+    isChessHatchlingArt || isChessYoungArt ? 'h-80 w-80' : 'h-60 w-60';
   const eyeSize = stage === 'hatchling' ? 'h-7 w-7' : 'h-8 w-8';
   const isMagical = stage === 'magical';
   const isLegendary = stage === 'legendary';

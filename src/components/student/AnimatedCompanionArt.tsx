@@ -263,6 +263,18 @@ export function CompanionAnimationStyles() {
       .companion-running [data-companion-layer-animation="tail"] {
         animation: companionRunTail 0.58s ease-in-out infinite !important;
       }
+      @keyframes companionKnightHop {
+        0%, 100% { transform: translateY(0) rotate(0deg); }
+        18% { transform: translateY(-1px) rotate(-0.6deg); }
+        42% { transform: translateY(-6px) rotate(1deg); }
+        58% { transform: translateY(-7px) rotate(0.4deg); }
+        78% { transform: translateY(-2px) rotate(-0.8deg); }
+      }
+      .companion-knight-hop {
+        animation: companionKnightHop 0.62s cubic-bezier(0.36, 0, 0.2, 1) infinite;
+        transform-origin: center bottom;
+        will-change: transform;
+      }
       @keyframes companionLayerPulse {
         0%, 100% { transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)) scale(0.96); opacity: 0.55; }
         50% { transform: translate(-50%, -50%) rotate(var(--companion-layer-rotation)) scaleX(var(--companion-layer-scale-x)) scale(1.06); opacity: 0.95; }
