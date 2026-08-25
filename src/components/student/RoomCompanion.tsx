@@ -96,8 +96,6 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     companion.theme === 'chess' && companion.stage === 'hatchling';
   const isChessYoung =
     companion.theme === 'chess' && companion.stage === 'young';
-  const isChessGrown =
-    companion.theme === 'chess' && companion.stage === 'grown';
   const isNonChessHatchling =
     companion.theme !== 'chess' && companion.stage === 'hatchling';
   const isNonChessYoung =
@@ -231,8 +229,8 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       ? 'h-24 w-24 sm:h-36 sm:w-36'
       : isChessYoung || isNonChessYoung
         ? 'h-[9.375rem] w-[9.375rem] sm:h-[12.5rem] sm:w-[12.5rem]'
-        : isChessGrown
-          ? 'h-[8.5rem] w-[8.5rem] sm:h-44 sm:w-44'
+        : companion.stage === 'grown'
+          ? 'h-[11.25rem] w-[11.25rem] sm:h-60 sm:w-60'
           : STAGE_SIZE[companion.stage];
   const facingScale = isChessLeftFacingArt
     ? position.facing === 'left' ? 1 : -1

@@ -905,11 +905,363 @@ export const COMPANION_FORM_ART: Partial<
   },
 };
 
+
+// FORM3_FULL_REBUILD_2026_08_25_START
+const FORM3_GROWN_ART: Partial<Record<ThemeId, CompanionFormArt>> = {
+  chess: {
+    nameHe: 'פרש מלכותי — צורה 3',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/chess/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/chess/form3/frames/idle-1.png',
+        '/assets/companions/chess/form3/frames/idle-2.png',
+        '/assets/companions/chess/form3/frames/idle-3.png',
+        '/assets/companions/chess/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/chess/form3/frames/run-1.png',
+        '/assets/companions/chess/form3/frames/run-2.png',
+        '/assets/companions/chess/form3/frames/run-3.png',
+        '/assets/companions/chess/form3/frames/run-4.png',
+        '/assets/companions/chess/form3/frames/run-5.png',
+        '/assets/companions/chess/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  science: {
+    nameHe: 'אטומיקס — חוקר ביו־אור מתקדם',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/science/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/science/form3/frames/idle-1.png',
+        '/assets/companions/science/form3/frames/idle-2.png',
+        '/assets/companions/science/form3/frames/idle-3.png',
+        '/assets/companions/science/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/science/form3/frames/run-1.png',
+        '/assets/companions/science/form3/frames/run-2.png',
+        '/assets/companions/science/form3/frames/run-3.png',
+        '/assets/companions/science/form3/frames/run-4.png',
+        '/assets/companions/science/form3/frames/run-5.png',
+        '/assets/companions/science/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  space: {
+    nameHe: 'נובה — שועל קוסמי צעיר',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/space/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/space/form3/frames/idle-1.png',
+        '/assets/companions/space/form3/frames/idle-2.png',
+        '/assets/companions/space/form3/frames/idle-3.png',
+        '/assets/companions/space/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/space/form3/frames/run-1.png',
+        '/assets/companions/space/form3/frames/run-2.png',
+        '/assets/companions/space/form3/frames/run-3.png',
+        '/assets/companions/space/form3/frames/run-4.png',
+        '/assets/companions/space/form3/frames/run-5.png',
+        '/assets/companions/space/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  animals: {
+    nameHe: 'פיץ — שועל שומר היער',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/animals/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/animals/form3/frames/idle-1.png',
+        '/assets/companions/animals/form3/frames/idle-2.png',
+        '/assets/companions/animals/form3/frames/idle-3.png',
+        '/assets/companions/animals/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/animals/form3/frames/run-1.png',
+        '/assets/companions/animals/form3/frames/run-2.png',
+        '/assets/companions/animals/form3/frames/run-3.png',
+        '/assets/companions/animals/form3/frames/run-4.png',
+        '/assets/companions/animals/form3/frames/run-5.png',
+        '/assets/companions/animals/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  nature: {
+    nameHe: 'עלה — רוח החורש הצעירה',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/nature/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/nature/form3/frames/idle-1.png',
+        '/assets/companions/nature/form3/frames/idle-2.png',
+        '/assets/companions/nature/form3/frames/idle-3.png',
+        '/assets/companions/nature/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/nature/form3/frames/run-1.png',
+        '/assets/companions/nature/form3/frames/run-2.png',
+        '/assets/companions/nature/form3/frames/run-3.png',
+        '/assets/companions/nature/form3/frames/run-4.png',
+        '/assets/companions/nature/form3/frames/run-5.png',
+        '/assets/companions/nature/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  robotics: {
+    nameHe: 'ביט־X — כלב רובוטי מתקדם',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/robotics/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/robotics/form3/frames/idle-1.png',
+        '/assets/companions/robotics/form3/frames/idle-2.png',
+        '/assets/companions/robotics/form3/frames/idle-3.png',
+        '/assets/companions/robotics/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/robotics/form3/frames/run-1.png',
+        '/assets/companions/robotics/form3/frames/run-2.png',
+        '/assets/companions/robotics/form3/frames/run-3.png',
+        '/assets/companions/robotics/form3/frames/run-4.png',
+        '/assets/companions/robotics/form3/frames/run-5.png',
+        '/assets/companions/robotics/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  fantasy: {
+    nameHe: 'לונה — דרקון רונות צעיר',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/fantasy/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/fantasy/form3/frames/idle-1.png',
+        '/assets/companions/fantasy/form3/frames/idle-2.png',
+        '/assets/companions/fantasy/form3/frames/idle-3.png',
+        '/assets/companions/fantasy/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/fantasy/form3/frames/run-1.png',
+        '/assets/companions/fantasy/form3/frames/run-2.png',
+        '/assets/companions/fantasy/form3/frames/run-3.png',
+        '/assets/companions/fantasy/form3/frames/run-4.png',
+        '/assets/companions/fantasy/form3/frames/run-5.png',
+        '/assets/companions/fantasy/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  art: {
+    nameHe: 'פלטה — מאסטר הצבע',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/art/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/art/form3/frames/idle-1.png',
+        '/assets/companions/art/form3/frames/idle-2.png',
+        '/assets/companions/art/form3/frames/idle-3.png',
+        '/assets/companions/art/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/art/form3/frames/run-1.png',
+        '/assets/companions/art/form3/frames/run-2.png',
+        '/assets/companions/art/form3/frames/run-3.png',
+        '/assets/companions/art/form3/frames/run-4.png',
+        '/assets/companions/art/form3/frames/run-5.png',
+        '/assets/companions/art/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  building: {
+    nameHe: 'בוני — בונה־מהנדס בכיר',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/building/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/building/form3/frames/idle-1.png',
+        '/assets/companions/building/form3/frames/idle-2.png',
+        '/assets/companions/building/form3/frames/idle-3.png',
+        '/assets/companions/building/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/building/form3/frames/run-1.png',
+        '/assets/companions/building/form3/frames/run-2.png',
+        '/assets/companions/building/form3/frames/run-3.png',
+        '/assets/companions/building/form3/frames/run-4.png',
+        '/assets/companions/building/form3/frames/run-5.png',
+        '/assets/companions/building/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  sports: {
+    nameHe: 'ספרינט — אלוף צעיר',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/sports/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/sports/form3/frames/idle-1.png',
+        '/assets/companions/sports/form3/frames/idle-2.png',
+        '/assets/companions/sports/form3/frames/idle-3.png',
+        '/assets/companions/sports/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/sports/form3/frames/run-1.png',
+        '/assets/companions/sports/form3/frames/run-2.png',
+        '/assets/companions/sports/form3/frames/run-3.png',
+        '/assets/companions/sports/form3/frames/run-4.png',
+        '/assets/companions/sports/form3/frames/run-5.png',
+        '/assets/companions/sports/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  music: {
+    nameHe: 'מנגינה — ציפור המאסטרו',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/music/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/music/form3/frames/idle-1.png',
+        '/assets/companions/music/form3/frames/idle-2.png',
+        '/assets/companions/music/form3/frames/idle-3.png',
+        '/assets/companions/music/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/music/form3/frames/run-1.png',
+        '/assets/companions/music/form3/frames/run-2.png',
+        '/assets/companions/music/form3/frames/run-3.png',
+        '/assets/companions/music/form3/frames/run-4.png',
+        '/assets/companions/music/form3/frames/run-5.png',
+        '/assets/companions/music/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  books: {
+    nameHe: 'דפדף — ינשוף הארכיבר',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/books/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/books/form3/frames/idle-1.png',
+        '/assets/companions/books/form3/frames/idle-2.png',
+        '/assets/companions/books/form3/frames/idle-3.png',
+        '/assets/companions/books/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/books/form3/frames/run-1.png',
+        '/assets/companions/books/form3/frames/run-2.png',
+        '/assets/companions/books/form3/frames/run-3.png',
+        '/assets/companions/books/form3/frames/run-4.png',
+        '/assets/companions/books/form3/frames/run-5.png',
+        '/assets/companions/books/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  math: {
+    nameHe: 'פאי — פנדה אדומה גאומטרית',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/math/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/math/form3/frames/idle-1.png',
+        '/assets/companions/math/form3/frames/idle-2.png',
+        '/assets/companions/math/form3/frames/idle-3.png',
+        '/assets/companions/math/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/math/form3/frames/run-1.png',
+        '/assets/companions/math/form3/frames/run-2.png',
+        '/assets/companions/math/form3/frames/run-3.png',
+        '/assets/companions/math/form3/frames/run-4.png',
+        '/assets/companions/math/form3/frames/run-5.png',
+        '/assets/companions/math/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  generic: {
+    nameHe: 'ניצוץ — אריה מלכותי צעיר',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/generic/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/generic/form3/frames/idle-1.png',
+        '/assets/companions/generic/form3/frames/idle-2.png',
+        '/assets/companions/generic/form3/frames/idle-3.png',
+        '/assets/companions/generic/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/generic/form3/frames/run-1.png',
+        '/assets/companions/generic/form3/frames/run-2.png',
+        '/assets/companions/generic/form3/frames/run-3.png',
+        '/assets/companions/generic/form3/frames/run-4.png',
+        '/assets/companions/generic/form3/frames/run-5.png',
+        '/assets/companions/generic/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  },
+  ballet: {
+    nameHe: 'ברבורית — ברבורת פרימה צעירה',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/ballet/form3/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/ballet/form3/frames/idle-1.png',
+        '/assets/companions/ballet/form3/frames/idle-2.png',
+        '/assets/companions/ballet/form3/frames/idle-3.png',
+        '/assets/companions/ballet/form3/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/ballet/form3/frames/run-1.png',
+        '/assets/companions/ballet/form3/frames/run-2.png',
+        '/assets/companions/ballet/form3/frames/run-3.png',
+        '/assets/companions/ballet/form3/frames/run-4.png',
+        '/assets/companions/ballet/form3/frames/run-5.png',
+        '/assets/companions/ballet/form3/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 330,
+      runFrameDurationMs: 128,
+    },
+  }
+};
+// FORM3_FULL_REBUILD_2026_08_25_END
+
 export function getCompanionFormArt(
   theme: ThemeId,
   stage: CompanionStage
 ): CompanionFormArt | null {
   if (stage === 'egg') return null;
+  if (stage === 'grown') return FORM3_GROWN_ART[theme] ?? COMPANION_FORM_ART[theme]?.[stage] ?? null;
   return COMPANION_FORM_ART[theme]?.[stage] ?? null;
 }
 

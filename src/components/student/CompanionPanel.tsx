@@ -1563,12 +1563,15 @@ function CompanionAvatar({
   const isChessHatchlingArt =
     visuals.theme === 'chess' && stage === 'hatchling' && hasCustomFormArt;
   const isAnyYoungCustomArt = stage === 'young' && hasCustomFormArt;
+  const isAnyGrownCustomArt = stage === 'grown' && hasCustomFormArt;
   const bodySize =
     isChessHatchlingArt
       ? 'h-56 w-56'
       : isAnyYoungCustomArt
         ? 'h-80 w-80'
-        : stage === 'hatchling'
+        : isAnyGrownCustomArt
+          ? 'h-96 w-96'
+          : stage === 'hatchling'
           ? 'h-36 w-36'
           : stage === 'young'
             ? 'h-44 w-40'
@@ -1578,7 +1581,13 @@ function CompanionAvatar({
                 ? 'h-[12.5rem] w-[11.5rem]'
                 : 'h-52 w-48';
   const avatarShellSize =
-    isChessHatchlingArt ? 'h-80 w-80' : isAnyYoungCustomArt ? 'h-96 w-96' : 'h-60 w-60';
+    isChessHatchlingArt
+      ? 'h-80 w-80'
+      : isAnyYoungCustomArt
+        ? 'h-96 w-96'
+        : isAnyGrownCustomArt
+          ? 'h-[28rem] w-[28rem]'
+          : 'h-60 w-60';
   const eyeSize = stage === 'hatchling' ? 'h-7 w-7' : 'h-8 w-8';
   const isMagical = stage === 'magical';
   const isLegendary = stage === 'legendary';
@@ -1598,7 +1607,7 @@ function CompanionAvatar({
           </div>
         </>
       )}
-      {(stage === 'grown' || isMagical || isLegendary) && (
+      {!hasCustomFormArt && (stage === 'grown' || isMagical || isLegendary) && (
         <div
           className={`absolute top-0 z-30 text-5xl ${
             isLegendary ? 'animate-pulse' : 'animate-bounce'
