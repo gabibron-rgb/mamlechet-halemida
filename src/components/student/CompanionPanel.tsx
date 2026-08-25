@@ -11,11 +11,7 @@ import {
   type CompanionStage,
   type CompanionWorldVisuals,
 } from '../../data/companionWorlds';
-import {
-  COMPANION_WORLD_OPTIONS,
-  THEMES,
-  type ThemeId,
-} from '../../data/themes';
+import { THEMES, type ThemeId } from '../../data/themes';
 import {
   COMPANION_INTERACTIONS,
   type CompanionInteractionId,
@@ -72,6 +68,30 @@ const LOCAL_COMPANION_TEST_THEMES: ThemeId[] = [
   'ballet',
   'chess',
 ];
+
+// הרשימה המלאה למסך הבחירה — לא תלויה ברשימה מצומצמת/ישנה מ-themes.ts.
+const COMPANION_SELECTION_THEMES: ThemeId[] = [
+  'chess',
+  'animals',
+  'nature',
+  'science',
+  'robotics',
+  'space',
+  'fantasy',
+  'art',
+  'building',
+  'sports',
+  'music',
+  'books',
+  'math',
+  'generic',
+  'ballet',
+];
+
+function companionPreviewSrc(themeId: ThemeId, stage: 'hatchling' | 'young' | 'grown') {
+  const art = getCompanionFormArt(themeId, stage);
+  return art?.frameAnimation?.staticSrc ?? art?.imageSrc ?? null;
+}
 
 const STAGE_LABEL_HE: Record<CompanionStage, string> = {
   egg: 'ביצה קסומה',
@@ -130,6 +150,7 @@ export default function CompanionPanel({ student }: Props) {
   const [celebratedStage, setCelebratedStage] =
     useState<CompanionStage | null>(null);
   const [previewStage, setPreviewStage] = useState<CompanionStage | null>(null);
+  const [journeyPreviewTheme, setJourneyPreviewTheme] = useState<ThemeId | null>(null);
   const [isRenaming, setIsRenaming] = useState(false);
   const [nameDraft, setNameDraft] = useState(companion.name ?? '');
   const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -180,7 +201,8 @@ export default function CompanionPanel({ student }: Props) {
     : null;
   const canUnlock = student.level >= COMPANION_UNLOCK_LEVEL;
   const canChangeWorld =
-    companion.unlocked && companion.stage === 'egg' && companion.bond === 0;
+    companion.unlocked &&
+    (companion.stage === 'egg' || companion.stage === 'hatchling');
   const shouldShowPicker =
     canUnlock && (!companion.unlocked || !companionVisuals || isChangingWorld);
   const nextStage = nextCompanionStage(companion.stage);
@@ -538,41 +560,112 @@ export default function CompanionPanel({ student }: Props) {
           <div className="mb-2 text-5xl">🐾</div>
           <h2 className="text-3xl font-black text-magic-accent">
             {companion.unlocked
-              ? 'בחירת עולם חדש לביצה'
+              ? companion.stage === 'hatchling'
+                ? 'החלפת חיית המחמד'
+                : 'בחירת עולם חדש לביצה'
               : 'בחירת עולם לחיית המחמד'}
           </h2>
           <p className="mt-2 text-sm text-magic-soft/70">
-            העולם יקבע את המראה והאופי של חיית המחמד שתבקע מהביצה.
+            {companion.stage === 'hatchling'
+              ? 'כל עוד החיה עדיין בצורה 1 אפשר לשנות בחירה. ההתקדמות שצברת נשמרת.'
+              : 'בחר/י עולם לפי החיה והכיוון שלה. חלק מההתפתחויות נשארות הפתעה.'}
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {COMPANION_WORLD_OPTIONS.map(themeId => {
+          {COMPANION_SELECTION_THEMES.map(themeId => {
             const visuals = COMPANION_VISUALS[themeId];
             if (!visuals) return null;
 
             const isSelected = selectedTheme === themeId;
 
             return (
-              <button
+              <div
                 key={themeId}
-                type="button"
-                aria-pressed={isSelected}
-                onClick={() => setSelectedTheme(themeId)}
                 className={`rounded-2xl border p-4 text-center transition-all ${
                   isSelected
                     ? 'scale-[1.02] border-yellow-300 bg-yellow-400/15 shadow-[0_0_24px_rgba(250,204,21,0.25)]'
                     : 'border-white/10 bg-magic-bg/40 hover:border-magic-accent/50 hover:bg-magic-bg/60'
                 }`}
               >
-                <div className="mb-2 text-4xl">{visuals.motif}</div>
-                <div className="font-black text-white">
-                  עולם {themeNameOf(themeId)}
-                </div>
-                <div className="mt-1 text-xs leading-5 text-magic-soft/65">
-                  {visuals.descriptionHe}
-                </div>
-              </button>
+                <button
+                  type="button"
+                  aria-pressed={isSelected}
+                  onClick={() => setSelectedTheme(themeId)}
+                  className="w-full text-center"
+                >
+                  <div className="mb-2 text-4xl">{visuals.motif}</div>
+                  <div className="font-black text-white">
+                    עולם {themeNameOf(themeId)}
+                  </div>
+                  <div className="mt-1 text-xs leading-5 text-magic-soft/65">
+                    {visuals.descriptionHe}
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedTheme(themeId);
+                    setJourneyPreviewTheme(themeId);
+                  }}
+                  className="mt-3 w-full rounded-xl border border-white/10 bg-black/20 p-2 transition hover:border-magic-accent/45 hover:bg-black/30"
+                  aria-label={`פתיחת מסלול ההתפתחות של עולם ${themeNameOf(themeId)}`}
+                >
+                  <div className="mb-2 flex items-center justify-between gap-2 text-[10px] font-black text-magic-soft/65">
+                    <span>מסלול התפתחות</span>
+                    <span className="text-magic-accent">הגדלה 🔍</span>
+                  </div>
+                  <div className="grid grid-cols-5 gap-1" dir="ltr">
+                    {(['hatchling', 'young', 'grown'] as const).map((stage, index) => {
+                      const src = companionPreviewSrc(themeId, stage);
+                      const isSilhouette = stage === 'grown';
+
+                      return (
+                        <div
+                          key={stage}
+                          className="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-magic-bg/55"
+                        >
+                          {src ? (
+                            <img
+                              src={src}
+                              alt=""
+                              className={`h-[88%] w-[88%] object-contain ${
+                                isSilhouette ? 'brightness-0 opacity-70' : ''
+                              }`}
+                            />
+                          ) : (
+                            <span className="text-lg">{visuals.motif}</span>
+                          )}
+                          <span className="absolute bottom-0.5 right-1 text-[9px] font-black text-white/70">
+                            {index + 1}
+                          </span>
+                          {isSilhouette && (
+                            <span className="absolute inset-0 flex items-center justify-center text-sm font-black text-white drop-shadow">
+                              ?
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {[4, 5].map(level => (
+                      <div
+                        key={level}
+                        className="relative flex aspect-square items-center justify-center rounded-lg border border-white/10 bg-black/35 text-lg"
+                      >
+                        🔒
+                        <span className="absolute bottom-0.5 right-1 text-[9px] font-black text-white/55">
+                          {level}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-1.5 text-[9px] leading-4 text-magic-soft/50">
+                    רמה 1 גלויה · רמה 2 הצצה · רמה 3 צללית · רמות 4–5 סודיות
+                  </div>
+                </button>
+              </div>
             );
           })}
         </div>
@@ -596,7 +689,9 @@ export default function CompanionPanel({ student }: Props) {
               onClick={confirmWorld}
               className="rounded-xl bg-magic-accent px-6 py-3 font-black text-magic-bg disabled:cursor-not-allowed disabled:opacity-40"
             >
-              אישור וקבלת הביצה 🥚
+              {companion.unlocked && companion.stage === 'hatchling'
+                ? 'אישור והחלפת החיה 🐾'
+                : 'אישור וקבלת הביצה 🥚'}
             </button>
 
             {companion.unlocked && (
@@ -613,6 +708,132 @@ export default function CompanionPanel({ student }: Props) {
             )}
           </div>
         </div>
+
+        {journeyPreviewTheme && (() => {
+          const journeyVisuals = COMPANION_VISUALS[journeyPreviewTheme];
+          if (!journeyVisuals) return null;
+
+          return (
+            <div
+              className="fixed inset-0 z-[150] flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm sm:p-6"
+              role="dialog"
+              aria-modal="true"
+              aria-label={`מסלול ההתפתחות של עולם ${themeNameOf(journeyPreviewTheme)}`}
+              onClick={() => setJourneyPreviewTheme(null)}
+            >
+              <div
+                className="max-h-[92vh] w-full max-w-6xl overflow-y-auto rounded-3xl border border-magic-accent/35 bg-slate-950 p-4 shadow-2xl sm:p-6"
+                onClick={event => event.stopPropagation()}
+              >
+                <div className="mb-5 flex items-start justify-between gap-4" dir="rtl">
+                  <div>
+                    <div className="text-sm font-bold text-magic-accent">
+                      מסלול ההתפתחות
+                    </div>
+                    <h3 className="mt-1 text-2xl font-black text-white sm:text-3xl">
+                      {journeyVisuals.motif} עולם {themeNameOf(journeyPreviewTheme)}
+                    </h3>
+                    <p className="mt-2 text-sm text-magic-soft/65">
+                      אפשר לראות היטב את ההתחלה ואת הכיוון — אבל ההתפתחויות המאוחרות עדיין נשארות הפתעה.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setJourneyPreviewTheme(null)}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/5 text-2xl font-black text-white hover:bg-white/10"
+                    aria-label="סגירה"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-5" dir="ltr">
+                  {(['hatchling', 'young', 'grown'] as const).map((stage, index) => {
+                    const src = companionPreviewSrc(journeyPreviewTheme, stage);
+                    const isSilhouette = stage === 'grown';
+                    const label =
+                      stage === 'hatchling'
+                        ? 'רמה 1 — החיה שבוחרים'
+                        : stage === 'young'
+                          ? 'רמה 2 — הצצה להתפתחות'
+                          : 'רמה 3 — צללית בלבד';
+
+                    return (
+                      <div
+                        key={stage}
+                        className="rounded-2xl border border-white/10 bg-magic-bg/45 p-3 text-center"
+                      >
+                        <div className="mb-2 text-sm font-black text-white" dir="rtl">
+                          {label}
+                        </div>
+                        <div className="relative flex h-44 items-center justify-center overflow-hidden rounded-xl border border-white/10 bg-black/25 sm:h-52">
+                          {src ? (
+                            <img
+                              src={src}
+                              alt={isSilhouette ? '' : label}
+                              className={`h-[94%] w-[94%] object-contain ${
+                                isSilhouette ? 'brightness-0 opacity-75' : ''
+                              }`}
+                            />
+                          ) : (
+                            <span className="text-6xl">{journeyVisuals.motif}</span>
+                          )}
+                          {isSilhouette && (
+                            <span className="absolute inset-0 flex items-center justify-center text-5xl font-black text-white drop-shadow-[0_3px_8px_rgba(0,0,0,0.9)]">
+                              ?
+                            </span>
+                          )}
+                          <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-2 py-1 text-xs font-black text-white">
+                            {index + 1}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {[4, 5].map(level => (
+                    <div
+                      key={level}
+                      className="rounded-2xl border border-white/10 bg-magic-bg/45 p-3 text-center"
+                    >
+                      <div className="mb-2 text-sm font-black text-white" dir="rtl">
+                        רמה {level} — סודית
+                      </div>
+                      <div className="flex h-44 items-center justify-center rounded-xl border border-white/10 bg-black/40 sm:h-52">
+                        <div>
+                          <div className="text-6xl">🔒</div>
+                          <div className="mt-3 text-sm font-black text-magic-soft/55" dir="rtl">
+                            תתגלה בהמשך
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-5 flex flex-col justify-center gap-2 sm:flex-row" dir="rtl">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedTheme(journeyPreviewTheme);
+                      setJourneyPreviewTheme(null);
+                    }}
+                    className="rounded-xl bg-magic-accent px-6 py-3 font-black text-magic-bg"
+                  >
+                    לבחור בעולם הזה ✓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setJourneyPreviewTheme(null)}
+                    className="rounded-xl border border-white/15 bg-white/5 px-6 py-3 font-bold text-magic-soft hover:bg-white/10"
+                  >
+                    לחזור לכל העולמות
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     );
   }
@@ -1169,7 +1390,9 @@ export default function CompanionPanel({ student }: Props) {
             }}
             className="mt-4 text-xs font-bold text-magic-soft/55 underline hover:text-magic-accent"
           >
-            שינוי עולם הביצה
+            {companion.stage === 'hatchling'
+              ? 'החלפת חיית המחמד — אפשרי עד סוף רמה 1'
+              : 'שינוי עולם הביצה'}
           </button>
         )}
       </div>
