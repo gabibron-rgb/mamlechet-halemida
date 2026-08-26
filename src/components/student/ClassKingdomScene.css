@@ -54,7 +54,12 @@
 .ck31-light-level-5,
 .ck31-light-level-6 { background: transparent; }
 
-.ck31-landmark {
+.ck31-landmark-system {
+  display: contents;
+}
+
+/* The whole building artwork is clickable again. */
+.ck31-landmark-visual {
   position: absolute;
   transform: translate(-50%, -82%);
   padding: 0;
@@ -62,41 +67,52 @@
   background: transparent;
   cursor: pointer;
   text-align: center;
+  touch-action: manipulation;
   transition: transform 190ms ease, filter 190ms ease, opacity 190ms ease;
   filter: drop-shadow(0 15px 17px rgba(5, 7, 22, 0.31));
 }
 
-.ck31-landmark:hover {
-  transform: translate(-50%, -84%) scale(1.04);
-  z-index: 90 !important;
+.ck31-landmark-visual:focus-visible {
+  outline: 2px solid rgba(255, 239, 165, 0.95);
+  outline-offset: 4px;
+  border-radius: 16px;
 }
 
-.ck31-landmark.is-selected {
-  transform: translate(-50%, -85%) scale(1.09);
-  z-index: 95 !important;
+.ck31-landmark-visual.is-hovered {
+  transform: translate(-50%, -84%) scale(1.04);
+  z-index: 82 !important;
+  filter:
+    drop-shadow(0 0 9px rgba(255, 239, 165, 0.42))
+    drop-shadow(0 0 22px rgba(109, 220, 255, 0.25))
+    drop-shadow(0 16px 18px rgba(5, 7, 22, 0.34));
+}
+
+.ck31-landmark-visual.is-selected {
+  transform: translate(-50%, -85%) scale(1.07);
+  z-index: 84 !important;
   filter:
     drop-shadow(0 0 10px rgba(255, 239, 165, 0.55))
     drop-shadow(0 0 26px rgba(109, 220, 255, 0.32))
     drop-shadow(0 16px 18px rgba(5, 7, 22, 0.34));
 }
 
-.ck31-landmark.is-preview {
+.ck31-landmark-visual.is-preview {
   opacity: 1;
   filter: drop-shadow(0 11px 14px rgba(5, 7, 22, 0.22));
 }
 
-.ck31-landmark.is-preview .ck31-landmark-image {
+.ck31-landmark-visual.is-preview .ck31-landmark-image {
   opacity: 0.48;
   filter: grayscale(0.68) brightness(0.68) saturate(0.58);
   transition: opacity 190ms ease, filter 190ms ease;
 }
 
-.ck31-landmark.is-preview:hover .ck31-landmark-image {
-  opacity: 0.62;
-  filter: grayscale(0.5) brightness(0.78) saturate(0.7);
+.ck31-landmark-visual.is-preview.is-hovered .ck31-landmark-image {
+  opacity: 0.64;
+  filter: grayscale(0.48) brightness(0.8) saturate(0.72);
 }
 
-.ck31-landmark.is-preview::before {
+.ck31-landmark-visual.is-preview::before {
   content: '';
   position: absolute;
   z-index: 1;
@@ -111,7 +127,7 @@
   pointer-events: none;
 }
 
-.ck31-landmark.is-preview[data-landmark='gate'] .ck31-landmark-image {
+.ck31-landmark-visual.is-preview[data-landmark='gate'] .ck31-landmark-image {
   opacity: 0.56;
   filter: grayscale(0.6) brightness(0.72) saturate(0.62);
 }
@@ -126,82 +142,44 @@
   pointer-events: none;
 }
 
-.ck31-ground-glow {
+/* No ground ellipse or separate hotspot: the artwork itself is the click target. */
+
+/* Labels are always visible again now that the map is less crowded. */
+.ck31-landmark-caption-floating {
   position: absolute;
-  z-index: 0;
-  left: 50%;
-  bottom: -3%;
-  width: 78%;
-  height: 27%;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255, 235, 151, 0.4) 0%, rgba(102, 218, 255, 0.16) 42%, transparent 72%);
-  filter: blur(6px);
-  opacity: 0.78;
-  pointer-events: none;
-}
-
-.ck31-landmark.is-selected .ck31-ground-glow {
-  width: 96%;
-  opacity: 1;
-  animation: ck31GroundPulse 2.6s ease-in-out infinite;
-}
-
-.ck31-landmark.is-preview .ck31-ground-glow {
-  opacity: 0.34;
-}
-
-.ck31-landmark-caption {
-  position: absolute;
-  z-index: 8;
-  top: calc(100% + 7px);
-  left: 50%;
+  z-index: 150;
   min-width: max-content;
-  transform: translateX(-50%);
+  transform: translate(-50%, -100%);
   display: flex;
   flex-direction: column;
   gap: 2px;
   padding: 6px 11px 7px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(246, 221, 123, 0.25);
   border-radius: 14px;
-  background: rgba(8, 11, 33, 0.8);
-  box-shadow: 0 8px 20px rgba(4, 5, 20, 0.28);
+  background: rgba(8, 30, 35, 0.9);
+  box-shadow: 0 8px 20px rgba(4, 5, 20, 0.34);
   backdrop-filter: blur(10px);
   white-space: nowrap;
   pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
 }
 
-.ck31-landmark.is-unlocked .ck31-landmark-caption {
-  border-color: rgba(246, 221, 123, 0.25);
-  background: rgba(8, 30, 35, 0.84);
-}
-
-.ck31-landmark.is-preview .ck31-landmark-caption {
-  background: rgba(11, 13, 37, 0.93);
-  border-color: rgba(255, 224, 122, 0.34);
-  border-style: dashed;
-  box-shadow: 0 8px 24px rgba(4, 5, 20, 0.38), 0 0 16px rgba(255, 222, 113, 0.08);
+.ck31-landmark-caption-floating.is-visible {
   opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, calc(-100% - 4px));
 }
 
-.ck31-landmark[data-landmark='gate'] .ck31-landmark-caption {
-  top: calc(100% - 10px);
+.ck31-landmark-caption-floating.is-preview {
+  background: rgba(11, 13, 37, 0.94);
+  border-color: rgba(255, 224, 122, 0.38);
+  border-style: dashed;
 }
 
-.ck31-landmark.is-preview .ck31-landmark-name {
-  color: rgba(255, 255, 255, 0.96);
-}
-
-.ck31-landmark.is-preview .ck31-landmark-status {
-  color: #ffe58f;
-}
-
-.ck31-landmark.has-room .ck31-landmark-caption {
+.ck31-landmark-caption-floating.has-room {
   border-color: rgba(111, 227, 255, 0.34);
-}
-
-.ck31-landmark.has-room:hover .ck31-landmark-caption {
-  background: rgba(12, 49, 58, 0.9);
 }
 
 .ck31-landmark-name {
@@ -218,6 +196,9 @@
   color: rgba(255, 242, 185, 0.82);
 }
 
+.ck31-landmark-caption-floating.is-preview .ck31-landmark-status {
+  color: #ffe58f;
+}
 
 .ck31-future-landmark {
   display: grid;
@@ -379,4 +360,73 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+}
+
+.ck31-realm-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ck31-realm-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 210px;
+  padding: 11px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.22);
+  color: #fff;
+  text-align: right;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.ck31-realm-tab:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.07);
+}
+
+.ck31-realm-tab.is-active {
+  border-color: rgba(255, 229, 141, 0.38);
+  background: linear-gradient(180deg, rgba(255, 222, 104, 0.18), rgba(80, 200, 255, 0.10));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+.ck31-realm-tab.is-locked {
+  opacity: 0.62;
+  cursor: not-allowed;
+}
+
+.ck31-realm-tab-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  font-size: 18px;
+  flex: 0 0 auto;
+}
+
+.ck31-realm-tab-title {
+  display: block;
+  font-size: 13px;
+  line-height: 1.1;
+  font-weight: 900;
+}
+
+.ck31-realm-tab-subtitle {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.15;
+  font-weight: 700;
+  color: rgba(255, 244, 200, 0.75);
+}
+
+
+.ck31-landmark-caption-floating.is-selected {
+  border-color: rgba(255, 239, 165, 0.45);
+  box-shadow: 0 10px 26px rgba(4, 5, 20, 0.38), 0 0 0 1px rgba(255, 239, 165, 0.08) inset;
 }

@@ -34,9 +34,11 @@ import {
   type ClassRoomPlacement,
   type StudentClassRelicVotes,
 } from '../../lib/classKingdomState';
+import type { ClassKingdomRoomDefinition } from '../../data/classKingdomRooms';
 import './ClassKingdomGateRoom.css';
 
 type Props = {
+  room: ClassKingdomRoomDefinition;
   stars: number;
   classId: string;
   sandboxMode?: boolean;
@@ -55,12 +57,14 @@ type DragState = {
 
 type DrawerFilter = 'all' | 'decor' | 'object';
 
-const SANDBOX_STORAGE_KEY = 'mamlechet-class-kingdom-gate-room-sandbox-v1';
+const LEGACY_GATE_SANDBOX_STORAGE_KEY = 'mamlechet-class-kingdom-gate-room-sandbox-v1';
+const SANDBOX_ROOM_STORAGE_PREFIX = 'mamlechet-class-kingdom-room-sandbox-v2';
 const SANDBOX_CHOICES_STORAGE_KEY = 'mamlechet-class-kingdom-gate-room-choices-v1';
 const SANDBOX_SPECIAL_RELICS_STORAGE_KEY = 'mamlechet-class-kingdom-special-relics-sandbox-v1';
 const STAGE_BOUNDS = { minX: 4, maxX: 96, minY: 7, maxY: 94 };
 
 export default function ClassKingdomGateRoom({
+  room,
   stars,
   classId,
   sandboxMode = false,
@@ -90,6 +94,7 @@ export default function ClassKingdomGateRoom({
 
   const canManage = sandboxMode || (viewerRole === 'teacher' && Boolean(teacherId));
   const canVote = !sandboxMode && viewerRole === 'student' && Boolean(studentId);
+  const sandboxRoomStorageKey = `${SANDBOX_ROOM_STORAGE_PREFIX}:${room.id}`;
 
   useEffect(() => {
     let cancelled = false;
@@ -104,7 +109,9 @@ export default function ClassKingdomGateRoom({
       setSharedReady(true);
 
       try {
-        const raw = window.localStorage.getItem(SANDBOX_STORAGE_KEY);
+        const raw =
+          window.localStorage.getItem(sandboxRoomStorageKey) ??
+          (room.id === 'gate' ? window.localStorage.getItem(LEGACY_GATE_SANDBOX_STORAGE_KEY) : null);
         const parsed = raw ? JSON.parse(raw) : [];
         const normalized = normalizePlacements(parsed);
         setSavedPlacements(normalized);
@@ -141,7 +148,7 @@ export default function ClassKingdomGateRoom({
     setStudentVotes({});
     setSpecialRelics([]);
 
-    void loadClassKingdomState(classId).then(result => {
+    void loadClassKingdomState(classId, room.id).then(result => {
       if (cancelled) return;
       setSharedLoading(false);
 
@@ -184,7 +191,7 @@ export default function ClassKingdomGateRoom({
     return () => {
       cancelled = true;
     };
-  }, [sandboxMode, classId, viewerRole, studentId]);
+  }, [sandboxMode, classId, viewerRole, studentId, room.id, sandboxRoomStorageKey]);
 
   useEffect(() => {
     if (sandboxMode) return;
@@ -321,7 +328,7 @@ export default function ClassKingdomGateRoom({
     setDraftPlacements(nextDraft);
     setSelectedInstanceId(null);
     window.localStorage.removeItem(SANDBOX_CHOICES_STORAGE_KEY);
-    window.localStorage.setItem(SANDBOX_STORAGE_KEY, JSON.stringify(nextSaved));
+    window.localStorage.setItem(sandboxRoomStorageKey, JSON.stringify(nextSaved));
     setMessage('🧪 בחירות הניסוי אופסו. אפשר לבחור שוב בכל אבן דרך.');
   }
 
@@ -358,7 +365,7 @@ export default function ClassKingdomGateRoom({
 
     if (sandboxMode) {
       try {
-        window.localStorage.setItem(SANDBOX_STORAGE_KEY, JSON.stringify(draftPlacements));
+        window.localStorage.setItem(sandboxRoomStorageKey, JSON.stringify(draftPlacements));
         setSavedPlacements(draftPlacements);
         setEditMode(false);
         setSelectedInstanceId(null);
@@ -371,7 +378,7 @@ export default function ClassKingdomGateRoom({
 
     if (!sharedReady || sharedSaving || !teacherId) return;
     setSharedSaving(true);
-    const result = await saveClassKingdomRoomAsTeacher(classId, teacherId, draftPlacements);
+    const result = await saveClassKingdomRoomAsTeacher(classId, teacherId, room.id, draftPlacements);
     setSharedSaving(false);
 
     if (result.ok === false) {
@@ -575,12 +582,10 @@ export default function ClassKingdomGateRoom({
 
       <div className="ck-gate-room-toolbar">
         <div>
-          <div className="ck-gate-room-kicker">🚪 חדר כיתתי · שער ההתחלה</div>
-          <h3 className="ck-gate-room-title">אולם השער</h3>
+          <div className="ck-gate-room-kicker">{room.kickerHe}</div>
+          <h3 className="ck-gate-room-title">{room.titleHe}</h3>
           <p className="ck-gate-room-subtitle">
-            {canManage
-              ? 'החדר הכיתתי הראשון בממלכה. במצב העיצוב כל החדר פתוח להצבה חופשית — אין אזורי קיר או רצפה.'
-              : 'החדר הכיתתי הראשון בממלכה. אפשר לצפות בעיצוב ובהישגים; שינוי החדר נשמר רק דרך ממשק המורה.'}
+            {canManage ? room.descriptionTeacherHe : room.descriptionStudentHe}
           </p>
         </div>
 
@@ -614,8 +619,8 @@ export default function ClassKingdomGateRoom({
         onPointerDown={() => editMode && setSelectedInstanceId(null)}
       >
         <img
-          src="/assets/class-kingdom/rooms/gate-hall-background-v2.png"
-          alt="אולם השער הכיתתי"
+          src={room.backgroundSrc}
+          alt={room.backgroundAltHe}
           className="ck-gate-room-background"
           draggable={false}
         />
@@ -1035,9 +1040,9 @@ export default function ClassKingdomGateRoom({
           <div className="ck-gate-room-card is-next">
             <div className="ck-gate-room-card-icon">💾</div>
             <div>
-              <div className="ck-gate-room-card-title">שמירה משותפת לכיתה</div>
+              <div className="ck-gate-room-card-title">אוסף משותף · עיצוב נפרד</div>
               <div className="ck-gate-room-card-text">
-                במפה האמיתית התלמידים מצביעים, והמורה מאשר את הבחירה הסופית ושומר את עיצוב החדר. במפת הניסויים הכול נשאר רק בדפדפן.
+                כל המזכרות זמינות בכל חדר, אבל המיקום שלהן נשמר בנפרד בכל מקום. כך אפשר להציג את אותו הישג גם כאן וגם בחדרים אחרים.
               </div>
             </div>
           </div>

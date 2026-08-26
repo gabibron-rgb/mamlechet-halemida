@@ -2,6 +2,7 @@ import type {
   ClassRoomChoiceGroupId,
   ClassRoomItemId,
 } from '../data/classRoomItems';
+import type { ClassKingdomRoomId } from '../data/classKingdomRooms';
 import { supabase } from './supabaseClient';
 
 export type ClassRoomPlacement = {
@@ -56,8 +57,9 @@ function isMissingTableError(error: { code?: string; message?: string } | null):
   if (!error) return false;
   return (
     error.code === '42P01' ||
-    (/class_kingdom_state|class_kingdom_relic_votes/i.test(error.message ?? '') &&
-      /does not exist|schema cache/i.test(error.message ?? ''))
+    error.code === '42703' ||
+    (/class_kingdom_state|class_kingdom_relic_votes|room_placements/i.test(error.message ?? '') &&
+      /does not exist|schema cache|column/i.test(error.message ?? ''))
   );
 }
 
@@ -70,13 +72,19 @@ function setupMessage(): string {
   return 'יש לוודא שסקריפטי הממלכה הכיתתית הותקנו ב-Supabase.';
 }
 
+function multiRoomSetupMessage(): string {
+  return 'יש להריץ את supabase/class-kingdom-multi-room-v1.sql ב-Supabase SQL Editor.';
+}
+
+
 function specialRelicsSetupMessage(): string {
   return 'יש להריץ את supabase/class-kingdom-special-relics-v1.sql ב-Supabase SQL Editor.';
 }
 
 
 export async function loadClassKingdomState(
-  classId: string
+  classId: string,
+  roomId: ClassKingdomRoomId = 'gate'
 ): Promise<ClassKingdomStateResult> {
   const cleanClassId = classId.trim();
   if (!cleanClassId) {
@@ -85,7 +93,7 @@ export async function loadClassKingdomState(
 
   const { data, error } = await supabase
     .from('class_kingdom_state')
-    .select('gate_room_placements, relic_choices, updated_at')
+    .select('room_placements, gate_room_placements, relic_choices, updated_at')
     .eq('class_id', cleanClassId)
     .maybeSingle();
 
@@ -95,7 +103,7 @@ export async function loadClassKingdomState(
       return {
         ok: false,
         reason: 'missing-table',
-        message: `טבלת הממלכה הכיתתית עדיין לא הותקנה. ${setupMessage()}`,
+        message: multiRoomSetupMessage(),
       };
     }
     return {
@@ -109,10 +117,16 @@ export async function loadClassKingdomState(
     return { ok: true, state: { ...EMPTY_STATE } };
   }
 
+  const rooms = data.room_placements && typeof data.room_placements === 'object'
+    ? data.room_placements as Record<string, unknown>
+    : {};
+  const roomPlacements = rooms[roomId];
+  const legacyGatePlacements = roomId === 'gate' ? data.gate_room_placements : null;
+
   return {
     ok: true,
     state: {
-      placements: data.gate_room_placements ?? [],
+      placements: roomPlacements ?? legacyGatePlacements ?? [],
       choices: data.relic_choices ?? {},
       updatedAt: typeof data.updated_at === 'string' ? data.updated_at : null,
     },
@@ -122,6 +136,7 @@ export async function loadClassKingdomState(
 export async function saveClassKingdomRoomAsTeacher(
   classId: string,
   teacherId: string,
+  roomId: ClassKingdomRoomId,
   placements: ClassRoomPlacement[]
 ): Promise<ClassKingdomStateResult> {
   const cleanClassId = classId.trim();
@@ -133,13 +148,14 @@ export async function saveClassKingdomRoomAsTeacher(
   const { data, error } = await supabase.rpc('save_class_kingdom_room_as_teacher', {
     p_class_id: cleanClassId,
     p_teacher_id: cleanTeacherId,
+    p_room_id: roomId,
     p_placements: placements,
   });
 
   if (error) {
     console.error('Error saving class kingdom room:', error);
     if (isMissingFunctionError(error) || isMissingTableError(error)) {
-      return { ok: false, reason: 'missing-table', message: setupMessage() };
+      return { ok: false, reason: 'missing-table', message: multiRoomSetupMessage() };
     }
     return { ok: false, reason: 'save-failed', message: 'לא הצלחתי לשמור את עיצוב החדר.' };
   }
@@ -152,7 +168,7 @@ export async function saveClassKingdomRoomAsTeacher(
     };
   }
 
-  return loadClassKingdomState(cleanClassId);
+  return loadClassKingdomState(cleanClassId, roomId);
 }
 
 export async function finalizeClassRelicChoiceAsTeacher(
