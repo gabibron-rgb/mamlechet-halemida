@@ -1,0 +1,313 @@
+.ck-manager-special-relics {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(250, 204, 21, 0.2);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(88, 28, 135, 0.18), rgba(15, 23, 42, 0.52));
+  padding: 18px;
+}
+
+.ck-manager-special-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ck-manager-special-kicker {
+  color: rgba(254, 240, 138, 0.75);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.ck-manager-special-head h3 {
+  margin: 4px 0 0;
+  color: white;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.ck-manager-special-head p {
+  margin: 6px 0 0;
+  max-width: 760px;
+  color: rgba(224, 231, 255, 0.66);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.ck-manager-special-count {
+  min-width: 112px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.ck-manager-special-count strong,
+.ck-manager-special-count span {
+  display: block;
+}
+
+.ck-manager-special-count strong {
+  color: white;
+  font-size: 22px;
+}
+
+.ck-manager-special-count span {
+  margin-top: 2px;
+  color: rgba(224, 231, 255, 0.58);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.ck-manager-special-sandbox,
+.ck-manager-special-message,
+.ck-manager-selected-help {
+  margin-top: 12px;
+  border-radius: 14px;
+  padding: 9px 12px;
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.ck-manager-special-sandbox {
+  border: 1px solid rgba(34, 211, 238, 0.18);
+  background: rgba(6, 182, 212, 0.08);
+  color: rgba(207, 250, 254, 0.9);
+}
+
+.ck-manager-template-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ck-manager-template-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.16);
+  padding: 10px 7px;
+  color: white;
+  cursor: pointer;
+  transition: 160ms ease;
+}
+
+.ck-manager-template-card:hover {
+  border-color: rgba(250, 204, 21, 0.32);
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.ck-manager-template-card.is-selected {
+  border-color: rgba(250, 204, 21, 0.65);
+  background: rgba(250, 204, 21, 0.1);
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.08), 0 0 24px rgba(250, 204, 21, 0.08);
+}
+
+.ck-manager-template-art {
+  display: flex;
+  width: 72px;
+  height: 72px;
+  align-items: center;
+  justify-content: center;
+}
+
+.ck-manager-template-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.24));
+}
+
+.ck-manager-template-name {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.ck-manager-template-category {
+  color: rgba(224, 231, 255, 0.52);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.ck-manager-selected-help {
+  display: flex;
+  gap: 8px;
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  background: rgba(124, 58, 237, 0.08);
+  color: rgba(237, 233, 254, 0.78);
+}
+
+.ck-manager-selected-help strong {
+  color: white;
+  white-space: nowrap;
+}
+
+.ck-manager-special-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr) auto;
+  gap: 10px;
+  margin-top: 12px;
+  align-items: end;
+}
+
+.ck-manager-special-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ck-manager-special-fields label > span {
+  color: rgba(224, 231, 255, 0.68);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.ck-manager-special-fields input,
+.ck-manager-special-fields textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  outline: none;
+  background: rgba(5, 8, 24, 0.58);
+  padding: 10px 12px;
+  color: white;
+  font: inherit;
+  font-size: 12px;
+}
+
+.ck-manager-special-fields textarea {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.ck-manager-special-fields input:focus,
+.ck-manager-special-fields textarea:focus {
+  border-color: rgba(250, 204, 21, 0.4);
+}
+
+.ck-manager-special-submit {
+  min-height: 44px;
+  border: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  padding: 10px 17px;
+  color: #241739;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.ck-manager-special-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ck-manager-special-message {
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  background: rgba(16, 185, 129, 0.08);
+  color: rgba(209, 250, 229, 0.9);
+  font-weight: 800;
+}
+
+.ck-manager-special-recent {
+  margin-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+}
+
+.ck-manager-special-recent-title {
+  margin-bottom: 8px;
+  color: white;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.ck-manager-special-recent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ck-manager-special-recent article {
+  display: flex;
+  min-width: 0;
+  gap: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.14);
+  padding: 9px;
+}
+
+.ck-manager-special-recent article img {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  object-fit: contain;
+}
+
+.ck-manager-special-recent article > div {
+  min-width: 0;
+}
+
+.ck-manager-special-recent strong,
+.ck-manager-special-recent span,
+.ck-manager-special-recent p {
+  display: block;
+}
+
+.ck-manager-special-recent strong {
+  color: white;
+  font-size: 11px;
+}
+
+.ck-manager-special-recent span {
+  margin-top: 2px;
+  color: rgba(254, 240, 138, 0.62);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.ck-manager-special-recent p {
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: rgba(224, 231, 255, 0.55);
+  font-size: 9px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1000px) {
+  .ck-manager-template-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ck-manager-special-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .ck-manager-special-head {
+    flex-direction: column;
+  }
+
+  .ck-manager-template-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ck-manager-special-recent-grid {
+    grid-template-columns: 1fr;
+  }
+}

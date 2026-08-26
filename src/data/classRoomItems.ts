@@ -51,6 +51,7 @@ export type ClassRoomItemDefinition = {
   defaultY: number;
   defaultScale: number;
   artKind: ClassRoomItemArtKind;
+  imagePath: string;
   category: ClassRoomItemCategory;
   rarity: ClassRoomItemRarity;
   unlockStars: number;
@@ -78,6 +79,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 38,
     defaultScale: 1,
     artKind: 'banner',
+    imagePath: '/assets/class-kingdom/relics/royal_banner.png',
     category: 'decor',
     rarity: 'common',
     unlockStars: 1,
@@ -93,6 +95,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 38,
     defaultScale: 1,
     artKind: 'shield',
+    imagePath: '/assets/class-kingdom/relics/unity_shield.png',
     category: 'decor',
     rarity: 'common',
     unlockStars: 2,
@@ -108,6 +111,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 49,
     defaultScale: 1,
     artKind: 'portrait',
+    imagePath: '/assets/class-kingdom/relics/star_portrait.png',
     category: 'decor',
     rarity: 'rare',
     unlockStars: 3,
@@ -123,6 +127,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 62,
     defaultScale: 1,
     artKind: 'lantern',
+    imagePath: '/assets/class-kingdom/relics/courage_lantern.png',
     category: 'object',
     rarity: 'rare',
     unlockStars: 4,
@@ -139,6 +144,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 32,
     defaultScale: 1,
     artKind: 'clock',
+    imagePath: '/assets/class-kingdom/relics/persistence_clock.png',
     category: 'decor',
     rarity: 'rare',
     unlockStars: 4,
@@ -155,6 +161,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 64,
     defaultScale: 1,
     artKind: 'books',
+    imagePath: '/assets/class-kingdom/relics/curiosity_books.png',
     category: 'object',
     rarity: 'rare',
     unlockStars: 4,
@@ -171,6 +178,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 78,
     defaultScale: 1,
     artKind: 'globe',
+    imagePath: '/assets/class-kingdom/relics/star_globe.png',
     category: 'object',
     rarity: 'rare',
     unlockStars: 5,
@@ -186,6 +194,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 84,
     defaultScale: 1,
     artKind: 'plant',
+    imagePath: '/assets/class-kingdom/relics/crystal_plant.png',
     category: 'object',
     rarity: 'rare',
     unlockStars: 6,
@@ -201,6 +210,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 72,
     defaultScale: 1,
     artKind: 'crystal',
+    imagePath: '/assets/class-kingdom/relics/imagination_crystal.png',
     category: 'object',
     rarity: 'epic',
     unlockStars: 8,
@@ -217,6 +227,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 73,
     defaultScale: 1,
     artKind: 'statue',
+    imagePath: '/assets/class-kingdom/relics/unity_statue.png',
     category: 'object',
     rarity: 'epic',
     unlockStars: 8,
@@ -233,6 +244,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 36,
     defaultScale: 1,
     artKind: 'crown',
+    imagePath: '/assets/class-kingdom/relics/inspiration_crown.png',
     category: 'decor',
     rarity: 'epic',
     unlockStars: 8,
@@ -249,6 +261,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 78,
     defaultScale: 1,
     artKind: 'trophy',
+    imagePath: '/assets/class-kingdom/relics/kingdom_trophy.png',
     category: 'object',
     rarity: 'epic',
     unlockStars: 10,
@@ -264,6 +277,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 76,
     defaultScale: 1,
     artKind: 'compass',
+    imagePath: '/assets/class-kingdom/relics/dream_compass.png',
     category: 'object',
     rarity: 'epic',
     unlockStars: 12,
@@ -280,6 +294,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 75,
     defaultScale: 1,
     artKind: 'tree',
+    imagePath: '/assets/class-kingdom/relics/light_tree.png',
     category: 'object',
     rarity: 'epic',
     unlockStars: 12,
@@ -296,6 +311,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 78,
     defaultScale: 1,
     artKind: 'fountain',
+    imagePath: '/assets/class-kingdom/relics/achievement_fountain.png',
     category: 'object',
     rarity: 'epic',
     unlockStars: 12,
@@ -312,6 +328,7 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     defaultY: 84,
     defaultScale: 1,
     artKind: 'chest',
+    imagePath: '/assets/class-kingdom/relics/treasure_chest.png',
     category: 'object',
     rarity: 'legendary',
     unlockStars: 15,
@@ -347,6 +364,64 @@ export const CLASS_ROOM_CHOICE_GROUPS: ClassRoomChoiceGroupDefinition[] = [
     optionIds: ['dream_compass', 'light_tree', 'achievement_fountain'],
   },
 ];
+
+
+export type ClassSpecialRelicTemplate = {
+  id: string;
+  itemId: ClassRoomItemId;
+  nameHe: string;
+  categoryHe: string;
+  descriptionHe: string;
+};
+
+export const CLASS_SPECIAL_RELIC_TEMPLATES: ClassSpecialRelicTemplate[] = [
+  {
+    id: 'competition',
+    itemId: 'kingdom_trophy',
+    nameHe: 'גביע הישג מיוחד',
+    categoryHe: 'תחרות / הישג מיוחד',
+    descriptionHe: 'מתאים לזכייה בתחרות, הישג חריג או רגע שבו הכיתה הגיעה לפסגה חדשה.',
+  },
+  {
+    id: 'learning',
+    itemId: 'star_globe',
+    nameHe: 'גלובוס הגילוי',
+    categoryHe: 'למידה / מדע / חקר',
+    descriptionHe: 'מתאים לפרויקט חקר, הישג מדעי, למידה יוצאת דופן או גילוי חדש של הכיתה.',
+  },
+  {
+    id: 'creativity',
+    itemId: 'imagination_crystal',
+    nameHe: 'קריסטל היצירתיות',
+    categoryHe: 'יצירתיות / יוזמה',
+    descriptionHe: 'מתאים לרעיון מקורי, פרויקט יצירתי, יוזמה כיתתית או פתרון יוצא דופן.',
+  },
+  {
+    id: 'teamwork',
+    itemId: 'unity_statue',
+    nameHe: 'פסל השותפות',
+    categoryHe: 'שיתוף פעולה / ערבות הדדית',
+    descriptionHe: 'מתאים לרגע של עבודת צוות, עזרה הדדית או הצלחה שנוצרה בזכות כולם יחד.',
+  },
+  {
+    id: 'journey',
+    itemId: 'dream_compass',
+    nameHe: 'מצפן המסע',
+    categoryHe: 'מסע / פרויקט / יעד גדול',
+    descriptionHe: 'מתאים לסיום פרויקט ארוך, מסע לימודי או יעד גדול שהכיתה עבדה עליו לאורך זמן.',
+  },
+  {
+    id: 'event',
+    itemId: 'treasure_chest',
+    nameHe: 'תיבת האירוע',
+    categoryHe: 'אירוע חד־פעמי / זיכרון מיוחד',
+    descriptionHe: 'מתאים ליום שיא, אירוע חד־פעמי או זיכרון שהכיתה רוצה לשמור בממלכה לתמיד.',
+  },
+];
+
+export function classSpecialRelicTemplateById(id: string): ClassSpecialRelicTemplate | null {
+  return CLASS_SPECIAL_RELIC_TEMPLATES.find(template => template.id === id) ?? null;
+}
 
 export function classRoomItemById(id: ClassRoomItemId): ClassRoomItemDefinition | null {
   return CLASS_ROOM_ITEMS.find(item => item.id === id) ?? null;

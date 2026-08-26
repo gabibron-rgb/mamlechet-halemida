@@ -10,6 +10,7 @@ import {
 import {
   CLASS_ROOM_CHOICE_GROUPS,
   CLASS_ROOM_ITEMS,
+  CLASS_SPECIAL_RELIC_TEMPLATES,
   classRoomCollectionCapacity,
   classRoomItemById,
   isClassRoomItemUnlocked,
@@ -24,9 +25,11 @@ import {
   finalizeClassRelicChoiceAsTeacher,
   loadClassKingdomState,
   loadClassRelicVoteSummary,
+  loadClassSpecialRelics,
   loadStudentClassRelicVotes,
   saveClassKingdomRoomAsTeacher,
   type ClassRelicVoteSummary,
+  type ClassSpecialRelicGrant,
   type ClassRoomChoiceSelections,
   type ClassRoomPlacement,
   type StudentClassRelicVotes,
@@ -54,6 +57,7 @@ type DrawerFilter = 'all' | 'decor' | 'object';
 
 const SANDBOX_STORAGE_KEY = 'mamlechet-class-kingdom-gate-room-sandbox-v1';
 const SANDBOX_CHOICES_STORAGE_KEY = 'mamlechet-class-kingdom-gate-room-choices-v1';
+const SANDBOX_SPECIAL_RELICS_STORAGE_KEY = 'mamlechet-class-kingdom-special-relics-sandbox-v1';
 const STAGE_BOUNDS = { minX: 4, maxX: 96, minY: 7, maxY: 94 };
 
 export default function ClassKingdomGateRoom({
@@ -82,6 +86,7 @@ export default function ClassKingdomGateRoom({
   const [voteSummary, setVoteSummary] = useState<ClassRelicVoteSummary>({});
   const [studentVotes, setStudentVotes] = useState<StudentClassRelicVotes>({});
   const [voteBusyGroup, setVoteBusyGroup] = useState<ClassRoomChoiceGroupId | null>(null);
+  const [specialRelics, setSpecialRelics] = useState<ClassSpecialRelicGrant[]>([]);
 
   const canManage = sandboxMode || (viewerRole === 'teacher' && Boolean(teacherId));
   const canVote = !sandboxMode && viewerRole === 'student' && Boolean(studentId);
@@ -116,6 +121,14 @@ export default function ClassKingdomGateRoom({
       } catch {
         setChoiceSelections({});
       }
+
+      try {
+        const rawSpecialRelics = window.localStorage.getItem(SANDBOX_SPECIAL_RELICS_STORAGE_KEY);
+        const parsedSpecialRelics = rawSpecialRelics ? JSON.parse(rawSpecialRelics) : [];
+        setSpecialRelics(normalizeSpecialRelics(parsedSpecialRelics, classId));
+      } catch {
+        setSpecialRelics([]);
+      }
       return () => { cancelled = true; };
     }
 
@@ -126,6 +139,7 @@ export default function ClassKingdomGateRoom({
     setChoiceSelections({});
     setVoteSummary({});
     setStudentVotes({});
+    setSpecialRelics([]);
 
     void loadClassKingdomState(classId).then(result => {
       if (cancelled) return;
@@ -149,6 +163,15 @@ export default function ClassKingdomGateRoom({
     void loadClassRelicVoteSummary(classId).then(result => {
       if (cancelled || result.ok === false) return;
       setVoteSummary(result.summary);
+    });
+
+    void loadClassSpecialRelics(classId).then(result => {
+      if (cancelled) return;
+      if (result.ok === false) {
+        setMessage(current => current ?? `⚠️ ${result.message}`);
+        return;
+      }
+      setSpecialRelics(result.relics);
     });
 
     if (viewerRole === 'student' && studentId) {
@@ -178,12 +201,29 @@ export default function ClassKingdomGateRoom({
   const placements = editMode ? draftPlacements : savedPlacements;
   const selectedPlacement = placements.find(entry => entry.instanceId === selectedInstanceId) ?? null;
   const selectedItem = selectedPlacement ? classRoomItemById(selectedPlacement.itemId) : null;
+  const selectedSpecialRelic = selectedPlacement?.specialRelicGrantId
+    ? specialRelics.find(relic => relic.id === selectedPlacement.specialRelicGrantId) ?? null
+    : null;
 
   const drawerItems = useMemo(() => {
     return CLASS_ROOM_ITEMS.filter(item => drawerFilter === 'all' || item.category === drawerFilter);
   }, [drawerFilter]);
 
-  const placedItemIds = useMemo(() => new Set(draftPlacements.map(entry => entry.itemId)), [draftPlacements]);
+  const specialDrawerRelics = useMemo(() => {
+    return specialRelics.filter(relic => {
+      const item = classRoomItemById(relic.itemId);
+      return Boolean(item) && (drawerFilter === 'all' || item?.category === drawerFilter);
+    });
+  }, [specialRelics, drawerFilter]);
+
+  const placedItemIds = useMemo(
+    () => new Set(draftPlacements.filter(entry => !entry.specialRelicGrantId).map(entry => entry.itemId)),
+    [draftPlacements]
+  );
+  const placedSpecialRelicGrantIds = useMemo(
+    () => new Set(draftPlacements.map(entry => entry.specialRelicGrantId).filter((value): value is string => Boolean(value))),
+    [draftPlacements]
+  );
   const selectedChoiceItemIds = useMemo(
     () => Object.values(choiceSelections).filter((value): value is ClassRoomItemId => Boolean(value)),
     [choiceSelections]
@@ -201,6 +241,7 @@ export default function ClassKingdomGateRoom({
     const result = await loadClassRelicVoteSummary(classId);
     if (result.ok) setVoteSummary(result.summary);
   }
+
 
   async function handleChoiceAction(groupId: ClassRoomChoiceGroupId, itemId: ClassRoomItemId) {
     if (!sandboxMode && !sharedReady) {
@@ -373,6 +414,28 @@ export default function ClassKingdomGateRoom({
     setMessage(`${item.nameHe} נוסף לחדר. עכשיו אפשר לגרור אותו לכל מקום.`);
   }
 
+  function addSpecialRelic(relic: ClassSpecialRelicGrant, x?: number, y?: number) {
+    if (!editMode || placedSpecialRelicGrantIds.has(relic.id)) return;
+    const item = classRoomItemById(relic.itemId);
+    if (!item) return;
+
+    const point = clampPoint(x ?? item.defaultX, y ?? item.defaultY);
+    const nextLayer = draftPlacements.reduce((max, entry) => Math.max(max, entry.layer), 0) + 1;
+    const placement: Placement = {
+      instanceId: `special-${relic.id}`,
+      itemId: relic.itemId,
+      specialRelicGrantId: relic.id,
+      x: point.x,
+      y: point.y,
+      scale: item.defaultScale,
+      layer: nextLayer,
+    };
+
+    setDraftPlacements(current => [...current, placement]);
+    setSelectedInstanceId(placement.instanceId);
+    setMessage(`🏅 “${relic.title}” נוספה לחדר.`);
+  }
+
   function removeSelectedItem() {
     if (!selectedInstanceId) return;
     setDraftPlacements(current => current.filter(entry => entry.instanceId !== selectedInstanceId));
@@ -458,20 +521,38 @@ export default function ClassKingdomGateRoom({
     event.dataTransfer.setData('application/x-class-room-item', item.id);
   }
 
+  function handleSpecialRelicDragStart(event: DragEvent<HTMLDivElement>, relic: ClassSpecialRelicGrant) {
+    if (!editMode || placedSpecialRelicGrantIds.has(relic.id)) {
+      event.preventDefault();
+      return;
+    }
+    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer.setData('application/x-class-special-relic', relic.id);
+  }
+
   function handleStageDrop(event: DragEvent<HTMLDivElement>) {
     if (!editMode) return;
     event.preventDefault();
 
-    const itemId = event.dataTransfer.getData('application/x-class-room-item') as ClassRoomItemId;
-    const item = classRoomItemById(itemId);
     const stage = stageRef.current;
-    if (!item || !stage || placedItemIds.has(item.id) || !isClassRoomItemUnlocked(item, stars, selectedChoiceItemIds)) return;
+    if (!stage) return;
 
     const rect = stage.getBoundingClientRect();
     const point = clampPoint(
       ((event.clientX - rect.left) / rect.width) * 100,
       ((event.clientY - rect.top) / rect.height) * 100
     );
+
+    const specialRelicId = event.dataTransfer.getData('application/x-class-special-relic');
+    if (specialRelicId) {
+      const relic = specialRelics.find(entry => entry.id === specialRelicId);
+      if (relic) addSpecialRelic(relic, point.x, point.y);
+      return;
+    }
+
+    const itemId = event.dataTransfer.getData('application/x-class-room-item') as ClassRoomItemId;
+    const item = classRoomItemById(itemId);
+    if (!item || placedItemIds.has(item.id) || !isClassRoomItemUnlocked(item, stars, selectedChoiceItemIds)) return;
     addItem(item, point.x, point.y);
   }
 
@@ -573,7 +654,7 @@ export default function ClassKingdomGateRoom({
                 event.stopPropagation();
                 setSelectedInstanceId(placement.instanceId);
               }}
-              aria-label={item.nameHe}
+              aria-label={placement.specialRelicGrantId ? (specialRelics.find(relic => relic.id === placement.specialRelicGrantId)?.title ?? item.nameHe) : item.nameHe}
             >
               <RoomItemArt item={item} />
             </button>
@@ -582,7 +663,7 @@ export default function ClassKingdomGateRoom({
 
         {editMode && selectedPlacement && selectedItem && (
           <div className="ck-room-item-controls">
-            <div className="ck-room-item-controls-name">{selectedItem.nameHe}</div>
+            <div className="ck-room-item-controls-name">{selectedSpecialRelic?.title ?? selectedItem.nameHe}</div>
             <button type="button" onClick={() => changeSelectedScale(-0.1)} aria-label="הקטן" title="הקטן">−</button>
             <button type="button" onClick={() => changeSelectedScale(0.1)} aria-label="הגדל" title="הגדל">＋</button>
             <button type="button" onClick={moveSelectedToFront} aria-label="הבא לקדמה" title="הבא לקדמה">⬆</button>
@@ -653,11 +734,93 @@ export default function ClassKingdomGateRoom({
               );
             })}
           </div>
+
+          {specialDrawerRelics.length > 0 && (
+            <div className="ck-special-drawer-section">
+              <div className="ck-special-drawer-head">
+                <div>
+                  <div className="ck-special-drawer-kicker">🏅 מזכרות מיוחדות</div>
+                  <div className="ck-special-drawer-title">אירועים שהמורה העניק לכיתה</div>
+                </div>
+                <div className="ck-special-drawer-count">{specialDrawerRelics.length} מזכרות</div>
+              </div>
+              <div className="ck-class-room-item-grid">
+                {specialDrawerRelics.map(relic => {
+                  const item = classRoomItemById(relic.itemId);
+                  if (!item) return null;
+                  const placed = placedSpecialRelicGrantIds.has(relic.id);
+                  return (
+                    <div
+                      key={relic.id}
+                      draggable={!placed}
+                      onDragStart={event => handleSpecialRelicDragStart(event, relic)}
+                      className={`ck-class-room-item-card ck-special-drawer-card ${placed ? 'is-placed' : ''}`}
+                    >
+                      <div className="ck-class-room-item-reward-row">
+                        <span className="ck-class-room-rarity is-legendary">מזכרת מיוחדת</span>
+                        <span className="ck-class-room-unlock-stars">{formatSpecialRelicDate(relic.grantedAt)}</span>
+                      </div>
+                      <div className={`ck-drawer-item-art ck-room-item-${item.artKind}`}>
+                        <RoomItemArt item={item} />
+                      </div>
+                      <div className="ck-class-room-item-name">{relic.title}</div>
+                      <div className="ck-class-room-item-zone">{item.nameHe}</div>
+                      <div className="ck-class-room-item-reason">{relic.story || 'מזכרת מיוחדת שהוענקה לכיתה.'}</div>
+                      <button type="button" disabled={placed} onClick={() => addSpecialRelic(relic)}>
+                        {placed ? '✓ בחדר' : '＋ הוסף לחדר'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {!editMode && (
         <>
+          <section className="ck-special-relics-section">
+            <div className="ck-special-relics-head">
+              <div>
+                <div className="ck-special-relics-kicker">🏅 רגעים שלא נמדדים רק בכוכבים</div>
+                <h4 className="ck-special-relics-title">מזכרות מיוחדות של הכיתה</h4>
+                <p className="ck-special-relics-subtitle">
+                  תחרות, פרויקט, יום שיא או רגע כיתתי משמעותי יכולים להפוך לחפץ שנשאר בחדר עם הסיפור והתאריך שלו. המורה מעניק מזכרות חדשות ממסך ניהול הממלכה.
+                </p>
+              </div>
+              <div className="ck-special-relics-count"><strong>{specialRelics.length}</strong><span>רגעים נשמרו</span></div>
+            </div>
+
+
+            {specialRelics.length === 0 ? (
+              <div className="ck-special-empty">
+                עדיין אין מזכרות מיוחדות. כשהכיתה תחווה רגע ששווה לשמור — הוא יופיע כאן.
+              </div>
+            ) : (
+              <div className="ck-special-history-grid">
+                {specialRelics.map(relic => {
+                  const item = classRoomItemById(relic.itemId);
+                  if (!item) return null;
+                  return (
+                    <article key={relic.id} className="ck-special-history-card">
+                      <div className={`ck-special-history-art ck-room-item-${item.artKind}`}><RoomItemArt item={item} /></div>
+                      <div className="ck-special-history-copy">
+                        <div className="ck-special-history-meta">
+                          <span>🏅 מזכרת מיוחדת</span>
+                          <span>{formatSpecialRelicDate(relic.grantedAt)}</span>
+                        </div>
+                        <div className="ck-special-history-title">{relic.title}</div>
+                        <div className="ck-special-history-template">{CLASS_SPECIAL_RELIC_TEMPLATES.find(template => template.id === relic.templateId)?.categoryHe ?? item.nameHe}</div>
+                        <div className="ck-special-history-story">{relic.story || 'מזכרת מיוחדת שהוענקה לכיתה.'}</div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
           <section className="ck-class-choice-section">
             <div className="ck-class-choice-head">
               <div>
@@ -886,48 +1049,28 @@ export default function ClassKingdomGateRoom({
 }
 
 function RoomItemArt({ item }: { item: ClassRoomItemDefinition }) {
-  switch (item.artKind) {
-    case 'banner':
-      return <span className="ck-item-art ck-art-banner"><i /><b>✦</b><i /></span>;
-    case 'shield':
-      return <span className="ck-item-art ck-art-shield"><b>✦</b></span>;
-    case 'portrait':
-      return <span className="ck-item-art ck-art-portrait"><b>☾</b><i>✦</i></span>;
-    case 'trophy':
-      return <span className="ck-item-art ck-art-trophy"><i className="cup">★</i><i className="stem" /><i className="base" /></span>;
-    case 'globe':
-      return <span className="ck-item-art ck-art-globe"><i className="orb">✦</i><i className="ring" /><i className="stand" /></span>;
-    case 'plant':
-      return <span className="ck-item-art ck-art-plant"><i className="leaf l1" /><i className="leaf l2" /><i className="leaf l3" /><i className="pot" /></span>;
-    case 'chest':
-      return <span className="ck-item-art ck-art-chest"><i className="lid" /><i className="body" /><b>✦</b></span>;
-    case 'lantern':
-      return <span className="ck-item-art ck-art-lantern"><i className="top" /><i className="glass">✦</i><i className="base" /></span>;
-    case 'clock':
-      return <span className="ck-item-art ck-art-clock"><i className="face"><b>✦</b></i><i className="pendulum" /></span>;
-    case 'books':
-      return <span className="ck-item-art ck-art-books"><i className="book b1" /><i className="book b2" /><i className="book b3" /><b>?</b></span>;
-    case 'crystal':
-      return <span className="ck-item-art ck-art-crystal"><i className="shard s1" /><i className="shard s2" /><i className="shard s3" /><i className="base" /></span>;
-    case 'statue':
-      return <span className="ck-item-art ck-art-statue"><i className="figure f1" /><i className="figure f2" /><i className="star">✦</i><i className="base" /></span>;
-    case 'crown':
-      return <span className="ck-item-art ck-art-crown"><i className="body" /><i className="jewel">✦</i></span>;
-    case 'compass':
-      return <span className="ck-item-art ck-art-compass"><i className="ring"><b>✦</b></i><i className="needle" /></span>;
-    case 'tree':
-      return <span className="ck-item-art ck-art-tree"><i className="trunk" /><i className="crown"><b>✦</b><b>✦</b><b>✦</b></i></span>;
-    case 'fountain':
-      return <span className="ck-item-art ck-art-fountain"><i className="water w1" /><i className="water w2" /><i className="bowl">✦</i><i className="base" /></span>;
-    default:
-      return null;
-  }
+  return (
+    <span className="ck-item-art ck-item-art-image-wrap">
+      <img
+        src={item.imagePath}
+        alt=""
+        className="ck-item-art-image"
+        draggable={false}
+      />
+    </span>
+  );
 }
 
 function formatSyncTime(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'עכשיו';
   return new Intl.DateTimeFormat('he-IL', { hour: '2-digit', minute: '2-digit' }).format(date);
+}
+
+function formatSpecialRelicDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'היום';
+  return new Intl.DateTimeFormat('he-IL', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(date);
 }
 
 function rarityLabel(rarity: ClassRoomItemDefinition['rarity']): string {
@@ -962,14 +1105,25 @@ function normalizeChoiceSelections(
 function normalizePlacements(value: unknown): Placement[] {
   if (!Array.isArray(value)) return [];
 
-  const seen = new Set<ClassRoomItemId>();
+  const seenStandard = new Set<ClassRoomItemId>();
+  const seenSpecial = new Set<string>();
   const result: Placement[] = [];
 
   for (const entry of value) {
     if (!entry || typeof entry !== 'object') continue;
     const raw = entry as Partial<Placement> & { zone?: unknown };
     const item = typeof raw.itemId === 'string' ? classRoomItemById(raw.itemId as ClassRoomItemId) : null;
-    if (!item || seen.has(item.id)) continue;
+    if (!item) continue;
+
+    const specialRelicGrantId = typeof raw.specialRelicGrantId === 'string' && raw.specialRelicGrantId
+      ? raw.specialRelicGrantId
+      : undefined;
+
+    if (specialRelicGrantId) {
+      if (seenSpecial.has(specialRelicGrantId)) continue;
+    } else if (seenStandard.has(item.id)) {
+      continue;
+    }
 
     const point = clampPoint(
       typeof raw.x === 'number' ? raw.x : item.defaultX,
@@ -977,14 +1131,42 @@ function normalizePlacements(value: unknown): Placement[] {
     );
 
     result.push({
-      instanceId: typeof raw.instanceId === 'string' ? raw.instanceId : `${item.id}-${result.length}`,
+      instanceId: typeof raw.instanceId === 'string' ? raw.instanceId : `${specialRelicGrantId ? 'special-' + specialRelicGrantId : item.id}-${result.length}`,
       itemId: item.id,
+      ...(specialRelicGrantId ? { specialRelicGrantId } : {}),
       x: point.x,
       y: point.y,
       scale: clamp(typeof raw.scale === 'number' ? raw.scale : item.defaultScale, 0.55, 1.8),
       layer: typeof raw.layer === 'number' && Number.isFinite(raw.layer) ? raw.layer : result.length + 1,
     });
-    seen.add(item.id);
+
+    if (specialRelicGrantId) seenSpecial.add(specialRelicGrantId);
+    else seenStandard.add(item.id);
+  }
+
+  return result;
+}
+
+function normalizeSpecialRelics(value: unknown, classId: string): ClassSpecialRelicGrant[] {
+  if (!Array.isArray(value)) return [];
+  const result: ClassSpecialRelicGrant[] = [];
+
+  for (const entry of value) {
+    if (!entry || typeof entry !== 'object') continue;
+    const raw = entry as Partial<ClassSpecialRelicGrant>;
+    if (typeof raw.id !== 'string' || typeof raw.itemId !== 'string') continue;
+    const item = classRoomItemById(raw.itemId as ClassRoomItemId);
+    if (!item) continue;
+
+    result.push({
+      id: raw.id,
+      classId: typeof raw.classId === 'string' ? raw.classId : classId,
+      templateId: typeof raw.templateId === 'string' ? raw.templateId : 'event',
+      itemId: item.id,
+      title: typeof raw.title === 'string' ? raw.title : item.nameHe,
+      story: typeof raw.story === 'string' ? raw.story : '',
+      grantedAt: typeof raw.grantedAt === 'string' ? raw.grantedAt : new Date().toISOString(),
+    });
   }
 
   return result;

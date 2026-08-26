@@ -1667,3 +1667,388 @@
   box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.08), 0 14px 30px rgba(8, 145, 178, 0.08);
   background: linear-gradient(180deg, rgba(34, 211, 238, 0.1), rgba(15, 23, 42, 0.24));
 }
+
+/* ===== Class relic artwork v2: generated PNG assets ===== */
+.ck-item-art-image-wrap {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  filter: drop-shadow(0 8px 12px rgba(4, 3, 24, 0.38));
+}
+
+.ck-item-art-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.ck-room-item-placement,
+.ck-room-item-placement.ck-room-item-banner,
+.ck-room-item-placement.ck-room-item-portrait,
+.ck-room-item-placement.ck-room-item-shield,
+.ck-room-item-placement.ck-room-item-chest,
+.ck-room-item-placement.ck-room-item-globe,
+.ck-room-item-placement.ck-room-item-trophy,
+.ck-room-item-placement.ck-room-item-plant {
+  width: 128px;
+  height: 128px;
+}
+
+.ck-room-item-placement.ck-room-item-banner,
+.ck-room-item-placement.ck-room-item-portrait,
+.ck-room-item-placement.ck-room-item-clock,
+.ck-room-item-placement.ck-room-item-books {
+  width: 118px;
+  height: 128px;
+}
+
+.ck-room-item-placement.ck-room-item-chest {
+  width: 136px;
+  height: 118px;
+}
+
+.ck-drawer-item-art .ck-item-art,
+.ck-class-relic-art .ck-item-art,
+.ck-choice-option-art .ck-item-art,
+.ck-choice-selected-art .ck-item-art {
+  transform: none;
+}
+
+.ck-drawer-item-art .ck-item-art-image-wrap {
+  width: 78px;
+  height: 78px;
+}
+
+.ck-class-relic-art .ck-item-art-image-wrap {
+  width: 68px;
+  height: 68px;
+}
+
+.ck-choice-option-art .ck-item-art-image-wrap {
+  width: 74px;
+  height: 74px;
+}
+
+.ck-choice-selected-art .ck-item-art-image-wrap {
+  width: 92px;
+  height: 92px;
+}
+
+.ck-class-room-item-card.is-locked .ck-item-art-image,
+.ck-class-relic-card.is-locked .ck-item-art-image,
+.ck-choice-group.is-locked .ck-item-art-image {
+  filter: grayscale(0.72) brightness(0.62);
+}
+
+/* Special teacher-awarded class relics */
+.ck-special-relics-section {
+  margin-top: 1.25rem;
+  border: 1px solid rgba(250, 204, 21, 0.18);
+  border-radius: 1.5rem;
+  background: linear-gradient(145deg, rgba(49, 33, 86, 0.7), rgba(21, 18, 47, 0.86));
+  padding: 1rem;
+}
+
+.ck-special-relics-head,
+.ck-special-drawer-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.ck-special-relics-kicker,
+.ck-special-drawer-kicker {
+  color: rgba(254, 240, 138, 0.86);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.ck-special-relics-title,
+.ck-special-drawer-title {
+  margin: 0.2rem 0 0;
+  color: white;
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.ck-special-relics-subtitle {
+  margin: 0.3rem 0 0;
+  color: rgba(226, 232, 240, 0.68);
+  font-size: 0.78rem;
+  line-height: 1.65;
+}
+
+.ck-special-relics-count,
+.ck-special-drawer-count {
+  flex: 0 0 auto;
+  border: 1px solid rgba(250, 204, 21, 0.18);
+  border-radius: 1rem;
+  background: rgba(250, 204, 21, 0.08);
+  padding: 0.55rem 0.8rem;
+  text-align: center;
+  color: rgba(254, 249, 195, 0.85);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.ck-special-relics-count strong {
+  display: block;
+  color: #fde68a;
+  font-size: 1.2rem;
+}
+
+.ck-special-relics-count span {
+  display: block;
+}
+
+.ck-special-award-panel {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  border-radius: 1.15rem;
+  background: rgba(8, 7, 24, 0.28);
+  padding: 0.9rem;
+}
+
+.ck-special-award-title {
+  color: #fef3c7;
+  font-size: 0.92rem;
+  font-weight: 900;
+}
+
+.ck-special-award-text {
+  margin-top: 0.2rem;
+  color: rgba(226, 232, 240, 0.64);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.ck-special-template-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+}
+
+.ck-special-template-card {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0.55rem;
+  color: white;
+  text-align: center;
+  transition: 160ms ease;
+}
+
+.ck-special-template-card:hover {
+  border-color: rgba(250, 204, 21, 0.28);
+  background: rgba(250, 204, 21, 0.06);
+}
+
+.ck-special-template-card.is-selected {
+  border-color: rgba(250, 204, 21, 0.65);
+  background: rgba(250, 204, 21, 0.11);
+  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.07);
+}
+
+.ck-special-template-art,
+.ck-special-history-art {
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  width: 76px;
+  height: 76px;
+}
+
+.ck-special-template-art .ck-item-art-image,
+.ck-special-history-art .ck-item-art-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.ck-special-template-name {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.ck-special-template-category {
+  display: block;
+  margin-top: 0.12rem;
+  color: rgba(226, 232, 240, 0.55);
+  font-size: 0.58rem;
+  line-height: 1.35;
+}
+
+.ck-special-award-fields {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr auto;
+  gap: 0.65rem;
+  align-items: end;
+  margin-top: 0.85rem;
+}
+
+.ck-special-award-fields label {
+  display: grid;
+  gap: 0.3rem;
+  color: rgba(254, 249, 195, 0.78);
+  font-size: 0.67rem;
+  font-weight: 900;
+}
+
+.ck-special-award-fields input,
+.ck-special-award-fields textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.8rem;
+  background: rgba(5, 4, 18, 0.5);
+  padding: 0.65rem 0.75rem;
+  color: white;
+  outline: none;
+}
+
+.ck-special-award-fields textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.ck-special-award-fields input:focus,
+.ck-special-award-fields textarea:focus {
+  border-color: rgba(250, 204, 21, 0.45);
+}
+
+.ck-special-award-submit {
+  min-height: 42px;
+  border: 0;
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  padding: 0.72rem 0.9rem;
+  color: #27160a;
+  font-size: 0.72rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.ck-special-award-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ck-special-empty {
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 1rem;
+  text-align: center;
+  color: rgba(226, 232, 240, 0.55);
+  font-size: 0.76rem;
+}
+
+.ck-special-history-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.ck-special-history-card {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  border: 1px solid rgba(250, 204, 21, 0.13);
+  border-radius: 1rem;
+  background: rgba(250, 204, 21, 0.045);
+  padding: 0.75rem;
+}
+
+.ck-special-history-art {
+  width: 104px;
+  height: 104px;
+}
+
+.ck-special-history-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: rgba(253, 230, 138, 0.7);
+  font-size: 0.62rem;
+  font-weight: 900;
+}
+
+.ck-special-history-title {
+  margin-top: 0.28rem;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.ck-special-history-template {
+  margin-top: 0.15rem;
+  color: rgba(196, 181, 253, 0.72);
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.ck-special-history-story {
+  margin-top: 0.38rem;
+  color: rgba(226, 232, 240, 0.66);
+  font-size: 0.7rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.ck-special-drawer-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(250, 204, 21, 0.14);
+}
+
+.ck-special-drawer-card {
+  border-color: rgba(250, 204, 21, 0.18) !important;
+  background: rgba(250, 204, 21, 0.04) !important;
+}
+
+@media (max-width: 1000px) {
+  .ck-special-template-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ck-special-award-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ck-special-award-submit {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 700px) {
+  .ck-special-relics-head,
+  .ck-special-drawer-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ck-special-template-grid,
+  .ck-special-history-grid,
+  .ck-special-award-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .ck-special-history-card {
+    grid-template-columns: 86px minmax(0, 1fr);
+  }
+
+  .ck-special-history-art {
+    width: 80px;
+    height: 80px;
+  }
+}

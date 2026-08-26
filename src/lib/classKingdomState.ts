@@ -7,10 +7,21 @@ import { supabase } from './supabaseClient';
 export type ClassRoomPlacement = {
   instanceId: string;
   itemId: ClassRoomItemId;
+  specialRelicGrantId?: string;
   x: number;
   y: number;
   scale: number;
   layer: number;
+};
+
+export type ClassSpecialRelicGrant = {
+  id: string;
+  classId: string;
+  templateId: string;
+  itemId: ClassRoomItemId;
+  title: string;
+  story: string;
+  grantedAt: string;
 };
 
 export type ClassRoomChoiceSelections = Partial<
@@ -56,8 +67,13 @@ function isMissingFunctionError(error: { code?: string; message?: string } | nul
 }
 
 function setupMessage(): string {
-  return 'יש להריץ את supabase/class-kingdom-permissions-v2.sql ב-Supabase SQL Editor.';
+  return 'יש לוודא שסקריפטי הממלכה הכיתתית הותקנו ב-Supabase.';
 }
+
+function specialRelicsSetupMessage(): string {
+  return 'יש להריץ את supabase/class-kingdom-special-relics-v1.sql ב-Supabase SQL Editor.';
+}
+
 
 export async function loadClassKingdomState(
   classId: string
@@ -274,4 +290,84 @@ export async function castClassRelicVote(
   }
 
   return { ok: true };
+}
+
+
+export async function loadClassSpecialRelics(
+  classId: string
+): Promise<{ ok: true; relics: ClassSpecialRelicGrant[] } | { ok: false; message: string }> {
+  const cleanClassId = classId.trim();
+  if (!cleanClassId) return { ok: false, message: 'חסר מזהה כיתה.' };
+
+  const { data, error } = await supabase
+    .from('class_kingdom_special_relics')
+    .select('id, class_id, template_id, item_id, title, story, granted_at')
+    .eq('class_id', cleanClassId)
+    .order('granted_at', { ascending: false });
+
+  if (error) {
+    console.error('Error loading class special relics:', error);
+    if (isMissingTableError(error) || /class_kingdom_special_relics/i.test(error.message ?? '')) {
+      return { ok: false, message: specialRelicsSetupMessage() };
+    }
+    return { ok: false, message: 'לא הצלחתי לטעון את המזכרות המיוחדות של הכיתה.' };
+  }
+
+  const relics: ClassSpecialRelicGrant[] = [];
+  for (const row of Array.isArray(data) ? data : []) {
+    if (!row || typeof row.id !== 'string' || typeof row.item_id !== 'string') continue;
+    relics.push({
+      id: row.id,
+      classId: String(row.class_id ?? cleanClassId),
+      templateId: String(row.template_id ?? ''),
+      itemId: row.item_id as ClassRoomItemId,
+      title: String(row.title ?? ''),
+      story: String(row.story ?? ''),
+      grantedAt: typeof row.granted_at === 'string' ? row.granted_at : new Date().toISOString(),
+    });
+  }
+
+  return { ok: true, relics };
+}
+
+export async function grantClassSpecialRelicAsTeacher(
+  classId: string,
+  teacherId: string,
+  templateId: string,
+  title: string,
+  story: string
+): Promise<{ ok: true; relicId: string } | { ok: false; message: string }> {
+  const cleanClassId = classId.trim();
+  const cleanTeacherId = teacherId.trim();
+  const cleanTitle = title.trim();
+  const cleanStory = story.trim();
+
+  if (!cleanClassId || !cleanTeacherId) {
+    return { ok: false, message: 'חסרה הרשאת מורה להענקת מזכרת.' };
+  }
+  if (!cleanTitle) return { ok: false, message: 'צריך לכתוב כותרת למזכרת.' };
+  if (cleanTitle.length > 100) return { ok: false, message: 'כותרת המזכרת ארוכה מדי.' };
+  if (cleanStory.length > 500) return { ok: false, message: 'סיפור המזכרת ארוך מדי.' };
+
+  const { data, error } = await supabase.rpc('grant_class_special_relic_as_teacher', {
+    p_class_id: cleanClassId,
+    p_teacher_id: cleanTeacherId,
+    p_template_id: templateId,
+    p_title: cleanTitle,
+    p_story: cleanStory,
+  });
+
+  if (error) {
+    console.error('Error granting class special relic:', error);
+    if (isMissingFunctionError(error) || isMissingTableError(error)) {
+      return { ok: false, message: specialRelicsSetupMessage() };
+    }
+    return { ok: false, message: 'לא הצלחתי להעניק את המזכרת.' };
+  }
+
+  if (typeof data !== 'string' || !data) {
+    return { ok: false, message: 'הענקת המזכרת נדחתה. בדקו שהמורה משויך לכיתה.' };
+  }
+
+  return { ok: true, relicId: data };
 }
