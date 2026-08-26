@@ -20,6 +20,7 @@ import {
 } from '../../data/classKingdom';
 import { THEMES, type ThemeId } from '../../data/themes';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
+import ClassKingdomScene from './ClassKingdomScene';
 
 type Props = {
   student: StudentState;
@@ -140,6 +141,19 @@ export default function ClassKingdomPanel({ student }: Props) {
           )}
         </div>
       </section>
+
+      <ClassKingdomScene
+        stars={stars}
+        classId={student.classId}
+        viewerRole="student"
+        studentId={student.id}
+        allowSandbox={
+          import.meta.env.DEV ||
+          student.classId === 'test2' ||
+          student.loginName === 'itemtester' ||
+          student.name === 'בודק חפצים'
+        }
+      />
 
       <section className="mt-5 rounded-3xl border border-yellow-300/15 bg-magic-bg/35 p-5">
         <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">

@@ -11,9 +11,10 @@ import type { StudentState } from '../../store/useGameStore';
 
 type Props = {
   students: StudentState[];
+  onManage?: () => void;
 };
 
-export default function ClassKingdomSummary({ students }: Props) {
+export default function ClassKingdomSummary({ students, onManage }: Props) {
   const goals = mergeClassGoals(students);
   const stars = classKingdomStars(goals);
   const level = classKingdomLevel(stars);
@@ -32,7 +33,16 @@ export default function ClassKingdomSummary({ students }: Props) {
           </div>
         </div>
 
-        <div className="flex gap-2 text-center">
+        <div className="flex flex-wrap items-center gap-2 text-center">
+          {onManage && (
+            <button
+              type="button"
+              onClick={onManage}
+              className="rounded-xl border border-cyan-300/25 bg-cyan-500/10 px-4 py-2 text-sm font-black text-cyan-100 transition hover:bg-cyan-500/20"
+            >
+              👑 ניהול הממלכה
+            </button>
+          )}
           <div className="rounded-xl border border-yellow-300/15 bg-yellow-400/10 px-4 py-2">
             <div className="text-xl font-black text-white">⭐ {stars}</div>
             <div className="text-[10px] text-magic-soft/50">כוכבי ממלכה</div>

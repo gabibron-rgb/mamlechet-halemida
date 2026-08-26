@@ -1,0 +1,382 @@
+.ck31-layout {
+  min-width: 0;
+}
+
+.ck31-map-wrap {
+  min-width: 0;
+}
+
+.ck31-map {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #121441;
+  box-shadow: 0 28px 80px rgba(4, 5, 21, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  isolation: isolate;
+}
+
+.ck31-map-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  pointer-events: none;
+}
+
+.ck31-map-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(8, 9, 36, 0.16) 0%, transparent 18%, transparent 78%, rgba(7, 8, 25, 0.23) 100%),
+    radial-gradient(circle at 50% 52%, transparent 52%, rgba(5, 8, 28, 0.18) 100%);
+}
+
+.ck31-world-light {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  transition: background 450ms ease;
+}
+
+.ck31-light-level-1 { background: rgba(13, 18, 49, 0.19); }
+.ck31-light-level-2 { background: rgba(18, 20, 54, 0.13); }
+.ck31-light-level-3 { background: rgba(32, 24, 54, 0.07); }
+.ck31-light-level-4,
+.ck31-light-level-5,
+.ck31-light-level-6 { background: transparent; }
+
+.ck31-landmark {
+  position: absolute;
+  transform: translate(-50%, -82%);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 190ms ease, filter 190ms ease, opacity 190ms ease;
+  filter: drop-shadow(0 15px 17px rgba(5, 7, 22, 0.31));
+}
+
+.ck31-landmark:hover {
+  transform: translate(-50%, -84%) scale(1.04);
+  z-index: 90 !important;
+}
+
+.ck31-landmark.is-selected {
+  transform: translate(-50%, -85%) scale(1.09);
+  z-index: 95 !important;
+  filter:
+    drop-shadow(0 0 10px rgba(255, 239, 165, 0.55))
+    drop-shadow(0 0 26px rgba(109, 220, 255, 0.32))
+    drop-shadow(0 16px 18px rgba(5, 7, 22, 0.34));
+}
+
+.ck31-landmark.is-preview {
+  opacity: 1;
+  filter: drop-shadow(0 11px 14px rgba(5, 7, 22, 0.22));
+}
+
+.ck31-landmark.is-preview .ck31-landmark-image {
+  opacity: 0.48;
+  filter: grayscale(0.68) brightness(0.68) saturate(0.58);
+  transition: opacity 190ms ease, filter 190ms ease;
+}
+
+.ck31-landmark.is-preview:hover .ck31-landmark-image {
+  opacity: 0.62;
+  filter: grayscale(0.5) brightness(0.78) saturate(0.7);
+}
+
+.ck31-landmark.is-preview::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  bottom: 4%;
+  width: 88%;
+  height: 42%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 226, 123, 0.2) 0%, rgba(140, 207, 255, 0.1) 42%, transparent 72%);
+  filter: blur(9px);
+  pointer-events: none;
+}
+
+.ck31-landmark.is-preview[data-landmark='gate'] .ck31-landmark-image {
+  opacity: 0.56;
+  filter: grayscale(0.6) brightness(0.72) saturate(0.62);
+}
+
+.ck31-landmark-image {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+  pointer-events: none;
+}
+
+.ck31-ground-glow {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  bottom: -3%;
+  width: 78%;
+  height: 27%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 235, 151, 0.4) 0%, rgba(102, 218, 255, 0.16) 42%, transparent 72%);
+  filter: blur(6px);
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+.ck31-landmark.is-selected .ck31-ground-glow {
+  width: 96%;
+  opacity: 1;
+  animation: ck31GroundPulse 2.6s ease-in-out infinite;
+}
+
+.ck31-landmark.is-preview .ck31-ground-glow {
+  opacity: 0.34;
+}
+
+.ck31-landmark-caption {
+  position: absolute;
+  z-index: 8;
+  top: calc(100% + 7px);
+  left: 50%;
+  min-width: max-content;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 11px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  background: rgba(8, 11, 33, 0.8);
+  box-shadow: 0 8px 20px rgba(4, 5, 20, 0.28);
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.ck31-landmark.is-unlocked .ck31-landmark-caption {
+  border-color: rgba(246, 221, 123, 0.25);
+  background: rgba(8, 30, 35, 0.84);
+}
+
+.ck31-landmark.is-preview .ck31-landmark-caption {
+  background: rgba(11, 13, 37, 0.93);
+  border-color: rgba(255, 224, 122, 0.34);
+  border-style: dashed;
+  box-shadow: 0 8px 24px rgba(4, 5, 20, 0.38), 0 0 16px rgba(255, 222, 113, 0.08);
+  opacity: 1;
+}
+
+.ck31-landmark[data-landmark='gate'] .ck31-landmark-caption {
+  top: calc(100% - 10px);
+}
+
+.ck31-landmark.is-preview .ck31-landmark-name {
+  color: rgba(255, 255, 255, 0.96);
+}
+
+.ck31-landmark.is-preview .ck31-landmark-status {
+  color: #ffe58f;
+}
+
+.ck31-landmark.has-room .ck31-landmark-caption {
+  border-color: rgba(111, 227, 255, 0.34);
+}
+
+.ck31-landmark.has-room:hover .ck31-landmark-caption {
+  background: rgba(12, 49, 58, 0.9);
+}
+
+.ck31-landmark-name {
+  font-size: clamp(9px, 0.9vw, 13px);
+  line-height: 1.05;
+  font-weight: 900;
+  color: #fff;
+}
+
+.ck31-landmark-status {
+  font-size: clamp(7px, 0.68vw, 10px);
+  line-height: 1;
+  font-weight: 800;
+  color: rgba(255, 242, 185, 0.82);
+}
+
+
+.ck31-future-landmark {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+}
+
+.ck31-future-orb {
+  display: grid;
+  place-items: center;
+  width: 58%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  background: radial-gradient(circle at 40% 35%, rgba(255,255,255,0.5), rgba(169, 128, 255, 0.3) 28%, rgba(46, 30, 103, 0.72) 70%);
+  color: #fff3b2;
+  font-size: clamp(18px, 2.6vw, 38px);
+  box-shadow: 0 0 22px rgba(181, 139, 255, 0.35);
+}
+
+.ck31-map-topbar {
+  position: absolute;
+  z-index: 100;
+  top: 18px;
+  right: 18px;
+  left: 18px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.ck31-title-card,
+.ck31-next-chip {
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  background: rgba(8, 10, 35, 0.64);
+  box-shadow: 0 8px 24px rgba(4, 5, 20, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.ck31-title-card {
+  padding: 10px 13px;
+  border-radius: 18px;
+}
+
+.ck31-next-chip {
+  padding: 10px 13px;
+  border-radius: 999px;
+  color: rgba(255, 244, 196, 0.92);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.ck31-map-bottombar {
+  position: absolute;
+  z-index: 100;
+  right: 18px;
+  bottom: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  background: rgba(6, 11, 29, 0.69);
+  box-shadow: 0 8px 24px rgba(4, 5, 20, 0.2);
+  backdrop-filter: blur(10px);
+  color: rgba(229, 236, 255, 0.74);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.ck31-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+  align-items: stretch;
+}
+
+.ck31-info-grid > article {
+  min-height: 100%;
+}
+
+@keyframes ck31GroundPulse {
+  0%, 100% { transform: translateX(-50%) scale(0.9); opacity: 0.72; }
+  50% { transform: translateX(-50%) scale(1.12); opacity: 1; }
+}
+
+@media (max-width: 1000px) {
+  .ck31-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .ck31-map {
+    aspect-ratio: 4 / 3;
+    border-radius: 22px;
+  }
+
+  .ck31-map-topbar {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+
+  .ck31-next-chip {
+    display: none;
+  }
+
+  .ck31-map-bottombar {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+
+  .ck31-landmark-caption {
+    top: calc(100% + 3px);
+    padding: 4px 7px 5px;
+    border-radius: 10px;
+  }
+
+}
+
+
+.ck31-sandbox-banner {
+  position: absolute;
+  z-index: 120;
+  top: 76px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border: 1px solid rgba(253, 230, 138, 0.38);
+  border-radius: 999px;
+  background: rgba(74, 42, 8, 0.78);
+  color: #fff4c2;
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .ck31-sandbox-banner {
+    top: 58px;
+    max-width: calc(100% - 24px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

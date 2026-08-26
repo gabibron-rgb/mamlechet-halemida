@@ -14,6 +14,7 @@ import MissionCreateModal from '../components/teacher/MissionCreateModal';
 import ClassGoalBoard from '../components/teacher/ClassGoalBoard';
 import ClassGoalCreateModal from '../components/teacher/ClassGoalCreateModal';
 import ClassKingdomSummary from '../components/teacher/ClassKingdomSummary';
+import ClassKingdomManagerModal from '../components/teacher/ClassKingdomManagerModal';
 import StudentManagementModal from '../components/teacher/StudentManagementModal';
 
 export default function TeacherHome() {
@@ -64,6 +65,7 @@ export default function TeacherHome() {
   const [transferFeedback, setTransferFeedback] = useState<string | null>(null);
   const [missionCreateOpen, setMissionCreateOpen] = useState(false);
   const [classGoalCreateOpen, setClassGoalCreateOpen] = useState(false);
+  const [classKingdomManagerOpen, setClassKingdomManagerOpen] = useState(false);
 
   const trophyStudent = trophyStudentId
     ? students.find(student => student.id === trophyStudentId) ?? null
@@ -168,7 +170,10 @@ export default function TeacherHome() {
           onCreateGoal={() => setClassGoalCreateOpen(true)}
         />
 
-        <ClassKingdomSummary students={students} />
+        <ClassKingdomSummary
+          students={students}
+          onManage={() => setClassKingdomManagerOpen(true)}
+        />
 
         <MissionBoard
           students={students}
@@ -266,6 +271,16 @@ export default function TeacherHome() {
           <ActivityLog classId={cls.id} />
         </div>
       </div>
+
+      {currentTeacherId && (
+        <ClassKingdomManagerModal
+          open={classKingdomManagerOpen}
+          onClose={() => setClassKingdomManagerOpen(false)}
+          classId={cls.id}
+          teacherId={currentTeacherId}
+          students={students}
+        />
+      )}
 
       <ClassGoalCreateModal
         open={classGoalCreateOpen}
