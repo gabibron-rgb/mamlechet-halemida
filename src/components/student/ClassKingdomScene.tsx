@@ -5,6 +5,7 @@ import {
   nextClassKingdomMilestone,
 } from '../../data/classKingdom';
 import ClassKingdomGateRoom from './ClassKingdomGateRoom';
+import KingdomAmbientEvents from './KingdomAmbientEvents';
 import {
   classKingdomRoomById,
   classKingdomRoomForLandmark,
@@ -718,6 +719,14 @@ export default function ClassKingdomScene({
 
             <div className="ck31-map-vignette" />
             <div className={`ck31-world-light ck31-light-level-${Math.min(6, currentLevel.level)}`} />
+
+            <KingdomAmbientEvents
+              classId={classId}
+              realm={currentRealm}
+              stars={displayStars}
+              sandboxMode={sandboxMode}
+              paused={ceremonyStar !== null || specialAchievementCeremony !== null}
+            />
 
             {realmLandmarks.map((landmark, index) => {
               const isUnlocked = displayStars >= landmark.stars;
