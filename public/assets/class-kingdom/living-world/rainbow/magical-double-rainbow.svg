@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" fill="none">
+  <defs>
+    <filter id="softGlow" x="-30%" y="-50%" width="160%" height="200%">
+      <feGaussianBlur stdDeviation="11" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="outerGlow" x="-30%" y="-60%" width="160%" height="220%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <linearGradient id="mist" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d8fbff" stop-opacity=".22"/>
+      <stop offset=".5" stop-color="#f5e6ff" stop-opacity=".15"/>
+      <stop offset="1" stop-color="#fff4d0" stop-opacity=".08"/>
+    </linearGradient>
+  </defs>
+
+  <!-- soft magical glow behind the primary bow -->
+  <path d="M 45 455 Q 600 -130 1155 455" stroke="#bffaff" stroke-opacity=".18" stroke-width="118" stroke-linecap="round" filter="url(#outerGlow)"/>
+
+  <!-- PRIMARY RAINBOW: concentric strokes, outside to inside -->
+  <g filter="url(#softGlow)" stroke-linecap="round">
+    <path d="M 75 448 Q 600 -104 1125 448" stroke="#ff5576" stroke-width="82"/>
+    <path d="M 75 448 Q 600 -104 1125 448" stroke="#ff9f46" stroke-width="70"/>
+    <path d="M 75 448 Q 600 -104 1125 448" stroke="#ffe56f" stroke-width="58"/>
+    <path d="M 75 448 Q 600 -104 1125 448" stroke="#74ef9d" stroke-width="46"/>
+    <path d="M 75 448 Q 600 -104 1125 448" stroke="#54dff7" stroke-width="34"/>
+    <path d="M 75 448 Q 600 -104 1125 448" stroke="#7298ff" stroke-width="22"/>
+    <path d="M 75 448 Q 600 -104 1125 448" stroke="#b884ff" stroke-width="11"/>
+  </g>
+
+  <!-- SECONDARY RAINBOW: reversed order, fainter and higher -->
+  <g opacity=".38" stroke-linecap="round">
+    <path d="M 6 477 Q 600 -186 1194 477" stroke="#b884ff" stroke-width="45"/>
+    <path d="M 6 477 Q 600 -186 1194 477" stroke="#7298ff" stroke-width="38"/>
+    <path d="M 6 477 Q 600 -186 1194 477" stroke="#54dff7" stroke-width="31"/>
+    <path d="M 6 477 Q 600 -186 1194 477" stroke="#74ef9d" stroke-width="24"/>
+    <path d="M 6 477 Q 600 -186 1194 477" stroke="#ffe56f" stroke-width="17"/>
+    <path d="M 6 477 Q 600 -186 1194 477" stroke="#ff9f46" stroke-width="10"/>
+    <path d="M 6 477 Q 600 -186 1194 477" stroke="#ff5576" stroke-width="5"/>
+  </g>
+
+  <!-- very subtle inner sky sheen, helps the arc feel integrated rather than pasted -->
+  <path d="M 112 450 Q 600 -42 1088 450" stroke="url(#mist)" stroke-width="20" stroke-linecap="round" opacity=".44"/>
+</svg>

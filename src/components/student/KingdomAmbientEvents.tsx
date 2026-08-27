@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -66,6 +66,7 @@ const AURORA_SKY_UNLOCK_STARS = 10;
 const PHOENIX_REBIRTH_UNLOCK_STARS = 12;
 const METEOR_SHOWER_UNLOCK_STARS = 14;
 const LUNAR_ECLIPSE_UNLOCK_STARS = 16;
+const RAINBOW_STORM_UNLOCK_STARS = 18;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -74,6 +75,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'aurora-sky': 17000,
   'meteor-shower': 12200,
   'lunar-eclipse': 18400,
+  'rainbow-storm': 26800,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -557,6 +559,82 @@ function LunarEclipseEvent({
 }
 
 
+function RainbowStormEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const raindrops = Array.from({ length: 34 });
+  const sparkles = Array.from({ length: 24 });
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-rainbow-storm is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-rainbow-storm-sky-dim" />
+      <div className="ck-rainbow-storm-clouds ck-rainbow-storm-clouds-back" />
+      <div className="ck-rainbow-storm-clouds ck-rainbow-storm-clouds-front" />
+      <div className="ck-rainbow-storm-flash" />
+
+      <div className="ck-rainbow-storm-rain">
+        {raindrops.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-rain-x': `${2 + ((index * 37) % 96)}%`,
+              '--ck-rain-y': `${-8 - ((index * 19) % 32)}%`,
+              '--ck-rain-delay': `${(index % 11) * 0.13}s`,
+              '--ck-rain-duration': `${0.72 + (index % 5) * 0.09}s`,
+              '--ck-rain-length': `${10 + (index % 4) * 5}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-rainbow-stage">
+        <div className="ck-rainbow-sunbreak" />
+        <img
+          className="ck-rainbow-double-arc ck-rainbow-double-arc-glow"
+          src="/assets/class-kingdom/living-world/rainbow/magical-double-rainbow.svg"
+          alt=""
+          draggable={false}
+        />
+        <img
+          className="ck-rainbow-double-arc ck-rainbow-double-arc-main"
+          src="/assets/class-kingdom/living-world/rainbow/magical-double-rainbow.svg"
+          alt=""
+          draggable={false}
+        />
+        <span className="ck-rainbow-sparkles">
+          {sparkles.map((_, index) => {
+            const x = 6 + ((index * 41) % 88);
+            const centered = (x - 50) / 50;
+            const y = 43 - (1 - centered * centered) * 31 + ((index % 3) - 1) * 2;
+            return (
+              <i
+                key={index}
+                style={{
+                  '--ck-rainbow-sparkle-x': `${x}%`,
+                  '--ck-rainbow-sparkle-y': `${y}%`,
+                  '--ck-rainbow-sparkle-delay': `${10.2 + (index % 8) * 0.48}s`,
+                  '--ck-rainbow-sparkle-size': `${2 + (index % 4)}px`,
+                } as CSSProperties}
+              />
+            );
+          })}
+        </span>
+      </div>
+
+      <div className="ck-rainbow-world-warmth" />
+    </div>
+  );
+}
+
+
 function MeteorShowerEvent({
   realm,
   instanceId,
@@ -809,6 +887,7 @@ export default function KingdomAmbientEvents({
   const canShowPhoenixRebirth = stars >= PHOENIX_REBIRTH_UNLOCK_STARS;
   const canShowMeteorShower = stars >= METEOR_SHOWER_UNLOCK_STARS;
   const canShowLunarEclipse = stars >= LUNAR_ECLIPSE_UNLOCK_STARS;
+  const canShowRainbowStorm = stars >= RAINBOW_STORM_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -834,6 +913,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'phoenix-rebirth' && !canShowPhoenixRebirth) return;
     if (eventId === 'meteor-shower' && !canShowMeteorShower) return;
     if (eventId === 'lunar-eclipse' && !canShowLunarEclipse) return;
+    if (eventId === 'rainbow-storm' && !canShowRainbowStorm) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -863,7 +943,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMeteorShower, canShowPhoenixRebirth, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -902,11 +982,19 @@ export default function KingdomAmbientEvents({
     if (roll < eclipseThreshold) return 'lunar-eclipse';
 
     const remainingAfterEclipse = 1 - eclipseThreshold;
+    const baseRainbowChance = canShowRainbowStorm
+      ? (realm === 'legendary' ? 0.16 : stars >= 22 ? 0.13 : 0.10)
+      : 0;
+    const rainbowChance = stored.lastEventId === 'rainbow-storm' ? 0.025 : baseRainbowChance;
+    const rainbowThreshold = eclipseThreshold + remainingAfterEclipse * rainbowChance;
+    if (roll < rainbowThreshold) return 'rainbow-storm';
+
+    const remainingAfterRainbow = 1 - rainbowThreshold;
     const baseIslandChance = canShowFloatingIsland
       ? (realm === 'legendary' ? 0.20 : stars >= 16 ? 0.18 : 0.15)
       : 0;
     const islandChance = stored.lastEventId === 'floating-island' ? 0.04 : baseIslandChance;
-    const islandThreshold = eclipseThreshold + remainingAfterEclipse * islandChance;
+    const islandThreshold = rainbowThreshold + remainingAfterRainbow * islandChance;
     if (roll < islandThreshold) return 'floating-island';
 
     const remainingAfterIsland = 1 - islandThreshold;
@@ -922,7 +1010,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMeteorShower, canShowPhoenixRebirth, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1048,6 +1136,10 @@ export default function KingdomAmbientEvents({
         <LunarEclipseEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
+      {activeEvent?.id === 'rainbow-storm' && (
+        <RainbowStormEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
       {activeEvent?.id === 'dragon-flight' && (
         <DragonFlightEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
@@ -1126,6 +1218,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               🌙 ליקוי ירח
+            </button>
+          )}
+          {canShowRainbowStorm && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-rainbow"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('rainbow-storm', false);
+              }}
+            >
+              🌈 קשת קסומה
             </button>
           )}
           {canShowDragonFlight && (

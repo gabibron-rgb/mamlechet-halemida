@@ -4194,3 +4194,394 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ========================================================================== */
+/* Living World V11 — Magical Double Rainbow after Storm                      */
+/* ========================================================================== */
+
+.ck-live-event-rainbow-storm {
+  --ck-rainbow-event-duration: 26.8s;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ck-rainbow-storm-sky-dim {
+  position: absolute;
+  z-index: 1;
+  inset: 0 0 27% 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(8, 18, 46, .46) 0%,
+      rgba(26, 39, 66, .34) 42%,
+      rgba(42, 59, 78, .17) 70%,
+      transparent 100%);
+  mix-blend-mode: multiply;
+  -webkit-mask-image: linear-gradient(180deg, #000 0 62%, rgba(0,0,0,.75) 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0 62%, rgba(0,0,0,.75) 78%, transparent 100%);
+  animation: ckRainbowStormDim var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-rainbow-storm-clouds {
+  position: absolute;
+  z-index: 2;
+  left: -18%;
+  width: 136%;
+  pointer-events: none;
+  opacity: 0;
+  filter: blur(8px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0 58%, rgba(0,0,0,.65) 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0 58%, rgba(0,0,0,.65) 78%, transparent 100%);
+}
+
+.ck-rainbow-storm-clouds::before,
+.ck-rainbow-storm-clouds::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 24% 55%, rgba(69, 79, 112, .84) 0 21%, transparent 22%),
+    radial-gradient(circle at 43% 43%, rgba(86, 96, 126, .82) 0 27%, transparent 28%),
+    radial-gradient(circle at 63% 52%, rgba(61, 72, 107, .83) 0 24%, transparent 25%),
+    radial-gradient(circle at 79% 47%, rgba(94, 103, 132, .68) 0 20%, transparent 21%),
+    linear-gradient(90deg, transparent 0 7%, rgba(52, 63, 96, .58) 16% 87%, transparent 96%);
+}
+
+.ck-rainbow-storm-clouds-back {
+  top: -11%;
+  height: 34%;
+  animation: ckRainbowCloudBack var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-rainbow-storm-clouds-back::before {
+  left: 1%;
+  top: 2%;
+  width: 59%;
+  height: 88%;
+}
+
+.ck-rainbow-storm-clouds-back::after {
+  right: -2%;
+  top: -2%;
+  width: 60%;
+  height: 92%;
+  transform: scaleX(-1);
+}
+
+.ck-rainbow-storm-clouds-front {
+  top: 6%;
+  height: 30%;
+  opacity: 0;
+  filter: blur(12px);
+  animation: ckRainbowCloudFront var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-rainbow-storm-clouds-front::before {
+  left: -6%;
+  top: 4%;
+  width: 66%;
+  height: 92%;
+  opacity: .74;
+}
+
+.ck-rainbow-storm-clouds-front::after {
+  right: -7%;
+  top: 0;
+  width: 64%;
+  height: 90%;
+  opacity: .68;
+  transform: scaleX(-1);
+}
+
+.ck-rainbow-storm-flash {
+  position: absolute;
+  z-index: 4;
+  inset: 0 0 36% 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 46% 14%, rgba(241, 250, 255, .72), rgba(169, 218, 255, .22) 28%, transparent 62%);
+  mix-blend-mode: screen;
+  animation: ckRainbowStormFlash var(--ck-rainbow-event-duration) linear both;
+}
+
+.ck-rainbow-storm-rain {
+  position: absolute;
+  z-index: 4;
+  inset: 0 0 35% 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(180deg, #000 0 70%, rgba(0,0,0,.62) 87%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0 70%, rgba(0,0,0,.62) 87%, transparent 100%);
+  animation: ckRainbowRainWindow var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-rainbow-storm-rain i {
+  position: absolute;
+  left: var(--ck-rain-x);
+  top: var(--ck-rain-y);
+  width: 1.4px;
+  height: var(--ck-rain-length);
+  border-radius: 999px;
+  opacity: .58;
+  background: linear-gradient(180deg, rgba(220,244,255,.08), rgba(196,234,255,.80), rgba(255,255,255,.10));
+  transform: rotate(13deg);
+  filter: drop-shadow(0 0 2px rgba(155, 213, 255, .30));
+  animation: ckRainbowRaindrop var(--ck-rain-duration) linear var(--ck-rain-delay) infinite;
+}
+
+.ck-rainbow-stage {
+  position: absolute;
+  z-index: 3;
+  left: -3%;
+  right: -3%;
+  top: -3%;
+  height: 64%;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 64%, rgba(0,0,0,.84) 76%, rgba(0,0,0,.28) 89%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 8%, #000 64%, rgba(0,0,0,.84) 76%, rgba(0,0,0,.28) 89%, transparent 100%);
+  animation: ckRainbowStageFade var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-rainbow-double-arc {
+  position: absolute;
+  left: 50%;
+  top: -8%;
+  width: 112%;
+  height: auto;
+  max-width: none;
+  transform: translateX(-50%) scale(.94);
+  transform-origin: 50% 66%;
+  pointer-events: none;
+  user-select: none;
+  will-change: transform, opacity, filter;
+}
+
+.ck-rainbow-double-arc-glow {
+  z-index: 1;
+  opacity: .34;
+  filter: blur(10px) saturate(1.22) brightness(1.12);
+  animation: ckRainbowArcGlow var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-rainbow-double-arc-main {
+  z-index: 2;
+  opacity: .92;
+  filter: saturate(1.08) brightness(1.03) drop-shadow(0 0 7px rgba(227, 250, 255, .20));
+  animation: ckRainbowArcMain var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-live-event-rainbow-storm.is-legendary .ck-rainbow-double-arc-main {
+  filter: saturate(1.16) brightness(1.08) drop-shadow(0 0 10px rgba(255, 226, 155, .24));
+}
+
+.ck-rainbow-sunbreak {
+  position: absolute;
+  z-index: 0;
+  left: 54%;
+  top: 19%;
+  width: min(72vw, 1050px);
+  aspect-ratio: 2.4 / 1;
+  transform: translate(-50%, -50%) scale(.84);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse,
+      rgba(255, 248, 203, .36) 0%,
+      rgba(255, 224, 144, .16) 28%,
+      rgba(185, 238, 255, .08) 49%,
+      transparent 73%);
+  mix-blend-mode: screen;
+  filter: blur(17px);
+  animation: ckRainbowSunbreak var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-rainbow-sparkles {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-rainbow-sparkles i {
+  position: absolute;
+  left: var(--ck-rainbow-sparkle-x);
+  top: var(--ck-rainbow-sparkle-y);
+  width: var(--ck-rainbow-sparkle-size);
+  height: var(--ck-rainbow-sparkle-size);
+  border-radius: 50%;
+  opacity: 0;
+  background: rgba(255,255,255,.96);
+  box-shadow:
+    0 0 5px rgba(255,255,255,.90),
+    0 0 12px rgba(255, 229, 139, .56),
+    0 0 18px rgba(115, 226, 255, .28);
+  animation: ckRainbowSparkle 2.8s ease-in-out var(--ck-rainbow-sparkle-delay) 3 both;
+}
+
+.ck-rainbow-world-warmth {
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(255, 243, 187, .06) 0%,
+      rgba(255, 221, 142, .045) 31%,
+      rgba(184, 238, 255, .025) 58%,
+      transparent 82%);
+  mix-blend-mode: screen;
+  animation: ckRainbowWarmth var(--ck-rainbow-event-duration) ease-in-out both;
+}
+
+.ck-live-event-test-button.is-rainbow {
+  border-color: rgba(170, 237, 255, .72);
+  background: linear-gradient(180deg, rgba(63, 74, 116, .95), rgba(55, 48, 102, .96));
+  box-shadow: 0 7px 18px rgba(63, 67, 127, .27), inset 0 0 0 1px rgba(255, 231, 139, .14);
+}
+
+.ck-live-event-test-button.is-rainbow:hover {
+  border-color: rgba(255, 239, 178, .96);
+  box-shadow: 0 8px 22px rgba(91, 99, 176, .33), 0 0 13px rgba(145, 238, 255, .18);
+}
+
+@keyframes ckRainbowStormDim {
+  0%, 2% { opacity: 0; }
+  8% { opacity: .46; }
+  17% { opacity: .78; }
+  24% { opacity: .65; }
+  29% { opacity: .32; }
+  34%, 100% { opacity: 0; }
+}
+
+@keyframes ckRainbowCloudBack {
+  0%, 2% { opacity: 0; transform: translate3d(-8%, -7px, 0) scale(1.06); }
+  8% { opacity: .74; }
+  18% { opacity: .88; transform: translate3d(0, 3px, 0) scale(1.01); }
+  25% { opacity: .60; }
+  31% { opacity: .16; transform: translate3d(9%, -8px, 0) scale(.98); }
+  35%, 100% { opacity: 0; transform: translate3d(15%, -10px, 0) scale(.96); }
+}
+
+@keyframes ckRainbowCloudFront {
+  0%, 5% { opacity: 0; transform: translate3d(8%, 3px, 0) scale(1.04); }
+  11% { opacity: .68; }
+  19% { opacity: .78; transform: translate3d(0, 0, 0) scale(1); }
+  25% { opacity: .36; }
+  31% { opacity: .08; transform: translate3d(-10%, -5px, 0) scale(.98); }
+  35%, 100% { opacity: 0; }
+}
+
+@keyframes ckRainbowStormFlash {
+  0%, 14% { opacity: 0; }
+  15.2% { opacity: .10; }
+  16.1% { opacity: .62; }
+  17% { opacity: .08; }
+  18.5%, 100% { opacity: 0; }
+}
+
+@keyframes ckRainbowRainWindow {
+  0%, 7% { opacity: 0; }
+  12% { opacity: .55; }
+  19% { opacity: .78; }
+  25% { opacity: .42; }
+  30% { opacity: .09; }
+  34%, 100% { opacity: 0; }
+}
+
+@keyframes ckRainbowRaindrop {
+  0% { transform: translate3d(0, -8px, 0) rotate(13deg); opacity: 0; }
+  14% { opacity: .58; }
+  100% { transform: translate3d(16px, 360px, 0) rotate(13deg); opacity: 0; }
+}
+
+@keyframes ckRainbowStageFade {
+  0%, 23% { opacity: 0; }
+  28% { opacity: .24; }
+  34% { opacity: .72; }
+  39% { opacity: 1; }
+  86% { opacity: 1; }
+  90% { opacity: .93; }
+  96% { opacity: .42; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckRainbowArcMain {
+  0%, 23% { opacity: 0; transform: translateX(-50%) scale(.89) translateY(18px); filter: saturate(.86) brightness(.92) blur(1.5px); }
+  28% { opacity: .28; }
+  34% { opacity: .74; transform: translateX(-50%) scale(.98) translateY(4px); filter: saturate(1.02) brightness(1.00) blur(.4px); }
+  39% { opacity: 1; transform: translateX(-50%) scale(1.01) translateY(0); filter: saturate(1.14) brightness(1.06) blur(0); }
+  68% { opacity: 1; transform: translateX(-50%) scale(1.012) translateY(-1px); }
+  86% { opacity: .98; transform: translateX(-50%) scale(1.015) translateY(-2px); }
+  91% { opacity: .88; }
+  96% { opacity: .38; }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.03) translateY(-4px); }
+}
+
+@keyframes ckRainbowArcGlow {
+  0%, 25% { opacity: 0; transform: translateX(-50%) scale(.92); }
+  32% { opacity: .20; }
+  39% { opacity: .52; transform: translateX(-50%) scale(1.03); }
+  70% { opacity: .48; }
+  86% { opacity: .43; }
+  94% { opacity: .20; }
+  100% { opacity: 0; transform: translateX(-50%) scale(1.06); }
+}
+
+@keyframes ckRainbowSunbreak {
+  0%, 26% { opacity: 0; transform: translate(-50%, -50%) scale(.78); }
+  33% { opacity: .18; }
+  40% { opacity: .72; transform: translate(-50%, -50%) scale(1.02); }
+  72% { opacity: .66; }
+  86% { opacity: .52; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.13); }
+}
+
+@keyframes ckRainbowSparkle {
+  0% { opacity: 0; transform: translate3d(0, 8px, 0) scale(.25); }
+  27% { opacity: .96; transform: translate3d(0, 0, 0) scale(1.15); }
+  56% { opacity: .44; transform: translate3d(4px, -5px, 0) scale(.72); }
+  100% { opacity: 0; transform: translate3d(9px, -13px, 0) scale(.15); }
+}
+
+@keyframes ckRainbowWarmth {
+  0%, 28% { opacity: 0; }
+  35% { opacity: .22; }
+  42% { opacity: .55; }
+  74% { opacity: .52; }
+  87% { opacity: .39; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 720px) {
+  .ck-rainbow-stage {
+    top: 0;
+    height: 58%;
+  }
+
+  .ck-rainbow-double-arc {
+    width: 130%;
+    top: -4%;
+  }
+
+  .ck-rainbow-storm-rain {
+    bottom: 40%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-live-event-rainbow-storm,
+  .ck-live-event-rainbow-storm *,
+  .ck-live-event-rainbow-storm *::before,
+  .ck-live-event-rainbow-storm *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
