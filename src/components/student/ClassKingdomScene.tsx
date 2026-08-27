@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   CLASS_KINGDOM_LEVELS,
   classKingdomLevel,
@@ -10,6 +10,11 @@ import {
   classKingdomRoomForLandmark,
   type ClassKingdomRoomId,
 } from '../../data/classKingdomRooms';
+import {
+  CLASS_ROOM_CHOICE_GROUPS,
+  CLASS_ROOM_ITEMS,
+  type ClassRoomItemDefinition,
+} from '../../data/classRoomItems';
 import './ClassKingdomScene.css';
 
 type Props = {
@@ -49,6 +54,21 @@ type RealmDefinition = {
   descriptionHe: string;
   unlockStars: number;
   backgroundSrc: string;
+};
+
+type CeremonyTone = 'standard' | 'epic' | 'legendary' | 'crown';
+
+type CeremonyUnlock = {
+  id: string;
+  titleHe: string;
+  descriptionHe: string;
+  imagePath?: string;
+  icon?: string;
+  badgeHe: string;
+};
+
+type CeremonySeenState = {
+  seenStars: number[];
 };
 
 const ASSET_ROOT = '/assets/class-kingdom/buildings';
@@ -284,6 +304,108 @@ function topLandmarkForRealm(realmId: RealmId, displayStars: number) {
     ?? realmLandmarks[0];
 }
 
+
+const CEREMONY_STORAGE_PREFIX = 'mamlechet-class-kingdom-ceremonies-v1';
+const LEGENDARY_REALM_CEREMONY_STAR = LEGENDARY_REALM_UNLOCK_STARS;
+
+function ceremonyUnlocksForStar(star: number): CeremonyUnlock[] {
+  const unlocks: CeremonyUnlock[] = [];
+
+  for (const landmark of LANDMARKS.filter(entry => entry.stars === star)) {
+    unlocks.push({
+      id: `landmark-${landmark.id}`,
+      titleHe: landmark.titleHe,
+      descriptionHe: landmark.descriptionHe,
+      imagePath: landmark.asset,
+      icon: '🏰',
+      badgeHe: 'מבנה חדש',
+    });
+  }
+
+  for (const item of CLASS_ROOM_ITEMS.filter(entry => entry.unlockKind === 'automatic' && entry.unlockStars === star)) {
+    unlocks.push(classRoomItemCeremonyUnlock(item));
+  }
+
+  for (const choiceGroup of CLASS_ROOM_CHOICE_GROUPS.filter(entry => entry.stars === star)) {
+    unlocks.push({
+      id: `choice-${choiceGroup.id}`,
+      titleHe: choiceGroup.titleHe,
+      descriptionHe: choiceGroup.subtitleHe,
+      icon: '🎁',
+      badgeHe: 'בחירה כיתתית חדשה',
+    });
+  }
+
+  if (star === LEGENDARY_REALM_CEREMONY_STAR) {
+    unlocks.push({
+      id: 'legendary-realm',
+      titleHe: 'הממלכה האגדית',
+      descriptionHe: 'שער חדש נפתח אל האזור המתקדם של הממלכה — מכאן מתחילים המבנים והפרסים האגדיים באמת.',
+      icon: '🌌',
+      badgeHe: 'עולם חדש',
+    });
+  }
+
+  return unlocks;
+}
+
+function classRoomItemCeremonyUnlock(item: ClassRoomItemDefinition): CeremonyUnlock {
+  return {
+    id: `reward-${item.id}`,
+    titleHe: item.nameHe,
+    descriptionHe: item.unlockReasonHe || item.descriptionHe,
+    imagePath: item.imagePath,
+    icon: '🏆',
+    badgeHe: item.rarity === 'legendary' ? 'פרס אגדי' : item.rarity === 'epic' ? 'פרס אפי' : 'פרס חדש',
+  };
+}
+
+function ceremonyStars(): number[] {
+  const values = new Set<number>([LEGENDARY_REALM_CEREMONY_STAR]);
+  LANDMARKS.forEach(landmark => values.add(landmark.stars));
+  CLASS_ROOM_ITEMS.filter(item => item.unlockKind === 'automatic').forEach(item => values.add(item.unlockStars));
+  CLASS_ROOM_CHOICE_GROUPS.forEach(group => values.add(group.stars));
+  return [...values].filter(star => ceremonyUnlocksForStar(star).length > 0).sort((a, b) => a - b);
+}
+
+const CEREMONY_STARS = ceremonyStars();
+
+function ceremonyToneForStar(star: number): CeremonyTone {
+  if (star >= 24) return 'crown';
+  if (star >= 16) return 'legendary';
+  if (star >= 8) return 'epic';
+  return 'standard';
+}
+
+function ceremonyTitleForStar(star: number): string {
+  if (star >= 24) return 'פסגת הממלכה הושגה!';
+  if (star === LEGENDARY_REALM_CEREMONY_STAR) return 'שער הממלכה האגדית נפתח!';
+  if (star >= 16) return 'הממלכה האגדית התעוררה!';
+  if (star >= 8) return 'אבן דרך אדירה הושגה!';
+  return 'הממלכה התקדמה!';
+}
+
+function loadSeenCeremonyStars(storageKey: string): number[] | null {
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<CeremonySeenState>;
+    if (!Array.isArray(parsed.seenStars)) return [];
+    return parsed.seenStars.filter(value => typeof value === 'number' && Number.isFinite(value));
+  } catch {
+    return [];
+  }
+}
+
+function saveSeenCeremonyStars(storageKey: string, stars: number[]) {
+  try {
+    const unique = [...new Set(stars.map(value => Math.max(0, Math.floor(value))))].sort((a, b) => a - b);
+    window.localStorage.setItem(storageKey, JSON.stringify({ seenStars: unique } satisfies CeremonySeenState));
+  } catch {
+    // A blocked localStorage should never block the kingdom itself.
+  }
+}
+
 export default function ClassKingdomScene({
   stars,
   classId,
@@ -298,6 +420,9 @@ export default function ClassKingdomScene({
   const [selectedId, setSelectedId] = useState('gate');
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [view, setView] = useState<'map' | ClassKingdomRoomId>('map');
+  const [ceremonyStar, setCeremonyStar] = useState<number | null>(null);
+  const [ceremonyQueue, setCeremonyQueue] = useState<number[]>([]);
+  const ceremonyStorageKey = `${CEREMONY_STORAGE_PREFIX}:${classId}`;
 
   const legendaryUnlocked = displayStars >= LEGENDARY_REALM_UNLOCK_STARS;
   const realm = realmById(currentRealm);
@@ -328,6 +453,49 @@ export default function ClassKingdomScene({
   const unlocked = LANDMARKS.filter(landmark => displayStars >= landmark.stars);
   const unlockedInRealm = realmLandmarks.filter(landmark => displayStars >= landmark.stars);
   const nextTargetsInRealm = realmLandmarks.filter(landmark => landmark.stars > displayStars).slice(0, 2);
+  const activeCeremonyUnlocks = ceremonyStar === null ? [] : ceremonyUnlocksForStar(ceremonyStar);
+  const activeCeremonyTone = ceremonyStar === null ? 'standard' : ceremonyToneForStar(ceremonyStar);
+
+  useEffect(() => {
+    if (sandboxMode || !classId) return;
+
+    const eligibleStars = CEREMONY_STARS.filter(star => star <= Math.max(0, Math.floor(stars)));
+    const storedSeenStars = loadSeenCeremonyStars(ceremonyStorageKey);
+
+    // First run after installing this feature: adopt the current progress as the baseline.
+    // This prevents old ceremonies from flooding existing real classes.
+    if (storedSeenStars === null) {
+      saveSeenCeremonyStars(ceremonyStorageKey, eligibleStars);
+      return;
+    }
+
+    const seen = new Set(storedSeenStars);
+    const unseen = eligibleStars.filter(star => !seen.has(star));
+    if (unseen.length === 0) return;
+
+    setCeremonyQueue(current => current.length > 0 ? current : unseen);
+    setCeremonyStar(current => current ?? unseen[0]);
+  }, [sandboxMode, classId, stars, ceremonyStorageKey]);
+
+  function closeCeremony() {
+    if (ceremonyStar === null) return;
+
+    if (!sandboxMode) {
+      const seen = loadSeenCeremonyStars(ceremonyStorageKey) ?? [];
+      saveSeenCeremonyStars(ceremonyStorageKey, [...seen, ceremonyStar]);
+    }
+
+    const remaining = ceremonyQueue.filter(star => star !== ceremonyStar);
+    setCeremonyQueue(remaining);
+    setCeremonyStar(remaining[0] ?? null);
+  }
+
+  function replayLatestCeremony() {
+    const latest = [...CEREMONY_STARS].reverse().find(star => star <= displayStars);
+    if (!latest) return;
+    setCeremonyQueue([]);
+    setCeremonyStar(latest);
+  }
 
   if (view !== 'map') {
     const room = classKingdomRoomById(view);
@@ -366,6 +534,58 @@ export default function ClassKingdomScene({
 
   return (
     <section className="mt-5 rounded-3xl border border-cyan-300/15 bg-magic-bg/35 p-5">
+      {ceremonyStar !== null && activeCeremonyUnlocks.length > 0 && (
+        <div className={`ck-ceremony-overlay is-${activeCeremonyTone}`} role="dialog" aria-modal="true" aria-label={`טקס פתיחת אבן דרך ${ceremonyStar} כוכבים`}>
+          <div className="ck-ceremony-backdrop" aria-hidden="true" />
+          <div className="ck-ceremony-rays" aria-hidden="true" />
+          <div className="ck-ceremony-particles" aria-hidden="true">
+            {Array.from({ length: activeCeremonyTone === 'crown' ? 42 : activeCeremonyTone === 'legendary' ? 34 : 24 }).map((_, index) => (
+              <i
+                key={index}
+                style={{
+                  left: `${(index * 37 + 9) % 100}%`,
+                  top: `${(index * 61 + 7) % 92}%`,
+                  animationDelay: `${-((index % 9) * 0.37)}s`,
+                  animationDuration: `${3.2 + (index % 6) * 0.42}s`,
+                } as CSSProperties}
+              />
+            ))}
+          </div>
+
+          <div className="ck-ceremony-card" dir="rtl">
+            <div className="ck-ceremony-star-burst" aria-hidden="true">
+              <span>★</span>
+            </div>
+            <div className="ck-ceremony-kicker">אבן דרך חדשה · {ceremonyStar} ⭐</div>
+            <h2 className="ck-ceremony-title">{ceremonyTitleForStar(ceremonyStar)}</h2>
+            <p className="ck-ceremony-subtitle">
+              הכיתה הרוויחה כוכב ששינה את הממלכה. {activeCeremonyUnlocks.length > 1 ? 'כמה דברים חדשים נפתחו יחד:' : 'נפתח משהו חדש:'}
+            </p>
+
+            <div className={`ck-ceremony-unlocks ${activeCeremonyUnlocks.length === 1 ? 'is-single' : ''}`}>
+              {activeCeremonyUnlocks.map(unlock => (
+                <article key={unlock.id} className="ck-ceremony-unlock-card">
+                  <div className="ck-ceremony-unlock-badge">{unlock.badgeHe}</div>
+                  <div className="ck-ceremony-unlock-art">
+                    {unlock.imagePath ? <img src={unlock.imagePath} alt="" draggable={false} /> : <span>{unlock.icon ?? '✨'}</span>}
+                  </div>
+                  <div className="ck-ceremony-unlock-title">{unlock.titleHe}</div>
+                  <div className="ck-ceremony-unlock-description">{unlock.descriptionHe}</div>
+                </article>
+              ))}
+            </div>
+
+            {activeCeremonyTone === 'crown' && (
+              <div className="ck-ceremony-crown-message">👑 24 כוכבים — הכיתה השלימה את מסלול הממלכה הנוכחי!</div>
+            )}
+
+            <button type="button" className="ck-ceremony-continue" onClick={closeCeremony}>
+              {ceremonyQueue.length > 1 ? '✨ המשך לפתיחה הבאה' : '✨ אל הממלכה'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h3 className="font-black text-white">🗺️ הממלכה החיה של הכיתה</h3>
@@ -376,6 +596,17 @@ export default function ClassKingdomScene({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {(viewerRole === 'teacher' || sandboxMode) && CEREMONY_STARS.some(star => star <= displayStars) && (
+            <button
+              type="button"
+              onClick={replayLatestCeremony}
+              className="ck-ceremony-replay-button"
+              title="הצג שוב את טקס הפתיחה האחרון"
+            >
+              🎬 הצג שוב טקס אחרון
+            </button>
+          )}
+
           {allowSandbox && (
             <button
               type="button"

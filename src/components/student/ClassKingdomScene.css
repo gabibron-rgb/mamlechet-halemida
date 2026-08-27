@@ -430,3 +430,465 @@
   border-color: rgba(255, 239, 165, 0.45);
   box-shadow: 0 10px 26px rgba(4, 5, 20, 0.38), 0 0 0 1px rgba(255, 239, 165, 0.08) inset;
 }
+
+/* ===== Kingdom milestone ceremony v1 ===== */
+.ck-ceremony-replay-button {
+  border: 1px solid rgba(250, 204, 21, 0.24);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.14), rgba(139, 92, 246, 0.08));
+  padding: 8px 12px;
+  color: rgba(255, 248, 213, 0.95);
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.ck-ceremony-replay-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(250, 204, 21, 0.42);
+  background: linear-gradient(180deg, rgba(250, 204, 21, 0.22), rgba(139, 92, 246, 0.14));
+}
+
+.ck-ceremony-overlay {
+  --ck-ceremony-primary: 103, 232, 249;
+  --ck-ceremony-secondary: 168, 85, 247;
+  --ck-ceremony-gold: 250, 204, 21;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 22px;
+  isolation: isolate;
+  animation: ck-ceremony-overlay-enter 420ms ease-out both;
+}
+
+.ck-ceremony-overlay.is-epic {
+  --ck-ceremony-primary: 217, 70, 239;
+  --ck-ceremony-secondary: 59, 130, 246;
+}
+
+.ck-ceremony-overlay.is-legendary {
+  --ck-ceremony-primary: 250, 204, 21;
+  --ck-ceremony-secondary: 139, 92, 246;
+}
+
+.ck-ceremony-overlay.is-crown {
+  --ck-ceremony-primary: 255, 226, 115;
+  --ck-ceremony-secondary: 217, 70, 239;
+}
+
+.ck-ceremony-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(var(--ck-ceremony-primary), 0.22), transparent 28%),
+    radial-gradient(circle at 50% 50%, rgba(var(--ck-ceremony-secondary), 0.15), transparent 52%),
+    rgba(3, 5, 22, 0.91);
+  backdrop-filter: blur(8px);
+}
+
+.ck-ceremony-rays {
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  z-index: -3;
+  width: min(1050px, 115vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0.52;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(var(--ck-ceremony-primary), 0.3) 0deg 3deg,
+    transparent 3deg 15deg
+  );
+  mask-image: radial-gradient(circle, #000 0 22%, rgba(0,0,0,0.9) 38%, transparent 72%);
+  animation: ck-ceremony-rays-spin 28s linear infinite;
+}
+
+.ck-ceremony-overlay.is-crown .ck-ceremony-rays {
+  opacity: 0.75;
+  animation-duration: 18s;
+}
+
+.ck-ceremony-particles {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.ck-ceremony-particles i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: rgb(var(--ck-ceremony-primary));
+  box-shadow:
+    0 0 12px rgba(var(--ck-ceremony-primary), 0.92),
+    0 0 22px rgba(var(--ck-ceremony-secondary), 0.48);
+  transform: rotate(45deg);
+  animation: ck-ceremony-particle-float 4s ease-in-out infinite;
+}
+
+.ck-ceremony-particles i:nth-child(3n) {
+  width: 5px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgb(var(--ck-ceremony-gold));
+}
+
+.ck-ceremony-particles i:nth-child(4n) {
+  width: 10px;
+  height: 10px;
+  background: rgb(var(--ck-ceremony-secondary));
+}
+
+.ck-ceremony-card {
+  position: relative;
+  width: min(930px, 94vw);
+  max-height: min(90vh, 880px);
+  overflow: auto;
+  border: 1px solid rgba(var(--ck-ceremony-primary), 0.4);
+  border-radius: 34px;
+  background:
+    linear-gradient(150deg, rgba(24, 18, 59, 0.96), rgba(8, 12, 38, 0.97)),
+    radial-gradient(circle at 50% 0%, rgba(var(--ck-ceremony-primary), 0.12), transparent 45%);
+  padding: 30px 30px 26px;
+  text-align: center;
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.62),
+    0 0 58px rgba(var(--ck-ceremony-primary), 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  animation: ck-ceremony-card-enter 680ms cubic-bezier(.18,.88,.26,1.2) both;
+}
+
+.ck-ceremony-card::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 27px;
+  pointer-events: none;
+}
+
+.ck-ceremony-overlay.is-legendary .ck-ceremony-card,
+.ck-ceremony-overlay.is-crown .ck-ceremony-card {
+  box-shadow:
+    0 30px 100px rgba(0, 0, 0, 0.66),
+    0 0 70px rgba(var(--ck-ceremony-primary), 0.23),
+    0 0 120px rgba(var(--ck-ceremony-secondary), 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.ck-ceremony-star-burst {
+  position: relative;
+  display: grid;
+  width: 102px;
+  height: 102px;
+  margin: -4px auto 8px;
+  place-items: center;
+}
+
+.ck-ceremony-star-burst::before,
+.ck-ceremony-star-burst::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 2px solid rgba(var(--ck-ceremony-primary), 0.45);
+  border-radius: 50%;
+  animation: ck-ceremony-ring 2.8s ease-out infinite;
+}
+
+.ck-ceremony-star-burst::after {
+  animation-delay: -1.4s;
+}
+
+.ck-ceremony-star-burst span {
+  position: relative;
+  z-index: 2;
+  color: rgb(var(--ck-ceremony-gold));
+  font-size: 66px;
+  line-height: 1;
+  text-shadow:
+    0 0 15px rgba(var(--ck-ceremony-gold), 0.92),
+    0 0 35px rgba(var(--ck-ceremony-primary), 0.65);
+  animation: ck-ceremony-star-beat 1.8s ease-in-out infinite;
+}
+
+.ck-ceremony-overlay.is-crown .ck-ceremony-star-burst span {
+  font-size: 74px;
+  animation-duration: 1.4s;
+}
+
+.ck-ceremony-kicker {
+  color: rgba(255, 238, 171, 0.84);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+.ck-ceremony-title {
+  margin: 6px 0 0;
+  background: linear-gradient(90deg, #ffffff, rgb(var(--ck-ceremony-primary)), #fff0a8, #ffffff);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(29px, 4.5vw, 54px);
+  font-weight: 1000;
+  line-height: 1.08;
+  text-shadow: 0 10px 36px rgba(var(--ck-ceremony-primary), 0.12);
+  animation: ck-ceremony-title-shimmer 4.8s linear infinite;
+}
+
+.ck-ceremony-subtitle {
+  max-width: 660px;
+  margin: 12px auto 0;
+  color: rgba(236, 237, 255, 0.74);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.ck-ceremony-unlocks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.ck-ceremony-unlocks.is-single {
+  grid-template-columns: minmax(0, 440px);
+  justify-content: center;
+}
+
+.ck-ceremony-unlock-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 258px;
+  border: 1px solid rgba(var(--ck-ceremony-primary), 0.2);
+  border-radius: 23px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(var(--ck-ceremony-primary), 0.13), transparent 36%),
+    linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.022));
+  padding: 14px 15px 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.07);
+  animation: ck-ceremony-unlock-enter 720ms 160ms cubic-bezier(.18,.88,.26,1.12) both;
+}
+
+.ck-ceremony-unlock-card::after {
+  content: '';
+  position: absolute;
+  left: -40%;
+  top: -60%;
+  width: 45%;
+  height: 210%;
+  transform: rotate(24deg);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  animation: ck-ceremony-card-sweep 5.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.ck-ceremony-unlock-badge {
+  display: inline-flex;
+  border: 1px solid rgba(var(--ck-ceremony-primary), 0.28);
+  border-radius: 999px;
+  background: rgba(var(--ck-ceremony-primary), 0.09);
+  padding: 4px 9px;
+  color: rgba(255, 246, 211, 0.92);
+  font-size: 9px;
+  font-weight: 1000;
+}
+
+.ck-ceremony-unlock-art {
+  display: grid;
+  height: 130px;
+  margin-top: 8px;
+  place-items: center;
+}
+
+.ck-ceremony-unlock-art img {
+  display: block;
+  width: min(175px, 82%);
+  height: 126px;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 12px 15px rgba(0, 0, 0, 0.36))
+    drop-shadow(0 0 16px rgba(var(--ck-ceremony-primary), 0.22));
+  animation: ck-ceremony-art-float 3.7s ease-in-out infinite;
+}
+
+.ck-ceremony-overlay.is-crown .ck-ceremony-unlock-art img {
+  filter:
+    drop-shadow(0 12px 15px rgba(0, 0, 0, 0.36))
+    drop-shadow(0 0 23px rgba(var(--ck-ceremony-primary), 0.34));
+}
+
+.ck-ceremony-unlock-art > span {
+  font-size: 76px;
+  filter: drop-shadow(0 0 18px rgba(var(--ck-ceremony-primary), 0.42));
+  animation: ck-ceremony-art-float 3.2s ease-in-out infinite;
+}
+
+.ck-ceremony-unlock-title {
+  color: white;
+  font-size: 17px;
+  font-weight: 1000;
+}
+
+.ck-ceremony-unlock-description {
+  margin-top: 5px;
+  color: rgba(226, 229, 255, 0.64);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.ck-ceremony-crown-message {
+  margin: 18px auto 0;
+  border: 1px solid rgba(255, 226, 115, 0.28);
+  border-radius: 16px;
+  background: linear-gradient(90deg, rgba(250,204,21,0.09), rgba(217,70,239,0.1), rgba(250,204,21,0.09));
+  padding: 10px 14px;
+  color: #fff2b7;
+  font-size: 12px;
+  font-weight: 1000;
+  box-shadow: 0 0 30px rgba(250, 204, 21, 0.08);
+}
+
+.ck-ceremony-continue {
+  position: relative;
+  overflow: hidden;
+  min-width: 190px;
+  margin-top: 20px;
+  border: 1px solid rgba(var(--ck-ceremony-primary), 0.42);
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(var(--ck-ceremony-primary), 0.21), rgba(var(--ck-ceremony-secondary), 0.24));
+  padding: 11px 20px;
+  color: white;
+  font-size: 13px;
+  font-weight: 1000;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.24), 0 0 26px rgba(var(--ck-ceremony-primary),0.1);
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
+.ck-ceremony-continue:hover {
+  transform: translateY(-2px) scale(1.015);
+  filter: brightness(1.15);
+}
+
+@keyframes ck-ceremony-overlay-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ck-ceremony-card-enter {
+  0% { opacity: 0; transform: scale(0.74) translateY(28px); }
+  68% { opacity: 1; transform: scale(1.025) translateY(-3px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes ck-ceremony-unlock-enter {
+  from { opacity: 0; transform: translateY(24px) scale(0.88); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ck-ceremony-rays-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes ck-ceremony-particle-float {
+  0%, 100% { opacity: 0.2; transform: translateY(18px) rotate(45deg) scale(0.68); }
+  45% { opacity: 1; }
+  50% { transform: translateY(-20px) rotate(135deg) scale(1.25); }
+  75% { opacity: 0.62; }
+}
+
+@keyframes ck-ceremony-ring {
+  0% { opacity: 0; transform: scale(0.5); }
+  35% { opacity: 0.8; }
+  100% { opacity: 0; transform: scale(1.7); }
+}
+
+@keyframes ck-ceremony-star-beat {
+  0%, 100% { transform: scale(0.94) rotate(-3deg); }
+  50% { transform: scale(1.1) rotate(3deg); }
+}
+
+@keyframes ck-ceremony-title-shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 220% 50%; }
+}
+
+@keyframes ck-ceremony-art-float {
+  0%, 100% { transform: translateY(2px) scale(0.98); }
+  50% { transform: translateY(-6px) scale(1.035); }
+}
+
+@keyframes ck-ceremony-card-sweep {
+  0%, 55% { transform: translateX(-180%) rotate(24deg); opacity: 0; }
+  66% { opacity: 1; }
+  88%, 100% { transform: translateX(420%) rotate(24deg); opacity: 0; }
+}
+
+@media (max-width: 720px) {
+  .ck-ceremony-overlay {
+    padding: 10px;
+  }
+
+  .ck-ceremony-card {
+    width: 96vw;
+    max-height: 94vh;
+    border-radius: 24px;
+    padding: 20px 14px 18px;
+  }
+
+  .ck-ceremony-star-burst {
+    width: 78px;
+    height: 78px;
+  }
+
+  .ck-ceremony-star-burst span {
+    font-size: 52px;
+  }
+
+  .ck-ceremony-unlocks,
+  .ck-ceremony-unlocks.is-single {
+    grid-template-columns: 1fr;
+  }
+
+  .ck-ceremony-unlock-card {
+    min-height: 220px;
+  }
+
+  .ck-ceremony-unlock-art {
+    height: 105px;
+  }
+
+  .ck-ceremony-unlock-art img {
+    height: 102px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-ceremony-overlay,
+  .ck-ceremony-card,
+  .ck-ceremony-rays,
+  .ck-ceremony-particles i,
+  .ck-ceremony-star-burst::before,
+  .ck-ceremony-star-burst::after,
+  .ck-ceremony-star-burst span,
+  .ck-ceremony-title,
+  .ck-ceremony-unlock-card,
+  .ck-ceremony-unlock-card::after,
+  .ck-ceremony-unlock-art img,
+  .ck-ceremony-unlock-art > span {
+    animation: none !important;
+  }
+}
