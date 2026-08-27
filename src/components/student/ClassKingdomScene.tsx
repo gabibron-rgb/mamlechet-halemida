@@ -71,6 +71,15 @@ type CeremonySeenState = {
   seenStars: number[];
 };
 
+type SpecialAchievementCeremonyDetail = {
+  title: string;
+  story: string;
+  itemNameHe: string;
+  imagePath: string;
+  achievementTitleHe: string;
+  achievementIcon: string;
+};
+
 const ASSET_ROOT = '/assets/class-kingdom/buildings';
 const LEGENDARY_REALM_UNLOCK_STARS = 11;
 
@@ -307,6 +316,7 @@ function topLandmarkForRealm(realmId: RealmId, displayStars: number) {
 
 const CEREMONY_STORAGE_PREFIX = 'mamlechet-class-kingdom-ceremonies-v1';
 const REPLAY_CEREMONY_EVENT = 'mamlechet:class-kingdom-replay-latest-ceremony';
+const SPECIAL_ACHIEVEMENT_AWARDED_EVENT = 'mamlechet:class-kingdom-special-achievement-awarded';
 const LEGENDARY_REALM_CEREMONY_STAR = LEGENDARY_REALM_UNLOCK_STARS;
 
 function ceremonyUnlocksForStar(star: number): CeremonyUnlock[] {
@@ -423,6 +433,7 @@ export default function ClassKingdomScene({
   const [view, setView] = useState<'map' | ClassKingdomRoomId>('map');
   const [ceremonyStar, setCeremonyStar] = useState<number | null>(null);
   const [ceremonyQueue, setCeremonyQueue] = useState<number[]>([]);
+  const [specialAchievementCeremony, setSpecialAchievementCeremony] = useState<SpecialAchievementCeremonyDetail | null>(null);
   const ceremonyStorageKey = `${CEREMONY_STORAGE_PREFIX}:${classId}`;
 
   const legendaryUnlocked = displayStars >= LEGENDARY_REALM_UNLOCK_STARS;
@@ -504,19 +515,38 @@ export default function ClassKingdomScene({
     return () => window.removeEventListener(REPLAY_CEREMONY_EVENT, handleReplayRequest);
   }, [displayStars]);
 
+  useEffect(() => {
+    const handleSpecialAchievement = (event: Event) => {
+      const detail = (event as CustomEvent<SpecialAchievementCeremonyDetail>).detail;
+      if (!detail?.title || !detail?.imagePath) return;
+      setSpecialAchievementCeremony(detail);
+    };
+
+    window.addEventListener(SPECIAL_ACHIEVEMENT_AWARDED_EVENT, handleSpecialAchievement);
+    return () => window.removeEventListener(SPECIAL_ACHIEVEMENT_AWARDED_EVENT, handleSpecialAchievement);
+  }, []);
+
   if (view !== 'map') {
     const room = classKingdomRoomById(view);
     return (
-      <ClassKingdomGateRoom
-        room={room}
-        stars={displayStars}
-        classId={classId}
-        sandboxMode={sandboxMode}
-        viewerRole={viewerRole}
-        studentId={studentId}
-        teacherId={teacherId}
-        onBack={() => setView('map')}
-      />
+      <>
+        {specialAchievementCeremony && (
+          <SpecialAchievementCeremony
+            detail={specialAchievementCeremony}
+            onClose={() => setSpecialAchievementCeremony(null)}
+          />
+        )}
+        <ClassKingdomGateRoom
+          room={room}
+          stars={displayStars}
+          classId={classId}
+          sandboxMode={sandboxMode}
+          viewerRole={viewerRole}
+          studentId={studentId}
+          teacherId={teacherId}
+          onBack={() => setView('map')}
+        />
+      </>
     );
   }
 
@@ -541,6 +571,13 @@ export default function ClassKingdomScene({
 
   return (
     <section className="mt-5 rounded-3xl border border-cyan-300/15 bg-magic-bg/35 p-5">
+      {specialAchievementCeremony && (
+        <SpecialAchievementCeremony
+          detail={specialAchievementCeremony}
+          onClose={() => setSpecialAchievementCeremony(null)}
+        />
+      )}
+
       {ceremonyStar !== null && activeCeremonyUnlocks.length > 0 && (
         <div className={`ck-ceremony-overlay is-${activeCeremonyTone}`} role="dialog" aria-modal="true" aria-label={`טקס פתיחת אבן דרך ${ceremonyStar} כוכבים`}>
           <div className="ck-ceremony-backdrop" aria-hidden="true" />
@@ -846,6 +883,70 @@ export default function ClassKingdomScene({
         </div>
       </div>
     </section>
+  );
+}
+
+function SpecialAchievementCeremony({
+  detail,
+  onClose,
+}: {
+  detail: SpecialAchievementCeremonyDetail;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="ck-achievement-ceremony-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label={`טקס הישג כיתתי: ${detail.title}`}
+    >
+      <div className="ck-achievement-ceremony-backdrop" aria-hidden="true" />
+      <div className="ck-achievement-ceremony-rays" aria-hidden="true" />
+      <div className="ck-achievement-ceremony-particles" aria-hidden="true">
+        {Array.from({ length: 38 }).map((_, index) => (
+          <i
+            key={index}
+            style={{
+              left: `${(index * 41 + 11) % 100}%`,
+              top: `${(index * 67 + 5) % 93}%`,
+              animationDelay: `${-((index % 10) * 0.31)}s`,
+              animationDuration: `${3 + (index % 7) * 0.36}s`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-achievement-ceremony-card" dir="rtl">
+        <div className="ck-achievement-ceremony-badge">🏅 הישג כיתתי מיוחד</div>
+        <div className="ck-achievement-ceremony-symbol" aria-hidden="true">
+          <span>{detail.achievementIcon}</span>
+        </div>
+        <div className="ck-achievement-ceremony-type">{detail.achievementTitleHe}</div>
+        <h2>{detail.title}</h2>
+        {detail.story && <p>{detail.story}</p>}
+
+        <div className="ck-achievement-ceremony-reward">
+          <div className="ck-achievement-ceremony-reward-glow" aria-hidden="true" />
+          <img src={detail.imagePath} alt="" draggable={false} />
+          <div>
+            <span>נפתחה מזכרת חדשה לאוסף הכיתתי</span>
+            <strong>{detail.itemNameHe}</strong>
+          </div>
+        </div>
+
+        <div className="ck-achievement-ceremony-history-note">
+          📖 הרגע הזה נשמר בספר האגדות של הכיתה ויישאר חלק מהממלכה.
+        </div>
+
+        <button
+          type="button"
+          className="ck-achievement-ceremony-continue"
+          onClick={onClose}
+        >
+          ✨ אל הממלכה
+        </button>
+      </div>
+    </div>
   );
 }
 

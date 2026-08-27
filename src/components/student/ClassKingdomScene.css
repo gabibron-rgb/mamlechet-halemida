@@ -892,3 +892,380 @@
     animation: none !important;
   }
 }
+
+/* === Special class achievement ceremony === */
+.ck-achievement-ceremony-overlay {
+  --ck-achievement-gold: 250, 204, 21;
+  --ck-achievement-violet: 168, 85, 247;
+  --ck-achievement-cyan: 103, 232, 249;
+  position: fixed;
+  inset: 0;
+  z-index: 10040;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 20px;
+  isolation: isolate;
+  animation: ck-achievement-overlay-enter 360ms ease-out both;
+}
+
+.ck-achievement-ceremony-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  background:
+    radial-gradient(circle at 50% 44%, rgba(var(--ck-achievement-gold), 0.24), transparent 23%),
+    radial-gradient(circle at 35% 35%, rgba(var(--ck-achievement-violet), 0.18), transparent 34%),
+    radial-gradient(circle at 70% 62%, rgba(var(--ck-achievement-cyan), 0.13), transparent 38%),
+    rgba(2, 4, 20, 0.94);
+  backdrop-filter: blur(9px);
+}
+
+.ck-achievement-ceremony-rays {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: -4;
+  width: min(1120px, 125vw);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0.62;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(var(--ck-achievement-gold), 0.28) 0deg 2.5deg,
+    transparent 2.5deg 13deg
+  );
+  mask-image: radial-gradient(circle, #000 0 18%, rgba(0, 0, 0, 0.9) 36%, transparent 72%);
+  animation: ck-achievement-rays-spin 24s linear infinite;
+}
+
+.ck-achievement-ceremony-particles {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.ck-achievement-ceremony-particles i {
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: rgb(var(--ck-achievement-gold));
+  box-shadow: 0 0 13px rgba(var(--ck-achievement-gold), 0.9);
+  transform: rotate(45deg);
+  animation: ck-achievement-particle-rise 4s ease-in-out infinite;
+}
+
+.ck-achievement-ceremony-particles i:nth-child(3n) {
+  width: 5px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgb(var(--ck-achievement-cyan));
+  box-shadow: 0 0 14px rgba(var(--ck-achievement-cyan), 0.86);
+}
+
+.ck-achievement-ceremony-particles i:nth-child(4n) {
+  width: 9px;
+  height: 9px;
+  background: rgb(var(--ck-achievement-violet));
+  box-shadow: 0 0 15px rgba(var(--ck-achievement-violet), 0.9);
+}
+
+.ck-achievement-ceremony-card {
+  position: relative;
+  width: min(700px, 94vw);
+  max-height: min(92vh, 820px);
+  overflow: auto;
+  border: 1px solid rgba(250, 204, 21, 0.42);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(250, 204, 21, 0.13), transparent 34%),
+    linear-gradient(150deg, rgba(35, 20, 70, 0.98), rgba(8, 12, 38, 0.985));
+  padding: 28px 28px 25px;
+  text-align: center;
+  box-shadow:
+    0 32px 110px rgba(0, 0, 0, 0.68),
+    0 0 80px rgba(250, 204, 21, 0.16),
+    0 0 120px rgba(168, 85, 247, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  animation: ck-achievement-card-enter 650ms cubic-bezier(.18,.88,.26,1.18) both;
+}
+
+.ck-achievement-ceremony-card::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  border-radius: 27px;
+  pointer-events: none;
+}
+
+.ck-achievement-ceremony-badge {
+  display: inline-flex;
+  border: 1px solid rgba(250, 204, 21, 0.34);
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.09);
+  padding: 5px 11px;
+  color: #fff0a8;
+  font-size: 10px;
+  font-weight: 1000;
+}
+
+.ck-achievement-ceremony-symbol {
+  position: relative;
+  display: grid;
+  width: 112px;
+  height: 112px;
+  margin: 8px auto 0;
+  place-items: center;
+}
+
+.ck-achievement-ceremony-symbol::before,
+.ck-achievement-ceremony-symbol::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 2px solid rgba(250, 204, 21, 0.42);
+  border-radius: 50%;
+  animation: ck-achievement-ring 2.7s ease-out infinite;
+}
+
+.ck-achievement-ceremony-symbol::after {
+  border-color: rgba(168, 85, 247, 0.42);
+  animation-delay: -1.35s;
+}
+
+.ck-achievement-ceremony-symbol span {
+  position: relative;
+  z-index: 2;
+  font-size: 62px;
+  filter: drop-shadow(0 0 18px rgba(250, 204, 21, 0.48));
+  animation: ck-achievement-symbol-beat 1.8s ease-in-out infinite;
+}
+
+.ck-achievement-ceremony-type {
+  color: rgba(216, 180, 254, 0.88);
+  font-size: 11px;
+  font-weight: 1000;
+}
+
+.ck-achievement-ceremony-card h2 {
+  margin: 4px 0 0;
+  background: linear-gradient(90deg, #fff, #fde68a, #d8b4fe, #67e8f9, #fff);
+  background-size: 240% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 1000;
+  line-height: 1.08;
+  animation: ck-achievement-title-shimmer 4.5s linear infinite;
+}
+
+.ck-achievement-ceremony-card > p {
+  max-width: 570px;
+  margin: 11px auto 0;
+  color: rgba(236, 237, 255, 0.72);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.75;
+}
+
+.ck-achievement-ceremony-reward {
+  position: relative;
+  display: flex;
+  max-width: 520px;
+  min-height: 150px;
+  margin: 20px auto 0;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(250, 204, 21, 0.2);
+  border-radius: 23px;
+  background:
+    radial-gradient(circle at 26% 50%, rgba(250, 204, 21, 0.1), transparent 38%),
+    rgba(255, 255, 255, 0.035);
+  padding: 14px 18px;
+}
+
+.ck-achievement-ceremony-reward-glow {
+  position: absolute;
+  right: 2%;
+  top: 50%;
+  width: 190px;
+  height: 190px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.21), rgba(168, 85, 247, 0.08) 45%, transparent 70%);
+  animation: ck-achievement-reward-glow 2.4s ease-in-out infinite;
+}
+
+.ck-achievement-ceremony-reward img {
+  position: relative;
+  z-index: 2;
+  width: 150px;
+  height: 132px;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 12px 14px rgba(0, 0, 0, 0.36))
+    drop-shadow(0 0 18px rgba(250, 204, 21, 0.22));
+  animation: ck-achievement-reward-float 3.2s ease-in-out infinite;
+}
+
+.ck-achievement-ceremony-reward > div:last-child {
+  position: relative;
+  z-index: 2;
+  text-align: right;
+}
+
+.ck-achievement-ceremony-reward span,
+.ck-achievement-ceremony-reward strong {
+  display: block;
+}
+
+.ck-achievement-ceremony-reward span {
+  color: rgba(254, 240, 138, 0.7);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.ck-achievement-ceremony-reward strong {
+  margin-top: 4px;
+  color: white;
+  font-size: 18px;
+  font-weight: 1000;
+}
+
+.ck-achievement-ceremony-history-note {
+  max-width: 540px;
+  margin: 13px auto 0;
+  border: 1px solid rgba(167, 139, 250, 0.14);
+  border-radius: 14px;
+  background: rgba(124, 58, 237, 0.08);
+  padding: 9px 12px;
+  color: rgba(237, 233, 254, 0.72);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.ck-achievement-ceremony-continue {
+  min-width: 190px;
+  margin-top: 18px;
+  border: 1px solid rgba(250, 204, 21, 0.38);
+  border-radius: 15px;
+  background: linear-gradient(135deg, rgba(250, 204, 21, 0.22), rgba(168, 85, 247, 0.24));
+  padding: 11px 20px;
+  color: white;
+  font-size: 13px;
+  font-weight: 1000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.24), 0 0 28px rgba(250, 204, 21, 0.1);
+  transition: transform 150ms ease, filter 150ms ease;
+}
+
+.ck-achievement-ceremony-continue:hover {
+  transform: translateY(-2px) scale(1.015);
+  filter: brightness(1.14);
+}
+
+@keyframes ck-achievement-overlay-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ck-achievement-card-enter {
+  0% { opacity: 0; transform: translateY(30px) scale(0.72); }
+  68% { opacity: 1; transform: translateY(-3px) scale(1.025); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ck-achievement-rays-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes ck-achievement-particle-rise {
+  0%, 100% { opacity: 0.15; transform: translateY(22px) rotate(45deg) scale(0.65); }
+  42% { opacity: 1; }
+  55% { transform: translateY(-26px) rotate(135deg) scale(1.2); }
+  76% { opacity: 0.55; }
+}
+
+@keyframes ck-achievement-ring {
+  0% { opacity: 0; transform: scale(0.48); }
+  35% { opacity: 0.8; }
+  100% { opacity: 0; transform: scale(1.72); }
+}
+
+@keyframes ck-achievement-symbol-beat {
+  0%, 100% { transform: scale(0.94) rotate(-2deg); }
+  50% { transform: scale(1.11) rotate(2deg); }
+}
+
+@keyframes ck-achievement-title-shimmer {
+  from { background-position: 0% 50%; }
+  to { background-position: 240% 50%; }
+}
+
+@keyframes ck-achievement-reward-glow {
+  0%, 100% { opacity: 0.58; transform: translateY(-50%) scale(0.9); }
+  50% { opacity: 1; transform: translateY(-50%) scale(1.1); }
+}
+
+@keyframes ck-achievement-reward-float {
+  0%, 100% { transform: translateY(2px) scale(0.98); }
+  50% { transform: translateY(-7px) scale(1.035); }
+}
+
+@media (max-width: 620px) {
+  .ck-achievement-ceremony-overlay {
+    padding: 9px;
+  }
+
+  .ck-achievement-ceremony-card {
+    width: 96vw;
+    border-radius: 24px;
+    padding: 20px 13px 18px;
+  }
+
+  .ck-achievement-ceremony-symbol {
+    width: 86px;
+    height: 86px;
+  }
+
+  .ck-achievement-ceremony-symbol span {
+    font-size: 48px;
+  }
+
+  .ck-achievement-ceremony-reward {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .ck-achievement-ceremony-reward img {
+    width: 130px;
+    height: 108px;
+  }
+
+  .ck-achievement-ceremony-reward > div:last-child {
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-achievement-ceremony-overlay,
+  .ck-achievement-ceremony-rays,
+  .ck-achievement-ceremony-particles i,
+  .ck-achievement-ceremony-card,
+  .ck-achievement-ceremony-symbol::before,
+  .ck-achievement-ceremony-symbol::after,
+  .ck-achievement-ceremony-symbol span,
+  .ck-achievement-ceremony-card h2,
+  .ck-achievement-ceremony-reward-glow,
+  .ck-achievement-ceremony-reward img {
+    animation: none !important;
+  }
+}

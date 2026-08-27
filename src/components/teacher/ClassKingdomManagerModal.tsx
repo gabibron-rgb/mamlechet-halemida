@@ -33,7 +33,7 @@ export default function ClassKingdomManagerModal({
             <div className="text-xs font-black text-yellow-100/60">👑 ממשק מורה</div>
             <h2 className="mt-1 text-2xl font-black text-magic-accent">ניהול הממלכה הכיתתית</h2>
             <p className="mt-1 text-sm text-magic-soft/65">
-              כאן אפשר לעצב את החדר ולאשר את בחירות הכיתה. תלמידים רואים את אותה ממלכה במצב צפייה בלבד.
+              כאן מנהלים את החלטות הממלכה, הישגים כיתתיים מיוחדים ועיצוב החדרים. תלמידים רואים את אותה ממלכה במצב צפייה בלבד.
             </p>
           </div>
 
@@ -47,7 +47,7 @@ export default function ClassKingdomManagerModal({
         </div>
 
         <div className="mb-4 rounded-2xl border border-cyan-300/15 bg-cyan-500/8 px-4 py-3 text-xs leading-5 text-cyan-100/85">
-          🗳️ תלמידים יכולים להצביע פעם אחת בכל בחירת מזכרת. ההצבעה אינה סוגרת את ההחלטה — רק המורה יכול לאשר את הפרס הסופי.
+          🗳️ תלמידים מצביעים על בחירות אבני הדרך, והמורה סוגר אותן. הישגים מיוחדים ניתנים רק על ידי המורה בעקבות משהו שקרה באמת בכיתה.
         </div>
 
         <ClassKingdomDecisionCenter
