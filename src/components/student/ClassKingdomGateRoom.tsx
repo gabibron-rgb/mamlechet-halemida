@@ -832,6 +832,7 @@ export default function ClassKingdomGateRoom({
             )}
           </section>
 
+          {(viewerRole === 'student' || sandboxMode) && (
           <section className="ck-class-choice-section">
             <div className="ck-class-choice-head">
               <div>
@@ -971,6 +972,7 @@ export default function ClassKingdomGateRoom({
               })}
             </div>
           </section>
+          )}
 
           <section className="ck-class-relics-section">
             <div className="ck-class-relics-head">

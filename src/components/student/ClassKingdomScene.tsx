@@ -306,6 +306,7 @@ function topLandmarkForRealm(realmId: RealmId, displayStars: number) {
 
 
 const CEREMONY_STORAGE_PREFIX = 'mamlechet-class-kingdom-ceremonies-v1';
+const REPLAY_CEREMONY_EVENT = 'mamlechet:class-kingdom-replay-latest-ceremony';
 const LEGENDARY_REALM_CEREMONY_STAR = LEGENDARY_REALM_UNLOCK_STARS;
 
 function ceremonyUnlocksForStar(star: number): CeremonyUnlock[] {
@@ -497,6 +498,12 @@ export default function ClassKingdomScene({
     setCeremonyStar(latest);
   }
 
+  useEffect(() => {
+    const handleReplayRequest = () => replayLatestCeremony();
+    window.addEventListener(REPLAY_CEREMONY_EVENT, handleReplayRequest);
+    return () => window.removeEventListener(REPLAY_CEREMONY_EVENT, handleReplayRequest);
+  }, [displayStars]);
+
   if (view !== 'map') {
     const room = classKingdomRoomById(view);
     return (
@@ -596,17 +603,6 @@ export default function ClassKingdomScene({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {(viewerRole === 'teacher' || sandboxMode) && CEREMONY_STARS.some(star => star <= displayStars) && (
-            <button
-              type="button"
-              onClick={replayLatestCeremony}
-              className="ck-ceremony-replay-button"
-              title="הצג שוב את טקס הפתיחה האחרון"
-            >
-              🎬 הצג שוב טקס אחרון
-            </button>
-          )}
-
           {allowSandbox && (
             <button
               type="button"

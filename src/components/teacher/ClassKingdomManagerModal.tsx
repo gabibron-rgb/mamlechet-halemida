@@ -4,6 +4,7 @@ import type { StudentClassGoal } from '../../data/classGoals';
 import type { StudentState } from '../../store/useGameStore';
 import ClassKingdomScene from '../student/ClassKingdomScene';
 import ClassSpecialRelicAwardPanel from './ClassSpecialRelicAwardPanel';
+import ClassKingdomDecisionCenter from './ClassKingdomDecisionCenter';
 
 type Props = {
   open: boolean;
@@ -48,6 +49,13 @@ export default function ClassKingdomManagerModal({
         <div className="mb-4 rounded-2xl border border-cyan-300/15 bg-cyan-500/8 px-4 py-3 text-xs leading-5 text-cyan-100/85">
           🗳️ תלמידים יכולים להצביע פעם אחת בכל בחירת מזכרת. ההצבעה אינה סוגרת את ההחלטה — רק המורה יכול לאשר את הפרס הסופי.
         </div>
+
+        <ClassKingdomDecisionCenter
+          classId={classId}
+          teacherId={teacherId}
+          stars={stars}
+          sandboxMode={import.meta.env.DEV || classId === 'test2'}
+        />
 
         <ClassSpecialRelicAwardPanel
           classId={classId}
