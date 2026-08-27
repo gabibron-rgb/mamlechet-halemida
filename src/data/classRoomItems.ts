@@ -19,7 +19,12 @@ export type ClassRoomItemId =
   | 'inspiration_crown'
   | 'dream_compass'
   | 'light_tree'
-  | 'achievement_fountain';
+  | 'achievement_fountain'
+  | 'heart_crystal'
+  | 'astral_clock'
+  | 'sky_citadel'
+  | 'star_shield_fortress'
+  | 'unity_crown_shrine';
 
 export type ClassRoomItemCategory = 'decor' | 'object';
 export type ClassRoomItemRarity = 'common' | 'rare' | 'epic' | 'legendary';
@@ -41,7 +46,10 @@ export type ClassRoomItemArtKind =
   | 'crown'
   | 'compass'
   | 'tree'
-  | 'fountain';
+  | 'fountain'
+  | 'citadel'
+  | 'fortress'
+  | 'shrine';
 
 export type ClassRoomItemDefinition = {
   id: ClassRoomItemId;
@@ -334,6 +342,86 @@ export const CLASS_ROOM_ITEMS: ClassRoomItemDefinition[] = [
     unlockStars: 15,
     unlockTitleHe: 'אוצר הממלכה',
     unlockReasonHe: 'נפתחת ב־15 כוכבים — אבן דרך גדולה שמסמלת ממלכה עם סיפור ארוך משלה.',
+    unlockKind: 'automatic',
+  },
+  {
+    id: 'heart_crystal',
+    nameHe: 'גביש לב הממלכה',
+    descriptionHe: 'מונומנט קריסטל עצום שסביבו נעים נתיבי אור. הוא מסמל את הרגע שבו הממלכה כבר אינה רק התחלה — יש לה לב משלה.',
+    defaultX: 28,
+    defaultY: 68,
+    defaultScale: 1.22,
+    artKind: 'crystal',
+    imagePath: '/assets/class-kingdom/relics/legendary/heart_crystal.png',
+    category: 'object',
+    rarity: 'legendary',
+    unlockStars: 16,
+    unlockTitleHe: 'לב הממלכה מתעורר',
+    unlockReasonHe: 'נפתח ב־16 כוכבים, מיד עם הכניסה האמיתית לשלב האגדי של הממלכה.',
+    unlockKind: 'automatic',
+  },
+  {
+    id: 'astral_clock',
+    nameHe: 'שעון הנצח האסטרלי',
+    descriptionHe: 'שעון שמימי עצום עם ירחים, מסלולי כוכבים ואור מסתחרר — מזכרת לכל הזמן שהכיתה השקיעה כדי להגיע לכאן.',
+    defaultX: 72,
+    defaultY: 42,
+    defaultScale: 1.28,
+    artKind: 'clock',
+    imagePath: '/assets/class-kingdom/relics/legendary/astral_clock.png',
+    category: 'object',
+    rarity: 'legendary',
+    unlockStars: 18,
+    unlockTitleHe: 'זמן של אגדות',
+    unlockReasonHe: 'נפתח ב־18 כוכבים — פרס גדול במיוחד שמסמן שהכיתה כבר עמוק בתוך הממלכה האגדית.',
+    unlockKind: 'automatic',
+  },
+  {
+    id: 'sky_citadel',
+    nameHe: 'מצודת השמיים',
+    descriptionHe: 'מצודה שלמה כפריט תצוגה: מגדלים, מפלים, קריסטל שמימי ומצפה קטן. היא נראית כמו ממלכה זעירה בתוך הממלכה.',
+    defaultX: 34,
+    defaultY: 72,
+    defaultScale: 1.38,
+    artKind: 'citadel',
+    imagePath: '/assets/class-kingdom/relics/legendary/sky_citadel.png',
+    category: 'object',
+    rarity: 'legendary',
+    unlockStars: 20,
+    unlockTitleHe: 'הממלכה נוגעת בשמיים',
+    unlockReasonHe: 'נפתחת ב־20 כוכבים. מכאן הפרסים כבר לא מרגישים כמו קישוטים — אלא כמו פלאים של ממש.',
+    unlockKind: 'automatic',
+  },
+  {
+    id: 'star_shield_fortress',
+    nameHe: 'מבצר מגן הכוכבים',
+    descriptionHe: 'מגן עצום עטוף כיפת כוכבים, צריחים, להבות קסומות ומפלי אור. מונומנט שמכריז שהממלכה הגיעה למעמד אגדי.',
+    defaultX: 70,
+    defaultY: 70,
+    defaultScale: 1.42,
+    artKind: 'fortress',
+    imagePath: '/assets/class-kingdom/relics/legendary/star_shield_fortress.png',
+    category: 'object',
+    rarity: 'legendary',
+    unlockStars: 22,
+    unlockTitleHe: 'מגן האגדות',
+    unlockReasonHe: 'נפתח ב־22 כוכבים — אחד הפרסים הגדולים ביותר לפני פסגת הממלכה.',
+    unlockKind: 'automatic',
+  },
+  {
+    id: 'unity_crown_shrine',
+    nameHe: 'מקדש כתר האחדות',
+    descriptionHe: 'פרס הפסגה: אי מקדש זוהר עם מפלים, מגדלים, גביש מרחף וכתר שמימי עצום שמסתובב מעל הכול. זהו הסמל לכך שהכיתה השלימה את מסע 24 הכוכבים.',
+    defaultX: 50,
+    defaultY: 62,
+    defaultScale: 1.55,
+    artKind: 'shrine',
+    imagePath: '/assets/class-kingdom/relics/legendary/unity_crown_shrine.png',
+    category: 'object',
+    rarity: 'legendary',
+    unlockStars: 24,
+    unlockTitleHe: 'פסגת הממלכה',
+    unlockReasonHe: 'נפתח רק ב־24 כוכבים — פרס הסיום הגדול של מסלול הממלכה הנוכחי.',
     unlockKind: 'automatic',
   },
 ];

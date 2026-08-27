@@ -644,12 +644,14 @@ export default function ClassKingdomGateRoom({
             '--ck-item-scale': placement.scale,
           } as CSSProperties;
 
+          const itemEffectClassName = itemIdClassName(item.id);
+
           return (
             <button
               key={placement.instanceId}
               type="button"
               style={style}
-              className={`ck-room-item-placement ck-room-item-${item.artKind} ${selected ? 'is-selected' : ''} ${editMode ? 'is-editable' : ''}`}
+              className={`ck-room-item-placement ck-room-item-${item.artKind} ${itemEffectClassName} ${selected ? 'is-selected' : ''} ${editMode ? 'is-editable' : ''}`}
               onPointerDown={event => handleItemPointerDown(event, placement)}
               onPointerMove={handleItemPointerMove}
               onPointerUp={handleItemPointerUp}
@@ -667,7 +669,11 @@ export default function ClassKingdomGateRoom({
         })}
 
         {editMode && selectedPlacement && selectedItem && (
-          <div className="ck-room-item-controls">
+          <div
+            className="ck-room-item-controls"
+            onPointerDown={event => event.stopPropagation()}
+            onClick={event => event.stopPropagation()}
+          >
             <div className="ck-room-item-controls-name">{selectedSpecialRelic?.title ?? selectedItem.nameHe}</div>
             <button type="button" onClick={() => changeSelectedScale(-0.1)} aria-label="הקטן" title="הקטן">−</button>
             <button type="button" onClick={() => changeSelectedScale(0.1)} aria-label="הגדל" title="הגדל">＋</button>
@@ -1055,7 +1061,7 @@ export default function ClassKingdomGateRoom({
 
 function RoomItemArt({ item }: { item: ClassRoomItemDefinition }) {
   return (
-    <span className="ck-item-art ck-item-art-image-wrap">
+    <span className={`ck-item-art ck-item-art-image-wrap ${itemIdClassName(item.id)}`}>
       <img
         src={item.imagePath}
         alt=""
@@ -1064,6 +1070,10 @@ function RoomItemArt({ item }: { item: ClassRoomItemDefinition }) {
       />
     </span>
   );
+}
+
+function itemIdClassName(itemId: ClassRoomItemId): string {
+  return `ck-item-id-${itemId.replace(/_/g, '-')}`;
 }
 
 function formatSyncTime(value: string): string {
