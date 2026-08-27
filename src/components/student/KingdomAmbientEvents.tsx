@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -60,12 +60,14 @@ type FairyFlightPlan = {
 const STORAGE_PREFIX = 'mamlechet-kingdom-ambient-events-v1';
 const REAL_COOLDOWN_MS = 8 * 60 * 1000;
 const FAIRY_SWARM_UNLOCK_STARS = 4;
+const FLOATING_ISLAND_UNLOCK_STARS = 6;
 const DRAGON_FLIGHT_UNLOCK_STARS = 8;
 const PHOENIX_REBIRTH_UNLOCK_STARS = 12;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
   'fairy-swarm': 9400,
+  'floating-island': 22000,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -75,6 +77,31 @@ const SHOOTING_STAR_PATHS = [
   { startX: -16, startY: 27, dx: 132, dy: 39, rotate: 16 },
   { startX: 8, startY: -10, dx: 105, dy: 68, rotate: 31 },
   { startX: 25, startY: -13, dx: 91, dy: 57, rotate: 27 },
+] as const;
+
+
+const FLOATING_ISLAND_ASSET =
+  '/assets/class-kingdom/living-world/floating-island/floating-island.png';
+
+const FLOATING_ISLAND_PATHS = [
+  {
+    x0: -30, x1: 6, x2: 42, x3: 78, x4: 114,
+    y0: 12, y1: 12, y2: 12, y3: 12, y4: 12,
+    scale0: 0.44, scale1: 0.46, scale2: 0.48, scale3: 0.46, scale4: 0.44,
+    tilt0: -0.5, tilt1: -0.15, tilt2: 0.05, tilt3: 0.18, tilt4: 0.05,
+  },
+  {
+    x0: 114, x1: 78, x2: 42, x3: 6, x4: -30,
+    y0: 14, y1: 14, y2: 14, y3: 14, y4: 14,
+    scale0: 0.45, scale1: 0.47, scale2: 0.49, scale3: 0.47, scale4: 0.45,
+    tilt0: 0.4, tilt1: 0.15, tilt2: 0, tilt3: -0.15, tilt4: -0.3,
+  },
+  {
+    x0: -28, x1: 8, x2: 44, x3: 80, x4: 116,
+    y0: 17, y1: 17, y2: 17, y3: 17, y4: 17,
+    scale0: 0.42, scale1: 0.44, scale2: 0.46, scale3: 0.44, scale4: 0.42,
+    tilt0: -0.35, tilt1: 0, tilt2: 0.14, tilt3: 0.06, tilt4: -0.14,
+  },
 ] as const;
 
 
@@ -359,6 +386,86 @@ function DragonFlightEvent({ realm, instanceId, pathIndex }: { realm: RealmId; i
 }
 
 
+function FloatingIslandEvent({
+  realm,
+  instanceId,
+  pathIndex,
+}: {
+  realm: RealmId;
+  instanceId: number;
+  pathIndex: number;
+}) {
+  const path = FLOATING_ISLAND_PATHS[pathIndex] ?? FLOATING_ISLAND_PATHS[0];
+  const style = {
+    '--ck-island-x0': `${path.x0}%`,
+    '--ck-island-x1': `${path.x1}%`,
+    '--ck-island-x2': `${path.x2}%`,
+    '--ck-island-x3': `${path.x3}%`,
+    '--ck-island-x4': `${path.x4}%`,
+    '--ck-island-y0': `${path.y0}%`,
+    '--ck-island-y1': `${path.y1}%`,
+    '--ck-island-y2': `${path.y2}%`,
+    '--ck-island-y3': `${path.y3}%`,
+    '--ck-island-y4': `${path.y4}%`,
+    '--ck-island-scale0': path.scale0,
+    '--ck-island-scale1': path.scale1,
+    '--ck-island-scale2': path.scale2,
+    '--ck-island-scale3': path.scale3,
+    '--ck-island-scale4': path.scale4,
+    '--ck-island-tilt0': `${path.tilt0}deg`,
+    '--ck-island-tilt1': `${path.tilt1}deg`,
+    '--ck-island-tilt2': `${path.tilt2}deg`,
+    '--ck-island-tilt3': `${path.tilt3}deg`,
+    '--ck-island-tilt4': `${path.tilt4}deg`,
+  } as CSSProperties;
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-floating-island is-${realm}`}
+      style={style}
+      aria-hidden="true"
+    >
+      <div className="ck-floating-island-sky-haze" />
+      <div className="ck-floating-island-flight">
+        <span className="ck-floating-island-shadow" />
+        <span className="ck-floating-island-cloud ck-floating-island-cloud-1" />
+        <span className="ck-floating-island-cloud ck-floating-island-cloud-2" />
+        <span className="ck-floating-island-cloud ck-floating-island-cloud-3" />
+        <span className="ck-floating-island-visual">
+          <span className="ck-floating-island-magic-ring" />
+          <span className="ck-floating-island-crystal-glow" />
+          <img
+            className="ck-floating-island-image"
+            src={FLOATING_ISLAND_ASSET}
+            alt=""
+            draggable={false}
+          />
+          <span className="ck-floating-island-waterfall ck-floating-island-waterfall-wide" />
+          <span className="ck-floating-island-waterfall ck-floating-island-waterfall-core" />
+          <span className="ck-floating-island-waterfall-mist" />
+          <span className="ck-floating-island-motes">
+            {Array.from({ length: 22 }).map((_, index) => (
+              <i
+                key={index}
+                style={{
+                  '--ck-island-mote-i': index,
+                  '--ck-island-mote-x': `${14 + ((index * 37) % 72)}%`,
+                  '--ck-island-mote-y': `${22 + ((index * 43) % 60)}%`,
+                  '--ck-island-mote-size': `${1 + (index % 4)}px`,
+                  '--ck-island-mote-delay': `${(index % 9) * 0.17}s`,
+                } as CSSProperties}
+              />
+            ))}
+          </span>
+        </span>
+      </div>
+      <div className="ck-floating-island-midpoint-glow" />
+    </div>
+  );
+}
+
+
 function PhoenixSprite({ reborn = false }: { reborn?: boolean }) {
   return (
     <span className={`ck-phoenix-visual ${reborn ? 'is-reborn' : ''}`} aria-hidden="true">
@@ -514,6 +621,7 @@ export default function KingdomAmbientEvents({
 
   const canShowShootingStar = stars >= 1;
   const canShowFairySwarm = stars >= FAIRY_SWARM_UNLOCK_STARS;
+  const canShowFloatingIsland = stars >= FLOATING_ISLAND_UNLOCK_STARS;
   const canShowDragonFlight = stars >= DRAGON_FLIGHT_UNLOCK_STARS;
   const canShowPhoenixRebirth = stars >= PHOENIX_REBIRTH_UNLOCK_STARS;
 
@@ -535,17 +643,20 @@ export default function KingdomAmbientEvents({
     if (paused) return;
     if (eventId === 'shooting-star' && !canShowShootingStar) return;
     if (eventId === 'fairy-swarm' && !canShowFairySwarm) return;
+    if (eventId === 'floating-island' && !canShowFloatingIsland) return;
     if (eventId === 'dragon-flight' && !canShowDragonFlight) return;
     if (eventId === 'phoenix-rebirth' && !canShowPhoenixRebirth) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
       ? Math.floor(Math.random() * SHOOTING_STAR_PATHS.length)
-      : eventId === 'dragon-flight'
-        ? Math.floor(Math.random() * DRAGON_FLIGHT_PATHS.length)
-        : eventId === 'phoenix-rebirth'
-          ? Math.floor(Math.random() * PHOENIX_FLIGHT_PATHS.length)
-          : 0;
+      : eventId === 'floating-island'
+        ? Math.floor(Math.random() * FLOATING_ISLAND_PATHS.length)
+        : eventId === 'dragon-flight'
+          ? Math.floor(Math.random() * DRAGON_FLIGHT_PATHS.length)
+          : eventId === 'phoenix-rebirth'
+            ? Math.floor(Math.random() * PHOENIX_FLIGHT_PATHS.length)
+            : 0;
 
     setActiveEvent({
       id: eventId,
@@ -564,7 +675,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowDragonFlight, canShowFairySwarm, canShowPhoenixRebirth, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowPhoenixRebirth, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -586,12 +697,20 @@ export default function KingdomAmbientEvents({
     const dragonThreshold = phoenixChance + remainingAfterPhoenix * dragonChance;
     if (roll < dragonThreshold) return 'dragon-flight';
 
-    const remainingAfterRare = 1 - dragonThreshold;
+    const remainingAfterDragon = 1 - dragonThreshold;
+    const baseIslandChance = canShowFloatingIsland
+      ? (realm === 'legendary' ? 0.22 : stars >= 16 ? 0.20 : 0.17)
+      : 0;
+    const islandChance = stored.lastEventId === 'floating-island' ? 0.045 : baseIslandChance;
+    const islandThreshold = dragonThreshold + remainingAfterDragon * islandChance;
+    if (roll < islandThreshold) return 'floating-island';
+
+    const remainingAfterRare = 1 - islandThreshold;
     const baseFairyChance = realm === 'legendary' ? 0.36 : stars >= 12 ? 0.32 : 0.28;
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
-    const fairyThreshold = dragonThreshold + remainingAfterRare * fairyChance;
+    const fairyThreshold = islandThreshold + remainingAfterRare * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowDragonFlight, canShowFairySwarm, canShowPhoenixRebirth, realm, stars, storageKey]);
+  }, [canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowPhoenixRebirth, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -701,6 +820,10 @@ export default function KingdomAmbientEvents({
         <FairySwarmEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
+      {activeEvent?.id === 'floating-island' && (
+        <FloatingIslandEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
+      )}
+
       {activeEvent?.id === 'dragon-flight' && (
         <DragonFlightEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
@@ -731,6 +854,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               ✨ פיות
+            </button>
+          )}
+          {canShowFloatingIsland && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-island"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('floating-island', false);
+              }}
+            >
+              🏝️ אי מרחף
             </button>
           )}
           {canShowDragonFlight && (

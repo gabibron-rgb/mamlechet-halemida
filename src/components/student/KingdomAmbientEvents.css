@@ -459,6 +459,7 @@
    behind or in front of landmarks while remaining fully non-interactive. */
 .ck-live-events {
   z-index: auto;
+  isolation: isolate;
 }
 
 .ck-live-event-shooting-star {
@@ -467,6 +468,7 @@
 
 .ck-live-event-fairy-swarm {
   z-index: auto;
+  isolation: isolate;
   overflow: visible;
 }
 
@@ -690,7 +692,7 @@
 
 .ck-fairy-pixie-dust {
   position: absolute;
-  z-index: 3;
+  z-index: 1;
   right: 52%;
   top: 50%;
   width: 1px;
@@ -943,7 +945,7 @@
   width: 92%;
   height: 92%;
   opacity: .36;
-  filter: blur(5px);
+  filter: blur(6px);
   animation-duration: 920ms;
 }
 
@@ -1155,7 +1157,7 @@
 
 .ck-dragon-magic-trail {
   position: absolute;
-  z-index: 3;
+  z-index: 1;
   right: 66%;
   top: 54%;
   width: clamp(150px, 18vw, 280px);
@@ -1750,7 +1752,7 @@
 }
 
 .ck-phoenix-world-flash {
-  z-index: 3;
+  z-index: 1;
   opacity: 0;
   mix-blend-mode: screen;
   background:
@@ -1878,7 +1880,7 @@
 
 .ck-phoenix-tail-ribbon {
   position: absolute;
-  z-index: 3;
+  z-index: 1;
   right: 72%;
   top: 58%;
   transform-origin: right center;
@@ -2339,5 +2341,400 @@
   .ck-phoenix-frame-3,
   .ck-phoenix-reborn-image {
     opacity: 0 !important;
+  }
+}
+
+/* ========================================================================== */
+/* Living World V7 — Floating Island                                          */
+/* ========================================================================== */
+
+.ck-live-event-floating-island {
+  z-index: auto;
+  isolation: isolate;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ck-floating-island-sky-haze {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 22% 24%, rgba(184, 234, 255, .16), transparent 28%),
+    radial-gradient(ellipse at 72% 20%, rgba(255, 245, 202, .10), transparent 34%);
+  mix-blend-mode: screen;
+  animation: ckFloatingIslandSkyHaze 22s linear both;
+}
+
+.ck-live-event-floating-island.is-legendary .ck-floating-island-sky-haze {
+  background:
+    radial-gradient(ellipse at 22% 24%, rgba(186, 211, 255, .17), transparent 28%),
+    radial-gradient(ellipse at 72% 20%, rgba(211, 181, 255, .14), transparent 34%);
+}
+
+.ck-floating-island-flight {
+  position: absolute;
+  z-index: 2;
+  left: var(--ck-island-x0);
+  top: var(--ck-island-y0);
+  width: clamp(160px, 18vw, 300px);
+  aspect-ratio: 678 / 551;
+  opacity: 1;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(var(--ck-island-tilt0)) scale(var(--ck-island-scale0));
+  transform-origin: 50% 50%;
+  will-change: left, top, transform, opacity;
+  filter: saturate(.98) brightness(.99);
+  animation: ckFloatingIslandDrift 22s linear both;
+}
+
+.ck-floating-island-visual {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  transform-origin: 50% 48%;
+  animation: ckFloatingIslandBob 7.5s ease-in-out infinite alternate;
+}
+
+.ck-floating-island-image {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  filter:
+    drop-shadow(0 8px 10px rgba(12, 22, 54, .18))
+    drop-shadow(0 0 6px rgba(111, 214, 255, .07));
+}
+
+.ck-live-event-floating-island.is-legendary .ck-floating-island-image {
+  filter:
+    drop-shadow(0 10px 12px rgba(15, 16, 62, .18))
+    drop-shadow(0 0 7px rgba(178, 149, 255, .10));
+}
+
+.ck-floating-island-shadow {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 82%;
+  width: 52%;
+  height: 10%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: .12;
+  background: radial-gradient(ellipse, rgba(16, 26, 57, .52), rgba(16, 26, 57, .18) 48%, transparent 74%);
+  filter: blur(18px);
+  animation: ckFloatingIslandShadow 8s ease-in-out infinite alternate;
+}
+
+.ck-floating-island-cloud {
+  position: absolute;
+  z-index: 4;
+  border-radius: 999px;
+  pointer-events: none;
+  opacity: .34;
+  background:
+    radial-gradient(circle at 28% 45%, rgba(255,255,255,.92) 0 22%, transparent 23%),
+    radial-gradient(circle at 48% 38%, rgba(240,249,255,.90) 0 27%, transparent 28%),
+    radial-gradient(circle at 68% 52%, rgba(220,241,255,.76) 0 25%, transparent 26%),
+    linear-gradient(90deg, transparent, rgba(236,248,255,.72) 22% 76%, transparent);
+  filter: blur(6px);
+}
+
+.ck-floating-island-cloud-1 {
+  left: -5%;
+  top: 56%;
+  width: 42%;
+  height: 15%;
+  animation: ckFloatingIslandCloudA 12s ease-in-out infinite alternate;
+}
+
+.ck-floating-island-cloud-2 {
+  right: -7%;
+  top: 50%;
+  width: 38%;
+  height: 14%;
+  opacity: .48;
+  animation: ckFloatingIslandCloudB 13.5s ease-in-out infinite alternate;
+}
+
+.ck-floating-island-cloud-3 {
+  left: 31%;
+  top: 76%;
+  width: 35%;
+  height: 12%;
+  opacity: .36;
+  filter: blur(8px);
+  animation: ckFloatingIslandCloudC 11s ease-in-out infinite alternate;
+}
+
+.ck-floating-island-magic-ring {
+  position: absolute;
+  z-index: 1;
+  left: 49%;
+  top: 58%;
+  width: 72%;
+  height: 31%;
+  transform: translate(-50%, -50%) rotate(-7deg);
+  border: 2px solid rgba(113, 226, 255, .28);
+  border-radius: 50%;
+  box-shadow:
+    0 0 10px rgba(93, 214, 255, .22),
+    inset 0 0 10px rgba(255, 222, 112, .10);
+  opacity: .05;
+  filter: blur(.25px);
+  animation: ckFloatingIslandRing 9s ease-in-out infinite;
+}
+
+.ck-floating-island-crystal-glow {
+  position: absolute;
+  z-index: 5;
+  left: 25%;
+  top: 58%;
+  width: 24%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: .10;
+  background: radial-gradient(circle, rgba(118, 239, 255, .38), rgba(111, 112, 255, .10) 44%, transparent 70%);
+  mix-blend-mode: screen;
+  filter: blur(5px);
+  animation: ckFloatingIslandCrystalPulse 4.2s ease-in-out infinite alternate;
+}
+
+.ck-floating-island-waterfall {
+  position: absolute;
+  z-index: 7;
+  left: 49.5%;
+  top: 40%;
+  transform: translateX(-50%);
+  border-radius: 999px 999px 60% 60%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  transform-origin: 50% 0%;
+}
+
+.ck-floating-island-waterfall-wide {
+  width: 11%;
+  height: 54%;
+  opacity: .24;
+  background:
+    repeating-linear-gradient(92deg,
+      rgba(255,255,255,.10) 0 3%,
+      rgba(117,221,255,.34) 4% 8%,
+      rgba(255,255,255,.08) 9% 14%);
+  filter: blur(4px);
+  animation: ckFloatingIslandWaterfall 1.6s linear infinite;
+}
+
+.ck-floating-island-waterfall-core {
+  width: 6.5%;
+  height: 53%;
+  opacity: .12;
+  background: linear-gradient(180deg,
+    rgba(237,255,255,.28),
+    rgba(118,232,255,.38) 34%,
+    rgba(176,142,255,.21) 68%,
+    rgba(255,255,255,0));
+  filter: blur(1.1px);
+  animation: ckFloatingIslandWaterfallCore 1.4s ease-in-out infinite alternate;
+}
+
+.ck-floating-island-waterfall-mist {
+  position: absolute;
+  z-index: 8;
+  left: 49.5%;
+  top: 89%;
+  width: 28%;
+  height: 15%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: .12;
+  background: radial-gradient(ellipse, rgba(232,250,255,.82), rgba(124,222,255,.24) 44%, transparent 72%);
+  filter: blur(8px);
+  animation: ckFloatingIslandMist 3.2s ease-in-out infinite alternate;
+}
+
+.ck-floating-island-motes {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+}
+
+.ck-floating-island-motes i {
+  position: absolute;
+  left: var(--ck-island-mote-x);
+  top: var(--ck-island-mote-y);
+  width: var(--ck-island-mote-size);
+  height: var(--ck-island-mote-size);
+  border-radius: 50%;
+  opacity: 0;
+  background: rgba(255, 249, 185, .96);
+  box-shadow:
+    0 0 5px rgba(255, 207, 99, .66),
+    0 0 9px rgba(110, 225, 255, .34);
+  animation: ckFloatingIslandMote 3.6s ease-in-out var(--ck-island-mote-delay) infinite;
+}
+
+.ck-floating-island-midpoint-glow {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 18%;
+  width: min(42vw, 520px);
+  aspect-ratio: 2 / 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse, rgba(157, 238, 255, .10), rgba(255, 222, 124, .04) 34%, transparent 72%);
+  filter: blur(12px);
+  mix-blend-mode: screen;
+  animation: ckFloatingIslandMidpointGlow 22s linear both;
+}
+
+.ck-live-event-test-button.is-island {
+  border-color: rgba(118, 225, 255, .58);
+  background: linear-gradient(180deg, rgba(25, 75, 83, .92), rgba(21, 47, 75, .95));
+  box-shadow: 0 7px 18px rgba(15, 69, 84, .25), inset 0 0 0 1px rgba(255, 233, 154, .08);
+}
+
+.ck-live-event-test-button.is-island:hover {
+  border-color: rgba(188, 247, 255, .92);
+  box-shadow: 0 8px 20px rgba(32, 115, 137, .28), 0 0 12px rgba(121, 225, 255, .14);
+}
+
+@keyframes ckFloatingIslandDrift {
+  0% {
+    left: var(--ck-island-x0);
+    top: var(--ck-island-y0);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--ck-island-tilt0)) scale(var(--ck-island-scale0));
+  }
+  25% {
+    left: var(--ck-island-x1);
+    top: var(--ck-island-y1);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--ck-island-tilt1)) scale(var(--ck-island-scale1));
+  }
+  50% {
+    left: var(--ck-island-x2);
+    top: var(--ck-island-y2);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--ck-island-tilt2)) scale(var(--ck-island-scale2));
+  }
+  75% {
+    left: var(--ck-island-x3);
+    top: var(--ck-island-y3);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--ck-island-tilt3)) scale(var(--ck-island-scale3));
+  }
+  100% {
+    left: var(--ck-island-x4);
+    top: var(--ck-island-y4);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--ck-island-tilt4)) scale(var(--ck-island-scale4));
+  }
+}
+
+
+@keyframes ckFloatingIslandBob {
+  from { transform: translate3d(0, -.8px, 0) rotate(-.08deg); }
+  to { transform: translate3d(0, 1.2px, 0) rotate(.08deg); }
+}
+
+@keyframes ckFloatingIslandShadow {
+  from { transform: translate(-50%, -50%) scale(.96); opacity: .08; }
+  to { transform: translate(-50%, -50%) scale(1.02); opacity: .14; }
+}
+
+@keyframes ckFloatingIslandCloudA {
+  from { transform: translate3d(-4px, 0, 0) scale(.97); }
+  to { transform: translate3d(6px, -1px, 0) scale(1.02); }
+}
+
+@keyframes ckFloatingIslandCloudB {
+  from { transform: translate3d(5px, -1px, 0) scale(1.01); }
+  to { transform: translate3d(-7px, 1px, 0) scale(.97); }
+}
+
+@keyframes ckFloatingIslandCloudC {
+  from { transform: translate3d(-3px, 0, 0) scale(.95); opacity: .18; }
+  to { transform: translate3d(4px, 1px, 0) scale(1.02); opacity: .32; }
+}
+
+@keyframes ckFloatingIslandRing {
+  0%, 100% { opacity: .03; transform: translate(-50%, -50%) rotate(-7deg) scale(.96); }
+  50% { opacity: .08; transform: translate(-50%, -50%) rotate(-5deg) scale(1.01); }
+}
+
+@keyframes ckFloatingIslandCrystalPulse {
+  from { opacity: .06; transform: translate(-50%, -50%) scale(.92); }
+  to { opacity: .14; transform: translate(-50%, -50%) scale(1.05); }
+}
+
+@keyframes ckFloatingIslandWaterfall {
+  from { background-position: 0 0; transform: translateX(-50%) scaleX(.94); }
+  to { background-position: 11px 36px; transform: translateX(-50%) scaleX(1.04); }
+}
+
+@keyframes ckFloatingIslandWaterfallCore {
+  from { opacity: .24; transform: translateX(-50%) scaleX(.88); }
+  to { opacity: .46; transform: translateX(-50%) scaleX(1.12); }
+}
+
+@keyframes ckFloatingIslandMist {
+  from { opacity: .23; transform: translate(-50%, -50%) scale(.88); }
+  to { opacity: .45; transform: translate(-50%, -50%) scale(1.13); }
+}
+
+@keyframes ckFloatingIslandMote {
+  0% { opacity: 0; transform: translate3d(0, 8px, 0) scale(.3); }
+  26% { opacity: .85; }
+  68% { opacity: .52; }
+  100% { opacity: 0; transform: translate3d(5px, -20px, 0) scale(.12); }
+}
+
+@keyframes ckFloatingIslandSkyHaze {
+  0%, 6% { opacity: 0; }
+  18% { opacity: .08; }
+  46% { opacity: .12; }
+  72% { opacity: .08; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckFloatingIslandMidpointGlow {
+  0%, 36% { opacity: 0; transform: translate(-50%, -50%) scale(.92); }
+  48% { opacity: .06; }
+  56% { opacity: .10; transform: translate(-50%, -50%) scale(1.005); }
+  68% { opacity: .05; transform: translate(-50%, -50%) scale(1.02); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.08); }
+}
+
+@media (max-width: 720px) {
+  .ck-floating-island-flight {
+    width: clamp(140px, 28vw, 220px);
+  }
+
+  .ck-floating-island-midpoint-glow {
+    width: 88vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-live-event-floating-island,
+  .ck-live-event-floating-island *,
+  .ck-live-event-floating-island *::before,
+  .ck-live-event-floating-island *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
