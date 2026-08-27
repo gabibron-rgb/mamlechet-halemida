@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -62,12 +62,16 @@ const REAL_COOLDOWN_MS = 8 * 60 * 1000;
 const FAIRY_SWARM_UNLOCK_STARS = 4;
 const FLOATING_ISLAND_UNLOCK_STARS = 6;
 const DRAGON_FLIGHT_UNLOCK_STARS = 8;
+const AURORA_SKY_UNLOCK_STARS = 10;
 const PHOENIX_REBIRTH_UNLOCK_STARS = 12;
+const METEOR_SHOWER_UNLOCK_STARS = 14;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
   'fairy-swarm': 9400,
   'floating-island': 22000,
+  'aurora-sky': 17000,
+  'meteor-shower': 12200,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -466,6 +470,155 @@ function FloatingIslandEvent({
 }
 
 
+function AuroraSkyEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const stars = Array.from({ length: 68 });
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-aurora-sky is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-aurora-night-tint" />
+      <div className="ck-aurora-starfield">
+        {stars.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-aurora-star-x': `${4 + ((index * 37) % 92)}%`,
+              '--ck-aurora-star-y': `${3 + ((index * 53) % 52)}%`,
+              '--ck-aurora-star-size': `${1.1 + (index % 5) * 0.58}px`,
+              '--ck-aurora-star-delay': `${(index % 17) * 0.16}s`,
+              '--ck-aurora-star-drift': `${((index * 13) % 13) - 6}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+      <div className="ck-aurora-real-lights">
+        <img
+          className="ck-aurora-real-image ck-aurora-real-image-main"
+          src="/assets/class-kingdom/living-world/aurora/aurora-borealis.png"
+          alt=""
+          draggable={false}
+        />
+        <img
+          className="ck-aurora-real-image ck-aurora-real-image-secondary"
+          src="/assets/class-kingdom/living-world/aurora/aurora-borealis.png"
+          alt=""
+          draggable={false}
+        />
+        <img
+          className="ck-aurora-real-image ck-aurora-real-image-tertiary"
+          src="/assets/class-kingdom/living-world/aurora/aurora-borealis.png"
+          alt=""
+          draggable={false}
+        />
+      </div>
+      <div className="ck-aurora-horizon-glow" />
+      <div className="ck-aurora-kingdom-shimmer" />
+      <div className="ck-aurora-celestial-pulse" />
+    </div>
+  );
+}
+
+
+function MeteorShowerEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const meteors = Array.from({ length: 20 });
+  const meteorDelays = [
+    0.70, 1.35, 2.05, 2.82, 3.55,
+    4.56, 4.66, 4.78, 4.91, 5.06, 5.24,
+    6.48, 6.95, 7.45, 7.98, 8.55, 9.12, 9.62, 10.05, 10.42,
+  ] as const;
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-meteor-shower is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-meteor-sky-tint" />
+      <div className="ck-meteor-horizon-glow" />
+      <div className="ck-meteor-field">
+        {meteors.map((_, index) => {
+          const isPeak = index >= 5 && index <= 10;
+          const isHero = index === 7 || index === 9;
+          const isDistant = index === 1 || index === 5 || index === 8 || index === 12 || index === 16 || index === 18;
+          const isWarm = index === 3 || index === 9 || index === 14 || index === 19;
+          const delay = meteorDelays[index] ?? 0.7 + index * 0.5;
+          const startX = -14 + ((index * 29) % 104);
+          const startY = 1 + ((index * 17) % 35);
+          const distance = isDistant ? 38 + (index % 3) * 5 : 46 + (index % 5) * 7;
+          const drop = isDistant ? 16 + (index % 3) * 4 : 21 + (index % 4) * 6;
+          const size = isHero ? 1.18 + (index % 2) * 0.12 : isDistant ? 0.46 + (index % 3) * 0.07 : 0.68 + (index % 5) * 0.11;
+          const duration = isDistant ? 1.42 + (index % 2) * 0.16 : isHero ? 1.16 : 1.04 + (index % 4) * 0.16;
+          const angle = 16 + (index % 7) * 1.7;
+          const depthClass = isDistant ? 'is-distant' : isPeak ? 'is-peak' : '';
+          const toneClass = isWarm ? 'is-warm' : '';
+
+          return (
+            <span
+              key={index}
+              className={`ck-meteor-streak ${isHero ? 'is-hero' : ''} ${depthClass} ${toneClass}`.trim()}
+              style={{
+                '--ck-meteor-x': `${startX}%`,
+                '--ck-meteor-y': `${startY}%`,
+                '--ck-meteor-dx': `${distance}vw`,
+                '--ck-meteor-dy': `${drop}vh`,
+                '--ck-meteor-delay': `${delay}s`,
+                '--ck-meteor-duration': `${duration}s`,
+                '--ck-meteor-scale': size,
+                '--ck-meteor-angle': `${angle}deg`,
+              } as CSSProperties}
+            >
+              <i className="ck-meteor-tail ck-meteor-tail-wide" />
+              <i className="ck-meteor-tail ck-meteor-tail-core" />
+              <i className="ck-meteor-head" />
+              <span className="ck-meteor-fragments">
+                {Array.from({ length: 5 }).map((__, fragmentIndex) => (
+                  <b
+                    key={fragmentIndex}
+                    style={{
+                      '--ck-meteor-fragment-i': fragmentIndex,
+                      '--ck-meteor-fragment-y': `${-10 + fragmentIndex * 5}px`,
+                    } as CSSProperties}
+                  />
+                ))}
+              </span>
+            </span>
+          );
+        })}
+      </div>
+      <div className="ck-meteor-peak-flash" />
+      <div className="ck-meteor-stardust">
+        {Array.from({ length: 42 }).map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-dust-x': `${4 + ((index * 37) % 92)}%`,
+              '--ck-dust-y': `${3 + ((index * 29) % 46)}%`,
+              '--ck-dust-delay': `${1.6 + (index % 12) * 0.55}s`,
+              '--ck-dust-size': `${1 + (index % 3)}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
 function PhoenixSprite({ reborn = false }: { reborn?: boolean }) {
   return (
     <span className={`ck-phoenix-visual ${reborn ? 'is-reborn' : ''}`} aria-hidden="true">
@@ -623,7 +776,9 @@ export default function KingdomAmbientEvents({
   const canShowFairySwarm = stars >= FAIRY_SWARM_UNLOCK_STARS;
   const canShowFloatingIsland = stars >= FLOATING_ISLAND_UNLOCK_STARS;
   const canShowDragonFlight = stars >= DRAGON_FLIGHT_UNLOCK_STARS;
+  const canShowAuroraSky = stars >= AURORA_SKY_UNLOCK_STARS;
   const canShowPhoenixRebirth = stars >= PHOENIX_REBIRTH_UNLOCK_STARS;
+  const canShowMeteorShower = stars >= METEOR_SHOWER_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -644,8 +799,10 @@ export default function KingdomAmbientEvents({
     if (eventId === 'shooting-star' && !canShowShootingStar) return;
     if (eventId === 'fairy-swarm' && !canShowFairySwarm) return;
     if (eventId === 'floating-island' && !canShowFloatingIsland) return;
+    if (eventId === 'aurora-sky' && !canShowAuroraSky) return;
     if (eventId === 'dragon-flight' && !canShowDragonFlight) return;
     if (eventId === 'phoenix-rebirth' && !canShowPhoenixRebirth) return;
+    if (eventId === 'meteor-shower' && !canShowMeteorShower) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -675,7 +832,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowPhoenixRebirth, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowMeteorShower, canShowPhoenixRebirth, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -698,19 +855,35 @@ export default function KingdomAmbientEvents({
     if (roll < dragonThreshold) return 'dragon-flight';
 
     const remainingAfterDragon = 1 - dragonThreshold;
-    const baseIslandChance = canShowFloatingIsland
-      ? (realm === 'legendary' ? 0.22 : stars >= 16 ? 0.20 : 0.17)
+    const baseMeteorChance = canShowMeteorShower
+      ? (realm === 'legendary' ? 0.16 : stars >= 20 ? 0.13 : 0.10)
       : 0;
-    const islandChance = stored.lastEventId === 'floating-island' ? 0.045 : baseIslandChance;
-    const islandThreshold = dragonThreshold + remainingAfterDragon * islandChance;
+    const meteorChance = stored.lastEventId === 'meteor-shower' ? 0.025 : baseMeteorChance;
+    const meteorThreshold = dragonThreshold + remainingAfterDragon * meteorChance;
+    if (roll < meteorThreshold) return 'meteor-shower';
+
+    const remainingAfterMeteor = 1 - meteorThreshold;
+    const baseIslandChance = canShowFloatingIsland
+      ? (realm === 'legendary' ? 0.20 : stars >= 16 ? 0.18 : 0.15)
+      : 0;
+    const islandChance = stored.lastEventId === 'floating-island' ? 0.04 : baseIslandChance;
+    const islandThreshold = meteorThreshold + remainingAfterMeteor * islandChance;
     if (roll < islandThreshold) return 'floating-island';
 
-    const remainingAfterRare = 1 - islandThreshold;
+    const remainingAfterIsland = 1 - islandThreshold;
+    const baseAuroraChance = canShowAuroraSky
+      ? (realm === 'legendary' ? 0.28 : stars >= 18 ? 0.22 : 0.18)
+      : 0;
+    const auroraChance = stored.lastEventId === 'aurora-sky' ? 0.05 : baseAuroraChance;
+    const auroraThreshold = islandThreshold + remainingAfterIsland * auroraChance;
+    if (roll < auroraThreshold) return 'aurora-sky';
+
+    const remainingAfterAtmosphere = 1 - auroraThreshold;
     const baseFairyChance = realm === 'legendary' ? 0.36 : stars >= 12 ? 0.32 : 0.28;
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
-    const fairyThreshold = islandThreshold + remainingAfterRare * fairyChance;
+    const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowPhoenixRebirth, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowMeteorShower, canShowPhoenixRebirth, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -824,6 +997,14 @@ export default function KingdomAmbientEvents({
         <FloatingIslandEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
 
+      {activeEvent?.id === 'aurora-sky' && (
+        <AuroraSkyEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
+      {activeEvent?.id === 'meteor-shower' && (
+        <MeteorShowerEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
       {activeEvent?.id === 'dragon-flight' && (
         <DragonFlightEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
@@ -866,6 +1047,30 @@ export default function KingdomAmbientEvents({
               }}
             >
               🏝️ אי מרחף
+            </button>
+          )}
+          {canShowAuroraSky && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-aurora"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('aurora-sky', false);
+              }}
+            >
+              🌌 אורורה
+            </button>
+          )}
+          {canShowMeteorShower && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-meteor"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('meteor-shower', false);
+              }}
+            >
+              ☄️ מטאורים
             </button>
           )}
           {canShowDragonFlight && (
