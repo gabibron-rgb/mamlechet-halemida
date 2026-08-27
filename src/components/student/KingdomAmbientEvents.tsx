@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -65,6 +65,7 @@ const DRAGON_FLIGHT_UNLOCK_STARS = 8;
 const AURORA_SKY_UNLOCK_STARS = 10;
 const PHOENIX_REBIRTH_UNLOCK_STARS = 12;
 const METEOR_SHOWER_UNLOCK_STARS = 14;
+const LUNAR_ECLIPSE_UNLOCK_STARS = 16;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -72,6 +73,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'floating-island': 22000,
   'aurora-sky': 17000,
   'meteor-shower': 12200,
+  'lunar-eclipse': 18400,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -528,6 +530,33 @@ function AuroraSkyEvent({
 }
 
 
+function LunarEclipseEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-lunar-eclipse is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-eclipse-world-dim" />
+      <div className="ck-eclipse-sky-stage">
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-dark" src="/assets/class-kingdom/living-world/eclipse/eclipse-sky-dark.png" alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-full" src="/assets/class-kingdom/living-world/eclipse/eclipse-full-moon.png" alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-partial" src="/assets/class-kingdom/living-world/eclipse/eclipse-partial.png" alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-near-total" src="/assets/class-kingdom/living-world/eclipse/eclipse-near-total.png" alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-blood" src="/assets/class-kingdom/living-world/eclipse/eclipse-blood-moon.png" alt="" draggable={false} />
+      </div>
+      <div className="ck-eclipse-totality-ambient" />
+    </div>
+  );
+}
+
+
 function MeteorShowerEvent({
   realm,
   instanceId,
@@ -779,6 +808,7 @@ export default function KingdomAmbientEvents({
   const canShowAuroraSky = stars >= AURORA_SKY_UNLOCK_STARS;
   const canShowPhoenixRebirth = stars >= PHOENIX_REBIRTH_UNLOCK_STARS;
   const canShowMeteorShower = stars >= METEOR_SHOWER_UNLOCK_STARS;
+  const canShowLunarEclipse = stars >= LUNAR_ECLIPSE_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -803,6 +833,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'dragon-flight' && !canShowDragonFlight) return;
     if (eventId === 'phoenix-rebirth' && !canShowPhoenixRebirth) return;
     if (eventId === 'meteor-shower' && !canShowMeteorShower) return;
+    if (eventId === 'lunar-eclipse' && !canShowLunarEclipse) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -832,7 +863,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowMeteorShower, canShowPhoenixRebirth, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMeteorShower, canShowPhoenixRebirth, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -863,11 +894,19 @@ export default function KingdomAmbientEvents({
     if (roll < meteorThreshold) return 'meteor-shower';
 
     const remainingAfterMeteor = 1 - meteorThreshold;
+    const baseEclipseChance = canShowLunarEclipse
+      ? (realm === 'legendary' ? 0.12 : stars >= 22 ? 0.09 : 0.07)
+      : 0;
+    const eclipseChance = stored.lastEventId === 'lunar-eclipse' ? 0.018 : baseEclipseChance;
+    const eclipseThreshold = meteorThreshold + remainingAfterMeteor * eclipseChance;
+    if (roll < eclipseThreshold) return 'lunar-eclipse';
+
+    const remainingAfterEclipse = 1 - eclipseThreshold;
     const baseIslandChance = canShowFloatingIsland
       ? (realm === 'legendary' ? 0.20 : stars >= 16 ? 0.18 : 0.15)
       : 0;
     const islandChance = stored.lastEventId === 'floating-island' ? 0.04 : baseIslandChance;
-    const islandThreshold = meteorThreshold + remainingAfterMeteor * islandChance;
+    const islandThreshold = eclipseThreshold + remainingAfterEclipse * islandChance;
     if (roll < islandThreshold) return 'floating-island';
 
     const remainingAfterIsland = 1 - islandThreshold;
@@ -883,7 +922,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowMeteorShower, canShowPhoenixRebirth, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMeteorShower, canShowPhoenixRebirth, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1005,6 +1044,10 @@ export default function KingdomAmbientEvents({
         <MeteorShowerEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
+      {activeEvent?.id === 'lunar-eclipse' && (
+        <LunarEclipseEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
       {activeEvent?.id === 'dragon-flight' && (
         <DragonFlightEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
@@ -1071,6 +1114,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               ☄️ מטאורים
+            </button>
+          )}
+          {canShowLunarEclipse && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-eclipse"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('lunar-eclipse', false);
+              }}
+            >
+              🌙 ליקוי ירח
             </button>
           )}
           {canShowDragonFlight && (
