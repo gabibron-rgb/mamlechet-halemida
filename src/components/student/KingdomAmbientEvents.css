@@ -1717,3 +1717,627 @@
     opacity: 0 !important;
   }
 }
+
+
+/* ========================================================================== */
+/* Living World V6 — Epic Phoenix: Rebirth in Flames                         */
+/* ========================================================================== */
+
+.ck-live-event-phoenix-rebirth {
+  z-index: 82;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ck-phoenix-world-warmth,
+.ck-phoenix-world-flash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-phoenix-world-warmth {
+  z-index: 1;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(circle at var(--ck-phoenix-rebirth-x) var(--ck-phoenix-rebirth-y),
+      rgba(255, 196, 77, .18) 0,
+      rgba(255, 95, 38, .10) 22%,
+      transparent 52%),
+    linear-gradient(180deg, rgba(255, 116, 48, .055), rgba(255, 182, 78, .025) 56%, transparent 82%);
+  animation: ckPhoenixWorldWarmth 10.4s ease-in-out both;
+}
+
+.ck-phoenix-world-flash {
+  z-index: 3;
+  opacity: 0;
+  mix-blend-mode: screen;
+  background:
+    radial-gradient(circle at var(--ck-phoenix-rebirth-x) var(--ck-phoenix-rebirth-y),
+      rgba(255,255,224,.92) 0 1.2%,
+      rgba(255,224,122,.55) 5%,
+      rgba(255,115,38,.22) 14%,
+      rgba(255,49,55,.09) 27%,
+      transparent 45%);
+  animation: ckPhoenixWorldFlash 10.4s ease-out both;
+}
+
+.ck-live-event-phoenix-rebirth.is-legendary .ck-phoenix-world-warmth {
+  background:
+    radial-gradient(circle at var(--ck-phoenix-rebirth-x) var(--ck-phoenix-rebirth-y),
+      rgba(255, 227, 116, .21) 0,
+      rgba(255, 103, 50, .11) 22%,
+      rgba(185, 80, 255, .055) 40%,
+      transparent 56%),
+    linear-gradient(180deg, rgba(255, 118, 48, .06), rgba(177, 91, 255, .025) 58%, transparent 84%);
+}
+
+.ck-phoenix-flight {
+  position: absolute;
+  z-index: 78;
+  width: clamp(170px, 20vw, 315px);
+  aspect-ratio: 1.24 / 1;
+  opacity: 0;
+  pointer-events: none;
+  will-change: left, top, opacity, transform;
+  filter:
+    drop-shadow(0 9px 11px rgba(71, 19, 12, .30))
+    drop-shadow(0 0 7px rgba(255, 128, 31, .36))
+    drop-shadow(0 0 16px rgba(255, 66, 50, .18));
+}
+
+.ck-phoenix-flight-pre {
+  left: -18%;
+  top: var(--ck-phoenix-y0);
+  transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt0)) scale(.48);
+  animation: ckPhoenixFlightPre 4.55s cubic-bezier(.17,.67,.18,1) .12s both;
+}
+
+.ck-phoenix-flight-post {
+  left: var(--ck-phoenix-rebirth-x);
+  top: var(--ck-phoenix-rebirth-y);
+  transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt2)) scale(.84);
+  animation: ckPhoenixFlightPost 4.62s cubic-bezier(.18,.65,.19,1) 5.34s both;
+}
+
+.ck-phoenix-visual,
+.ck-phoenix-frame-stack {
+  position: absolute;
+  inset: 0;
+}
+
+.ck-phoenix-visual {
+  transform-origin: 54% 53%;
+  animation: ckPhoenixBodyPulse 680ms ease-in-out infinite;
+}
+
+.ck-phoenix-visual.is-reborn {
+  filter:
+    brightness(1.08)
+    saturate(1.08)
+    drop-shadow(0 0 8px rgba(255, 217, 92, .32));
+}
+
+.ck-phoenix-frame-stack {
+  z-index: 8;
+  transform-origin: 55% 53%;
+  animation: ckPhoenixWingbeatLift 640ms cubic-bezier(.35,.02,.37,1) infinite;
+}
+
+.ck-phoenix-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0;
+  filter:
+    drop-shadow(0 3px 4px rgba(74, 17, 13, .22))
+    drop-shadow(0 0 4px rgba(255, 141, 37, .31));
+  will-change: opacity;
+}
+
+.ck-phoenix-frame {
+  animation-duration: 640ms;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+
+.ck-phoenix-frame-1 { animation-name: ckPhoenixFrameUp; }
+.ck-phoenix-frame-2 { animation-name: ckPhoenixFrameMid; }
+.ck-phoenix-frame-3 { animation-name: ckPhoenixFrameDown; }
+
+.ck-phoenix-reborn-image {
+  z-index: 9;
+  opacity: 0;
+  animation: ckPhoenixRebornImage 2.1s ease-out 5.3s both;
+}
+
+.ck-phoenix-aura {
+  position: absolute;
+  z-index: 2;
+  left: 55%;
+  top: 52%;
+  width: 82%;
+  height: 78%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: .52;
+  background:
+    radial-gradient(ellipse,
+      rgba(255, 248, 181, .44) 0,
+      rgba(255, 176, 56, .25) 30%,
+      rgba(255, 66, 45, .12) 51%,
+      transparent 72%);
+  filter: blur(9px);
+  animation: ckPhoenixAura 530ms ease-in-out infinite alternate;
+}
+
+.ck-phoenix-tail-ribbon {
+  position: absolute;
+  z-index: 3;
+  right: 72%;
+  top: 58%;
+  transform-origin: right center;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.ck-phoenix-tail-ribbon-wide {
+  width: clamp(155px, 18vw, 285px);
+  height: 38px;
+  opacity: .68;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(176, 49, 187, .05) 14%,
+    rgba(243, 58, 84, .16) 34%,
+    rgba(255, 92, 35, .33) 58%,
+    rgba(255, 192, 61, .48) 79%,
+    rgba(255, 241, 159, .15) 96%,
+    transparent 100%);
+  filter: blur(10px);
+  animation: ckPhoenixTailWide 560ms ease-in-out infinite alternate;
+}
+
+.ck-phoenix-tail-ribbon-core {
+  width: clamp(125px, 15vw, 240px);
+  height: 6px;
+  opacity: .95;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(255, 59, 65, .20) 24%,
+    rgba(255, 131, 35, .62) 62%,
+    rgba(255, 235, 128, .94) 88%,
+    transparent);
+  filter: blur(2px);
+  box-shadow:
+    0 0 8px rgba(255, 126, 34, .68),
+    0 0 14px rgba(255, 57, 47, .30);
+}
+
+.ck-phoenix-trail-particles {
+  position: absolute;
+  z-index: 4;
+  right: 62%;
+  top: 52%;
+  width: clamp(155px, 18vw, 280px);
+  height: 70px;
+  transform: translateY(-50%);
+}
+
+.ck-phoenix-trail-particles i {
+  position: absolute;
+  right: calc((var(--ck-phoenix-trail-i) * 8.1px) - 4px);
+  top: calc(50% + var(--ck-phoenix-trail-y));
+  width: var(--ck-phoenix-trail-size);
+  height: var(--ck-phoenix-trail-size);
+  border-radius: 50% 50% 50% 0;
+  opacity: 0;
+  background: rgba(255, 228, 125, .98);
+  box-shadow:
+    0 0 5px rgba(255, 172, 42, .92),
+    0 0 10px rgba(255, 66, 51, .56);
+  transform: rotate(45deg);
+  animation: ckPhoenixTrailSpark 1.15s ease-out calc((var(--ck-phoenix-trail-i) % 8) * 72ms) infinite;
+}
+
+.ck-phoenix-rebirth {
+  position: absolute;
+  z-index: 84;
+  left: var(--ck-phoenix-rebirth-x);
+  top: var(--ck-phoenix-rebirth-y);
+  width: clamp(170px, 20vw, 320px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.ck-phoenix-rebirth-halo,
+.ck-phoenix-rebirth-core,
+.ck-phoenix-rebirth-wings,
+.ck-phoenix-rebirth-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+}
+
+.ck-phoenix-rebirth-halo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(.12);
+  opacity: 0;
+  background:
+    radial-gradient(circle,
+      rgba(255,255,232,.90) 0 4%,
+      rgba(255,232,120,.54) 11%,
+      rgba(255,131,39,.30) 26%,
+      rgba(255,45,61,.14) 45%,
+      rgba(188,75,255,.055) 61%,
+      transparent 73%);
+  filter: blur(2px);
+  animation: ckPhoenixRebirthHalo 2.2s ease-out 4.22s both;
+}
+
+.ck-phoenix-rebirth-core {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(.2);
+  opacity: 0;
+  background: radial-gradient(circle,
+    #fff 0 12%,
+    #fff4a2 24%,
+    #ffc63b 47%,
+    #ff622f 68%,
+    rgba(255,44,68,.82) 82%,
+    transparent 100%);
+  box-shadow:
+    0 0 10px rgba(255,255,222,.98),
+    0 0 24px rgba(255,197,61,.95),
+    0 0 48px rgba(255,79,45,.72),
+    0 0 78px rgba(195,64,255,.28);
+  animation: ckPhoenixRebirthCore 2.05s cubic-bezier(.18,.74,.21,1) 4.26s both;
+}
+
+.ck-phoenix-rebirth-wings {
+  width: 112%;
+  height: 58%;
+  transform: translate(-50%, -50%) scale(.14);
+  opacity: 0;
+  filter: blur(1px) drop-shadow(0 0 11px rgba(255,178,55,.64));
+  background:
+    radial-gradient(ellipse at 50% 82%, rgba(255,245,173,.78), rgba(255,144,38,.30) 35%, transparent 62%),
+    conic-gradient(from 270deg at 50% 82%,
+      transparent 0 10%,
+      rgba(255,91,46,.08) 10% 15%,
+      rgba(255,218,96,.74) 15% 22%,
+      rgba(255,75,57,.18) 22% 32%,
+      transparent 32% 68%,
+      rgba(255,75,57,.18) 68% 78%,
+      rgba(255,218,96,.74) 78% 85%,
+      rgba(255,91,46,.08) 85% 90%,
+      transparent 90% 100%);
+  clip-path: polygon(50% 74%, 35% 57%, 8% 28%, 0 9%, 18% 15%, 42% 31%, 50% 0, 58% 31%, 82% 15%, 100% 9%, 92% 28%, 65% 57%);
+  animation: ckPhoenixRebirthWings 1.8s cubic-bezier(.16,.76,.20,1) 4.5s both;
+}
+
+.ck-phoenix-rebirth-ring {
+  width: 44%;
+  height: 44%;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 215, 94, .76);
+  box-shadow:
+    0 0 8px rgba(255, 172, 54, .58),
+    inset 0 0 8px rgba(255, 76, 49, .24);
+  opacity: 0;
+}
+
+.ck-phoenix-rebirth-ring-1 {
+  animation: ckPhoenixRebirthRing 1.7s ease-out 4.35s both;
+}
+
+.ck-phoenix-rebirth-ring-2 {
+  animation: ckPhoenixRebirthRing 1.8s ease-out 4.62s both;
+}
+
+.ck-phoenix-rebirth-feathers,
+.ck-phoenix-rebirth-embers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-phoenix-rebirth-feathers i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 7px;
+  height: 22px;
+  border-radius: 100% 0 100% 0;
+  opacity: 0;
+  background: linear-gradient(180deg, #fff3a6, #ffad34 42%, #ef3e4e 78%, #8c34c7);
+  box-shadow:
+    0 0 6px rgba(255,192,64,.80),
+    0 0 10px rgba(255,73,55,.40);
+  transform-origin: center;
+  animation: ckPhoenixFeatherBurst 1.72s cubic-bezier(.12,.73,.24,1)
+    calc(4.42s + (var(--ck-phoenix-feather-i) % 6) * 38ms) both;
+}
+
+.ck-phoenix-rebirth-embers i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--ck-phoenix-ember-size);
+  height: var(--ck-phoenix-ember-size);
+  border-radius: 50%;
+  opacity: 0;
+  background: rgba(255,236,143,.98);
+  box-shadow:
+    0 0 5px rgba(255,188,49,.98),
+    0 0 11px rgba(255,67,45,.66);
+  animation: ckPhoenixEmberBurst 1.36s ease-out
+    calc(4.34s + (var(--ck-phoenix-ember-i) % 9) * 28ms) both;
+}
+
+.ck-phoenix-afterglow {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.ck-phoenix-afterglow i {
+  position: absolute;
+  left: var(--ck-phoenix-after-x);
+  top: var(--ck-phoenix-after-y);
+  width: var(--ck-phoenix-after-size);
+  height: var(--ck-phoenix-after-size);
+  border-radius: 50%;
+  opacity: 0;
+  background: rgba(255, 225, 124, .92);
+  box-shadow:
+    0 0 5px rgba(255, 152, 49, .62),
+    0 0 10px rgba(255, 65, 55, .26);
+  animation: ckPhoenixAfterglow 3.2s ease-out calc(5.25s + (var(--ck-phoenix-after-i) % 8) * 140ms) both;
+}
+
+.ck-live-event-test-button.is-phoenix {
+  border-color: rgba(255, 137, 47, .74);
+  background: linear-gradient(180deg, rgba(102, 25, 31, .94), rgba(55, 18, 37, .96));
+  box-shadow: 0 7px 18px rgba(92, 19, 24, .28), inset 0 0 0 1px rgba(255, 202, 91, .08);
+}
+
+.ck-live-event-test-button.is-phoenix:hover {
+  border-color: rgba(255, 207, 98, .95);
+  box-shadow: 0 8px 20px rgba(180, 55, 30, .30), 0 0 12px rgba(255, 123, 40, .16);
+}
+
+@keyframes ckPhoenixFlightPre {
+  0% {
+    left: -18%;
+    top: var(--ck-phoenix-y0);
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt0)) scale(.42);
+  }
+  8% { opacity: .96; }
+  48% {
+    left: 24%;
+    top: var(--ck-phoenix-y1);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt1)) scale(.72);
+  }
+  88% {
+    left: calc(var(--ck-phoenix-rebirth-x) - 4%);
+    top: calc(var(--ck-phoenix-rebirth-y) + 2%);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt2)) scale(.93);
+  }
+  100% {
+    left: var(--ck-phoenix-rebirth-x);
+    top: var(--ck-phoenix-rebirth-y);
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt2)) scale(.56);
+  }
+}
+
+@keyframes ckPhoenixFlightPost {
+  0% {
+    left: var(--ck-phoenix-rebirth-x);
+    top: var(--ck-phoenix-rebirth-y);
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt2)) scale(.54);
+  }
+  9% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt2)) scale(1.03);
+  }
+  36% {
+    left: 72%;
+    top: calc(var(--ck-phoenix-rebirth-y) - 7%);
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-2deg) scale(.88);
+  }
+  78% {
+    left: 101%;
+    top: var(--ck-phoenix-y4);
+    opacity: .96;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt4)) scale(.70);
+  }
+  100% {
+    left: 122%;
+    top: calc(var(--ck-phoenix-y4) - 4%);
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-tilt4)) scale(.55);
+  }
+}
+
+@keyframes ckPhoenixFrameUp {
+  0%, 24.9% { opacity: 1; }
+  25%, 100% { opacity: 0; }
+}
+
+@keyframes ckPhoenixFrameMid {
+  0%, 24.9% { opacity: 0; }
+  25%, 49.9% { opacity: 1; }
+  50%, 74.9% { opacity: 0; }
+  75%, 99.9% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckPhoenixFrameDown {
+  0%, 49.9% { opacity: 0; }
+  50%, 74.9% { opacity: 1; }
+  75%, 100% { opacity: 0; }
+}
+
+@keyframes ckPhoenixWingbeatLift {
+  0% { transform: translateY(0) rotate(-.2deg) scaleY(.995); }
+  25% { transform: translateY(-1.5px) rotate(.1deg) scaleY(1.006); }
+  50% { transform: translateY(2.5px) rotate(.3deg) scaleY(.987); }
+  75% { transform: translateY(.5px) rotate(-.1deg) scaleY(.997); }
+  100% { transform: translateY(0) rotate(-.2deg) scaleY(.995); }
+}
+
+@keyframes ckPhoenixBodyPulse {
+  0%, 100% { transform: translateY(0) rotate(-.15deg); }
+  50% { transform: translateY(-1.4px) rotate(.2deg); }
+}
+
+@keyframes ckPhoenixAura {
+  from { opacity: .34; transform: translate(-50%, -50%) scale(.88); }
+  to { opacity: .62; transform: translate(-50%, -50%) scale(1.08); }
+}
+
+@keyframes ckPhoenixTailWide {
+  from { opacity: .48; transform: rotate(-1deg) scaleY(.70); }
+  to { opacity: .78; transform: rotate(2deg) scaleY(1.08); }
+}
+
+@keyframes ckPhoenixTrailSpark {
+  0% { opacity: 0; transform: translate3d(8px, 0, 0) rotate(45deg) scale(.2); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(-78px, 13px, 0) rotate(115deg) scale(.06); }
+}
+
+@keyframes ckPhoenixWorldWarmth {
+  0%, 4% { opacity: 0; }
+  18% { opacity: .48; }
+  38% { opacity: .72; }
+  45% { opacity: .38; }
+  49% { opacity: .96; }
+  58% { opacity: .62; }
+  78% { opacity: .30; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckPhoenixWorldFlash {
+  0%, 39% { opacity: 0; }
+  43% { opacity: .18; }
+  47% { opacity: 1; }
+  50% { opacity: .72; }
+  55% { opacity: .18; }
+  63%, 100% { opacity: 0; }
+}
+
+@keyframes ckPhoenixRebirthHalo {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.08); }
+  22% { opacity: .92; }
+  62% { opacity: .60; transform: translate(-50%, -50%) scale(.92); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.46); }
+}
+
+@keyframes ckPhoenixRebirthCore {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.18); }
+  25% { opacity: 1; transform: translate(-50%, -50%) scale(.82); }
+  53% { opacity: 1; transform: translate(-50%, -50%) scale(1.46); }
+  77% { opacity: .98; transform: translate(-50%, -50%) scale(.92); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+}
+
+@keyframes ckPhoenixRebirthWings {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.10) rotate(0deg); }
+  24% { opacity: .50; }
+  58% { opacity: .94; transform: translate(-50%, -50%) scale(.95) rotate(0deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.22) rotate(1deg); }
+}
+
+@keyframes ckPhoenixRebirthRing {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.22); }
+  22% { opacity: .92; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(2.55); }
+}
+
+@keyframes ckPhoenixFeatherBurst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--ck-phoenix-feather-rot)) scale(.12);
+  }
+  18% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform:
+      translate(calc(-50% + var(--ck-phoenix-feather-x)), calc(-50% + var(--ck-phoenix-feather-y)))
+      rotate(calc(var(--ck-phoenix-feather-rot) + 150deg))
+      scale(var(--ck-phoenix-feather-scale));
+  }
+}
+
+@keyframes ckPhoenixEmberBurst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.15); }
+  16% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform:
+      translate(calc(-50% + var(--ck-phoenix-ember-x)), calc(-50% + var(--ck-phoenix-ember-y)))
+      scale(.05);
+  }
+}
+
+@keyframes ckPhoenixRebornImage {
+  0%, 8% { opacity: 0; transform: scale(.86); filter: brightness(1.8) saturate(1.1); }
+  19% { opacity: 1; transform: scale(1.04); filter: brightness(1.55) saturate(1.14); }
+  42% { opacity: .92; transform: scale(1); filter: brightness(1.22) saturate(1.09); }
+  63%, 100% { opacity: 0; transform: scale(1); }
+}
+
+@keyframes ckPhoenixAfterglow {
+  0% { opacity: 0; transform: translateY(4px) scale(.2); }
+  18% { opacity: .80; }
+  100% { opacity: 0; transform: translateY(-26px) scale(.05); }
+}
+
+@media (max-width: 720px) {
+  .ck-phoenix-flight {
+    width: clamp(155px, 37vw, 245px);
+  }
+
+  .ck-phoenix-rebirth {
+    width: clamp(150px, 40vw, 245px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-live-event-phoenix-rebirth,
+  .ck-live-event-phoenix-rebirth *,
+  .ck-live-event-phoenix-rebirth *::before,
+  .ck-live-event-phoenix-rebirth *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .ck-phoenix-frame-1 {
+    opacity: 1 !important;
+  }
+
+  .ck-phoenix-frame-2,
+  .ck-phoenix-frame-3,
+  .ck-phoenix-reborn-image {
+    opacity: 0 !important;
+  }
+}

@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'dragon-flight';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -61,11 +61,13 @@ const STORAGE_PREFIX = 'mamlechet-kingdom-ambient-events-v1';
 const REAL_COOLDOWN_MS = 8 * 60 * 1000;
 const FAIRY_SWARM_UNLOCK_STARS = 4;
 const DRAGON_FLIGHT_UNLOCK_STARS = 8;
+const PHOENIX_REBIRTH_UNLOCK_STARS = 12;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
   'fairy-swarm': 9400,
   'dragon-flight': 9000,
+  'phoenix-rebirth': 10800,
 };
 
 const SHOOTING_STAR_PATHS = [
@@ -87,6 +89,22 @@ const DRAGON_FLIGHT_PATHS = [
   { y0: 31, y1: 22, y2: 35, y3: 19, y4: 27, tilt0: -7, tilt1: 4, tilt2: 9, tilt3: -5, tilt4: 1 },
   { y0: 19, y1: 29, y2: 26, y3: 39, y4: 25, tilt0: 5, tilt1: -5, tilt2: 4, tilt3: 8, tilt4: -3 },
   { y0: 39, y1: 30, y2: 22, y3: 32, y4: 17, tilt0: -3, tilt1: 6, tilt2: -4, tilt3: 5, tilt4: -2 },
+] as const;
+
+
+const PHOENIX_FRAME_ASSETS = [
+  '/assets/class-kingdom/living-world/phoenix/phoenix-wing-up.png',
+  '/assets/class-kingdom/living-world/phoenix/phoenix-wing-mid.png',
+  '/assets/class-kingdom/living-world/phoenix/phoenix-wing-down.png',
+] as const;
+
+const PHOENIX_REBORN_ASSET =
+  '/assets/class-kingdom/living-world/phoenix/phoenix-wing-reborn.png';
+
+const PHOENIX_FLIGHT_PATHS = [
+  { y0: 66, y1: 48, rebirthY: 30, y4: 20, tilt0: -9, tilt1: -2, tilt2: 6, tilt4: -5, rebirthX: 52 },
+  { y0: 48, y1: 32, rebirthY: 38, y4: 18, tilt0: -5, tilt1: 5, tilt2: -4, tilt4: 3, rebirthX: 48 },
+  { y0: 70, y1: 55, rebirthY: 34, y4: 28, tilt0: -10, tilt1: -4, tilt2: 5, tilt4: -2, rebirthX: 56 },
 ] as const;
 
 
@@ -340,6 +358,148 @@ function DragonFlightEvent({ realm, instanceId, pathIndex }: { realm: RealmId; i
   );
 }
 
+
+function PhoenixSprite({ reborn = false }: { reborn?: boolean }) {
+  return (
+    <span className={`ck-phoenix-visual ${reborn ? 'is-reborn' : ''}`} aria-hidden="true">
+      <span className="ck-phoenix-aura" />
+      <span className="ck-phoenix-frame-stack">
+        {PHOENIX_FRAME_ASSETS.map((src, index) => (
+          <img
+            key={src}
+            className={`ck-phoenix-image ck-phoenix-frame ck-phoenix-frame-${index + 1}`}
+            src={src}
+            alt=""
+            draggable={false}
+          />
+        ))}
+        {reborn && (
+          <img
+            className="ck-phoenix-image ck-phoenix-reborn-image"
+            src={PHOENIX_REBORN_ASSET}
+            alt=""
+            draggable={false}
+          />
+        )}
+      </span>
+      <span className="ck-phoenix-tail-ribbon ck-phoenix-tail-ribbon-wide" />
+      <span className="ck-phoenix-tail-ribbon ck-phoenix-tail-ribbon-core" />
+      <span className="ck-phoenix-trail-particles">
+        {Array.from({ length: 30 }).map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-phoenix-trail-i': index,
+              '--ck-phoenix-trail-y': `${((index * 29) % 43) - 21}px`,
+              '--ck-phoenix-trail-size': `${2 + (index % 5)}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </span>
+    </span>
+  );
+}
+
+function PhoenixRebirthEvent({
+  realm,
+  instanceId,
+  pathIndex,
+}: {
+  realm: RealmId;
+  instanceId: number;
+  pathIndex: number;
+}) {
+  const path = PHOENIX_FLIGHT_PATHS[pathIndex] ?? PHOENIX_FLIGHT_PATHS[0];
+  const style = {
+    '--ck-phoenix-y0': `${path.y0}%`,
+    '--ck-phoenix-y1': `${path.y1}%`,
+    '--ck-phoenix-rebirth-y': `${path.rebirthY}%`,
+    '--ck-phoenix-y4': `${path.y4}%`,
+    '--ck-phoenix-tilt0': `${path.tilt0}deg`,
+    '--ck-phoenix-tilt1': `${path.tilt1}deg`,
+    '--ck-phoenix-tilt2': `${path.tilt2}deg`,
+    '--ck-phoenix-tilt4': `${path.tilt4}deg`,
+    '--ck-phoenix-rebirth-x': `${path.rebirthX}%`,
+  } as CSSProperties;
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-phoenix-rebirth is-${realm}`}
+      style={style}
+      aria-hidden="true"
+    >
+      <div className="ck-phoenix-world-warmth" />
+      <div className="ck-phoenix-world-flash" />
+
+      <div className="ck-phoenix-flight ck-phoenix-flight-pre">
+        <PhoenixSprite />
+      </div>
+
+      <div className="ck-phoenix-rebirth">
+        <span className="ck-phoenix-rebirth-halo" />
+        <span className="ck-phoenix-rebirth-ring ck-phoenix-rebirth-ring-1" />
+        <span className="ck-phoenix-rebirth-ring ck-phoenix-rebirth-ring-2" />
+        <span className="ck-phoenix-rebirth-core" />
+        <span className="ck-phoenix-rebirth-wings" />
+        <span className="ck-phoenix-rebirth-feathers">
+          {Array.from({ length: 18 }).map((_, index) => {
+            const angle = (index * Math.PI * 2) / 18;
+            const distance = 62 + (index % 5) * 16;
+            return (
+              <i
+                key={index}
+                style={{
+                  '--ck-phoenix-feather-i': index,
+                  '--ck-phoenix-feather-x': `${Math.cos(angle) * distance}px`,
+                  '--ck-phoenix-feather-y': `${Math.sin(angle) * distance}px`,
+                  '--ck-phoenix-feather-rot': `${(angle * 180) / Math.PI + 35}deg`,
+                  '--ck-phoenix-feather-scale': 0.7 + (index % 4) * 0.14,
+                } as CSSProperties}
+              />
+            );
+          })}
+        </span>
+        <span className="ck-phoenix-rebirth-embers">
+          {Array.from({ length: 34 }).map((_, index) => {
+            const angle = (index * 137.5 * Math.PI) / 180;
+            const distance = 28 + (index % 9) * 11;
+            return (
+              <i
+                key={index}
+                style={{
+                  '--ck-phoenix-ember-i': index,
+                  '--ck-phoenix-ember-x': `${Math.cos(angle) * distance}px`,
+                  '--ck-phoenix-ember-y': `${Math.sin(angle) * distance}px`,
+                  '--ck-phoenix-ember-size': `${2 + (index % 5)}px`,
+                } as CSSProperties}
+              />
+            );
+          })}
+        </span>
+      </div>
+
+      <div className="ck-phoenix-flight ck-phoenix-flight-post">
+        <PhoenixSprite reborn />
+      </div>
+
+      <div className="ck-phoenix-afterglow">
+        {Array.from({ length: 16 }).map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-phoenix-after-i': index,
+              '--ck-phoenix-after-x': `${10 + ((index * 31) % 82)}%`,
+              '--ck-phoenix-after-y': `${12 + ((index * 47) % 70)}%`,
+              '--ck-phoenix-after-size': `${1 + (index % 4)}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function KingdomAmbientEvents({
   classId,
   realm,
@@ -355,6 +515,7 @@ export default function KingdomAmbientEvents({
   const canShowShootingStar = stars >= 1;
   const canShowFairySwarm = stars >= FAIRY_SWARM_UNLOCK_STARS;
   const canShowDragonFlight = stars >= DRAGON_FLIGHT_UNLOCK_STARS;
+  const canShowPhoenixRebirth = stars >= PHOENIX_REBIRTH_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -375,13 +536,16 @@ export default function KingdomAmbientEvents({
     if (eventId === 'shooting-star' && !canShowShootingStar) return;
     if (eventId === 'fairy-swarm' && !canShowFairySwarm) return;
     if (eventId === 'dragon-flight' && !canShowDragonFlight) return;
+    if (eventId === 'phoenix-rebirth' && !canShowPhoenixRebirth) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
       ? Math.floor(Math.random() * SHOOTING_STAR_PATHS.length)
       : eventId === 'dragon-flight'
         ? Math.floor(Math.random() * DRAGON_FLIGHT_PATHS.length)
-        : 0;
+        : eventId === 'phoenix-rebirth'
+          ? Math.floor(Math.random() * PHOENIX_FLIGHT_PATHS.length)
+          : 0;
 
     setActiveEvent({
       id: eventId,
@@ -400,7 +564,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowDragonFlight, canShowFairySwarm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowDragonFlight, canShowFairySwarm, canShowPhoenixRebirth, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -408,17 +572,26 @@ export default function KingdomAmbientEvents({
     const stored = readStoredState(storageKey);
     const roll = Math.random();
 
+    const basePhoenixChance = canShowPhoenixRebirth
+      ? (realm === 'legendary' ? 0.10 : stars >= 20 ? 0.075 : 0.055)
+      : 0;
+    const phoenixChance = stored.lastEventId === 'phoenix-rebirth' ? 0.012 : basePhoenixChance;
+    if (roll < phoenixChance) return 'phoenix-rebirth';
+
+    const remainingAfterPhoenix = 1 - phoenixChance;
     const baseDragonChance = canShowDragonFlight
       ? (realm === 'legendary' ? 0.18 : stars >= 16 ? 0.14 : 0.10)
       : 0;
     const dragonChance = stored.lastEventId === 'dragon-flight' ? 0.035 : baseDragonChance;
-    if (roll < dragonChance) return 'dragon-flight';
+    const dragonThreshold = phoenixChance + remainingAfterPhoenix * dragonChance;
+    if (roll < dragonThreshold) return 'dragon-flight';
 
+    const remainingAfterRare = 1 - dragonThreshold;
     const baseFairyChance = realm === 'legendary' ? 0.36 : stars >= 12 ? 0.32 : 0.28;
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
-    const fairyThreshold = dragonChance + ((1 - dragonChance) * fairyChance);
+    const fairyThreshold = dragonThreshold + remainingAfterRare * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowDragonFlight, canShowFairySwarm, realm, stars, storageKey]);
+  }, [canShowDragonFlight, canShowFairySwarm, canShowPhoenixRebirth, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -532,6 +705,10 @@ export default function KingdomAmbientEvents({
         <DragonFlightEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
 
+      {activeEvent?.id === 'phoenix-rebirth' && (
+        <PhoenixRebirthEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
+      )}
+
       {sandboxMode && !paused && (
         <div className="ck-live-event-test-controls" dir="rtl">
           <button
@@ -566,6 +743,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               🐉 דרקון
+            </button>
+          )}
+          {canShowPhoenixRebirth && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-phoenix"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('phoenix-rebirth', false);
+              }}
+            >
+              🔥 עוף חול
             </button>
           )}
         </div>
