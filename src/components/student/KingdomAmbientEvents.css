@@ -7915,3 +7915,435 @@
     height: 56px;
   }
 }
+
+
+/* ========================================================================== */
+/* Living World V19.2 — Celestial Tide / Clear Fantasy Breaker                    */
+/* ========================================================================== */
+
+.ck-live-event-celestial-tide {
+  z-index: auto;
+  isolation: auto;
+  overflow: visible;
+  --ck-tide-event-duration: 27.2s;
+}
+
+.ck-live-events.is-tide-depth-split {
+  isolation: auto;
+}
+
+.ck31-map:has(> .ck-live-events.is-tide-depth-split) > .ck31-map-topbar,
+.ck31-map:has(> .ck-live-events.is-tide-depth-split) > .ck31-map-bottombar {
+  z-index: 220;
+}
+
+.ck31-map:has(> .ck-live-events.is-tide-depth-split) > .ck31-sandbox-banner {
+  z-index: 230;
+}
+
+.ck-tide-world-tint,
+.ck-tide-horizon-glow,
+.ck-tide-caustics,
+.ck-tide-ripples,
+.ck-tide-bubbles,
+.ck-tide-light-fish-field,
+.ck-tide-water-sheet,
+.ck-tide-foam-spray,
+.ck-tide-peak-flash,
+.ck-tide-peak-burst,
+.ck-tide-afterglow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-tide-world-tint {
+  z-index: 18;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 84%, rgba(54, 199, 255, .18), transparent 52%),
+    linear-gradient(180deg, rgba(44, 121, 194, .02), rgba(24, 132, 190, .14) 62%, rgba(22, 91, 151, .22));
+  mix-blend-mode: screen;
+  backdrop-filter: saturate(.92) hue-rotate(-3deg);
+  animation: ckTideWorldTint var(--ck-tide-event-duration) ease-in-out both;
+}
+
+.ck-live-event-celestial-tide.is-legendary .ck-tide-world-tint {
+  background:
+    radial-gradient(ellipse at 50% 82%, rgba(92, 220, 255, .18), transparent 49%),
+    radial-gradient(ellipse at 50% 72%, rgba(154, 115, 255, .10), transparent 54%),
+    linear-gradient(180deg, rgba(60, 111, 205, .02), rgba(48, 117, 212, .14) 62%, rgba(56, 55, 158, .20));
+}
+
+.ck-tide-horizon-glow {
+  z-index: 19;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 61%, rgba(201, 247, 255, .30), transparent 18%),
+    radial-gradient(ellipse at 50% 72%, rgba(89, 211, 255, .17), transparent 38%);
+  mix-blend-mode: screen;
+  animation: ckTideHorizonGlow var(--ck-tide-event-duration) ease-in-out both;
+}
+
+.ck-tide-caustics {
+  z-index: 52;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse 15% 6% at 12% 70%, rgba(212, 251, 255, .30), transparent 72%),
+    radial-gradient(ellipse 18% 7% at 30% 62%, rgba(174, 237, 255, .24), transparent 72%),
+    radial-gradient(ellipse 16% 6% at 48% 76%, rgba(219, 252, 255, .28), transparent 72%),
+    radial-gradient(ellipse 20% 7% at 67% 61%, rgba(165, 232, 255, .23), transparent 72%),
+    radial-gradient(ellipse 17% 6% at 84% 73%, rgba(220, 252, 255, .28), transparent 72%);
+  mix-blend-mode: screen;
+  filter: blur(3px);
+  animation: ckTideCaustics var(--ck-tide-event-duration) ease-in-out both;
+}
+
+.ck-tide-ripples { z-index: 54; }
+.ck-tide-ripples > i {
+  position: absolute;
+  left: var(--ck-tide-ripple-x);
+  top: var(--ck-tide-ripple-y);
+  width: 92px;
+  height: 30px;
+  opacity: 0;
+  border: 2px solid rgba(208, 249, 255, .72);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(102, 214, 255, .30), inset 0 0 8px rgba(255,255,255,.14);
+  transform: translate(-50%, -50%) scale(.08) scale(var(--ck-tide-ripple-scale));
+  animation: ckTideRipple 3.6s ease-out var(--ck-tide-ripple-delay) both;
+}
+
+.ck-tide-bubbles { z-index: 98; overflow: hidden; }
+.ck-tide-bubbles > i {
+  position: absolute;
+  left: var(--ck-tide-bubble-x);
+  top: var(--ck-tide-bubble-y);
+  width: var(--ck-tide-bubble-size);
+  height: var(--ck-tide-bubble-size);
+  opacity: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(224, 252, 255, .82);
+  background: radial-gradient(circle at 30% 27%, rgba(255,255,255,.94) 0 12%, rgba(139,226,255,.30) 23%, rgba(65,174,237,.10) 65%, transparent 76%);
+  box-shadow: 0 0 8px rgba(137, 225, 255, .42);
+  animation: ckTideBubbleRise 6.1s ease-in var(--ck-tide-bubble-delay) both;
+}
+
+.ck-tide-light-fish-field { z-index: 104; overflow: hidden; }
+.ck-tide-light-fish-field > span {
+  position: absolute;
+  left: -11%;
+  top: var(--ck-tide-fish-y);
+  width: calc(var(--ck-tide-fish-size) * 1.45);
+  height: var(--ck-tide-fish-size);
+  opacity: 0;
+  border-radius: 58% 42% 48% 52%;
+  background: linear-gradient(90deg, rgba(224,252,255,.46), rgba(178,240,255,.96) 44%, rgba(255,244,180,.96));
+  box-shadow: 0 0 12px rgba(138, 230, 255, .78), 0 0 24px rgba(255, 226, 126, .27);
+  clip-path: polygon(0 50%, 22% 28%, 70% 14%, 100% 50%, 70% 86%, 22% 72%);
+  animation: ckTideFishSwim var(--ck-tide-fish-duration) ease-in-out var(--ck-tide-fish-delay) both;
+}
+
+.ck-tide-light-fish-field > span::after {
+  content: '';
+  position: absolute;
+  left: -36%;
+  top: 18%;
+  width: 46%;
+  height: 64%;
+  background: rgba(185, 241, 255, .68);
+  clip-path: polygon(100% 50%, 0 0, 14% 50%, 0 100%);
+  filter: drop-shadow(0 0 5px rgba(111,214,255,.42));
+}
+
+.ck-tide-light-fish-field > span.is-reverse {
+  left: auto;
+  right: -11%;
+  transform: scaleX(-1);
+  animation-name: ckTideFishSwimReverse;
+}
+
+.ck-tide-wave {
+  position: absolute;
+  left: -34%;
+  width: 168%;
+  height: 72%;
+  overflow: visible;
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 -5px 14px rgba(188, 244, 255, .20));
+  transform-origin: 50% 74%;
+  will-change: transform, opacity;
+}
+
+.ck-tide-wave-body { opacity: .78; }
+.ck-tide-wave-inner {
+  stroke: rgba(190, 242, 255, .30);
+  stroke-width: 10;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 9px rgba(116, 218, 255, .38));
+}
+.ck-tide-wave-foam {
+  stroke-width: 15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,.82)) drop-shadow(0 0 18px rgba(119,220,255,.52));
+}
+
+.ck-tide-wave.is-one {
+  z-index: 76;
+  top: 36%;
+  transform: translateX(-13%) scaleY(.48) scaleX(.92);
+  animation: ckTideWavePass 5.2s cubic-bezier(.16,.62,.22,1) 5.5s both;
+}
+.ck-tide-wave.is-two {
+  z-index: 96;
+  top: 31%;
+  transform: translateX(-14%) scaleY(.59) scaleX(.96);
+  animation: ckTideWavePass 5.4s cubic-bezier(.16,.62,.22,1) 8.2s both;
+  filter: hue-rotate(4deg) drop-shadow(0 -5px 16px rgba(188, 244, 255, .23));
+}
+.ck-tide-wave.is-three {
+  z-index: 118;
+  top: 26%;
+  transform: translateX(-16%) scaleY(.70) scaleX(1.00);
+  animation: ckTideWavePass 5.6s cubic-bezier(.16,.62,.22,1) 11.0s both;
+}
+.ck-tide-wave.is-hero {
+  z-index: 142;
+  left: -42%;
+  width: 180%;
+  top: 18%;
+  height: 79%;
+  transform: translateX(-28%) scaleY(.82) scaleX(1.01);
+  filter: drop-shadow(0 -5px 12px rgba(213,249,255,.22)) drop-shadow(0 0 28px rgba(38, 183, 238, .26));
+  animation: ckTideHeroWave 6.25s cubic-bezier(.10,.69,.17,1) 13.2s both;
+}
+
+.ck-tide-wave.is-hero .ck-tide-wave-body { opacity: .64; }
+.ck-tide-wave.is-hero .ck-tide-wave-foam { stroke-width: 15; }
+.ck-tide-wave.is-hero .ck-tide-wave-inner { stroke-width: 6; opacity: .48; }
+
+.ck-tide-wave-breaker {
+  stroke: rgba(249, 254, 255, .90);
+  stroke-width: 10;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(255,255,255,.78)) drop-shadow(0 0 14px rgba(107,221,255,.52));
+}
+.ck-tide-wave-breaker.is-secondary {
+  stroke: rgba(222, 250, 255, .62);
+  stroke-width: 5;
+  filter: drop-shadow(0 0 7px rgba(111,218,255,.42));
+}
+
+.ck-tide-water-sheet {
+  z-index: 136;
+  inset: auto -10% -3% -10%;
+  height: 49%;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(188, 246, 255, .14), transparent 45%),
+    linear-gradient(180deg, rgba(61, 201, 243, .10), rgba(19, 122, 190, .25) 42%, rgba(10, 84, 151, .16));
+  border-top: 1px solid rgba(219, 251, 255, .26);
+  box-shadow: inset 0 10px 28px rgba(156, 237, 255, .08);
+  backdrop-filter: saturate(.96) hue-rotate(-2deg);
+  clip-path: polygon(0 22%, 14% 15%, 28% 20%, 42% 10%, 57% 17%, 70% 8%, 84% 16%, 100% 10%, 100% 100%, 0 100%);
+  animation: ckTideWaterSheet var(--ck-tide-event-duration) ease-in-out both;
+}
+
+.ck-live-event-celestial-tide.is-legendary .ck-tide-wave.is-hero {
+  filter: hue-rotate(14deg) drop-shadow(0 -7px 14px rgba(255,255,255,.38)) drop-shadow(0 0 34px rgba(129, 108, 255, .34));
+}
+
+.ck-tide-foam-spray { z-index: 145; overflow: visible; }
+.ck-tide-foam-spray > i {
+  position: absolute;
+  left: var(--ck-tide-foam-x);
+  top: var(--ck-tide-foam-y);
+  width: var(--ck-tide-foam-size);
+  height: var(--ck-tide-foam-size);
+  opacity: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0 22%, rgba(224,250,255,.92) 25% 50%, rgba(87,203,244,.52) 56%, transparent 76%);
+  box-shadow: 0 0 6px rgba(255,255,255,.78), 0 0 13px rgba(95,211,250,.46);
+  animation: ckTideFoamSpray 3.35s ease-out var(--ck-tide-foam-delay) both;
+}
+
+.ck-tide-peak-flash {
+  z-index: 146;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 60%, rgba(246, 254, 255, .72), rgba(124, 224, 255, .18) 33%, transparent 68%);
+  mix-blend-mode: screen;
+  animation: ckTidePeakFlash var(--ck-tide-event-duration) linear both;
+}
+
+.ck-tide-peak-burst { z-index: 147; overflow: visible; }
+.ck-tide-peak-burst > i {
+  position: absolute;
+  left: var(--ck-tide-burst-x0);
+  top: var(--ck-tide-burst-y0);
+  width: var(--ck-tide-burst-size);
+  height: calc(var(--ck-tide-burst-size) * 1.65);
+  opacity: 0;
+  border-radius: 55% 45% 64% 36%;
+  background: linear-gradient(180deg, #fff, rgba(180,240,255,.94) 52%, rgba(85,177,237,.42));
+  box-shadow: 0 0 8px rgba(230, 251, 255, .94), 0 0 16px rgba(109, 211, 255, .42);
+  transform: translate(-50%, -50%) scale(.15);
+  animation: ckTideBurstDrop 4.2s cubic-bezier(.14,.68,.20,1) var(--ck-tide-burst-delay) both;
+}
+
+.ck-tide-afterglow { z-index: 120; }
+.ck-tide-afterglow > i {
+  position: absolute;
+  left: var(--ck-tide-after-x);
+  top: var(--ck-tide-after-y);
+  width: var(--ck-tide-after-size);
+  height: var(--ck-tide-after-size);
+  opacity: 0;
+  border-radius: 50%;
+  background: #f7feff;
+  box-shadow: 0 0 7px rgba(255,255,255,.95), 0 0 16px rgba(86,209,255,.55), 0 0 25px rgba(255,225,127,.15);
+  animation: ckTideAfterglow 3.2s ease-out var(--ck-tide-after-delay) both;
+}
+
+.ck-live-event-test-button.is-tide {
+  border-color: rgba(98, 220, 255, .80);
+  background: linear-gradient(180deg, rgba(25, 124, 170, .94), rgba(17, 66, 128, .96));
+  box-shadow: inset 0 0 16px rgba(168, 241, 255, .13), 0 0 12px rgba(75, 205, 255, .14);
+}
+.ck-live-event-test-button.is-tide:hover {
+  border-color: rgba(218, 252, 255, .98);
+  box-shadow: inset 0 0 18px rgba(204, 249, 255, .20), 0 0 20px rgba(91, 218, 255, .28);
+}
+
+@keyframes ckTideWorldTint {
+  0%, 6% { opacity: 0; }
+  16% { opacity: .18; }
+  32% { opacity: .42; }
+  52% { opacity: .64; }
+  62%, 75% { opacity: .82; }
+  84% { opacity: .46; }
+  94% { opacity: .10; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckTideHorizonGlow {
+  0%, 12% { opacity: 0; }
+  24% { opacity: .28; }
+  47% { opacity: .62; }
+  60%, 75% { opacity: .92; }
+  87% { opacity: .26; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckTideCaustics {
+  0%, 16% { opacity: 0; transform: translateX(-2%) scale(.97); }
+  28% { opacity: .32; }
+  48% { opacity: .62; transform: translateX(1%) scale(1.02); }
+  61%, 78% { opacity: .78; }
+  87% { opacity: .34; transform: translateX(-1%) scale(1); }
+  100% { opacity: 0; }
+}
+
+@keyframes ckTideRipple {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.08) scale(var(--ck-tide-ripple-scale)); }
+  16% { opacity: .78; }
+  52% { opacity: .46; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8) scale(var(--ck-tide-ripple-scale)); }
+}
+
+@keyframes ckTideBubbleRise {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(.45); }
+  12% { opacity: .72; }
+  56% { opacity: .82; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--ck-tide-bubble-drift)), -150px) scale(1.06); }
+}
+
+@keyframes ckTideFishSwim {
+  0% { opacity: 0; transform: translateX(0) translateY(8px) rotate(-4deg) scale(.75); }
+  12% { opacity: .76; }
+  46% { opacity: .92; transform: translateX(54vw) translateY(-10px) rotate(3deg) scale(1); }
+  86% { opacity: .72; }
+  100% { opacity: 0; transform: translateX(124vw) translateY(5px) rotate(-2deg) scale(.82); }
+}
+
+@keyframes ckTideFishSwimReverse {
+  0% { opacity: 0; transform: translateX(0) translateY(6px) rotate(-3deg) scaleX(-1) scale(.75); }
+  12% { opacity: .72; }
+  48% { opacity: .90; transform: translateX(-54vw) translateY(-8px) rotate(3deg) scaleX(-1) scale(1); }
+  86% { opacity: .70; }
+  100% { opacity: 0; transform: translateX(-124vw) translateY(5px) rotate(-2deg) scaleX(-1) scale(.82); }
+}
+
+@keyframes ckTideWavePass {
+  0% { opacity: 0; transform: translateX(-20%) scaleY(.48) scaleX(.90); }
+  13% { opacity: .40; }
+  30% { opacity: .78; }
+  62% { opacity: .68; }
+  100% { opacity: 0; transform: translateX(17%) scaleY(.70) scaleX(1.06); }
+}
+
+@keyframes ckTideHeroWave {
+  0% { opacity: 0; transform: translateX(-34%) translateY(6%) scaleY(.72) scaleX(.95); }
+  10% { opacity: .30; }
+  24% { opacity: .78; transform: translateX(-21%) translateY(2%) scaleY(.82) scaleX(.98); }
+  43% { opacity: .96; transform: translateX(-7%) translateY(-1%) scaleY(.90) scaleX(1.01); }
+  58% { opacity: .98; transform: translateX(7%) translateY(-2%) scaleY(.94) scaleX(1.03); }
+  73% { opacity: .80; transform: translateX(20%) translateY(0) scaleY(.90) scaleX(1.05); }
+  88% { opacity: .34; }
+  100% { opacity: 0; transform: translateX(36%) translateY(4%) scaleY(.80) scaleX(1.07); }
+}
+
+@keyframes ckTideWaterSheet {
+  0%, 50% { opacity: 0; transform: translateY(10%); }
+  56% { opacity: .10; transform: translateY(6%); }
+  62% { opacity: .34; transform: translateY(1%); }
+  68%, 73% { opacity: .48; transform: translateY(0); }
+  80% { opacity: .28; transform: translateY(3%); }
+  88% { opacity: .08; transform: translateY(8%); }
+  100% { opacity: 0; transform: translateY(12%); }
+}
+
+@keyframes ckTideFoamSpray {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.14) rotate(0deg); }
+  10% { opacity: .94; }
+  34% { opacity: .96; transform: translate(-44%, -88%) scale(1.02) rotate(64deg); }
+  66% { opacity: .68; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--ck-tide-foam-dx)), calc(-50% + var(--ck-tide-foam-dy))) scale(.48) rotate(168deg); }
+}
+
+@keyframes ckTidePeakFlash {
+  0%, 57% { opacity: 0; }
+  59% { opacity: .14; }
+  61% { opacity: .68; }
+  62.2% { opacity: .10; }
+  64.1% { opacity: .48; }
+  65.2% { opacity: .08; }
+  67%, 100% { opacity: 0; }
+}
+
+@keyframes ckTideBurstDrop {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.15); }
+  10% { opacity: .94; }
+  35% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--ck-tide-burst-x)), calc(-50% + var(--ck-tide-burst-y))) rotate(420deg) scale(.60);
+  }
+}
+
+@keyframes ckTideAfterglow {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.16); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.20); }
+  52% { opacity: .76; }
+  100% { opacity: 0; transform: translate(-50%, -74%) scale(.55); }
+}
+
+@media (max-width: 760px) {
+  .ck-tide-wave.is-hero { height: 76%; top: 20%; }
+  .ck-tide-light-fish-field > span:nth-child(n+19) { display: none; }
+  .ck-tide-bubbles > i:nth-child(n+61) { display: none; }
+  .ck-tide-foam-spray > i:nth-child(n+49) { display: none; }
+}

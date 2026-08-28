@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'magical-winter' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'magical-winter' | 'celestial-tide' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -74,6 +74,7 @@ const MAGICAL_WIND_VORTEX_UNLOCK_STARS = 26;
 const ENCHANTED_PETAL_BLOOM_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 const INTERDIMENSIONAL_PORTAL_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 const MAGICAL_WINTER_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
+const CELESTIAL_TIDE_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -90,6 +91,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'enchanted-petal-bloom': 25800,
   'interdimensional-portal': 27400,
   'magical-winter': 26600,
+  'celestial-tide': 27200,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -1157,6 +1159,205 @@ function MagicalWinterEvent({
   );
 }
 
+
+function CelestialTideEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const waveClasses = ['is-one', 'is-two', 'is-three', 'is-hero'] as const;
+  const bubbles = Array.from({ length: 86 });
+  const lightFish = Array.from({ length: 34 });
+  const foamSpray = Array.from({ length: 108 });
+  const peakBurst = Array.from({ length: 96 });
+  const afterglow = Array.from({ length: 52 });
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-celestial-tide is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-tide-world-tint" />
+      <div className="ck-tide-horizon-glow" />
+      <div className="ck-tide-caustics" />
+
+      <div className="ck-tide-ripples">
+        {Array.from({ length: 7 }).map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-tide-ripple-x': `${8 + ((index * 31) % 84)}%`,
+              '--ck-tide-ripple-y': `${50 + ((index * 17) % 34)}%`,
+              '--ck-tide-ripple-delay': `${2.2 + index * 0.62}s`,
+              '--ck-tide-ripple-scale': `${0.66 + (index % 4) * 0.22}`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-tide-bubbles">
+        {bubbles.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-tide-bubble-x': `${2 + ((index * 37) % 96)}%`,
+              '--ck-tide-bubble-y': `${48 + ((index * 19) % 48)}%`,
+              '--ck-tide-bubble-size': `${2.4 + (index % 7) * 1.25}px`,
+              '--ck-tide-bubble-delay': `${5.2 + (index % 23) * 0.23}s`,
+              '--ck-tide-bubble-drift': `${-34 + ((index * 29) % 69)}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-tide-light-fish-field">
+        {lightFish.map((_, index) => (
+          <span
+            key={index}
+            className={index % 3 === 0 ? 'is-reverse' : ''}
+            style={{
+              '--ck-tide-fish-y': `${39 + ((index * 23) % 45)}%`,
+              '--ck-tide-fish-size': `${8 + (index % 6) * 2.2}px`,
+              '--ck-tide-fish-delay': `${8.1 + (index % 14) * 0.33}s`,
+              '--ck-tide-fish-duration': `${5.6 + (index % 5) * 0.65}s`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      {waveClasses.map((waveClass, index) => {
+        const gradientId = `ck-tide-gradient-${instanceId}-${index}`;
+        const foamId = `ck-tide-foam-${instanceId}-${index}`;
+        const isHeroWave = waveClass === 'is-hero';
+        const bodyPath = isHeroWave
+          ? 'M-190 510 C-35 454 95 492 225 450 C350 410 470 450 570 414 C650 386 702 356 738 314 C780 265 808 200 870 176 C928 153 984 178 1028 226 C1065 267 1095 315 1148 342 C1215 376 1308 384 1410 365 L1410 700 L-190 700 Z'
+          : 'M-160 430 C45 305 175 454 330 350 C505 230 650 505 835 338 C998 192 1110 368 1370 272 L1370 700 L-160 700 Z';
+        const innerPath = isHeroWave
+          ? 'M-120 533 C25 484 135 510 252 476 C367 441 474 470 581 438 C657 415 713 383 756 340 C797 299 829 236 881 215 C928 196 974 213 1011 252 C1043 286 1068 317 1111 339'
+          : 'M-110 455 C70 355 205 474 360 383 C525 286 666 518 846 372 C1008 241 1140 402 1320 328';
+        const foamPath = isHeroWave
+          ? 'M-190 510 C-35 454 95 492 225 450 C350 410 470 450 570 414 C650 386 702 356 738 314 C780 265 808 200 870 176 C928 153 984 178 1028 226 C1065 267 1095 315 1148 342 C1215 376 1308 384 1410 365'
+          : 'M-160 430 C45 305 175 454 330 350 C505 230 650 505 835 338 C998 192 1110 368 1370 272';
+        return (
+          <svg
+            key={waveClass}
+            className={`ck-tide-wave ${waveClass}`}
+            viewBox="0 0 1200 620"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor={realm === 'legendary' ? '#8eeaff' : '#8be8ff'} stopOpacity="0.12" />
+                <stop offset="0.32" stopColor={realm === 'legendary' ? '#6f8fff' : '#38bdf8'} stopOpacity="0.54" />
+                <stop offset="0.70" stopColor={realm === 'legendary' ? '#6948d8' : '#187ac1'} stopOpacity="0.42" />
+                <stop offset="1" stopColor="#0a3a79" stopOpacity="0.08" />
+              </linearGradient>
+              <linearGradient id={foamId} x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stopColor="#ffffff" stopOpacity="0" />
+                <stop offset="0.18" stopColor="#f5fdff" stopOpacity="0.90" />
+                <stop offset="0.52" stopColor={realm === 'legendary' ? '#e7ddff' : '#dff9ff'} stopOpacity="0.98" />
+                <stop offset="0.84" stopColor="#ffffff" stopOpacity="0.84" />
+                <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path
+              className="ck-tide-wave-body"
+              d={bodyPath}
+              fill={`url(#${gradientId})`}
+            />
+            <path
+              className="ck-tide-wave-inner"
+              d={innerPath}
+              fill="none"
+            />
+            <path
+              className="ck-tide-wave-foam"
+              d={foamPath}
+              fill="none"
+              stroke={`url(#${foamId})`}
+            />
+            {isHeroWave && (
+              <>
+                <path
+                  className="ck-tide-wave-breaker"
+                  d="M748 307 C788 254 819 201 872 180 C921 161 970 181 1009 222 C1044 259 1070 296 1107 323"
+                  fill="none"
+                />
+                <path
+                  className="ck-tide-wave-breaker is-secondary"
+                  d="M834 211 C873 188 914 184 951 197 C985 209 1015 235 1042 269"
+                  fill="none"
+                />
+              </>
+            )}
+          </svg>
+        );
+      })}
+
+      <div className="ck-tide-water-sheet" />
+
+      <div className="ck-tide-foam-spray">
+        {foamSpray.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-tide-foam-x': `${index < 76 ? 55 + ((index * 17) % 28) : 3 + ((index * 47) % 94)}%`,
+              '--ck-tide-foam-y': `${index < 76 ? 31 + ((index * 13) % 27) : 48 + ((index * 29) % 25)}%`,
+              '--ck-tide-foam-size': `${index < 76 ? 4.2 + (index % 9) * 1.55 : 3 + (index % 6) * 1.15}px`,
+              '--ck-tide-foam-delay': `${13.9 + (index % 31) * 0.05}s`,
+              '--ck-tide-foam-dx': `${index < 76 ? 24 + ((index * 41) % 142) : -52 + ((index * 53) % 105)}px`,
+              '--ck-tide-foam-dy': `${index < 76 ? -58 - (index % 10) * 9 : -28 - (index % 7) * 7}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-tide-peak-flash" />
+      <div className="ck-tide-peak-burst">
+        {peakBurst.map((_, index) => {
+          const site = [
+            { x: 10, y: 62 }, { x: 28, y: 47 }, { x: 47, y: 67 },
+            { x: 66, y: 45 }, { x: 84, y: 64 }, { x: 56, y: 29 },
+          ][index % 6];
+          const localIndex = Math.floor(index / 6);
+          const angle = ((localIndex * 137.5 + (index % 6) * 21) % 360) * Math.PI / 180;
+          const distance = 34 + (localIndex % 10) * 12;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-tide-burst-x0': `${site.x}%`,
+                '--ck-tide-burst-y0': `${site.y}%`,
+                '--ck-tide-burst-x': `${Math.cos(angle) * distance}px`,
+                '--ck-tide-burst-y': `${Math.sin(angle) * distance * 0.65}px`,
+                '--ck-tide-burst-size': `${2.6 + (index % 6) * 1.05}px`,
+                '--ck-tide-burst-delay': `${16.35 + (index % 25) * 0.045}s`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      <div className="ck-tide-afterglow">
+        {afterglow.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-tide-after-x': `${3 + ((index * 41) % 94)}%`,
+              '--ck-tide-after-y': `${32 + ((index * 29) % 59)}%`,
+              '--ck-tide-after-size': `${2 + (index % 5) * 1.2}px`,
+              '--ck-tide-after-delay': `${19.0 + (index % 17) * 0.17}s`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MagicalWindVortexEvent({
   realm,
   instanceId,
@@ -1857,6 +2058,7 @@ export default function KingdomAmbientEvents({
   const canShowEnchantedPetalBloom = sandboxMode || stars >= ENCHANTED_PETAL_BLOOM_UNLOCK_STARS;
   const canShowInterdimensionalPortal = sandboxMode || stars >= INTERDIMENSIONAL_PORTAL_UNLOCK_STARS;
   const canShowMagicalWinter = sandboxMode || stars >= MAGICAL_WINTER_UNLOCK_STARS;
+  const canShowCelestialTide = sandboxMode || stars >= CELESTIAL_TIDE_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -1890,6 +2092,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'enchanted-petal-bloom' && !canShowEnchantedPetalBloom) return;
     if (eventId === 'interdimensional-portal' && !canShowInterdimensionalPortal) return;
     if (eventId === 'magical-winter' && !canShowMagicalWinter) return;
+    if (eventId === 'celestial-tide' && !canShowCelestialTide) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -1919,7 +2122,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -2014,11 +2217,19 @@ export default function KingdomAmbientEvents({
     if (roll < winterThreshold) return 'magical-winter';
 
     const remainingAfterWinter = 1 - winterThreshold;
+    const baseTideChance = canShowCelestialTide
+      ? (realm === 'legendary' ? 0.14 : 0.085)
+      : 0;
+    const tideChance = stored.lastEventId === 'celestial-tide' ? 0.012 : baseTideChance;
+    const tideThreshold = winterThreshold + remainingAfterWinter * tideChance;
+    if (roll < tideThreshold) return 'celestial-tide';
+
+    const remainingAfterTide = 1 - tideThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = winterThreshold + remainingAfterWinter * fireflyChance;
+    const fireflyThreshold = tideThreshold + remainingAfterTide * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -2042,7 +2253,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -2088,7 +2299,7 @@ export default function KingdomAmbientEvents({
 
   return (
     <div
-      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''} ${activeEvent?.id === 'interdimensional-portal' ? 'is-portal-depth-split' : ''} ${activeEvent?.id === 'magical-winter' ? 'is-winter-depth-split' : ''}`}
+      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''} ${activeEvent?.id === 'interdimensional-portal' ? 'is-portal-depth-split' : ''} ${activeEvent?.id === 'magical-winter' ? 'is-winter-depth-split' : ''} ${activeEvent?.id === 'celestial-tide' ? 'is-tide-depth-split' : ''}`}
     >
       {activeEvent?.id === 'shooting-star' && (
         <div
@@ -2200,6 +2411,10 @@ export default function KingdomAmbientEvents({
 
       {activeEvent?.id === 'magical-winter' && (
         <MagicalWinterEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
+      {activeEvent?.id === 'celestial-tide' && (
+        <CelestialTideEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
       {activeEvent?.id === 'dragon-flight' && (
@@ -2376,6 +2591,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               ❄️ חורף
+            </button>
+          )}
+          {canShowCelestialTide && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-tide"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('celestial-tide', false);
+              }}
+            >
+              🌊 גל קסם
             </button>
           )}
           {canShowDragonFlight && (
