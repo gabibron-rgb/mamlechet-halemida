@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'magical-winter' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -73,6 +73,7 @@ const CRYSTAL_BLOOM_UNLOCK_STARS = 24;
 const MAGICAL_WIND_VORTEX_UNLOCK_STARS = 26;
 const ENCHANTED_PETAL_BLOOM_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 const INTERDIMENSIONAL_PORTAL_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
+const MAGICAL_WINTER_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -88,6 +89,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'magical-wind-vortex': 25600,
   'enchanted-petal-bloom': 25800,
   'interdimensional-portal': 27400,
+  'magical-winter': 26600,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -1032,6 +1034,129 @@ function InterdimensionalPortalEvent({
   );
 }
 
+
+function MagicalWinterEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const backSnow = Array.from({ length: 82 });
+  const midSnow = Array.from({ length: 104 });
+  const frontSnow = Array.from({ length: 46 });
+  const frostCrowns = Array.from({ length: 15 });
+  const peakBurst = Array.from({ length: 188 });
+  const thawSparkles = Array.from({ length: 56 });
+
+  const renderSnow = (flakes: unknown[], layer: 'back' | 'mid' | 'front') => (
+    <div className={`ck-winter-snow is-${layer}`}>
+      {flakes.map((_, index) => {
+        const seed = layer === 'back' ? 17 : layer === 'mid' ? 31 : 47;
+        const x = -4 + ((index * seed * 13) % 108);
+        const drift = -72 + ((index * (seed + 8)) % 145);
+        const sizeBase = layer === 'back' ? 2.1 : layer === 'mid' ? 3.3 : 7.5;
+        const sizeStep = layer === 'front' ? 2.25 : 1.15;
+        const durationBase = layer === 'back' ? 8.4 : layer === 'mid' ? 6.8 : 5.5;
+        return (
+          <i
+            key={index}
+            style={{
+              '--ck-winter-snow-x': `${x}%`,
+              '--ck-winter-snow-drift': `${drift}px`,
+              '--ck-winter-snow-drift-mid': `${drift * 0.55}px`,
+              '--ck-winter-snow-size': `${sizeBase + (index % 6) * sizeStep}px`,
+              '--ck-winter-snow-duration': `${durationBase + (index % 7) * 0.48}s`,
+              '--ck-winter-snow-delay': `${-((index * 0.43) % 8.5)}s`,
+              '--ck-winter-snow-spin': `${220 + (index % 9) * 54}deg`,
+              '--ck-winter-snow-spin-mid': `${(220 + (index % 9) * 54) * 0.55}deg`,
+              '--ck-winter-snow-opacity': `${0.46 + (index % 5) * 0.12}`,
+            } as CSSProperties}
+          />
+        );
+      })}
+    </div>
+  );
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-magical-winter is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-winter-world-chill" />
+      <div className="ck-winter-sky-haze" />
+      <div className="ck-winter-frost-lace" />
+
+      {renderSnow(backSnow, 'back')}
+      {renderSnow(midSnow, 'mid')}
+
+      <div className="ck-winter-frost-crowns">
+        {frostCrowns.map((_, index) => (
+          <span
+            key={index}
+            style={{
+              '--ck-winter-crown-x': `${2 + ((index * 41) % 95)}%`,
+              '--ck-winter-crown-y': `${7 + ((index * 17) % 22)}%`,
+              '--ck-winter-crown-scale': `${0.65 + (index % 5) * 0.16}`,
+              '--ck-winter-crown-delay': `${7.4 + (index % 8) * 0.34}s`,
+              '--ck-winter-crown-tilt': `${-18 + ((index * 13) % 36)}deg`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-winter-ice-wave is-one" />
+      <div className="ck-winter-ice-wave is-two" />
+      <div className="ck-winter-ice-wave is-three" />
+      <div className="ck-winter-peak-freeze" />
+      <div className="ck-winter-peak-flash" />
+
+      <div className="ck-winter-peak-burst">
+        {peakBurst.map((_, index) => {
+          const site = [
+            { x: 14, y: 70 }, { x: 31, y: 38 }, { x: 49, y: 65 },
+            { x: 67, y: 35 }, { x: 84, y: 66 }, { x: 54, y: 24 },
+          ][index % 6];
+          const localIndex = Math.floor(index / 6);
+          const angle = ((localIndex * 137.5 + (index % 6) * 29) % 360) * Math.PI / 180;
+          const distance = 54 + (localIndex % 12) * 17;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-winter-burst-x0': `${site.x}%`,
+                '--ck-winter-burst-y0': `${site.y}%`,
+                '--ck-winter-burst-x': `${Math.cos(angle) * distance}px`,
+                '--ck-winter-burst-y': `${Math.sin(angle) * distance * 0.72}px`,
+                '--ck-winter-burst-size': `${3.2 + (index % 7) * 1.15}px`,
+                '--ck-winter-burst-delay': `${14.85 + (index % 29) * 0.035}s`,
+                '--ck-winter-burst-spin': `${(index * 83) % 360}deg`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      {renderSnow(frontSnow, 'front')}
+
+      <div className="ck-winter-thaw-sparkles">
+        {thawSparkles.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-winter-thaw-x': `${4 + ((index * 43) % 92)}%`,
+              '--ck-winter-thaw-y': `${12 + ((index * 29) % 75)}%`,
+              '--ck-winter-thaw-size': `${2 + (index % 5) * 1.3}px`,
+              '--ck-winter-thaw-delay': `${20.4 + (index % 13) * 0.11}s`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MagicalWindVortexEvent({
   realm,
   instanceId,
@@ -1731,6 +1856,7 @@ export default function KingdomAmbientEvents({
   const canShowMagicalWindVortex = sandboxMode || stars >= MAGICAL_WIND_VORTEX_UNLOCK_STARS;
   const canShowEnchantedPetalBloom = sandboxMode || stars >= ENCHANTED_PETAL_BLOOM_UNLOCK_STARS;
   const canShowInterdimensionalPortal = sandboxMode || stars >= INTERDIMENSIONAL_PORTAL_UNLOCK_STARS;
+  const canShowMagicalWinter = sandboxMode || stars >= MAGICAL_WINTER_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -1763,6 +1889,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'magical-wind-vortex' && !canShowMagicalWindVortex) return;
     if (eventId === 'enchanted-petal-bloom' && !canShowEnchantedPetalBloom) return;
     if (eventId === 'interdimensional-portal' && !canShowInterdimensionalPortal) return;
+    if (eventId === 'magical-winter' && !canShowMagicalWinter) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -1792,7 +1919,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -1879,11 +2006,19 @@ export default function KingdomAmbientEvents({
     if (roll < portalThreshold) return 'interdimensional-portal';
 
     const remainingAfterPortal = 1 - portalThreshold;
+    const baseWinterChance = canShowMagicalWinter
+      ? (realm === 'legendary' ? 0.14 : 0.085)
+      : 0;
+    const winterChance = stored.lastEventId === 'magical-winter' ? 0.012 : baseWinterChance;
+    const winterThreshold = portalThreshold + remainingAfterPortal * winterChance;
+    if (roll < winterThreshold) return 'magical-winter';
+
+    const remainingAfterWinter = 1 - winterThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = portalThreshold + remainingAfterPortal * fireflyChance;
+    const fireflyThreshold = winterThreshold + remainingAfterWinter * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -1907,7 +2042,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1953,7 +2088,7 @@ export default function KingdomAmbientEvents({
 
   return (
     <div
-      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''} ${activeEvent?.id === 'interdimensional-portal' ? 'is-portal-depth-split' : ''}`}
+      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''} ${activeEvent?.id === 'interdimensional-portal' ? 'is-portal-depth-split' : ''} ${activeEvent?.id === 'magical-winter' ? 'is-winter-depth-split' : ''}`}
     >
       {activeEvent?.id === 'shooting-star' && (
         <div
@@ -2061,6 +2196,10 @@ export default function KingdomAmbientEvents({
 
       {activeEvent?.id === 'interdimensional-portal' && (
         <InterdimensionalPortalEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
+      {activeEvent?.id === 'magical-winter' && (
+        <MagicalWinterEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
       {activeEvent?.id === 'dragon-flight' && (
@@ -2225,6 +2364,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               🌀 שער
+            </button>
+          )}
+          {canShowMagicalWinter && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-winter"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('magical-winter', false);
+              }}
+            >
+              ❄️ חורף
             </button>
           )}
           {canShowDragonFlight && (

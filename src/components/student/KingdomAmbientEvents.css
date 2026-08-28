@@ -134,7 +134,7 @@
     rgba(174,232,255,0.42) 26%,
     rgba(100,200,255,0.16) 48%,
     transparent 74%);
-  filter: blur(2px);
+  filter: blur(3px);
   animation: ckLiveAuraPulse 420ms ease-in-out infinite alternate;
 }
 
@@ -1914,7 +1914,7 @@
     rgba(255, 131, 35, .62) 62%,
     rgba(255, 235, 128, .94) 88%,
     transparent);
-  filter: blur(2px);
+  filter: blur(3px);
   box-shadow:
     0 0 8px rgba(255, 126, 34, .68),
     0 0 14px rgba(255, 57, 47, .30);
@@ -1981,7 +1981,7 @@
       rgba(255,45,61,.14) 45%,
       rgba(188,75,255,.055) 61%,
       transparent 73%);
-  filter: blur(2px);
+  filter: blur(3px);
   animation: ckPhoenixRebirthHalo 2.2s ease-out 4.22s both;
 }
 
@@ -3289,7 +3289,7 @@
 }
 
 @keyframes ckAuroraRibbonTwo {
-  from { transform: translate3d(3%, -4px, 0) rotate(-7deg) scaleX(1.03) scaleY(.88); opacity: .56; }
+  from { transform: translate3d(3%, -4px, 0) rotate(-7deg) scaleX(1.03) scaleY(.88); opacity: .32; }
   to { transform: translate3d(-4%, 8px, 0) rotate(-3deg) scaleX(.98) scaleY(1.14); opacity: .92; }
 }
 
@@ -3382,7 +3382,7 @@
 
 @keyframes ckAuroraKingdomShimmer {
   0%, 12% { opacity: 0; }
-  34% { opacity: .56; }
+  34% { opacity: .32; }
   55% { opacity: .78; }
   75% { opacity: .52; }
   100% { opacity: 0; }
@@ -3844,7 +3844,7 @@
   0%, 5% { opacity: 0; }
   18% { opacity: .46; }
   47% { opacity: .68; }
-  72% { opacity: .56; }
+  72% { opacity: .32; }
   92% { opacity: .16; }
   100% { opacity: 0; }
 }
@@ -5353,7 +5353,7 @@
   64% { opacity: .08; }
   72% { opacity: .78; transform: translate3d(-.04%, 0, 0) scale(1.002); filter: brightness(1.78) saturate(1.18); }
   80% { opacity: .035; }
-  88% { opacity: .56; filter: brightness(1.45); }
+  88% { opacity: .32; filter: brightness(1.45); }
   96%, 100% { opacity: 0; transform: translate3d(0,0,0) scale(1); }
 }
 
@@ -6296,7 +6296,7 @@
   32% { opacity: .48; }
   55% { opacity: .62; }
   68% { opacity: .82; }
-  78% { opacity: .56; }
+  78% { opacity: .32; }
   91% { opacity: .20; }
   100% { opacity: 0; }
 }
@@ -6360,7 +6360,7 @@
 @keyframes ckWindVortexAura {
   0%, 45% { opacity: 0; transform: translate(-50%, -50%) scale(.42); }
   54% { opacity: .20; }
-  62% { opacity: .56; transform: translate(-50%, -50%) scale(.82); }
+  62% { opacity: .32; transform: translate(-50%, -50%) scale(.82); }
   69% { opacity: .84; transform: translate(-50%, -50%) scale(1.03); }
   76% { opacity: .66; transform: translate(-50%, -50%) scale(1.10); }
   84% { opacity: .20; }
@@ -6622,7 +6622,7 @@
   border-radius: 50%;
   opacity: 0;
   background: radial-gradient(ellipse, rgba(255,252,221,.48) 0 7%, rgba(255,161,216,.30) 21%, rgba(222,139,255,.14) 42%, transparent 68%);
-  filter: blur(2px);
+  filter: blur(3px);
   mix-blend-mode: screen;
   animation: ckPetalBloomFlare 2.3s ease-out calc(var(--ck-petal-bloom-delay) + .16s) both;
 }
@@ -7448,5 +7448,470 @@
 
   .ck-portal-runes > i {
     transform: translate(-50%, -50%) rotate(var(--ck-portal-rune-angle)) translateX(clamp(120px, 30vw, 220px)) scale(var(--ck-portal-rune-scale));
+  }
+}
+
+/* ========================================================================== */
+/* Living World V18 — Magical Winter                                          */
+/* ========================================================================== */
+
+.ck-live-event-magical-winter {
+  z-index: auto;
+  isolation: auto;
+  overflow: visible;
+  --ck-winter-event-duration: 26.6s;
+}
+
+/* V18 deliberately uses several map-depth layers: distant snow stays behind
+   landmarks, frost/ice rises through the map, and a few large flakes can pass
+   in front. Map chrome remains readable above the event. */
+.ck-live-events.is-winter-depth-split {
+  isolation: auto;
+}
+
+.ck31-map:has(> .ck-live-events.is-winter-depth-split) > .ck31-map-topbar,
+.ck31-map:has(> .ck-live-events.is-winter-depth-split) > .ck31-map-bottombar {
+  z-index: 220;
+}
+
+.ck31-map:has(> .ck-live-events.is-winter-depth-split) > .ck31-sandbox-banner {
+  z-index: 230;
+}
+
+.ck-winter-world-chill,
+.ck-winter-sky-haze,
+.ck-winter-frost-lace,
+.ck-winter-snow,
+.ck-winter-frost-crowns,
+.ck-winter-ice-wave,
+.ck-winter-peak-freeze,
+.ck-winter-peak-flash,
+.ck-winter-peak-burst,
+.ck-winter-thaw-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-winter-world-chill {
+  z-index: 34;
+  opacity: 0;
+  background:
+    linear-gradient(180deg, rgba(69, 115, 176, .18), rgba(86, 151, 206, .12) 55%, rgba(164, 224, 246, .14));
+  backdrop-filter: saturate(.76) brightness(.96) hue-rotate(3deg);
+  animation: ckWinterWorldChill var(--ck-winter-event-duration) ease-in-out both;
+}
+
+.ck-live-event-magical-winter.is-legendary .ck-winter-world-chill {
+  background:
+    linear-gradient(180deg, rgba(78, 80, 171, .20), rgba(78, 147, 214, .13) 55%, rgba(180, 225, 255, .15));
+}
+
+.ck-winter-sky-haze {
+  z-index: 36;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(226, 248, 255, .32), transparent 49%),
+    radial-gradient(ellipse at 20% 32%, rgba(185, 229, 255, .14), transparent 36%),
+    radial-gradient(ellipse at 80% 27%, rgba(201, 235, 255, .12), transparent 35%),
+    linear-gradient(180deg, rgba(214, 241, 255, .14), transparent 58%);
+  mix-blend-mode: screen;
+  animation: ckWinterSkyHaze var(--ck-winter-event-duration) ease-in-out both;
+}
+
+.ck-winter-frost-lace {
+  z-index: 118;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 2% 94%, rgba(221, 249, 255, .66) 0 2%, rgba(130, 211, 244, .18) 6%, transparent 19%),
+    radial-gradient(ellipse at 14% 101%, rgba(236, 253, 255, .72) 0 2%, rgba(139, 218, 250, .20) 7%, transparent 20%),
+    radial-gradient(ellipse at 34% 103%, rgba(224, 249, 255, .62) 0 2%, rgba(123, 205, 244, .18) 7%, transparent 21%),
+    radial-gradient(ellipse at 55% 103%, rgba(237, 254, 255, .68) 0 2%, rgba(145, 220, 250, .19) 7%, transparent 20%),
+    radial-gradient(ellipse at 76% 102%, rgba(228, 251, 255, .66) 0 2%, rgba(134, 214, 248, .19) 7%, transparent 20%),
+    radial-gradient(ellipse at 97% 96%, rgba(236, 253, 255, .70) 0 2%, rgba(132, 211, 247, .18) 6%, transparent 19%),
+    linear-gradient(0deg, rgba(215, 246, 255, .20), transparent 32%);
+  filter: drop-shadow(0 0 13px rgba(162, 229, 255, .28));
+  animation: ckWinterFrostLace var(--ck-winter-event-duration) ease-in-out both;
+}
+
+.ck-winter-snow {
+  overflow: hidden;
+  opacity: 0;
+  animation: ckWinterSnowField var(--ck-winter-event-duration) ease-in-out both;
+}
+
+.ck-winter-snow.is-back { z-index: 42; filter: blur(.65px); }
+.ck-winter-snow.is-mid { z-index: 96; }
+.ck-winter-snow.is-front { z-index: 172; overflow: visible; }
+
+.ck-winter-snow > i {
+  position: absolute;
+  left: var(--ck-winter-snow-x);
+  top: -12%;
+  width: var(--ck-winter-snow-size);
+  height: var(--ck-winter-snow-size);
+  opacity: var(--ck-winter-snow-opacity);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0 22%, rgba(233, 249, 255, .98) 24% 48%, rgba(181, 226, 249, .58) 54%, transparent 72%);
+  box-shadow:
+    0 0 calc(var(--ck-winter-snow-size) * .8) rgba(232, 250, 255, .82),
+    0 0 calc(var(--ck-winter-snow-size) * 1.8) rgba(156, 221, 255, .30);
+  animation: ckWinterSnowFall var(--ck-winter-snow-duration) linear var(--ck-winter-snow-delay) infinite;
+  will-change: transform;
+}
+
+.ck-winter-snow.is-mid > i::before,
+.ck-winter-snow.is-mid > i::after,
+.ck-winter-snow.is-front > i::before,
+.ck-winter-snow.is-front > i::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 112%;
+  height: 1px;
+  border-radius: 999px;
+  background: rgba(239, 252, 255, .90);
+  box-shadow: 0 0 5px rgba(187, 235, 255, .72);
+  transform-origin: center;
+}
+
+.ck-winter-snow.is-mid > i::before,
+.ck-winter-snow.is-front > i::before {
+  transform: translate(-50%, -50%) rotate(60deg);
+}
+
+.ck-winter-snow.is-mid > i::after,
+.ck-winter-snow.is-front > i::after {
+  transform: translate(-50%, -50%) rotate(-60deg);
+}
+
+.ck-winter-frost-crowns {
+  z-index: 126;
+  opacity: 0;
+  animation: ckWinterCrownsField var(--ck-winter-event-duration) ease-in-out both;
+}
+
+.ck-winter-frost-crowns > span {
+  position: absolute;
+  left: var(--ck-winter-crown-x);
+  bottom: var(--ck-winter-crown-y);
+  width: 18px;
+  height: 74px;
+  opacity: 0;
+  transform-origin: 50% 100%;
+  transform: translateX(-50%) rotate(var(--ck-winter-crown-tilt)) scaleY(.04) scale(var(--ck-winter-crown-scale));
+  clip-path: polygon(50% 0, 78% 65%, 61% 57%, 72% 100%, 28% 100%, 39% 57%, 22% 65%);
+  background: linear-gradient(90deg, rgba(153, 218, 247, .36), rgba(244, 254, 255, .95) 45%, rgba(156, 223, 252, .52));
+  box-shadow: 0 0 12px rgba(168, 230, 255, .70), 0 0 28px rgba(117, 198, 244, .30);
+  animation: ckWinterCrownGrow 2.35s cubic-bezier(.16,.76,.22,1) var(--ck-winter-crown-delay) both;
+}
+
+.ck-winter-frost-crowns > span::before,
+.ck-winter-frost-crowns > span::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 72%;
+  height: 70%;
+  background: linear-gradient(90deg, rgba(133, 211, 249, .26), rgba(238, 253, 255, .90), rgba(139, 215, 250, .34));
+  clip-path: polygon(50% 0, 82% 100%, 18% 100%);
+  transform-origin: 50% 100%;
+}
+
+.ck-winter-frost-crowns > span::before { left: -48%; transform: rotate(-31deg) scale(.72); }
+.ck-winter-frost-crowns > span::after { right: -48%; transform: rotate(29deg) scale(.64); }
+
+.ck-winter-ice-wave {
+  z-index: 158;
+  left: -8%;
+  right: auto;
+  width: 118%;
+  height: 14%;
+  opacity: 0;
+  border-radius: 999px;
+  transform: translateX(-14%) translateY(0) scaleX(.92) scaleY(.86);
+  background:
+    linear-gradient(180deg,
+      transparent 0%,
+      rgba(255, 255, 255, .00) 18%,
+      rgba(239, 251, 255, .22) 38%,
+      rgba(198, 237, 253, .34) 52%,
+      rgba(245, 252, 255, .18) 68%,
+      transparent 100%),
+    linear-gradient(90deg,
+      transparent 0%,
+      rgba(255,255,255,.10) 12%,
+      rgba(220, 246, 255, .42) 42%,
+      rgba(255,255,255,.28) 60%,
+      rgba(206, 242, 255, .10) 84%,
+      transparent 100%);
+  box-shadow: 0 0 18px rgba(202, 240, 255, .18), 0 0 56px rgba(130, 211, 248, .10);
+  filter: blur(4px);
+  will-change: transform, opacity;
+}
+
+.ck-winter-ice-wave::before,
+.ck-winter-ice-wave::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.ck-winter-ice-wave::before {
+  background:
+    radial-gradient(ellipse at 18% 52%, rgba(255,255,255,.18) 0 7%, transparent 13%),
+    radial-gradient(ellipse at 47% 48%, rgba(255,255,255,.22) 0 8%, transparent 14%),
+    radial-gradient(ellipse at 78% 54%, rgba(255,255,255,.16) 0 7%, transparent 13%);
+  filter: blur(10px);
+}
+
+.ck-winter-ice-wave::after {
+  top: auto;
+  bottom: -24%;
+  height: 44%;
+  background: linear-gradient(180deg, rgba(239, 250, 255, .26), rgba(181, 230, 252, .06) 62%, transparent 100%);
+  filter: blur(12px);
+  opacity: .58;
+}
+
+.ck-winter-ice-wave.is-one { top: 69%; animation: ckWinterIceWave 4s cubic-bezier(.16,.68,.20,1) 12.15s both; }
+.ck-winter-ice-wave.is-two { top: 61%; animation: ckWinterIceWave 3.8s cubic-bezier(.16,.68,.20,1) 13.45s both; filter: hue-rotate(3deg) brightness(1.01) blur(5px); }
+.ck-winter-ice-wave.is-three { top: 54%; animation: ckWinterIceWave 3.65s cubic-bezier(.16,.68,.20,1) 14.75s both; filter: hue-rotate(-3deg) brightness(1.03) blur(5px); }
+
+.ck-winter-peak-freeze {
+  z-index: 88;
+  opacity: 0;
+  overflow: hidden;
+  animation: ckWinterPeakFreeze var(--ck-winter-event-duration) ease-in-out both;
+}
+
+/* V18.6: second PNG attempt based on the real visible kingdom layout.
+   The snow blanket is mapped much more closely to the current ground/paths areas,
+   and stays behind landmarks/buildings so only the floor appears snow-covered. */
+.ck-winter-peak-freeze::before,
+.ck-winter-peak-freeze::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-winter-peak-freeze::before {
+  opacity: 1;
+  background: url('/assets/class-kingdom/living-world/winter/winter-ground-snow-overlay-v2.png') center / cover no-repeat;
+  filter: drop-shadow(0 -2px 8px rgba(177, 223, 246, .14));
+  transform-origin: 50% 100%;
+  animation: ckWinterSnowBlanket var(--ck-winter-event-duration) ease-in-out both;
+}
+
+.ck-winter-peak-freeze::after {
+  opacity: .32;
+  background:
+    linear-gradient(180deg, transparent 0 64%, rgba(217, 240, 250, .015) 74%, rgba(225, 243, 252, .05) 100%),
+    radial-gradient(ellipse at 18% 74%, rgba(170,214,239,.09) 0 10%, transparent 24%),
+    radial-gradient(ellipse at 47% 73%, rgba(170,214,239,.10) 0 11%, transparent 24%),
+    radial-gradient(ellipse at 73% 76%, rgba(170,214,239,.09) 0 10%, transparent 24%),
+    radial-gradient(ellipse at 88% 80%, rgba(170,214,239,.08) 0 9%, transparent 22%);
+  mix-blend-mode: screen;
+  filter: blur(3px);
+  animation: ckWinterSnowBlanketDetail var(--ck-winter-event-duration) ease-in-out both;
+}
+
+.ck-winter-peak-flash {
+  z-index: 166;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 54%, rgba(255,255,255,.82), rgba(204, 243, 255, .38) 28%, transparent 67%);
+  mix-blend-mode: screen;
+  animation: ckWinterPeakFlash var(--ck-winter-event-duration) linear both;
+}
+
+.ck-winter-peak-burst {
+  z-index: 168;
+  overflow: visible;
+}
+
+.ck-winter-peak-burst > i {
+  position: absolute;
+  left: var(--ck-winter-burst-x0);
+  top: var(--ck-winter-burst-y0);
+  width: var(--ck-winter-burst-size);
+  height: calc(var(--ck-winter-burst-size) * 1.7);
+  opacity: 0;
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  background: linear-gradient(180deg, #fff, rgba(196, 238, 255, .92) 48%, rgba(103, 191, 237, .45));
+  box-shadow: 0 0 7px rgba(229, 250, 255, .95), 0 0 16px rgba(128, 207, 250, .48);
+  transform: translate(-50%, -50%) rotate(var(--ck-winter-burst-spin)) scale(.18);
+  animation: ckWinterBurstShard 4.4s cubic-bezier(.14,.68,.20,1) var(--ck-winter-burst-delay) both;
+}
+
+.ck-winter-thaw-sparkles {
+  z-index: 169;
+}
+
+.ck-winter-thaw-sparkles > i {
+  position: absolute;
+  left: var(--ck-winter-thaw-x);
+  top: var(--ck-winter-thaw-y);
+  width: var(--ck-winter-thaw-size);
+  height: var(--ck-winter-thaw-size);
+  opacity: 0;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 7px #fff, 0 0 16px rgba(135, 220, 255, .78);
+  animation: ckWinterThawSparkle 2.65s ease-out var(--ck-winter-thaw-delay) both;
+}
+
+.ck-live-event-test-button.is-winter {
+  border-color: rgba(161, 222, 255, .78);
+  background: linear-gradient(180deg, rgba(50, 108, 163, .92), rgba(31, 61, 116, .95));
+  box-shadow: inset 0 0 16px rgba(196, 239, 255, .12), 0 0 12px rgba(117, 207, 255, .13);
+}
+
+.ck-live-event-test-button.is-winter:hover {
+  border-color: rgba(220, 249, 255, .96);
+  box-shadow: inset 0 0 18px rgba(218, 247, 255, .18), 0 0 18px rgba(133, 217, 255, .24);
+}
+
+@keyframes ckWinterWorldChill {
+  0%, 7% { opacity: 0; }
+  15% { opacity: .18; }
+  31% { opacity: .42; }
+  52% { opacity: .62; }
+  63%, 76% { opacity: .82; }
+  85% { opacity: .52; }
+  94% { opacity: .14; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckWinterSkyHaze {
+  0%, 8% { opacity: 0; }
+  18% { opacity: .32; }
+  40% { opacity: .70; }
+  62%, 78% { opacity: 1; }
+  92% { opacity: .18; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckWinterFrostLace {
+  0%, 22% { opacity: 0; transform: translateY(12%) scaleY(.70); }
+  38% { opacity: .45; transform: translateY(5%) scaleY(.90); }
+  56% { opacity: .88; transform: translateY(0) scaleY(1); }
+  76% { opacity: 1; transform: translateY(-1%) scaleY(1.03); }
+  88% { opacity: .36; }
+  100% { opacity: 0; transform: translateY(7%) scaleY(.84); }
+}
+
+@keyframes ckWinterSnowField {
+  0%, 6% { opacity: 0; }
+  15% { opacity: .45; }
+  28% { opacity: .82; }
+  48%, 78% { opacity: 1; }
+  89% { opacity: .52; }
+  97%, 100% { opacity: 0; }
+}
+
+@keyframes ckWinterSnowFall {
+  0% {
+    transform: translate3d(-50%, -4vh, 0) rotate(0deg) scale(.82);
+  }
+  45% {
+    transform: translate3d(calc(-50% + var(--ck-winter-snow-drift-mid)), 53vh, 0) rotate(var(--ck-winter-snow-spin-mid)) scale(1);
+  }
+  100% {
+    transform: translate3d(calc(-50% + var(--ck-winter-snow-drift)), 118vh, 0) rotate(var(--ck-winter-snow-spin)) scale(.94);
+  }
+}
+
+@keyframes ckWinterCrownsField {
+  0%, 24% { opacity: 0; }
+  34% { opacity: .55; }
+  52%, 78% { opacity: 1; }
+  90% { opacity: .24; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckWinterCrownGrow {
+  0% { opacity: 0; transform: translateX(-50%) rotate(var(--ck-winter-crown-tilt)) scaleY(.04) scale(var(--ck-winter-crown-scale)); filter: brightness(2); }
+  45% { opacity: .84; }
+  72% { opacity: 1; transform: translateX(-50%) rotate(var(--ck-winter-crown-tilt)) scaleY(1.08) scale(var(--ck-winter-crown-scale)); filter: brightness(1.22); }
+  100% { opacity: .92; transform: translateX(-50%) rotate(var(--ck-winter-crown-tilt)) scaleY(1) scale(var(--ck-winter-crown-scale)); filter: brightness(1); }
+}
+
+@keyframes ckWinterIceWave {
+  0% { opacity: 0; transform: translateX(-22%) translateY(1%) scaleX(.84) scaleY(.82); }
+  16% { opacity: .12; }
+  34% { opacity: .26; }
+  58% { opacity: .22; }
+  76% { opacity: .10; }
+  100% { opacity: 0; transform: translateX(16%) translateY(-2%) scaleX(1.06) scaleY(.96); }
+}
+
+@keyframes ckWinterPeakFreeze {
+  0%, 49% { opacity: 0; }
+  55% { opacity: .10; }
+  60% { opacity: .28; }
+  66%, 81% { opacity: .64; }
+  87% { opacity: .36; }
+  94% { opacity: .06; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckWinterSnowBlanket {
+  0%, 49% { opacity: 0; transform: translateY(5%) scaleY(.88); }
+  56% { opacity: .20; transform: translateY(3%) scaleY(.92); }
+  63% { opacity: .62; transform: translateY(1%) scaleY(.97); }
+  68%, 80% { opacity: 1; transform: translateY(0) scaleY(1); }
+  86% { opacity: .70; transform: translateY(1%) scaleY(.99); }
+  93% { opacity: .18; transform: translateY(4%) scaleY(.94); }
+  100% { opacity: 0; transform: translateY(6%) scaleY(.90); }
+}
+
+@keyframes ckWinterSnowBlanketDetail {
+  0%, 54% { opacity: 0; }
+  62% { opacity: .36; }
+  68%, 80% { opacity: .84; }
+  87% { opacity: .42; }
+  94%, 100% { opacity: 0; }
+}
+
+@keyframes ckWinterPeakFlash {
+  0%, 56% { opacity: 0; }
+  58.5% { opacity: .18; }
+  60% { opacity: .78; }
+  61.2% { opacity: .10; }
+  63.1% { opacity: .62; }
+  64.2% { opacity: .05; }
+  66% { opacity: .46; }
+  68%, 100% { opacity: 0; }
+}
+
+@keyframes ckWinterBurstShard {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(var(--ck-winter-burst-spin)) scale(.15); }
+  9% { opacity: .95; }
+  34% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--ck-winter-burst-x)), calc(-50% + var(--ck-winter-burst-y))) rotate(calc(var(--ck-winter-burst-spin) + 500deg)) scale(.74);
+  }
+}
+
+@keyframes ckWinterThawSparkle {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+  18% { opacity: 1; transform: translate(-50%, -50%) scale(1.25); }
+  52% { opacity: .82; }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(.55); }
+}
+
+@media (max-width: 760px) {
+  .ck-winter-snow.is-front > i {
+    transform-origin: center;
+  }
+
+  .ck-winter-frost-crowns > span {
+    height: 56px;
   }
 }
