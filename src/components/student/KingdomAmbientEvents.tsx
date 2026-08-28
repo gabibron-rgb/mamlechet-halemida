@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'magical-winter' | 'celestial-tide' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'magical-winter' | 'celestial-tide' | 'enchanted-star-night' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -75,6 +75,7 @@ const ENCHANTED_PETAL_BLOOM_UNLOCK_STARS = 24; // Placeholder; final unlock bala
 const INTERDIMENSIONAL_PORTAL_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 const MAGICAL_WINTER_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 const CELESTIAL_TIDE_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
+const ENCHANTED_STAR_NIGHT_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -92,6 +93,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'interdimensional-portal': 27400,
   'magical-winter': 26600,
   'celestial-tide': 27200,
+  'enchanted-star-night': 31200,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -1160,6 +1162,130 @@ function MagicalWinterEvent({
 }
 
 
+function EnchantedStarNightEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const stars = Array.from({ length: 248 });
+  const heroStars = Array.from({ length: 22 });
+  const cosmicDust = Array.from({ length: 92 });
+  const constellations = [
+    {
+      className: 'is-crown', left: 13, top: 13, width: 19, height: 17,
+      points: [[10,72],[28,36],[45,66],[62,24],[82,66],[94,42]],
+      path: 'M10 72 L28 36 L45 66 L62 24 L82 66 L94 42',
+    },
+    {
+      className: 'is-compass', left: 39, top: 8, width: 17, height: 18,
+      points: [[50,8],[60,42],[91,52],[60,61],[50,94],[40,61],[9,52],[40,42]],
+      path: 'M50 8 L60 42 L91 52 L60 61 L50 94 L40 61 L9 52 L40 42 Z',
+    },
+    {
+      className: 'is-wing', left: 68, top: 15, width: 22, height: 16,
+      points: [[6,70],[26,43],[45,54],[62,24],[82,36],[96,14],[88,60],[63,73],[41,67],[20,82]],
+      path: 'M6 70 L26 43 L45 54 L62 24 L82 36 L96 14 M26 43 L20 82 L41 67 L63 73 L88 60',
+    },
+    {
+      className: 'is-book', left: 27, top: 31, width: 18, height: 13,
+      points: [[8,31],[30,20],[49,31],[69,20],[92,31],[89,77],[65,67],[49,78],[31,67],[10,77]],
+      path: 'M8 31 L30 20 L49 31 L69 20 L92 31 L89 77 L65 67 L49 78 L31 67 L10 77 Z M49 31 L49 78',
+    },
+    {
+      className: 'is-diamond', left: 57, top: 32, width: 15, height: 14,
+      points: [[50,6],[88,37],[69,90],[31,90],[12,37]],
+      path: 'M50 6 L88 37 L69 90 L31 90 L12 37 Z M12 37 L50 53 L88 37 M50 6 L50 53 L69 90',
+    },
+  ] as const;
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-enchanted-star-night is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-star-night-deep-sky" />
+      <div className="ck-star-night-horizon" />
+      <div className="ck-star-night-milky-way" />
+      <div className="ck-star-night-galaxy-core" />
+
+      <div className="ck-star-night-stars">
+        {stars.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-star-night-x': `${1 + ((index * 47) % 98)}%`,
+              '--ck-star-night-y': `${3 + ((index * 61) % 48)}%`,
+              '--ck-star-night-size': `${1.2 + (index % 7) * 0.56}px`,
+              '--ck-star-night-delay': `${3.2 + (index % 43) * 0.11}s`,
+              '--ck-star-night-twinkle': `${1.15 + (index % 9) * 0.19}s`,
+              '--ck-star-night-opacity': `${0.46 + (index % 6) * 0.095}`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-star-night-cosmic-dust">
+        {cosmicDust.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-star-dust-x': `${4 + ((index * 53) % 92)}%`,
+              '--ck-star-dust-y': `${7 + ((index * 31) % 41)}%`,
+              '--ck-star-dust-size': `${1.2 + (index % 5) * 0.75}px`,
+              '--ck-star-dust-delay': `${8.2 + (index % 29) * 0.13}s`,
+              '--ck-star-dust-dx': `${-18 + ((index * 37) % 37)}px`,
+              '--ck-star-dust-dy': `${-9 + ((index * 19) % 19)}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-star-night-constellations">
+        {constellations.map((constellation, constellationIndex) => (
+          <svg
+            key={constellation.className}
+            className={`ck-star-night-constellation ${constellation.className}`}
+            viewBox="0 0 100 100"
+            style={{
+              '--ck-constellation-left': `${constellation.left}%`,
+              '--ck-constellation-top': `${constellation.top}%`,
+              '--ck-constellation-width': `${constellation.width}%`,
+              '--ck-constellation-height': `${constellation.height}%`,
+              '--ck-constellation-delay': `${10.2 + constellationIndex * 1.15}s`,
+            } as CSSProperties}
+          >
+            <path d={constellation.path} />
+            {constellation.points.map(([x, y], pointIndex) => (
+              <circle key={pointIndex} cx={x} cy={y} r={pointIndex % 3 === 0 ? 2.8 : 2.1} />
+            ))}
+          </svg>
+        ))}
+      </div>
+
+      <div className="ck-star-night-hero-stars">
+        {heroStars.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-hero-star-x': `${5 + ((index * 43) % 90)}%`,
+              '--ck-hero-star-y': `${5 + ((index * 29) % 40)}%`,
+              '--ck-hero-star-size': `${4.2 + (index % 6) * 1.4}px`,
+              '--ck-hero-star-delay': `${17.1 + (index % 13) * 0.18}s`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-star-night-cosmic-peak" />
+      <div className="ck-star-night-peak-ribbon" />
+      <div className="ck-star-night-finale-glow" />
+    </div>
+  );
+}
+
 function CelestialTideEvent({
   realm,
   instanceId,
@@ -2059,6 +2185,7 @@ export default function KingdomAmbientEvents({
   const canShowInterdimensionalPortal = sandboxMode || stars >= INTERDIMENSIONAL_PORTAL_UNLOCK_STARS;
   const canShowMagicalWinter = sandboxMode || stars >= MAGICAL_WINTER_UNLOCK_STARS;
   const canShowCelestialTide = sandboxMode || stars >= CELESTIAL_TIDE_UNLOCK_STARS;
+  const canShowEnchantedStarNight = sandboxMode || stars >= ENCHANTED_STAR_NIGHT_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -2093,6 +2220,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'interdimensional-portal' && !canShowInterdimensionalPortal) return;
     if (eventId === 'magical-winter' && !canShowMagicalWinter) return;
     if (eventId === 'celestial-tide' && !canShowCelestialTide) return;
+    if (eventId === 'enchanted-star-night' && !canShowEnchantedStarNight) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -2122,7 +2250,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -2225,11 +2353,19 @@ export default function KingdomAmbientEvents({
     if (roll < tideThreshold) return 'celestial-tide';
 
     const remainingAfterTide = 1 - tideThreshold;
+    const baseStarNightChance = canShowEnchantedStarNight
+      ? (realm === 'legendary' ? 0.12 : 0.07)
+      : 0;
+    const starNightChance = stored.lastEventId === 'enchanted-star-night' ? 0.009 : baseStarNightChance;
+    const starNightThreshold = tideThreshold + remainingAfterTide * starNightChance;
+    if (roll < starNightThreshold) return 'enchanted-star-night';
+
+    const remainingAfterStarNight = 1 - starNightThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = tideThreshold + remainingAfterTide * fireflyChance;
+    const fireflyThreshold = starNightThreshold + remainingAfterStarNight * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -2253,7 +2389,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -2415,6 +2551,10 @@ export default function KingdomAmbientEvents({
 
       {activeEvent?.id === 'celestial-tide' && (
         <CelestialTideEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
+      {activeEvent?.id === 'enchanted-star-night' && (
+        <EnchantedStarNightEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
       {activeEvent?.id === 'dragon-flight' && (
@@ -2603,6 +2743,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               🌊 גל קסם
+            </button>
+          )}
+          {canShowEnchantedStarNight && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-star-night"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('enchanted-star-night', false);
+              }}
+            >
+              🌌 ליל כוכבים
             </button>
           )}
           {canShowDragonFlight && (

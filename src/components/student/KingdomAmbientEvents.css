@@ -8347,3 +8347,421 @@
   .ck-tide-bubbles > i:nth-child(n+61) { display: none; }
   .ck-tide-foam-spray > i:nth-child(n+49) { display: none; }
 }
+
+/* ========================================================================== */
+/* V20 - Enchanted Star Night                                                 */
+/* ========================================================================== */
+
+.ck-live-event-enchanted-star-night {
+  z-index: 8;
+  isolation: isolate;
+  overflow: hidden;
+  --ck-star-night-duration: 31.2s;
+}
+
+.ck-star-night-deep-sky,
+.ck-star-night-horizon,
+.ck-star-night-milky-way,
+.ck-star-night-galaxy-core,
+.ck-star-night-stars,
+.ck-star-night-cosmic-dust,
+.ck-star-night-constellations,
+.ck-star-night-hero-stars,
+.ck-star-night-cosmic-peak,
+.ck-star-night-peak-ribbon,
+.ck-star-night-finale-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-star-night-deep-sky {
+  z-index: 1;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 9%, rgba(14, 8, 62, .46), transparent 55%),
+    linear-gradient(180deg, rgba(2, 3, 27, .90) 0%, rgba(7, 8, 48, .82) 34%, rgba(18, 20, 72, .54) 55%, rgba(22, 28, 70, .18) 68%, transparent 75%);
+  backdrop-filter: saturate(.92) brightness(.70) contrast(1.10);
+  animation: ckStarNightDeepSky var(--ck-star-night-duration) ease-in-out both;
+}
+
+.ck-live-event-enchanted-star-night.is-legendary .ck-star-night-deep-sky {
+  background:
+    radial-gradient(ellipse at 50% 8%, rgba(26, 11, 67, .52), transparent 59%),
+    linear-gradient(180deg, rgba(5, 4, 37, .76) 0%, rgba(30, 12, 71, .54) 36%, rgba(32, 42, 91, .28) 57%, transparent 70%);
+}
+
+.ck-star-night-horizon {
+  z-index: 2;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 47%, rgba(82, 120, 214, .09), transparent 40%),
+    linear-gradient(180deg, transparent 0 39%, rgba(87, 111, 205, .045) 50%, transparent 64%);
+  mix-blend-mode: screen;
+  animation: ckStarNightHorizon var(--ck-star-night-duration) ease-in-out both;
+}
+
+.ck-star-night-milky-way {
+  z-index: 3;
+  left: -18%;
+  right: -18%;
+  top: -25%;
+  bottom: 24%;
+  opacity: 0;
+  transform: rotate(-12deg) scale(1.02);
+  transform-origin: center;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(119, 139, 255, .18) 0 4%, rgba(83, 104, 224, .12) 13%, rgba(62, 70, 183, .07) 25%, transparent 48%),
+    radial-gradient(ellipse at 36% 52%, rgba(110, 157, 255, .12) 0 5%, rgba(70, 119, 232, .07) 22%, transparent 48%),
+    radial-gradient(ellipse at 68% 48%, rgba(168, 112, 244, .12) 0 5%, rgba(115, 73, 202, .06) 23%, transparent 50%),
+    linear-gradient(90deg, transparent 5%, rgba(85, 117, 229, .04) 24%, rgba(126, 142, 255, .10) 48%, rgba(135, 83, 222, .05) 70%, transparent 95%);
+  filter: blur(8px) saturate(1.35) contrast(1.05);
+  mix-blend-mode: screen;
+  animation: ckStarNightMilkyWay var(--ck-star-night-duration) ease-in-out both;
+}
+
+.ck-star-night-milky-way::before,
+.ck-star-night-milky-way::after {
+  content: '';
+  position: absolute;
+  inset: 10% 7%;
+  border-radius: 50%;
+}
+
+.ck-star-night-milky-way::before {
+  background:
+    radial-gradient(circle at 8% 54%, rgba(255,255,255,.72) 0 1px, transparent 2px),
+    radial-gradient(circle at 16% 43%, rgba(216,232,255,.62) 0 1px, transparent 2px),
+    radial-gradient(circle at 27% 57%, rgba(255,255,255,.80) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 38% 45%, rgba(226,215,255,.74) 0 1px, transparent 2px),
+    radial-gradient(circle at 48% 52%, rgba(255,255,255,.90) 0 1.3px, transparent 2.3px),
+    radial-gradient(circle at 58% 46%, rgba(210,231,255,.70) 0 1px, transparent 2px),
+    radial-gradient(circle at 68% 56%, rgba(255,255,255,.82) 0 1.2px, transparent 2.2px),
+    radial-gradient(circle at 79% 43%, rgba(231,213,255,.68) 0 1px, transparent 2px),
+    radial-gradient(circle at 90% 53%, rgba(255,255,255,.74) 0 1px, transparent 2px);
+  background-size: 13% 37%, 17% 31%, 19% 41%, 23% 33%, 27% 43%, 29% 35%, 31% 39%, 37% 45%, 41% 37%;
+  opacity: .78;
+  filter: blur(.2px);
+}
+
+.ck-star-night-milky-way::after {
+  inset: 22% 18%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(153, 167, 255, .18), rgba(112, 120, 225, .10) 24%, transparent 58%);
+  filter: blur(12px);
+  opacity: .48;
+}
+
+.ck-star-night-galaxy-core {
+  z-index: 4;
+  left: 35%;
+  top: 5%;
+  width: 34%;
+  height: 34%;
+  opacity: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(188,198,255,.12) 0 3%, rgba(141,133,241,.09) 12%, rgba(83,110,223,.05) 28%, transparent 62%);
+  box-shadow: 0 0 62px rgba(103, 125, 238, .06);
+  mix-blend-mode: screen;
+  animation: ckStarNightGalaxyCore var(--ck-star-night-duration) ease-in-out both;
+}
+
+.ck-star-night-stars {
+  z-index: 5;
+  overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, 100% 56%, 0 56%);
+  opacity: 0;
+  animation: ckStarNightStarsField var(--ck-star-night-duration) ease-in-out both;
+}
+
+.ck-star-night-stars > i {
+  position: absolute;
+  left: var(--ck-star-night-x);
+  top: var(--ck-star-night-y);
+  width: var(--ck-star-night-size);
+  height: var(--ck-star-night-size);
+  border-radius: 50%;
+  opacity: 0;
+  background: #fff;
+  box-shadow:
+    0 0 calc(var(--ck-star-night-size) * 1.4) rgba(255,255,255,.95),
+    0 0 calc(var(--ck-star-night-size) * 4.3) rgba(126, 160, 255, .68);
+  animation:
+    ckStarNightStarAppear 1.25s ease-out var(--ck-star-night-delay) both,
+    ckStarNightTwinkle var(--ck-star-night-twinkle) ease-in-out calc(var(--ck-star-night-delay) + 1.35s) infinite alternate;
+}
+
+.ck-star-night-stars > i:nth-child(5n) {
+  background: #fff5ce;
+  box-shadow: 0 0 5px rgba(255,245,205,.92), 0 0 14px rgba(255,208,115,.38);
+}
+
+.ck-star-night-stars > i:nth-child(7n) {
+  background: #d8e7ff;
+  box-shadow: 0 0 5px rgba(222,235,255,.96), 0 0 15px rgba(133,166,255,.50);
+}
+
+.ck-star-night-cosmic-dust {
+  z-index: 6;
+  overflow: hidden;
+  clip-path: polygon(0 0, 100% 0, 100% 54%, 0 54%);
+}
+
+.ck-star-night-cosmic-dust > i {
+  position: absolute;
+  left: var(--ck-star-dust-x);
+  top: var(--ck-star-dust-y);
+  width: var(--ck-star-dust-size);
+  height: var(--ck-star-dust-size);
+  border-radius: 50%;
+  opacity: 0;
+  background: rgba(230, 239, 255, .92);
+  box-shadow: 0 0 8px rgba(186, 208, 255, .72);
+  animation: ckStarNightDust 9.4s ease-in-out var(--ck-star-dust-delay) both;
+}
+
+.ck-star-night-constellations {
+  z-index: 7;
+  overflow: visible;
+}
+
+.ck-star-night-constellation {
+  position: absolute;
+  left: var(--ck-constellation-left);
+  top: var(--ck-constellation-top);
+  width: var(--ck-constellation-width);
+  height: var(--ck-constellation-height);
+  overflow: visible;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px rgba(184, 214, 255, .44)) drop-shadow(0 0 9px rgba(117, 154, 255, .13));
+  animation: ckStarNightConstellation 17.5s ease-in-out var(--ck-constellation-delay) both;
+}
+
+.ck-star-night-constellation path {
+  fill: none;
+  stroke: rgba(190, 220, 255, .38);
+  stroke-width: .78;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 310;
+  stroke-dashoffset: 310;
+  animation: ckStarNightDrawConstellation 3.3s cubic-bezier(.18,.72,.18,1) var(--ck-constellation-delay) forwards;
+}
+
+.ck-star-night-constellation circle {
+  fill: #fff;
+  stroke: rgba(178, 210, 255, .70);
+  stroke-width: .55;
+  opacity: 0;
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 6px rgba(132,176,255,.92));
+  animation: ckStarNightConstellationPoint 1.25s ease-out calc(var(--ck-constellation-delay) + .45s) forwards;
+}
+
+.ck-star-night-constellation.is-crown path,
+.ck-star-night-constellation.is-crown circle,
+.ck-star-night-constellation.is-book path,
+.ck-star-night-constellation.is-book circle {
+  stroke: rgba(255, 230, 158, .44);
+}
+
+.ck-star-night-constellation.is-crown circle,
+.ck-star-night-constellation.is-book circle {
+  fill: #fff5cf;
+}
+
+.ck-star-night-hero-stars {
+  z-index: 8;
+  overflow: visible;
+}
+
+.ck-star-night-hero-stars > i {
+  position: absolute;
+  left: var(--ck-hero-star-x);
+  top: var(--ck-hero-star-y);
+  width: var(--ck-hero-star-size);
+  height: var(--ck-hero-star-size);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.15) rotate(45deg);
+  background: #fff;
+  clip-path: polygon(50% 0, 60% 39%, 100% 50%, 60% 61%, 50% 100%, 40% 61%, 0 50%, 40% 39%);
+  filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 14px rgba(139, 183, 255, .95));
+  animation: ckStarNightHeroStar 4.8s ease-in-out var(--ck-hero-star-delay) both;
+}
+
+.ck-star-night-hero-stars > i:nth-child(4n) {
+  background: #fff0b9;
+  filter: drop-shadow(0 0 5px #fff8d7) drop-shadow(0 0 15px rgba(255, 206, 104, .76));
+}
+
+.ck-star-night-cosmic-peak {
+  z-index: 9;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(133,145,255,.055), transparent 17%),
+    radial-gradient(ellipse at 50% 23%, rgba(88,112,230,.075), transparent 35%),
+    radial-gradient(ellipse at 22% 22%, rgba(139,88,225,.055), transparent 24%),
+    radial-gradient(ellipse at 78% 18%, rgba(69,145,224,.045), transparent 25%);
+  mix-blend-mode: screen;
+  animation: ckStarNightCosmicPeak var(--ck-star-night-duration) ease-in-out both;
+}
+
+.ck-star-night-peak-ribbon {
+  z-index: 10;
+  left: -8%;
+  right: -8%;
+  top: 0;
+  height: 46%;
+  opacity: 0;
+  transform: rotate(-4deg) scaleX(1.08);
+  background:
+    linear-gradient(100deg, transparent 3%, rgba(83, 112, 230, .035) 24%, rgba(117, 127, 243, .075) 48%, rgba(128, 77, 211, .04) 70%, transparent 96%);
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  animation: ckStarNightPeakRibbon var(--ck-star-night-duration) ease-in-out both;
+}
+
+.ck-star-night-finale-glow {
+  z-index: 11;
+  opacity: 0;
+  background: radial-gradient(ellipse at 50% 24%, rgba(123, 139, 255, .075), rgba(91, 105, 215, .035) 28%, transparent 56%);
+  mix-blend-mode: screen;
+  animation: ckStarNightFinaleGlow var(--ck-star-night-duration) ease-in-out both;
+}
+
+.ck-live-event-test-button.is-star-night {
+  border-color: rgba(155, 187, 255, .76);
+  background: linear-gradient(180deg, rgba(42, 45, 112, .94), rgba(20, 22, 68, .96));
+  box-shadow: inset 0 0 16px rgba(170, 190, 255, .10), 0 0 12px rgba(115, 142, 255, .12);
+}
+
+.ck-live-event-test-button.is-star-night:hover {
+  border-color: rgba(218, 229, 255, .96);
+  box-shadow: inset 0 0 18px rgba(205, 218, 255, .16), 0 0 19px rgba(137, 166, 255, .24);
+}
+
+@keyframes ckStarNightDeepSky {
+  0%, 4% { opacity: 0; }
+  14% { opacity: .28; }
+  28% { opacity: .58; }
+  47%, 79% { opacity: 1; }
+  89% { opacity: .52; }
+  97%, 100% { opacity: 0; }
+}
+
+@keyframes ckStarNightHorizon {
+  0%, 10% { opacity: 0; }
+  25% { opacity: .30; }
+  48%, 80% { opacity: .42; }
+  92% { opacity: .16; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckStarNightMilkyWay {
+  0%, 20% { opacity: 0; transform: rotate(-12deg) scale(.95); }
+  31% { opacity: .20; }
+  47% { opacity: .60; transform: rotate(-12deg) scale(1.00); }
+  61%, 79% { opacity: .78; transform: rotate(-11deg) scale(1.04); }
+  89% { opacity: .42; }
+  100% { opacity: 0; transform: rotate(-10deg) scale(1.08); }
+}
+
+@keyframes ckStarNightGalaxyCore {
+  0%, 30% { opacity: 0; transform: scale(.72); }
+  45% { opacity: .24; }
+  62%, 78% { opacity: .40; transform: scale(1.05); }
+  89% { opacity: .20; }
+  100% { opacity: 0; transform: scale(1.18); }
+}
+
+@keyframes ckStarNightStarsField {
+  0%, 8% { opacity: 0; }
+  19% { opacity: .58; }
+  31%, 84% { opacity: 1; }
+  93% { opacity: .42; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckStarNightStarAppear {
+  0% { opacity: 0; transform: scale(.22); }
+  62% { opacity: var(--ck-star-night-opacity); transform: scale(1.34); }
+  100% { opacity: var(--ck-star-night-opacity); transform: scale(1); }
+}
+
+@keyframes ckStarNightTwinkle {
+  0% { filter: brightness(.72); transform: scale(.75); }
+  100% { filter: brightness(1.50); transform: scale(1.25); }
+}
+
+@keyframes ckStarNightDust {
+  0% { opacity: 0; transform: translate(0,0) scale(.45); }
+  18% { opacity: .62; }
+  54% { opacity: .88; transform: translate(var(--ck-star-dust-dx), var(--ck-star-dust-dy)) scale(1); }
+  82% { opacity: .38; }
+  100% { opacity: 0; transform: translate(calc(var(--ck-star-dust-dx) * 1.45), calc(var(--ck-star-dust-dy) * 1.45)) scale(.65); }
+}
+
+@keyframes ckStarNightConstellation {
+  0% { opacity: 0; transform: scale(.88); }
+  12% { opacity: .28; }
+  26%, 62% { opacity: .78; transform: scale(1); }
+  76% { opacity: .62; }
+  90%, 100% { opacity: 0; transform: scale(1.04); }
+}
+
+@keyframes ckStarNightDrawConstellation {
+  0% { stroke-dashoffset: 310; opacity: .14; }
+  55% { opacity: .58; }
+  100% { stroke-dashoffset: 0; opacity: .72; }
+}
+
+@keyframes ckStarNightConstellationPoint {
+  0% { opacity: 0; transform: scale(.2); }
+  45% { opacity: 1; transform: scale(1.55); }
+  100% { opacity: .96; transform: scale(1); }
+}
+
+@keyframes ckStarNightHeroStar {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.15) rotate(45deg); }
+  18% { opacity: .92; transform: translate(-50%, -50%) scale(1.18) rotate(45deg); }
+  38% { opacity: .58; transform: translate(-50%, -50%) scale(.72) rotate(45deg); }
+  58% { opacity: 1; transform: translate(-50%, -50%) scale(1.34) rotate(45deg); }
+  82% { opacity: .44; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.35) rotate(45deg); }
+}
+
+@keyframes ckStarNightCosmicPeak {
+  0%, 52% { opacity: 0; }
+  60% { opacity: .12; }
+  68%, 79% { opacity: .52; }
+  85% { opacity: .24; }
+  92%, 100% { opacity: 0; }
+}
+
+@keyframes ckStarNightPeakRibbon {
+  0%, 54% { opacity: 0; transform: rotate(-4deg) translateX(-5%) scaleX(.98); }
+  64% { opacity: .16; }
+  72%, 80% { opacity: .40; transform: rotate(-3deg) translateX(1%) scaleX(1.08); }
+  89% { opacity: .10; }
+  100% { opacity: 0; transform: rotate(-2deg) translateX(5%) scaleX(1.14); }
+}
+
+@keyframes ckStarNightFinaleGlow {
+  0%, 60% { opacity: 0; }
+  67% { opacity: .06; }
+  72% { opacity: .22; }
+  75% { opacity: .08; }
+  78% { opacity: .26; }
+  82% { opacity: .07; }
+  87%, 100% { opacity: 0; }
+}
+
+@media (max-width: 760px) {
+  .ck-star-night-constellation.is-book,
+  .ck-star-night-constellation.is-diamond {
+    opacity: .72;
+  }
+
+  .ck-star-night-milky-way {
+    filter: blur(7px) saturate(1.28);
+  }
+}
