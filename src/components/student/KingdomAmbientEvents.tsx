@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -67,6 +67,7 @@ const PHOENIX_REBIRTH_UNLOCK_STARS = 12;
 const METEOR_SHOWER_UNLOCK_STARS = 14;
 const LUNAR_ECLIPSE_UNLOCK_STARS = 16;
 const RAINBOW_STORM_UNLOCK_STARS = 18;
+const MAGICAL_FIREFLIES_UNLOCK_STARS = 20;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -76,6 +77,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'meteor-shower': 12200,
   'lunar-eclipse': 18400,
   'rainbow-storm': 26800,
+  'magical-fireflies': 23200,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -635,6 +637,93 @@ function RainbowStormEvent({
 }
 
 
+function MagicalFirefliesEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const fireflies = Array.from({ length: 64 });
+  const swirlFireflies = Array.from({ length: 12 });
+  const peakRiseFireflies = Array.from({ length: 20 });
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-magical-fireflies is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-firefly-world-tint" />
+      <div className="ck-firefly-ground-glow" />
+
+      <div className="ck-firefly-field">
+        {fireflies.map((_, index) => {
+          const hue = index % 11 === 0 ? 171 : index % 13 === 0 ? 199 : 47 + (index % 5) * 2;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-firefly-x': `${3 + ((index * 37) % 94)}%`,
+                '--ck-firefly-y': `${34 + ((index * 43) % 59)}%`,
+                '--ck-firefly-size': `${2.45 + (index % 4) * 0.82}px`,
+                '--ck-firefly-delay': `${0.8 + (index % 12) * 0.21}s`,
+                '--ck-firefly-duration': `${5.4 + (index % 7) * 0.62}s`,
+                '--ck-firefly-pulse-delay': `${(index % 8) * 0.17}s`,
+                '--ck-firefly-halo-delay': `${(index % 6) * 0.21}s`,
+                '--ck-firefly-dx1': `${((index * 17) % 47) - 23}px`,
+                '--ck-firefly-dy1': `${-16 - (index % 5) * 6}px`,
+                '--ck-firefly-dx2': `${((index * 29) % 65) - 32}px`,
+                '--ck-firefly-dy2': `${-38 - (index % 4) * 9}px`,
+                '--ck-firefly-dx3': `${((index * 11) % 53) - 26}px`,
+                '--ck-firefly-dy3': `${-21 - (index % 6) * 6}px`,
+                '--ck-firefly-color': `hsl(${hue} 100% 78%)`,
+                '--ck-firefly-glow': `hsl(${hue} 100% 63%)`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      <div className="ck-firefly-peak-rise">
+        {peakRiseFireflies.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-firefly-rise-x': `${7 + ((index * 41) % 87)}%`,
+              '--ck-firefly-rise-y': `${76 + ((index * 19) % 19)}%`,
+              '--ck-firefly-rise-size': `${3.2 + (index % 4) * 0.78}px`,
+              '--ck-firefly-rise-delay': `${(index % 10) * 0.16}s`,
+              '--ck-firefly-rise-dx': `${((index * 23) % 63) - 31}px`,
+              '--ck-firefly-rise-dy': `${-86 - (index % 6) * 17}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-firefly-magic-pockets">
+        {['a', 'b'].map((pocket, pocketIndex) => (
+          <span key={pocket} className={`ck-firefly-swirl is-${pocket}`}>
+            {swirlFireflies.map((_, index) => (
+              <i
+                key={index}
+                style={{
+                  '--ck-firefly-swirl-angle': `${index * 30 + pocketIndex * 15}deg`,
+                  '--ck-firefly-swirl-radius': `${34 + (index % 4) * 10}px`,
+                  '--ck-firefly-swirl-delay': `${index * 0.11}s`,
+                } as CSSProperties}
+              />
+            ))}
+          </span>
+        ))}
+      </div>
+
+      <div className="ck-firefly-peak-bloom" />
+    </div>
+  );
+}
+
+
 function MeteorShowerEvent({
   realm,
   instanceId,
@@ -888,6 +977,7 @@ export default function KingdomAmbientEvents({
   const canShowMeteorShower = stars >= METEOR_SHOWER_UNLOCK_STARS;
   const canShowLunarEclipse = stars >= LUNAR_ECLIPSE_UNLOCK_STARS;
   const canShowRainbowStorm = stars >= RAINBOW_STORM_UNLOCK_STARS;
+  const canShowMagicalFireflies = stars >= MAGICAL_FIREFLIES_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -914,6 +1004,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'meteor-shower' && !canShowMeteorShower) return;
     if (eventId === 'lunar-eclipse' && !canShowLunarEclipse) return;
     if (eventId === 'rainbow-storm' && !canShowRainbowStorm) return;
+    if (eventId === 'magical-fireflies' && !canShowMagicalFireflies) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -943,7 +1034,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -990,11 +1081,19 @@ export default function KingdomAmbientEvents({
     if (roll < rainbowThreshold) return 'rainbow-storm';
 
     const remainingAfterRainbow = 1 - rainbowThreshold;
+    const baseFireflyChance = canShowMagicalFireflies
+      ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
+      : 0;
+    const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
+    const fireflyThreshold = rainbowThreshold + remainingAfterRainbow * fireflyChance;
+    if (roll < fireflyThreshold) return 'magical-fireflies';
+
+    const remainingAfterFireflies = 1 - fireflyThreshold;
     const baseIslandChance = canShowFloatingIsland
       ? (realm === 'legendary' ? 0.20 : stars >= 16 ? 0.18 : 0.15)
       : 0;
     const islandChance = stored.lastEventId === 'floating-island' ? 0.04 : baseIslandChance;
-    const islandThreshold = rainbowThreshold + remainingAfterRainbow * islandChance;
+    const islandThreshold = fireflyThreshold + remainingAfterFireflies * islandChance;
     if (roll < islandThreshold) return 'floating-island';
 
     const remainingAfterIsland = 1 - islandThreshold;
@@ -1010,7 +1109,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1140,6 +1239,10 @@ export default function KingdomAmbientEvents({
         <RainbowStormEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
+      {activeEvent?.id === 'magical-fireflies' && (
+        <MagicalFirefliesEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
       {activeEvent?.id === 'dragon-flight' && (
         <DragonFlightEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
@@ -1230,6 +1333,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               🌈 קשת קסומה
+            </button>
+          )}
+          {canShowMagicalFireflies && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-fireflies"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('magical-fireflies', false);
+              }}
+            >
+              ✨ גחליליות
             </button>
           )}
           {canShowDragonFlight && (
