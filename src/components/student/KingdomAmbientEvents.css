@@ -5910,3 +5910,516 @@
   64% { opacity: .12; transform: translateY(-12px) scale(.55); }
   100% { opacity: 0; transform: translateY(-22px) scale(.12); }
 }
+
+/* ================================================================
+   V15.2 — MAGICAL WIND VORTEX / רוח קסומה
+   Organic wind pass: curved gusts -> visible leaves -> spiral-arm vortex.
+   ================================================================ */
+
+.ck-live-event-magical-wind-vortex {
+  --ck-wind-event-duration: 25.6s;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ck-wind-world-tint,
+.ck-wind-sky-haze,
+.ck-wind-peak-flash,
+.ck-wind-gust-bands,
+.ck-wind-mote-field,
+.ck-wind-leaf-field,
+.ck-wind-foreground-leaves,
+.ck-wind-vortex-stage,
+.ck-wind-final-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-wind-world-tint {
+  z-index: 1;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 20% 76%, rgba(153,255,196,.15), transparent 36%),
+    radial-gradient(ellipse at 72% 58%, rgba(116,231,255,.14), transparent 43%),
+    linear-gradient(180deg, rgba(22,50,65,.04), rgba(20,58,48,.15));
+  mix-blend-mode: screen;
+  animation: ckWindWorldTint var(--ck-wind-event-duration) ease-in-out both;
+}
+
+.ck-wind-sky-haze {
+  z-index: 2;
+  left: -12%;
+  right: -12%;
+  top: 8%;
+  bottom: 24%;
+  opacity: 0;
+  background:
+    repeating-linear-gradient(
+      171deg,
+      transparent 0 9%,
+      rgba(199,249,255,.065) 10% 11%,
+      transparent 12% 19%
+    ),
+    radial-gradient(ellipse at 50% 55%, rgba(181,255,225,.18), transparent 60%);
+  filter: blur(9px);
+  transform: translateX(-5%);
+  animation: ckWindSkyHaze var(--ck-wind-event-duration) ease-in-out both;
+}
+
+.ck-wind-peak-flash {
+  z-index: 24;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 52% 59%, rgba(248,255,244,.80), rgba(151,255,216,.22) 19%, transparent 48%),
+    linear-gradient(180deg, rgba(212,255,247,.14), rgba(117,239,203,.08));
+  mix-blend-mode: screen;
+  animation: ckWindPeakFlash var(--ck-wind-event-duration) linear both;
+}
+
+/* Curved wind streaks instead of straight bands. */
+.ck-wind-gust-bands {
+  z-index: 7;
+  overflow: hidden;
+}
+
+.ck-wind-gust-bands > i {
+  position: absolute;
+  left: -48vw;
+  top: var(--ck-wind-gust-y);
+  width: var(--ck-wind-gust-width);
+  min-width: 260px;
+  height: var(--ck-wind-gust-curve);
+  opacity: 0;
+  border-radius: 56% 100% 46% 80%;
+  border-top: 2px solid rgba(230,255,249,.82);
+  border-right: 1px solid rgba(139,250,216,.28);
+  filter: blur(.2px) drop-shadow(0 0 8px rgba(142,255,224,.50));
+  transform: rotate(var(--ck-wind-gust-tilt));
+  animation: ckWindGustTravel var(--ck-wind-gust-duration) cubic-bezier(.15,.55,.24,1) var(--ck-wind-gust-delay) both;
+  will-change: transform, opacity;
+}
+
+.ck-wind-gust-bands > i::before,
+.ck-wind-gust-bands > i::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  width: 72%;
+  height: 72%;
+  border-radius: 62% 100% 42% 90%;
+  border-top: 1px solid rgba(231,255,250,.70);
+}
+
+.ck-wind-gust-bands > i::before {
+  top: 8px;
+  transform: translateX(-9%) rotate(-2deg) scaleX(.88);
+}
+
+.ck-wind-gust-bands > i::after {
+  top: 17px;
+  left: 22%;
+  width: 58%;
+  opacity: .48;
+  transform: rotate(3deg) scaleX(.72);
+}
+
+.ck-wind-mote-field {
+  z-index: 8;
+}
+
+.ck-wind-mote-field > i {
+  position: absolute;
+  left: var(--ck-wind-mote-x);
+  top: var(--ck-wind-mote-y);
+  width: var(--ck-wind-mote-size);
+  height: var(--ck-wind-mote-size);
+  margin: calc(var(--ck-wind-mote-size) / -2);
+  border-radius: 50%;
+  opacity: 0;
+  background: hsl(var(--ck-wind-mote-hue) 96% 78%);
+  box-shadow:
+    0 0 5px rgba(255,255,255,.88),
+    0 0 14px hsl(var(--ck-wind-mote-hue) 95% 65% / .76);
+  animation: ckWindMoteDrift var(--ck-wind-mote-duration) ease-in-out var(--ck-wind-mote-delay) both;
+  will-change: transform, opacity;
+}
+
+.ck-wind-leaf-field {
+  z-index: 10;
+  overflow: hidden;
+}
+
+.ck-wind-leaf-field > i,
+.ck-wind-foreground-leaves > i {
+  position: absolute;
+  opacity: 0;
+  border-radius: 92% 8% 92% 8%;
+  transform-origin: center;
+  background: linear-gradient(135deg, #fff1a0, #8ee38f 55%, #45b68f);
+  box-shadow: 0 0 8px rgba(169,255,164,.55);
+  will-change: transform, opacity;
+}
+
+.ck-wind-leaf-field > i {
+  left: -5%;
+  top: var(--ck-wind-leaf-y);
+  width: calc(var(--ck-wind-leaf-size) * 1.72);
+  height: var(--ck-wind-leaf-size);
+  animation: ckWindLeafSweep var(--ck-wind-leaf-duration) cubic-bezier(.14,.52,.22,1) var(--ck-wind-leaf-delay) both;
+}
+
+.ck-wind-leaf-field > i:nth-child(4n + 2),
+.ck-wind-foreground-leaves > i:nth-child(4n + 2) {
+  background: linear-gradient(135deg, #dcfff5, #72dcc8 58%, #3fa89f);
+}
+
+.ck-wind-leaf-field > i:nth-child(4n + 3),
+.ck-wind-foreground-leaves > i:nth-child(4n + 3) {
+  background: linear-gradient(135deg, #fff1a7, #d9d46a 58%, #78bf69);
+}
+
+.ck-wind-leaf-field > i:nth-child(4n),
+.ck-wind-foreground-leaves > i:nth-child(4n) {
+  background: linear-gradient(135deg, #eeffd9, #a7e96d 58%, #4eae73);
+}
+
+/* A handful of big leaves pass close to the camera during the build and peak. */
+.ck-wind-foreground-leaves {
+  z-index: 23;
+  overflow: hidden;
+}
+
+.ck-wind-foreground-leaves > i {
+  left: -9%;
+  top: var(--ck-wind-fg-y);
+  width: calc(var(--ck-wind-fg-size) * 1.78);
+  height: var(--ck-wind-fg-size);
+  filter: drop-shadow(0 2px 4px rgba(16,64,49,.34)) drop-shadow(0 0 8px rgba(190,255,178,.42));
+  animation: ckWindForegroundLeaf var(--ck-wind-fg-duration) cubic-bezier(.12,.53,.2,1) var(--ck-wind-fg-delay) both;
+}
+
+.ck-wind-vortex-stage {
+  z-index: 18;
+  left: 10%;
+  right: 10%;
+  top: 20%;
+  bottom: 9%;
+  opacity: 1;
+  overflow: visible;
+}
+
+.ck-wind-vortex-aura {
+  position: absolute;
+  left: 52%;
+  top: 57%;
+  width: min(60vw, 790px);
+  height: min(33vw, 420px);
+  max-height: 48vh;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.52);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse, rgba(255,255,255,.28) 0 5%, rgba(135,255,219,.21) 15%, rgba(109,225,255,.12) 31%, transparent 67%);
+  filter: blur(10px);
+  mix-blend-mode: screen;
+  animation: ckWindVortexAura var(--ck-wind-event-duration) ease-in-out both;
+}
+
+/* Three broken spiral arms: intentionally not full circles. */
+.ck-wind-vortex-arms {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.ck-wind-vortex-arms > i {
+  position: absolute;
+  left: 52%;
+  top: 57%;
+  width: min(var(--ck-wind-arm-length), 620px);
+  height: min(var(--ck-wind-arm-height), 230px);
+  opacity: 0;
+  transform-origin: 0% 50%;
+  border-radius: 12% 100% 24% 86%;
+  border-top: clamp(2px, .22vw, 3.5px) solid rgba(232,255,249,.86);
+  border-right: clamp(1px, .11vw, 2px) solid rgba(116,247,211,.44);
+  filter: drop-shadow(0 0 8px rgba(167,255,231,.72)) drop-shadow(0 0 20px rgba(100,221,255,.22));
+  transform: translateY(-50%) rotate(var(--ck-wind-arm-angle)) scaleX(var(--ck-wind-arm-scale-start)) scaleY(.68);
+  animation: ckWindVortexArm 6.15s cubic-bezier(.15,.72,.2,1) var(--ck-wind-arm-delay) both;
+  will-change: transform, opacity;
+}
+
+.ck-wind-vortex-arms > i::before,
+.ck-wind-vortex-arms > i::after,
+.ck-wind-vortex-arms > i > span {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: 20% 100% 18% 90%;
+  border-top: 1px solid rgba(226,255,247,.66);
+}
+
+.ck-wind-vortex-arms > i::before {
+  left: 11%;
+  top: 14%;
+  width: 72%;
+  height: 62%;
+  transform: rotate(-7deg) scaleX(.88);
+}
+
+.ck-wind-vortex-arms > i::after {
+  left: 27%;
+  top: 28%;
+  width: 51%;
+  height: 47%;
+  opacity: .48;
+  transform: rotate(9deg) scaleX(.74);
+}
+
+.ck-wind-vortex-arms > i > span {
+  left: 48%;
+  top: -5%;
+  width: 42%;
+  height: 36%;
+  opacity: .78;
+  border-top-color: rgba(255,245,150,.58);
+  transform: rotate(16deg);
+  filter: drop-shadow(0 0 6px rgba(244,255,173,.35));
+}
+
+.ck-wind-vortex-arms > i:nth-child(2) {
+  filter: drop-shadow(0 0 9px rgba(149,247,255,.68)) drop-shadow(0 0 22px rgba(115,255,220,.20));
+}
+
+.ck-wind-vortex-arms > i:nth-child(3) {
+  border-top-color: rgba(255,248,185,.78);
+  border-right-color: rgba(165,255,223,.42);
+}
+
+.ck-wind-vortex-core {
+  position: absolute;
+  left: 52%;
+  top: 57%;
+  width: min(18vw, 220px);
+  height: min(10vw, 118px);
+  min-width: 112px;
+  min-height: 62px;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.4);
+  animation: ckWindVortexCore var(--ck-wind-event-duration) ease-in-out both;
+}
+
+.ck-wind-vortex-core > span {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border-top: 3px solid rgba(244,255,248,.94);
+  border-right: 2px solid rgba(126,252,215,.52);
+  border-left: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  clip-path: inset(0 0 44% 0);
+  filter: drop-shadow(0 0 7px rgba(178,255,231,.82));
+}
+
+.ck-wind-vortex-core .is-a { animation: ckWindCoreSpin .96s linear infinite; }
+.ck-wind-vortex-core .is-b { inset: 15%; animation: ckWindCoreSpinReverse .72s linear infinite; opacity: .72; }
+.ck-wind-vortex-core .is-c { inset: 31%; animation: ckWindCoreSpin .48s linear infinite; opacity: .84; }
+
+.ck-wind-vortex-sparks {
+  position: absolute;
+  inset: 0;
+}
+
+.ck-wind-vortex-sparks > i {
+  position: absolute;
+  left: 52%;
+  top: 57%;
+  width: var(--ck-wind-spark-size);
+  height: var(--ck-wind-spark-size);
+  margin: calc(var(--ck-wind-spark-size) / -2);
+  border-radius: 50%;
+  opacity: 0;
+  background: #f5fff4;
+  box-shadow: 0 0 7px #fff, 0 0 18px rgba(135,255,211,.92), 0 0 29px rgba(91,218,255,.54);
+  animation: ckWindVortexSpark 3.45s cubic-bezier(.14,.65,.22,1) var(--ck-wind-spark-delay) both;
+  will-change: transform, opacity;
+}
+
+.ck-wind-final-sweep {
+  z-index: 21;
+  overflow: hidden;
+}
+
+.ck-wind-final-sweep > i {
+  position: absolute;
+  left: -58%;
+  width: 50%;
+  height: 12%;
+  opacity: 0;
+  border-radius: 54% 100% 42% 86%;
+  border-top: 3px solid rgba(239,255,250,.84);
+  border-right: 1px solid rgba(123,247,213,.28);
+  filter: blur(.25px) drop-shadow(0 0 11px rgba(135,255,222,.64));
+  animation: ckWindFinalSweep 3.15s cubic-bezier(.15,.62,.24,1) both;
+}
+
+.ck-wind-final-sweep .is-one { top: 32%; animation-delay: 17.0s; transform: rotate(-7deg); }
+.ck-wind-final-sweep .is-two { top: 46%; animation-delay: 17.24s; transform: rotate(4deg); }
+.ck-wind-final-sweep .is-three { top: 61%; animation-delay: 17.48s; transform: rotate(-3deg); }
+.ck-wind-final-sweep .is-four { top: 73%; animation-delay: 17.72s; transform: rotate(7deg); }
+
+.ck-live-event-magical-wind-vortex.is-legendary .ck-wind-world-tint {
+  filter: saturate(1.18) hue-rotate(8deg);
+}
+
+.ck-live-event-magical-wind-vortex.is-legendary .ck-wind-vortex-arms > i {
+  border-top-color: rgba(255,248,184,.90);
+  border-right-color: rgba(159,248,255,.72);
+}
+
+.ck-live-event-test-button.is-wind {
+  border-color: rgba(157, 239, 207, .78);
+  background: linear-gradient(180deg, rgba(40, 91, 84, .97), rgba(28, 61, 69, .98));
+  box-shadow: 0 7px 18px rgba(26, 75, 68, .32), inset 0 0 0 1px rgba(222, 255, 243, .10);
+}
+
+.ck-live-event-test-button.is-wind:hover {
+  border-color: rgba(224, 255, 244, .98);
+  background: linear-gradient(180deg, rgba(53, 113, 99, .98), rgba(35, 76, 82, .98));
+  box-shadow: 0 8px 22px rgba(34, 89, 78, .42), 0 0 16px rgba(137, 244, 207, .23);
+}
+
+@keyframes ckWindWorldTint {
+  0%, 4% { opacity: 0; }
+  14% { opacity: .24; }
+  32% { opacity: .48; }
+  55% { opacity: .62; }
+  68% { opacity: .82; }
+  78% { opacity: .56; }
+  91% { opacity: .20; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckWindSkyHaze {
+  0%, 7% { opacity: 0; transform: translateX(-8%); }
+  20% { opacity: .36; }
+  48% { opacity: .64; transform: translateX(2%); }
+  68% { opacity: .86; transform: translateX(7%); }
+  84% { opacity: .35; }
+  100% { opacity: 0; transform: translateX(12%); }
+}
+
+@keyframes ckWindPeakFlash {
+  0%, 58% { opacity: 0; }
+  61% { opacity: .10; }
+  63.5% { opacity: .34; }
+  65% { opacity: .07; }
+  67.2% { opacity: .46; }
+  68.4% { opacity: .11; }
+  70% { opacity: .30; }
+  73% { opacity: .07; }
+  78%, 100% { opacity: 0; }
+}
+
+@keyframes ckWindGustTravel {
+  0% { opacity: 0; transform: translateX(0) rotate(var(--ck-wind-gust-tilt)) scaleX(.58) scaleY(.72); }
+  12% { opacity: .68; }
+  38% { opacity: .98; }
+  64% { transform: translateX(105vw) rotate(calc(var(--ck-wind-gust-tilt) + 3deg)) scaleX(1.02) scaleY(1.12); }
+  80% { opacity: .70; }
+  100% { opacity: 0; transform: translateX(184vw) rotate(calc(var(--ck-wind-gust-tilt) - 2deg)) scaleX(1.22) scaleY(.82); }
+}
+
+@keyframes ckWindMoteDrift {
+  0% { opacity: 0; transform: translate3d(-18px, 8px, 0) scale(.45); }
+  16% { opacity: .88; }
+  48% { opacity: 1; transform: translate3d(var(--ck-wind-mote-dx-mid), var(--ck-wind-mote-dy-mid), 0) scale(1.16); }
+  82% { opacity: .76; }
+  100% { opacity: 0; transform: translate3d(var(--ck-wind-mote-dx), var(--ck-wind-mote-dy), 0) scale(.65); }
+}
+
+@keyframes ckWindLeafSweep {
+  0% { opacity: 0; transform: translate3d(-3vw, 0, 0) rotate(0deg) scale(.50); }
+  10% { opacity: .84; }
+  33% { opacity: 1; transform: translate3d(37vw, var(--ck-wind-leaf-rise), 0) rotate(var(--ck-wind-leaf-spin-mid-a)) scale(1.08); }
+  61% { transform: translate3d(74vw, var(--ck-wind-leaf-rise-mid), 0) rotate(var(--ck-wind-leaf-spin-mid-b)) scale(.92); }
+  84% { opacity: .86; }
+  100% { opacity: 0; transform: translate3d(114vw, var(--ck-wind-leaf-rise-end), 0) rotate(var(--ck-wind-leaf-spin)) scale(.62); }
+}
+
+@keyframes ckWindForegroundLeaf {
+  0% { opacity: 0; transform: translate3d(-8vw, 0, 0) rotate(-80deg) scale(.54); }
+  10% { opacity: .92; }
+  34% { transform: translate3d(34vw, var(--ck-wind-fg-rise), 0) rotate(var(--ck-wind-fg-spin-mid-a)) scale(1.22); }
+  62% { opacity: 1; transform: translate3d(73vw, var(--ck-wind-fg-rise-mid), 0) rotate(var(--ck-wind-fg-spin-mid-b)) scale(.96); }
+  84% { opacity: .72; }
+  100% { opacity: 0; transform: translate3d(119vw, var(--ck-wind-fg-rise-end), 0) rotate(var(--ck-wind-fg-spin)) scale(.62); }
+}
+
+@keyframes ckWindVortexAura {
+  0%, 45% { opacity: 0; transform: translate(-50%, -50%) scale(.42); }
+  54% { opacity: .20; }
+  62% { opacity: .56; transform: translate(-50%, -50%) scale(.82); }
+  69% { opacity: .84; transform: translate(-50%, -50%) scale(1.03); }
+  76% { opacity: .66; transform: translate(-50%, -50%) scale(1.10); }
+  84% { opacity: .20; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.22); }
+}
+
+@keyframes ckWindVortexArm {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) rotate(var(--ck-wind-arm-angle)) scaleX(var(--ck-wind-arm-scale-start)) scaleY(.44);
+  }
+  11% { opacity: .72; }
+  35% {
+    opacity: 1;
+    transform: translateY(-50%) rotate(calc(var(--ck-wind-arm-angle) + 54deg)) scaleX(.72) scaleY(.86);
+  }
+  62% {
+    opacity: .98;
+    transform: translateY(-50%) rotate(calc(var(--ck-wind-arm-angle) + 128deg)) scaleX(var(--ck-wind-arm-scale-peak)) scaleY(1.12);
+  }
+  82% { opacity: .70; }
+  100% {
+    opacity: 0;
+    transform: translateY(-50%) rotate(calc(var(--ck-wind-arm-angle) + 218deg)) scaleX(1.28) scaleY(.72);
+  }
+}
+
+@keyframes ckWindVortexCore {
+  0%, 47% { opacity: 0; transform: translate(-50%, -50%) scale(.34); }
+  56% { opacity: .38; }
+  64% { opacity: .88; transform: translate(-50%, -50%) scale(.86); }
+  70% { opacity: .96; transform: translate(-50%, -50%) scale(1.04); }
+  78% { opacity: .68; transform: translate(-50%, -50%) scale(.95); }
+  88% { opacity: .18; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(.58); }
+}
+
+@keyframes ckWindCoreSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ckWindCoreSpinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+@keyframes ckWindVortexSpark {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.25); }
+  12% { opacity: 1; }
+  58% { opacity: .94; transform: translate(calc(-50% + var(--ck-wind-spark-x-mid)), calc(-50% + var(--ck-wind-spark-y-mid))) rotate(var(--ck-wind-spark-angle)) scale(1.18); }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--ck-wind-spark-x)), calc(-50% + var(--ck-wind-spark-y))) rotate(calc(var(--ck-wind-spark-angle) + 165deg)) scale(.58); }
+}
+
+@keyframes ckWindFinalSweep {
+  0% { opacity: 0; transform: translateX(0) rotate(-5deg) scaleX(.48) scaleY(.74); }
+  12% { opacity: .88; }
+  46% { opacity: 1; }
+  68% { transform: translateX(205%) rotate(4deg) scaleX(1.03) scaleY(1.18); }
+  82% { opacity: .66; }
+  100% { opacity: 0; transform: translateX(336%) rotate(-2deg) scaleX(1.28) scaleY(.82); }
+}

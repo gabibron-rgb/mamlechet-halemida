@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -70,6 +70,7 @@ const RAINBOW_STORM_UNLOCK_STARS = 18;
 const MAGICAL_FIREFLIES_UNLOCK_STARS = 20;
 const MAGIC_THUNDERSTORM_UNLOCK_STARS = 22;
 const CRYSTAL_BLOOM_UNLOCK_STARS = 24;
+const MAGICAL_WIND_VORTEX_UNLOCK_STARS = 26;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -82,6 +83,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'magical-fireflies': 23200,
   'magic-thunderstorm': 24800,
   'crystal-bloom': 25200,
+  'magical-wind-vortex': 25600,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -728,6 +730,165 @@ function MagicalFirefliesEvent({
 }
 
 
+function MagicalWindVortexEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const windMotes = Array.from({ length: 68 });
+  const windLeaves = Array.from({ length: 52 });
+  const foregroundLeaves = Array.from({ length: 12 });
+  const vortexArms = Array.from({ length: 3 });
+  const vortexSparks = Array.from({ length: 38 });
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-magical-wind-vortex is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-wind-world-tint" />
+      <div className="ck-wind-sky-haze" />
+      <div className="ck-wind-peak-flash" />
+
+      <div className="ck-wind-gust-bands">
+        {Array.from({ length: 11 }).map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-wind-gust-y': `${15 + ((index * 9) % 68)}%`,
+              '--ck-wind-gust-delay': `${1.1 + (index % 6) * 1.15 + Math.floor(index / 6) * 0.72}s`,
+              '--ck-wind-gust-duration': `${3.25 + (index % 5) * 0.42}s`,
+              '--ck-wind-gust-width': `${28 + (index % 5) * 7}vw`,
+              '--ck-wind-gust-tilt': `${-8 + (index % 6) * 2.7}deg`,
+              '--ck-wind-gust-curve': `${34 + (index % 4) * 9}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-wind-mote-field">
+        {windMotes.map((_, index) => {
+          const hue = index % 9 === 0 ? 186 : index % 7 === 0 ? 50 : 112 + (index % 5) * 9;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-wind-mote-x': `${3 + ((index * 37) % 94)}%`,
+                '--ck-wind-mote-y': `${17 + ((index * 29) % 72)}%`,
+                '--ck-wind-mote-size': `${2.2 + (index % 5) * 1.0}px`,
+                '--ck-wind-mote-delay': `${0.9 + (index % 17) * 0.29}s`,
+                '--ck-wind-mote-duration': `${4.0 + (index % 7) * 0.42}s`,
+                '--ck-wind-mote-dx': `${102 + (index % 8) * 21}px`,
+                '--ck-wind-mote-dy': `${-34 + ((index * 13) % 69)}px`,
+                '--ck-wind-mote-dx-mid': `${(102 + (index % 8) * 21) * 0.45}px`,
+                '--ck-wind-mote-dy-mid': `${(-34 + ((index * 13) % 69)) * 0.55}px`,
+                '--ck-wind-mote-hue': `${hue}`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      <div className="ck-wind-leaf-field">
+        {windLeaves.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-wind-leaf-y': `${21 + ((index * 31) % 67)}%`,
+              '--ck-wind-leaf-delay': `${1.7 + (index % 15) * 0.39}s`,
+              '--ck-wind-leaf-duration': `${4.8 + (index % 7) * 0.52}s`,
+              '--ck-wind-leaf-size': `${6 + (index % 5) * 2.2}px`,
+              '--ck-wind-leaf-rise': `${-38 - (index % 5) * 12}px`,
+              '--ck-wind-leaf-rise-mid': `${(-38 - (index % 5) * 12) * -0.42}px`,
+              '--ck-wind-leaf-rise-end': `${(-38 - (index % 5) * 12) * 0.55}px`,
+              '--ck-wind-leaf-spin': `${330 + (index % 7) * 95}deg`,
+              '--ck-wind-leaf-spin-mid-a': `${(330 + (index % 7) * 95) * 0.38}deg`,
+              '--ck-wind-leaf-spin-mid-b': `${(330 + (index % 7) * 95) * 0.72}deg`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-wind-foreground-leaves">
+        {foregroundLeaves.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-wind-fg-y': `${24 + ((index * 17) % 60)}%`,
+              '--ck-wind-fg-delay': `${7.1 + (index % 6) * 1.05}s`,
+              '--ck-wind-fg-duration': `${3.7 + (index % 4) * 0.48}s`,
+              '--ck-wind-fg-size': `${12 + (index % 4) * 4}px`,
+              '--ck-wind-fg-rise': `${-58 + (index % 5) * 27}px`,
+              '--ck-wind-fg-rise-mid': `${(-58 + (index % 5) * 27) * -0.52}px`,
+              '--ck-wind-fg-rise-end': `${(-58 + (index % 5) * 27) * 0.42}px`,
+              '--ck-wind-fg-spin': `${520 + (index % 6) * 130}deg`,
+              '--ck-wind-fg-spin-mid-a': `${(520 + (index % 6) * 130) * 0.34}deg`,
+              '--ck-wind-fg-spin-mid-b': `${(520 + (index % 6) * 130) * 0.68}deg`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-wind-vortex-stage">
+        <div className="ck-wind-vortex-aura" />
+        <div className="ck-wind-vortex-arms">
+          {vortexArms.map((_, index) => (
+            <i
+              key={index}
+              style={{
+                '--ck-wind-arm-delay': `${12.05 + index * 0.19}s`,
+                '--ck-wind-arm-angle': `${-122 + index * 118}deg`,
+                '--ck-wind-arm-length': `${34 + index * 5}vw`,
+                '--ck-wind-arm-height': `${11 + index * 2.4}vw`,
+                '--ck-wind-arm-scale-start': 0.34 + index * 0.04,
+                '--ck-wind-arm-scale-peak': 0.95 + index * 0.08,
+              } as CSSProperties}
+            >
+              <span />
+            </i>
+          ))}
+        </div>
+        <div className="ck-wind-vortex-core">
+          <span className="is-a" />
+          <span className="is-b" />
+          <span className="is-c" />
+        </div>
+        <div className="ck-wind-vortex-sparks">
+          {vortexSparks.map((_, index) => {
+            const angle = ((index * 137.5) % 360) * Math.PI / 180;
+            const distance = 78 + (index % 9) * 18;
+            return (
+              <i
+                key={index}
+                style={{
+                  '--ck-wind-spark-angle': `${(index * 137.5) % 360}deg`,
+                  '--ck-wind-spark-x': `${Math.cos(angle) * distance}px`,
+                  '--ck-wind-spark-y': `${Math.sin(angle) * distance * 0.56}px`,
+                  '--ck-wind-spark-x-mid': `${Math.cos(angle) * distance * 0.58}px`,
+                  '--ck-wind-spark-y-mid': `${Math.sin(angle) * distance * 0.56 * 0.58}px`,
+                  '--ck-wind-spark-delay': `${13.0 + (index % 12) * 0.1}s`,
+                  '--ck-wind-spark-size': `${3 + (index % 5) * 1.2}px`,
+                } as CSSProperties}
+              />
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="ck-wind-final-sweep">
+        <i className="is-one" />
+        <i className="is-two" />
+        <i className="is-three" />
+        <i className="is-four" />
+      </div>
+    </div>
+  );
+}
+
+
 function CrystalBloomEvent({
   realm,
   instanceId,
@@ -1253,18 +1414,19 @@ export default function KingdomAmbientEvents({
   const scheduleTimerRef = useRef<number | null>(null);
   const storageKey = `${STORAGE_PREFIX}:${classId || 'anonymous'}`;
 
-  const canShowShootingStar = stars >= 1;
-  const canShowFairySwarm = stars >= FAIRY_SWARM_UNLOCK_STARS;
-  const canShowFloatingIsland = stars >= FLOATING_ISLAND_UNLOCK_STARS;
-  const canShowDragonFlight = stars >= DRAGON_FLIGHT_UNLOCK_STARS;
-  const canShowAuroraSky = stars >= AURORA_SKY_UNLOCK_STARS;
-  const canShowPhoenixRebirth = stars >= PHOENIX_REBIRTH_UNLOCK_STARS;
-  const canShowMeteorShower = stars >= METEOR_SHOWER_UNLOCK_STARS;
-  const canShowLunarEclipse = stars >= LUNAR_ECLIPSE_UNLOCK_STARS;
-  const canShowRainbowStorm = stars >= RAINBOW_STORM_UNLOCK_STARS;
-  const canShowMagicalFireflies = stars >= MAGICAL_FIREFLIES_UNLOCK_STARS;
-  const canShowMagicThunderstorm = stars >= MAGIC_THUNDERSTORM_UNLOCK_STARS;
-  const canShowCrystalBloom = stars >= CRYSTAL_BLOOM_UNLOCK_STARS;
+  const canShowShootingStar = sandboxMode || stars >= 1;
+  const canShowFairySwarm = sandboxMode || stars >= FAIRY_SWARM_UNLOCK_STARS;
+  const canShowFloatingIsland = sandboxMode || stars >= FLOATING_ISLAND_UNLOCK_STARS;
+  const canShowDragonFlight = sandboxMode || stars >= DRAGON_FLIGHT_UNLOCK_STARS;
+  const canShowAuroraSky = sandboxMode || stars >= AURORA_SKY_UNLOCK_STARS;
+  const canShowPhoenixRebirth = sandboxMode || stars >= PHOENIX_REBIRTH_UNLOCK_STARS;
+  const canShowMeteorShower = sandboxMode || stars >= METEOR_SHOWER_UNLOCK_STARS;
+  const canShowLunarEclipse = sandboxMode || stars >= LUNAR_ECLIPSE_UNLOCK_STARS;
+  const canShowRainbowStorm = sandboxMode || stars >= RAINBOW_STORM_UNLOCK_STARS;
+  const canShowMagicalFireflies = sandboxMode || stars >= MAGICAL_FIREFLIES_UNLOCK_STARS;
+  const canShowMagicThunderstorm = sandboxMode || stars >= MAGIC_THUNDERSTORM_UNLOCK_STARS;
+  const canShowCrystalBloom = sandboxMode || stars >= CRYSTAL_BLOOM_UNLOCK_STARS;
+  const canShowMagicalWindVortex = sandboxMode || stars >= MAGICAL_WIND_VORTEX_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -1294,6 +1456,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'magical-fireflies' && !canShowMagicalFireflies) return;
     if (eventId === 'magic-thunderstorm' && !canShowMagicThunderstorm) return;
     if (eventId === 'crystal-bloom' && !canShowCrystalBloom) return;
+    if (eventId === 'magical-wind-vortex' && !canShowMagicalWindVortex) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -1323,7 +1486,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -1386,11 +1549,19 @@ export default function KingdomAmbientEvents({
     if (roll < crystalThreshold) return 'crystal-bloom';
 
     const remainingAfterCrystal = 1 - crystalThreshold;
+    const baseWindChance = canShowMagicalWindVortex
+      ? (realm === 'legendary' ? 0.16 : stars >= 32 ? 0.13 : 0.10)
+      : 0;
+    const windChance = stored.lastEventId === 'magical-wind-vortex' ? 0.015 : baseWindChance;
+    const windThreshold = crystalThreshold + remainingAfterCrystal * windChance;
+    if (roll < windThreshold) return 'magical-wind-vortex';
+
+    const remainingAfterWind = 1 - windThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = crystalThreshold + remainingAfterCrystal * fireflyChance;
+    const fireflyThreshold = windThreshold + remainingAfterWind * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -1414,7 +1585,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1556,6 +1727,10 @@ export default function KingdomAmbientEvents({
         <CrystalBloomEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
+      {activeEvent?.id === 'magical-wind-vortex' && (
+        <MagicalWindVortexEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
       {activeEvent?.id === 'dragon-flight' && (
         <DragonFlightEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
@@ -1682,6 +1857,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               💎 גבישים
+            </button>
+          )}
+          {canShowMagicalWindVortex && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-wind"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('magical-wind-vortex', false);
+              }}
+            >
+              🌪️ רוחות קסם
             </button>
           )}
           {canShowDragonFlight && (
