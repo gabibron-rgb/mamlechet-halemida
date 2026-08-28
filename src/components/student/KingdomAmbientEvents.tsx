@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -72,6 +72,7 @@ const MAGIC_THUNDERSTORM_UNLOCK_STARS = 22;
 const CRYSTAL_BLOOM_UNLOCK_STARS = 24;
 const MAGICAL_WIND_VORTEX_UNLOCK_STARS = 26;
 const ENCHANTED_PETAL_BLOOM_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
+const INTERDIMENSIONAL_PORTAL_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -86,6 +87,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'crystal-bloom': 25200,
   'magical-wind-vortex': 25600,
   'enchanted-petal-bloom': 25800,
+  'interdimensional-portal': 27400,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -889,6 +891,147 @@ function EnchantedPetalBloomEvent({
   );
 }
 
+
+function InterdimensionalPortalEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const suctionMotes = Array.from({ length: 96 });
+  const orbitSparks = Array.from({ length: 48 });
+  const runes = Array.from({ length: 28 });
+  const collapseFragments = Array.from({ length: 124 });
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-interdimensional-portal is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-portal-world-veil" />
+      <div className="ck-portal-space-bend is-a" />
+      <div className="ck-portal-space-bend is-b" />
+      <div className="ck-portal-space-bend is-c" />
+      <div className="ck-portal-peak-flash" />
+
+      <div className="ck-portal-suction-field">
+        {suctionMotes.map((_, index) => {
+          const startX = 3 + ((index * 37) % 94);
+          const startY = 12 + ((index * 53) % 76);
+          const hue = index % 5 === 0 ? 45 : index % 3 === 0 ? 192 : 268 + (index % 4) * 13;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-portal-mote-x': `${startX}%`,
+                '--ck-portal-mote-y': `${startY}%`,
+                '--ck-portal-mote-size': `${2.2 + (index % 6) * 0.85}px`,
+                '--ck-portal-mote-delay': `${2.1 + (index % 24) * 0.46}s`,
+                '--ck-portal-mote-duration': `${5.1 + (index % 7) * 0.48}s`,
+                '--ck-portal-mote-spin': `${320 + (index % 9) * 94}deg`,
+                '--ck-portal-mote-hue': `${hue}`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      <div className="ck-portal-stage">
+        <div className="ck-portal-outer-glow" />
+        <div className="ck-portal-ring is-outer" />
+        <div className="ck-portal-ring is-middle" />
+        <div className="ck-portal-ring is-inner" />
+
+        <div className="ck-portal-runes">
+          {runes.map((_, index) => (
+            <i
+              key={index}
+              style={{
+                '--ck-portal-rune-angle': `${index * (360 / runes.length)}deg`,
+                '--ck-portal-rune-delay': `${(index % 7) * 0.12}s`,
+                '--ck-portal-rune-scale': `${0.72 + (index % 4) * 0.14}`,
+              } as CSSProperties}
+            />
+          ))}
+        </div>
+
+        <div className="ck-portal-aperture">
+          <div className="ck-portal-other-world">
+            <span className="ck-portal-other-moon" />
+            <span className="ck-portal-other-nebula" />
+            <span className="ck-portal-other-horizon" />
+            <span className="ck-portal-other-island is-one" />
+            <span className="ck-portal-other-island is-two" />
+            <span className="ck-portal-other-island is-three" />
+            <span className="ck-portal-other-stars">
+              {Array.from({ length: 42 }).map((_, index) => (
+                <i
+                  key={index}
+                  style={{
+                    '--ck-portal-star-x': `${4 + ((index * 47) % 92)}%`,
+                    '--ck-portal-star-y': `${5 + ((index * 31) % 66)}%`,
+                    '--ck-portal-star-size': `${1 + (index % 4) * 0.8}px`,
+                    '--ck-portal-star-delay': `${(index % 11) * 0.17}s`,
+                  } as CSSProperties}
+                />
+              ))}
+            </span>
+          </div>
+        </div>
+
+        <div className="ck-portal-orbit-sparks">
+          {orbitSparks.map((_, index) => (
+            <i
+              key={index}
+              style={{
+                '--ck-portal-orbit-angle': `${index * (360 / orbitSparks.length)}deg`,
+                '--ck-portal-orbit-radius': `clamp(${108 + (index % 6) * 7}px, ${13.8 + (index % 6) * 0.8}vw, ${190 + (index % 6) * 13}px)`,
+                '--ck-portal-orbit-delay': `${(index % 12) * 0.11}s`,
+                '--ck-portal-orbit-size': `${2 + (index % 5) * 0.9}px`,
+              } as CSSProperties}
+            />
+          ))}
+        </div>
+
+        <div className="ck-portal-energy-arcs">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <i
+              key={index}
+              style={{
+                '--ck-portal-arc-rotate': `${index * 45 + (index % 3) * 11}deg`,
+                '--ck-portal-arc-delay': `${8.6 + (index % 5) * 0.41}s`,
+                '--ck-portal-arc-scale': `${0.82 + (index % 4) * 0.10}`,
+              } as CSSProperties}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="ck-portal-collapse-burst">
+        <span className="ck-portal-collapse-core" />
+        {collapseFragments.map((_, index) => {
+          const angle = ((index * 137.5) % 360) * Math.PI / 180;
+          const distance = 96 + (index % 13) * 24;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-portal-burst-x': `${Math.cos(angle) * distance}px`,
+                '--ck-portal-burst-y': `${Math.sin(angle) * distance * 0.68}px`,
+                '--ck-portal-burst-size': `${2.6 + (index % 7) * 1.05}px`,
+                '--ck-portal-burst-delay': `${(index % 17) * 0.012}s`,
+                '--ck-portal-burst-rotate': `${(index * 79) % 360}deg`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function MagicalWindVortexEvent({
   realm,
   instanceId,
@@ -1587,6 +1730,7 @@ export default function KingdomAmbientEvents({
   const canShowCrystalBloom = sandboxMode || stars >= CRYSTAL_BLOOM_UNLOCK_STARS;
   const canShowMagicalWindVortex = sandboxMode || stars >= MAGICAL_WIND_VORTEX_UNLOCK_STARS;
   const canShowEnchantedPetalBloom = sandboxMode || stars >= ENCHANTED_PETAL_BLOOM_UNLOCK_STARS;
+  const canShowInterdimensionalPortal = sandboxMode || stars >= INTERDIMENSIONAL_PORTAL_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -1618,6 +1762,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'crystal-bloom' && !canShowCrystalBloom) return;
     if (eventId === 'magical-wind-vortex' && !canShowMagicalWindVortex) return;
     if (eventId === 'enchanted-petal-bloom' && !canShowEnchantedPetalBloom) return;
+    if (eventId === 'interdimensional-portal' && !canShowInterdimensionalPortal) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -1647,7 +1792,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -1726,11 +1871,19 @@ export default function KingdomAmbientEvents({
     if (roll < petalThreshold) return 'enchanted-petal-bloom';
 
     const remainingAfterPetal = 1 - petalThreshold;
+    const basePortalChance = canShowInterdimensionalPortal
+      ? (realm === 'legendary' ? 0.13 : 0.075)
+      : 0;
+    const portalChance = stored.lastEventId === 'interdimensional-portal' ? 0.01 : basePortalChance;
+    const portalThreshold = petalThreshold + remainingAfterPetal * portalChance;
+    if (roll < portalThreshold) return 'interdimensional-portal';
+
+    const remainingAfterPortal = 1 - portalThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = petalThreshold + remainingAfterPetal * fireflyChance;
+    const fireflyThreshold = portalThreshold + remainingAfterPortal * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -1754,7 +1907,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1800,7 +1953,7 @@ export default function KingdomAmbientEvents({
 
   return (
     <div
-      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''}`}
+      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''} ${activeEvent?.id === 'interdimensional-portal' ? 'is-portal-depth-split' : ''}`}
     >
       {activeEvent?.id === 'shooting-star' && (
         <div
@@ -1904,6 +2057,10 @@ export default function KingdomAmbientEvents({
 
       {activeEvent?.id === 'enchanted-petal-bloom' && (
         <EnchantedPetalBloomEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
+      {activeEvent?.id === 'interdimensional-portal' && (
+        <InterdimensionalPortalEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
       {activeEvent?.id === 'dragon-flight' && (
@@ -2056,6 +2213,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               🌸 פריחה
+            </button>
+          )}
+          {canShowInterdimensionalPortal && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-portal"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('interdimensional-portal', false);
+              }}
+            >
+              🌀 שער
             </button>
           )}
           {canShowDragonFlight && (
