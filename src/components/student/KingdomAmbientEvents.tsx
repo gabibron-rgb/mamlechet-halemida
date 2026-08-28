@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -71,6 +71,7 @@ const MAGICAL_FIREFLIES_UNLOCK_STARS = 20;
 const MAGIC_THUNDERSTORM_UNLOCK_STARS = 22;
 const CRYSTAL_BLOOM_UNLOCK_STARS = 24;
 const MAGICAL_WIND_VORTEX_UNLOCK_STARS = 26;
+const ENCHANTED_PETAL_BLOOM_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -84,6 +85,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'magic-thunderstorm': 24800,
   'crystal-bloom': 25200,
   'magical-wind-vortex': 25600,
+  'enchanted-petal-bloom': 25800,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -729,6 +731,163 @@ function MagicalFirefliesEvent({
   );
 }
 
+
+function EnchantedPetalBloomEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const driftingPetals = Array.from({ length: 72 });
+  const foregroundPetals = Array.from({ length: 22 });
+  const peakPetals = Array.from({ length: 156 });
+
+  // V16.2 — the peak is no longer one central cluster. Ten bloom points fire
+  // across the kingdom in a short wave, creating a true whole-world bloom.
+  const bloomSites = [
+    { x: 13, y: 33, scale: 0.78, delay: 11.90, petalCount: 28, foreground: false },
+    { x: 31, y: 42, scale: 0.90, delay: 12.18, petalCount: 24, foreground: true },
+    { x: 50, y: 31, scale: 0.84, delay: 12.42, petalCount: 30, foreground: false },
+    { x: 70, y: 39, scale: 0.88, delay: 12.08, petalCount: 26, foreground: true },
+    { x: 88, y: 31, scale: 0.80, delay: 12.56, petalCount: 28, foreground: false },
+    { x: 16, y: 68, scale: 0.92, delay: 12.46, petalCount: 26, foreground: true },
+    { x: 37, y: 70, scale: 1.00, delay: 12.72, petalCount: 34, foreground: false },
+    { x: 53, y: 61, scale: 1.28, delay: 12.92, petalCount: 28, foreground: true },
+    { x: 69, y: 70, scale: 0.94, delay: 12.60, petalCount: 24, foreground: false },
+    { x: 85, y: 66, scale: 0.92, delay: 12.26, petalCount: 30, foreground: true },
+  ] as const;
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-enchanted-petal-bloom is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-petal-world-warmth" />
+      <div className="ck-petal-sun-glow" />
+
+      <div className="ck-petal-breeze-lines">
+        {Array.from({ length: 7 }).map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-petal-breeze-y': `${18 + ((index * 11) % 62)}%`,
+              '--ck-petal-breeze-delay': `${1.7 + index * 1.48}s`,
+              '--ck-petal-breeze-duration': `${4.0 + (index % 3) * 0.55}s`,
+              '--ck-petal-breeze-tilt': `${-7 + (index % 5) * 3.1}deg`,
+              '--ck-petal-breeze-width': `${31 + (index % 4) * 8}vw`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-petal-drift-field">
+        {driftingPetals.map((_, index) => {
+          const hue = index % 9 === 0 ? 43 : index % 7 === 0 ? 333 : 344 + (index % 4) * 5;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-petal-x': `${2 + ((index * 37) % 96)}%`,
+                '--ck-petal-y': `${-8 - ((index * 19) % 24)}%`,
+                '--ck-petal-size': `${6 + (index % 6) * 2.1}px`,
+                '--ck-petal-delay': `${0.55 + (index % 18) * 0.54}s`,
+                '--ck-petal-duration': `${7.4 + (index % 7) * 0.72}s`,
+                '--ck-petal-drift-x': `${-62 + ((index * 31) % 125)}px`,
+                '--ck-petal-drift-mid': `${-36 + ((index * 23) % 73)}px`,
+                '--ck-petal-spin': `${280 + (index % 8) * 92}deg`,
+                '--ck-petal-hue': `${hue}`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      <div className="ck-petal-bloom-sites">
+        {bloomSites.map((site, siteIndex) => (
+          <span
+            key={siteIndex}
+            className={`ck-petal-bloom-site is-${siteIndex + 1} ${site.foreground ? 'is-foreground' : 'is-background'}`}
+            style={{
+              '--ck-petal-bloom-x': `${site.x}%`,
+              '--ck-petal-bloom-y': `${site.y}%`,
+              '--ck-petal-bloom-scale': site.scale,
+              '--ck-petal-bloom-delay': `${site.delay}s`,
+            } as CSSProperties}
+          >
+            <em />
+            <b />
+            {Array.from({ length: site.petalCount }).map((_, petalIndex) => {
+              const angle = ((petalIndex * 137.5 + siteIndex * 31) % 360) * Math.PI / 180;
+              const baseDistance = site.foreground ? 94 : 76;
+              const distance = baseDistance + (petalIndex % 7) * (site.foreground ? 18 : 15);
+              return (
+                <i
+                  key={petalIndex}
+                  style={{
+                    '--ck-bloom-petal-x': `${Math.cos(angle) * distance}px`,
+                    '--ck-bloom-petal-y': `${Math.sin(angle) * distance * 0.70}px`,
+                    '--ck-bloom-petal-x-mid': `${Math.cos(angle) * distance * 0.44}px`,
+                    '--ck-bloom-petal-y-mid': `${Math.sin(angle) * distance * 0.70 * 0.44}px`,
+                    '--ck-bloom-petal-size': `${6.2 + (petalIndex % 6) * 1.8}px`,
+                    '--ck-bloom-petal-rotate': `${(petalIndex * 83 + siteIndex * 23) % 360}deg`,
+                    '--ck-bloom-petal-delay': `${petalIndex * 0.018}s`,
+                  } as CSSProperties}
+                />
+              );
+            })}
+          </span>
+        ))}
+      </div>
+
+      <div className="ck-petal-peak-shower">
+        {peakPetals.map((_, index) => {
+          const site = bloomSites[index % bloomSites.length];
+          const localIndex = Math.floor(index / bloomSites.length);
+          const angle = ((index * 149 + localIndex * 37) % 360) * Math.PI / 180;
+          const distance = 92 + (index % 9) * 22;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-peak-petal-start-x': `${site.x}%`,
+                '--ck-peak-petal-start-y': `${site.y}%`,
+                '--ck-peak-petal-x': `${Math.cos(angle) * distance}px`,
+                '--ck-peak-petal-y': `${Math.sin(angle) * distance * 0.72}px`,
+                '--ck-peak-petal-x-mid': `${Math.cos(angle) * distance * 0.50}px`,
+                '--ck-peak-petal-y-mid': `${Math.sin(angle) * distance * 0.72 * 0.50}px`,
+                '--ck-peak-petal-size': `${5.8 + (index % 7) * 1.65}px`,
+                '--ck-peak-petal-delay': `${13.05 + (index % 23) * 0.031}s`,
+                '--ck-peak-petal-rotate': `${(index * 71) % 360}deg`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      <div className="ck-petal-foreground">
+        {foregroundPetals.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-petal-fg-x': `${-12 + ((index * 29) % 116)}%`,
+              '--ck-petal-fg-y': `${8 + ((index * 17) % 70)}%`,
+              '--ck-petal-fg-size': `${17 + (index % 5) * 5}px`,
+              '--ck-petal-fg-delay': `${8.2 + (index % 11) * 0.56}s`,
+              '--ck-petal-fg-duration': `${4.5 + (index % 4) * 0.55}s`,
+              '--ck-petal-fg-rise': `${-54 + (index % 6) * 22}px`,
+              '--ck-petal-fg-spin': `${430 + (index % 7) * 110}deg`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-petal-peak-bloom" />
+      <div className="ck-petal-final-sparkle" />
+    </div>
+  );
+}
 
 function MagicalWindVortexEvent({
   realm,
@@ -1427,6 +1586,7 @@ export default function KingdomAmbientEvents({
   const canShowMagicThunderstorm = sandboxMode || stars >= MAGIC_THUNDERSTORM_UNLOCK_STARS;
   const canShowCrystalBloom = sandboxMode || stars >= CRYSTAL_BLOOM_UNLOCK_STARS;
   const canShowMagicalWindVortex = sandboxMode || stars >= MAGICAL_WIND_VORTEX_UNLOCK_STARS;
+  const canShowEnchantedPetalBloom = sandboxMode || stars >= ENCHANTED_PETAL_BLOOM_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -1457,6 +1617,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'magic-thunderstorm' && !canShowMagicThunderstorm) return;
     if (eventId === 'crystal-bloom' && !canShowCrystalBloom) return;
     if (eventId === 'magical-wind-vortex' && !canShowMagicalWindVortex) return;
+    if (eventId === 'enchanted-petal-bloom' && !canShowEnchantedPetalBloom) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -1486,7 +1647,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -1557,11 +1718,19 @@ export default function KingdomAmbientEvents({
     if (roll < windThreshold) return 'magical-wind-vortex';
 
     const remainingAfterWind = 1 - windThreshold;
+    const basePetalChance = canShowEnchantedPetalBloom
+      ? (realm === 'legendary' ? 0.16 : 0.10)
+      : 0;
+    const petalChance = stored.lastEventId === 'enchanted-petal-bloom' ? 0.015 : basePetalChance;
+    const petalThreshold = windThreshold + remainingAfterWind * petalChance;
+    if (roll < petalThreshold) return 'enchanted-petal-bloom';
+
+    const remainingAfterPetal = 1 - petalThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = windThreshold + remainingAfterWind * fireflyChance;
+    const fireflyThreshold = petalThreshold + remainingAfterPetal * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -1585,7 +1754,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1630,7 +1799,9 @@ export default function KingdomAmbientEvents({
   }, [activeEvent]);
 
   return (
-    <div className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''}`}>
+    <div
+      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''}`}
+    >
       {activeEvent?.id === 'shooting-star' && (
         <div
           key={activeEvent.instanceId}
@@ -1729,6 +1900,10 @@ export default function KingdomAmbientEvents({
 
       {activeEvent?.id === 'magical-wind-vortex' && (
         <MagicalWindVortexEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
+      {activeEvent?.id === 'enchanted-petal-bloom' && (
+        <EnchantedPetalBloomEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
       {activeEvent?.id === 'dragon-flight' && (
@@ -1869,6 +2044,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               🌪️ רוחות קסם
+            </button>
+          )}
+          {canShowEnchantedPetalBloom && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-petal"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('enchanted-petal-bloom', false);
+              }}
+            >
+              🌸 פריחה
             </button>
           )}
           {canShowDragonFlight && (
