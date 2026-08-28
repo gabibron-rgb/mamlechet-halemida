@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -68,6 +68,7 @@ const METEOR_SHOWER_UNLOCK_STARS = 14;
 const LUNAR_ECLIPSE_UNLOCK_STARS = 16;
 const RAINBOW_STORM_UNLOCK_STARS = 18;
 const MAGICAL_FIREFLIES_UNLOCK_STARS = 20;
+const MAGIC_THUNDERSTORM_UNLOCK_STARS = 22;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -78,6 +79,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'lunar-eclipse': 18400,
   'rainbow-storm': 26800,
   'magical-fireflies': 23200,
+  'magic-thunderstorm': 24800,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -724,6 +726,166 @@ function MagicalFirefliesEvent({
 }
 
 
+function MagicThunderstormEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const electricMotes = Array.from({ length: 64 });
+  const peakSparks = Array.from({ length: 38 });
+
+  const thunderBolts = [
+    {
+      className: 'is-strike-one',
+      main: 'M13 -5 L15 3 L11 7 L17 11 L13 16 L20 19 L16 25 L23 29 L18 34 L25 39 L22 45 L31 50 L27 56 L36 63 L33 69 L41 77',
+      branches: 'M17 11 L25 8 L31 10 L36 6 M20 19 L29 22 L35 20 L42 24 M23 29 L13 33 L8 39 M25 39 L36 43 L42 49 M31 50 L20 55 L14 62 M36 63 L46 66 L51 72',
+      fine: 'M25 8 L22 3 M31 10 L34 15 M29 22 L26 28 M13 33 L7 31 M36 43 L48 41 M20 55 L18 48 M46 66 L55 64',
+    },
+    {
+      className: 'is-strike-two',
+      main: 'M83 -5 L80 2 L85 6 L79 11 L84 15 L77 20 L81 24 L74 29 L79 34 L72 38 L76 44 L68 49 L72 54 L64 59 L69 64 L61 70 L65 77',
+      branches: 'M79 11 L69 9 L64 13 M77 20 L88 23 L94 29 M74 29 L64 32 L58 38 M72 38 L82 42 L88 48 M68 49 L58 53 L53 60 M64 59 L74 63 L80 69',
+      fine: 'M69 9 L66 4 M88 23 L91 17 M64 32 L59 29 M82 42 L91 40 M58 53 L50 50 M74 63 L79 58',
+    },
+    {
+      className: 'is-strike-three',
+      main: 'M47 -6 L43 1 L48 5 L42 9 L46 14 L40 18 L45 22 L38 28 L43 32 L37 37 L42 42 L35 47 L40 53 L33 58 L38 64 L31 70 L36 78',
+      branches: 'M42 9 L33 6 L27 10 M40 18 L50 20 L57 26 M38 28 L28 31 L22 37 M37 37 L48 40 L55 46 M35 47 L25 51 L19 58 M33 58 L44 61 L50 68',
+      fine: 'M33 6 L31 1 M50 20 L53 15 M28 31 L23 28 M48 40 L58 38 M25 51 L20 47 M44 61 L51 57 M31 70 L25 75',
+    },
+    {
+      className: 'is-strike-four',
+      main: 'M67 -5 L70 2 L65 7 L71 12 L66 17 L73 21 L68 27 L75 31 L70 36 L78 41 L72 46 L80 51 L74 57 L82 62 L77 68 L85 77',
+      branches: 'M71 12 L81 9 L88 13 M73 21 L62 24 L56 30 M75 31 L86 35 L92 42 M78 41 L67 45 L61 52 M80 51 L90 55 L96 62 M82 62 L72 66 L68 72',
+      fine: 'M81 9 L84 4 M62 24 L59 19 M86 35 L94 33 M67 45 L61 42 M90 55 L95 51 M72 66 L66 63',
+    },
+    {
+      className: 'is-prepeak-left',
+      main: 'M7 -4 L10 4 L6 9 L13 13 L9 18 L16 22 L12 28 L20 32 L15 38 L24 42 L19 49 L29 54 L24 61 L34 68 L31 77',
+      branches: 'M13 13 L24 15 L30 21 M16 22 L6 26 L2 32 M20 32 L31 35 L38 42 M24 42 L13 47 L8 55 M29 54 L41 58 L48 65',
+      fine: 'M24 15 L28 10 M6 26 L2 23 M31 35 L37 31 M13 47 L8 44 M41 58 L48 54',
+    },
+    {
+      className: 'is-prepeak-right',
+      main: 'M94 -4 L90 4 L95 9 L88 14 L92 19 L85 24 L90 29 L82 34 L87 39 L78 44 L83 50 L73 55 L78 61 L68 68 L71 77',
+      branches: 'M88 14 L78 16 L72 22 M85 24 L95 28 L99 34 M82 34 L71 38 L65 45 M78 44 L89 48 L94 55 M73 55 L61 59 L54 66',
+      fine: 'M78 16 L74 11 M95 28 L99 25 M71 38 L65 34 M89 48 L94 44 M61 59 L54 55',
+    },
+    {
+      className: 'is-sky-vein-left',
+      main: 'M-5 11 L5 8 L12 12 L20 7 L27 11 L35 6 L42 10 L49 5 L56 9',
+      branches: 'M12 12 L15 20 L21 25 M27 11 L30 18 L37 22 M42 10 L39 18 L34 24',
+      fine: 'M5 8 L7 2 M20 7 L18 1 M35 6 L37 0 M49 5 L52 0',
+    },
+    {
+      className: 'is-sky-vein-right',
+      main: 'M105 13 L96 9 L88 13 L80 8 L72 12 L64 7 L56 11 L49 6 L43 10',
+      branches: 'M88 13 L85 20 L79 25 M72 12 L69 19 L62 23 M56 11 L60 18 L65 24',
+      fine: 'M96 9 L94 3 M80 8 L82 2 M64 7 L62 1 M49 6 L46 0',
+    },
+    {
+      className: 'is-finale-left',
+      main: 'M20 -6 L18 1 L22 5 L17 9 L23 13 L18 18 L25 22 L20 27 L28 31 L22 36 L30 41 L24 46 L33 51 L27 57 L36 62 L31 68 L40 78',
+      branches: 'M17 9 L8 12 L3 18 M18 18 L30 16 L38 20 M20 27 L10 31 L4 38 M22 36 L34 39 L42 46 M24 46 L13 51 L7 59 M27 57 L40 60 L49 68',
+      fine: 'M8 12 L6 7 M30 16 L34 10 M10 31 L4 29 M34 39 L43 36 M13 51 L7 48 M40 60 L48 56 M31 68 L24 74',
+    },
+    {
+      className: 'is-finale-mid-left',
+      main: 'M39 -7 L42 0 L37 5 L43 9 L38 14 L45 18 L39 24 L47 28 L40 34 L49 38 L42 44 L51 49 L44 55 L53 61 L47 68 L55 78',
+      branches: 'M43 9 L53 7 L60 12 M45 18 L34 21 L28 28 M47 28 L58 31 L65 37 M49 38 L37 43 L31 50 M51 49 L63 53 L70 60 M53 61 L42 66 L36 73',
+      fine: 'M53 7 L57 2 M34 21 L30 17 M58 31 L66 27 M37 43 L30 40 M63 53 L72 50 M42 66 L35 63',
+    },
+    {
+      className: 'is-finale-mid-right',
+      main: 'M62 -7 L58 0 L63 5 L57 10 L62 15 L55 20 L61 25 L53 31 L59 36 L51 41 L57 46 L48 52 L54 57 L45 63 L51 69 L43 78',
+      branches: 'M57 10 L47 8 L40 13 M55 20 L66 23 L73 30 M53 31 L42 35 L35 42 M51 41 L63 45 L70 52 M48 52 L36 56 L29 63 M45 63 L56 67 L63 74',
+      fine: 'M47 8 L43 3 M66 23 L70 18 M42 35 L34 32 M63 45 L71 42 M36 56 L28 53 M56 67 L63 63',
+    },
+    {
+      className: 'is-finale-right',
+      main: 'M82 -6 L85 1 L80 6 L86 10 L81 15 L88 19 L83 25 L91 29 L85 35 L93 39 L87 45 L95 50 L89 56 L97 61 L91 68 L99 77',
+      branches: 'M86 10 L76 12 L70 18 M88 19 L98 23 L103 30 M91 29 L80 33 L74 40 M93 39 L103 44 L108 51 M95 50 L84 54 L78 62 M97 61 L87 65 L82 72',
+      fine: 'M76 12 L73 7 M98 23 L101 18 M80 33 L73 30 M103 44 L108 41 M84 54 L77 51 M87 65 L80 62',
+    },
+    {
+      className: 'is-hero',
+      main: 'M51 -9 L48 -2 L53 2 L47 7 L54 11 L48 16 L55 20 L47 25 L56 29 L49 34 L58 38 L50 43 L60 48 L51 53 L62 58 L54 63 L65 69 L58 74 L69 80',
+      branches: 'M47 7 L35 5 L27 10 L20 9 M54 11 L66 8 L74 12 L82 9 M48 16 L36 20 L29 26 L20 28 M55 20 L68 23 L76 29 L86 31 M47 25 L34 30 L27 37 L17 40 M56 29 L70 34 L79 41 L91 44 M49 34 L36 39 L28 47 L18 51 M58 38 L72 43 L81 51 L93 55 M50 43 L38 49 L30 57 L20 62 M60 48 L74 53 L83 61 L94 66 M51 53 L41 60 L35 68 L27 74 M62 58 L73 63 L80 70 L88 76',
+      fine: 'M35 5 L33 -1 M27 10 L24 16 M66 8 L69 1 M74 12 L80 17 M36 20 L32 15 M29 26 L23 23 M68 23 L72 18 M76 29 L83 26 M34 30 L29 27 M27 37 L20 34 M70 34 L77 31 M79 41 L88 38 M36 39 L31 35 M28 47 L21 45 M72 43 L78 39 M81 51 L90 48 M38 49 L34 45 M30 57 L23 54 M74 53 L81 49 M83 61 L92 58 M41 60 L36 56 M35 68 L28 65 M73 63 L79 59 M80 70 L88 68 M58 74 L51 79',
+    },
+  ] as const;
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-magic-thunderstorm is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-thunder-world-dim" />
+      <div className="ck-thunder-cloud-bank ck-thunder-cloud-back" />
+      <div className="ck-thunder-cloud-bank ck-thunder-cloud-front" />
+      <div className="ck-thunder-world-flashes" />
+      <div className="ck-thunder-peak-whiteout" />
+
+      <div className="ck-thunder-lightning-stage">
+        {thunderBolts.map((bolt) => (
+          <svg
+            key={bolt.className}
+            className={`ck-thunder-bolt ${bolt.className}`}
+            viewBox="0 0 100 78"
+            preserveAspectRatio="none"
+          >
+            <path className="ck-thunder-bolt-glow" d={bolt.main} vectorEffect="non-scaling-stroke" />
+            <path className="ck-thunder-bolt-core" d={bolt.main} vectorEffect="non-scaling-stroke" />
+            <path className="ck-thunder-bolt-branch" d={bolt.branches} vectorEffect="non-scaling-stroke" />
+            <path className="ck-thunder-bolt-branch is-fine" d={bolt.fine} vectorEffect="non-scaling-stroke" />
+          </svg>
+        ))}
+      </div>
+
+      <div className="ck-thunder-electric-motes">
+        {electricMotes.map((_, index) => {
+          const hue = index % 7 === 0 ? 47 : index % 4 === 0 ? 188 : 244 + (index % 4) * 10;
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-thunder-mote-x': `${3 + ((index * 37) % 94)}%`,
+                '--ck-thunder-mote-y': `${7 + ((index * 29) % 58)}%`,
+                '--ck-thunder-mote-size': `${1.8 + (index % 5) * 0.75}px`,
+                '--ck-thunder-mote-delay': `${(index % 15) * 0.12}s`,
+                '--ck-thunder-mote-dx': `${((index * 19) % 49) - 24}px`,
+                '--ck-thunder-mote-dy': `${-12 - (index % 7) * 6}px`,
+                '--ck-thunder-mote-color': `hsl(${hue} 100% 84%)`,
+                '--ck-thunder-mote-glow': `hsl(${hue} 100% 66%)`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      <div className="ck-thunder-peak-sparks">
+        {peakSparks.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-thunder-spark-angle': `${(360 / peakSparks.length) * index + (index % 3) * 4}deg`,
+              '--ck-thunder-spark-distance': `${-(72 + (index % 7) * 18)}px`,
+              '--ck-thunder-spark-delay': `${(index % 6) * 0.03}s`,
+              '--ck-thunder-spark-size': `${1.8 + (index % 4) * 0.7}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-thunder-peak-energy" />
+      <div className="ck-thunder-impact-bloom" />
+    </div>
+  );
+}
+
 function MeteorShowerEvent({
   realm,
   instanceId,
@@ -978,6 +1140,7 @@ export default function KingdomAmbientEvents({
   const canShowLunarEclipse = stars >= LUNAR_ECLIPSE_UNLOCK_STARS;
   const canShowRainbowStorm = stars >= RAINBOW_STORM_UNLOCK_STARS;
   const canShowMagicalFireflies = stars >= MAGICAL_FIREFLIES_UNLOCK_STARS;
+  const canShowMagicThunderstorm = stars >= MAGIC_THUNDERSTORM_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -1005,6 +1168,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'lunar-eclipse' && !canShowLunarEclipse) return;
     if (eventId === 'rainbow-storm' && !canShowRainbowStorm) return;
     if (eventId === 'magical-fireflies' && !canShowMagicalFireflies) return;
+    if (eventId === 'magic-thunderstorm' && !canShowMagicThunderstorm) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -1034,7 +1198,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -1081,11 +1245,19 @@ export default function KingdomAmbientEvents({
     if (roll < rainbowThreshold) return 'rainbow-storm';
 
     const remainingAfterRainbow = 1 - rainbowThreshold;
+    const baseThunderstormChance = canShowMagicThunderstorm
+      ? (realm === 'legendary' ? 0.16 : stars >= 28 ? 0.14 : 0.11)
+      : 0;
+    const thunderstormChance = stored.lastEventId === 'magic-thunderstorm' ? 0.02 : baseThunderstormChance;
+    const thunderstormThreshold = rainbowThreshold + remainingAfterRainbow * thunderstormChance;
+    if (roll < thunderstormThreshold) return 'magic-thunderstorm';
+
+    const remainingAfterThunderstorm = 1 - thunderstormThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = rainbowThreshold + remainingAfterRainbow * fireflyChance;
+    const fireflyThreshold = thunderstormThreshold + remainingAfterThunderstorm * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -1109,7 +1281,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1243,6 +1415,10 @@ export default function KingdomAmbientEvents({
         <MagicalFirefliesEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
+      {activeEvent?.id === 'magic-thunderstorm' && (
+        <MagicThunderstormEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
       {activeEvent?.id === 'dragon-flight' && (
         <DragonFlightEvent realm={realm} instanceId={activeEvent.instanceId} pathIndex={activeEvent.pathIndex} />
       )}
@@ -1345,6 +1521,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               ✨ גחליליות
+            </button>
+          )}
+          {canShowMagicThunderstorm && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-thunderstorm"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('magic-thunderstorm', false);
+              }}
+            >
+              ⚡ סערה
             </button>
           )}
           {canShowDragonFlight && (

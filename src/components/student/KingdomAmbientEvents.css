@@ -4941,3 +4941,524 @@
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ========================================================================== */
+/* Living World V13.2 — Magical Thunderstorm: fractal lightning finale        */
+/* ========================================================================== */
+
+.ck-live-event-magic-thunderstorm {
+  --ck-thunder-event-duration: 24.8s;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ck-thunder-world-dim {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 4%, rgba(78, 63, 145, .30) 0%, rgba(47, 49, 108, .13) 36%, transparent 65%),
+    linear-gradient(180deg,
+      rgba(5, 9, 30, .86) 0%,
+      rgba(10, 15, 40, .72) 43%,
+      rgba(14, 21, 43, .49) 73%,
+      rgba(14, 22, 38, .30) 100%);
+  mix-blend-mode: multiply;
+  animation: ckThunderWorldDim var(--ck-thunder-event-duration) ease-in-out both;
+}
+
+.ck-live-event-magic-thunderstorm.is-legendary .ck-thunder-world-dim {
+  background:
+    radial-gradient(ellipse at 50% 4%, rgba(111, 67, 176, .34) 0%, rgba(59, 47, 124, .15) 36%, transparent 65%),
+    linear-gradient(180deg,
+      rgba(10, 7, 36, .87) 0%,
+      rgba(19, 13, 48, .73) 43%,
+      rgba(24, 21, 49, .49) 73%,
+      rgba(16, 21, 38, .30) 100%);
+}
+
+.ck-thunder-cloud-bank {
+  position: absolute;
+  z-index: 2;
+  left: -16%;
+  width: 132%;
+  pointer-events: none;
+  opacity: 0;
+  transform-origin: center top;
+  -webkit-mask-image: linear-gradient(180deg, #000 0 67%, rgba(0,0,0,.88) 78%, rgba(0,0,0,.32) 92%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0 67%, rgba(0,0,0,.88) 78%, rgba(0,0,0,.32) 92%, transparent 100%);
+}
+
+.ck-thunder-cloud-bank::before,
+.ck-thunder-cloud-bank::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 3% 36%, rgba(20, 26, 61, .98) 0 13%, transparent 29%),
+    radial-gradient(ellipse at 16% 25%, rgba(38, 41, 81, .98) 0 18%, transparent 34%),
+    radial-gradient(ellipse at 31% 37%, rgba(19, 26, 64, .99) 0 19%, transparent 36%),
+    radial-gradient(ellipse at 47% 21%, rgba(47, 44, 91, .98) 0 20%, transparent 38%),
+    radial-gradient(ellipse at 62% 34%, rgba(23, 28, 69, .99) 0 20%, transparent 37%),
+    radial-gradient(ellipse at 78% 22%, rgba(46, 45, 89, .97) 0 18%, transparent 34%),
+    radial-gradient(ellipse at 94% 35%, rgba(19, 27, 63, .98) 0 14%, transparent 30%),
+    linear-gradient(180deg, rgba(25, 29, 67, .98) 0%, rgba(25, 30, 65, .91) 56%, rgba(40, 45, 74, .35) 84%, transparent 100%);
+  filter: blur(7px);
+}
+
+.ck-thunder-cloud-bank::after {
+  transform: translate3d(4%, 8%, 0) scaleX(-1) scale(.95);
+  opacity: .80;
+  filter: blur(14px);
+}
+
+.ck-thunder-cloud-back {
+  top: -15%;
+  height: 56%;
+  animation: ckThunderCloudBack var(--ck-thunder-event-duration) ease-in-out both;
+}
+
+.ck-thunder-cloud-front {
+  z-index: 3;
+  top: -4%;
+  height: 51%;
+  animation: ckThunderCloudFront var(--ck-thunder-event-duration) ease-in-out both;
+}
+
+.ck-thunder-cloud-front::before {
+  filter: blur(12px);
+  opacity: .84;
+}
+
+.ck-thunder-cloud-front::after {
+  filter: blur(19px);
+  opacity: .68;
+}
+
+.ck-thunder-world-flashes {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 12% 12%, rgba(225, 248, 255, .98) 0%, rgba(105, 209, 255, .34) 22%, transparent 49%),
+    radial-gradient(ellipse at 50% 8%, rgba(244, 235, 255, 1) 0%, rgba(168, 117, 255, .42) 28%, transparent 58%),
+    radial-gradient(ellipse at 88% 13%, rgba(218, 253, 255, .98) 0%, rgba(64, 224, 255, .32) 23%, transparent 50%),
+    linear-gradient(180deg, rgba(245, 250, 255, .30), transparent 72%);
+  mix-blend-mode: screen;
+  animation: ckThunderWorldFlashes var(--ck-thunder-event-duration) linear both;
+}
+
+.ck-thunder-peak-whiteout {
+  position: absolute;
+  z-index: 7;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255,255,255,.98) 0%, rgba(224,235,255,.70) 23%, rgba(159,129,255,.25) 50%, transparent 76%),
+    linear-gradient(180deg, rgba(239,247,255,.80), rgba(176,202,255,.20) 64%, transparent 100%);
+  mix-blend-mode: screen;
+  animation: ckThunderPeakWhiteout var(--ck-thunder-event-duration) linear both;
+}
+
+.ck-thunder-lightning-stage {
+  position: absolute;
+  z-index: 6;
+  inset: -6% -3% 16% -3%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.ck-thunder-bolt {
+  --ck-thunder-delay: 0s;
+  --ck-thunder-burst-duration: .78s;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: 0;
+  color: #d9f7ff;
+  mix-blend-mode: screen;
+  will-change: opacity, filter, transform;
+  animation: ckThunderBoltBurst var(--ck-thunder-burst-duration) linear var(--ck-thunder-delay) both;
+}
+
+.ck-thunder-bolt.is-strike-one { --ck-thunder-delay: 3.62s; color: #b9edff; }
+.ck-thunder-bolt.is-strike-two { --ck-thunder-delay: 6.72s; color: #d2c3ff; }
+.ck-thunder-bolt.is-strike-three { --ck-thunder-delay: 9.78s; color: #e4dcff; }
+.ck-thunder-bolt.is-strike-four { --ck-thunder-delay: 12.42s; color: #a9f7ff; }
+.ck-thunder-bolt.is-prepeak-left { --ck-thunder-delay: 14.88s; --ck-thunder-burst-duration: .92s; color: #b9eaff; }
+.ck-thunder-bolt.is-prepeak-right { --ck-thunder-delay: 15.20s; --ck-thunder-burst-duration: .96s; color: #d9c7ff; }
+.ck-thunder-bolt.is-sky-vein-left { --ck-thunder-delay: 15.72s; --ck-thunder-burst-duration: .80s; color: #9cecff; }
+.ck-thunder-bolt.is-sky-vein-right { --ck-thunder-delay: 15.94s; --ck-thunder-burst-duration: .84s; color: #cfbfff; }
+.ck-thunder-bolt.is-finale-left { --ck-thunder-delay: 16.42s; --ck-thunder-burst-duration: 1.18s; color: #a8efff; }
+.ck-thunder-bolt.is-finale-mid-left { --ck-thunder-delay: 16.68s; --ck-thunder-burst-duration: 1.22s; color: #d5c5ff; }
+.ck-thunder-bolt.is-finale-mid-right { --ck-thunder-delay: 16.90s; --ck-thunder-burst-duration: 1.24s; color: #f0e6ff; }
+.ck-thunder-bolt.is-finale-right { --ck-thunder-delay: 17.12s; --ck-thunder-burst-duration: 1.18s; color: #a7f5ff; }
+.ck-thunder-bolt.is-hero {
+  --ck-thunder-delay: 17.36s;
+  --ck-thunder-burst-duration: 2.45s;
+  color: #fff7ff;
+  animation-name: ckThunderHeroBurst;
+}
+
+.ck-live-event-magic-thunderstorm.is-legendary .ck-thunder-bolt.is-hero { color: #fff0ae; }
+
+.ck-thunder-bolt path {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ck-thunder-bolt-glow {
+  stroke-width: 13px;
+  opacity: .42;
+  filter: blur(5.5px) drop-shadow(0 0 12px currentColor) drop-shadow(0 0 30px currentColor);
+}
+
+.ck-thunder-bolt-core {
+  stroke-width: 2.9px;
+  opacity: 1;
+  filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px currentColor) drop-shadow(0 0 25px currentColor);
+}
+
+.ck-thunder-bolt-branch {
+  stroke-width: 1.75px;
+  opacity: .94;
+  filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 11px currentColor);
+}
+
+.ck-thunder-bolt-branch.is-fine {
+  stroke-width: .95px;
+  opacity: .82;
+  filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 0 8px currentColor);
+}
+
+.ck-thunder-bolt.is-sky-vein-left .ck-thunder-bolt-glow,
+.ck-thunder-bolt.is-sky-vein-right .ck-thunder-bolt-glow { stroke-width: 8px; opacity: .34; }
+.ck-thunder-bolt.is-sky-vein-left .ck-thunder-bolt-core,
+.ck-thunder-bolt.is-sky-vein-right .ck-thunder-bolt-core { stroke-width: 2.1px; }
+
+.ck-thunder-bolt.is-finale-left .ck-thunder-bolt-glow,
+.ck-thunder-bolt.is-finale-mid-left .ck-thunder-bolt-glow,
+.ck-thunder-bolt.is-finale-mid-right .ck-thunder-bolt-glow,
+.ck-thunder-bolt.is-finale-right .ck-thunder-bolt-glow { stroke-width: 16px; opacity: .48; }
+.ck-thunder-bolt.is-finale-left .ck-thunder-bolt-core,
+.ck-thunder-bolt.is-finale-mid-left .ck-thunder-bolt-core,
+.ck-thunder-bolt.is-finale-mid-right .ck-thunder-bolt-core,
+.ck-thunder-bolt.is-finale-right .ck-thunder-bolt-core { stroke-width: 3.5px; }
+
+.ck-thunder-bolt.is-hero .ck-thunder-bolt-glow {
+  stroke-width: 23px;
+  opacity: .58;
+  filter: blur(7px) drop-shadow(0 0 18px #fff) drop-shadow(0 0 42px currentColor) drop-shadow(0 0 72px currentColor);
+}
+.ck-thunder-bolt.is-hero .ck-thunder-bolt-core {
+  stroke-width: 4.6px;
+  filter: drop-shadow(0 0 7px #fff) drop-shadow(0 0 18px currentColor) drop-shadow(0 0 42px currentColor);
+}
+.ck-thunder-bolt.is-hero .ck-thunder-bolt-branch { stroke-width: 2.35px; opacity: 1; }
+.ck-thunder-bolt.is-hero .ck-thunder-bolt-branch.is-fine { stroke-width: 1.12px; opacity: .88; }
+
+.ck-thunder-electric-motes {
+  position: absolute;
+  z-index: 8;
+  inset: 0 0 21% 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 7%, #000 86%, rgba(0,0,0,.48) 95%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 7%, #000 86%, rgba(0,0,0,.48) 95%, transparent 100%);
+  animation: ckThunderMoteWindow var(--ck-thunder-event-duration) ease-in-out both;
+}
+
+.ck-thunder-electric-motes i {
+  position: absolute;
+  left: var(--ck-thunder-mote-x);
+  top: var(--ck-thunder-mote-y);
+  width: var(--ck-thunder-mote-size);
+  height: var(--ck-thunder-mote-size);
+  border-radius: 50%;
+  background: var(--ck-thunder-mote-color);
+  box-shadow:
+    0 0 6px var(--ck-thunder-mote-color),
+    0 0 14px var(--ck-thunder-mote-glow),
+    0 0 28px color-mix(in srgb, var(--ck-thunder-mote-glow) 62%, transparent);
+  opacity: .20;
+  animation: ckThunderMoteDrift 2.05s ease-in-out var(--ck-thunder-mote-delay) infinite alternate;
+  will-change: transform, opacity;
+}
+
+.ck-thunder-peak-energy {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 35%;
+  width: min(146vw, 1880px);
+  height: 72%;
+  transform: translate(-50%, -50%) scale(.72);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse,
+      rgba(242, 249, 255, .56) 0%,
+      rgba(183, 154, 255, .31) 23%,
+      rgba(78, 226, 255, .17) 43%,
+      rgba(113, 85, 255, .06) 61%,
+      transparent 78%);
+  filter: blur(22px);
+  mix-blend-mode: screen;
+  animation: ckThunderPeakEnergy var(--ck-thunder-event-duration) ease-in-out both;
+}
+
+.ck-thunder-impact-bloom {
+  position: absolute;
+  z-index: 8;
+  left: 56%;
+  top: 63%;
+  width: min(48vw, 620px);
+  height: min(34vw, 380px);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.35);
+  background: radial-gradient(ellipse, rgba(255,255,255,.92) 0%, rgba(183,232,255,.42) 19%, rgba(171,128,255,.18) 42%, transparent 72%);
+  filter: blur(12px);
+  mix-blend-mode: screen;
+  animation: ckThunderImpactBloom var(--ck-thunder-event-duration) ease-out both;
+}
+
+.ck-thunder-peak-sparks {
+  position: absolute;
+  z-index: 9;
+  left: 56%;
+  top: 63%;
+  width: 2px;
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+  animation: ckThunderPeakSparkWindow var(--ck-thunder-event-duration) linear both;
+}
+
+.ck-thunder-peak-sparks i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--ck-thunder-spark-size);
+  height: calc(var(--ck-thunder-spark-size) * 4.2);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff, #bcecff 45%, #b99cff 100%);
+  box-shadow: 0 0 6px #fff, 0 0 14px #9fcdff, 0 0 24px #a67dff;
+  transform-origin: center center;
+  opacity: 0;
+  animation: ckThunderPeakSpark .74s ease-out var(--ck-thunder-spark-delay) infinite;
+}
+
+.ck-live-event-test-button.is-thunderstorm {
+  border-color: rgba(166, 207, 255, .72);
+  background: linear-gradient(180deg, rgba(43, 45, 84, .96), rgba(29, 30, 61, .97));
+  box-shadow: 0 7px 18px rgba(25, 29, 68, .34), inset 0 0 0 1px rgba(194, 225, 255, .10);
+}
+
+.ck-live-event-test-button.is-thunderstorm:hover {
+  border-color: rgba(211, 235, 255, .98);
+  background: linear-gradient(180deg, rgba(57, 59, 105, .98), rgba(39, 39, 78, .98));
+  box-shadow: 0 8px 22px rgba(35, 39, 88, .40), 0 0 14px rgba(136, 216, 255, .20);
+}
+
+@keyframes ckThunderWorldDim {
+  0%, 2% { opacity: 0; }
+  10% { opacity: .50; }
+  20% { opacity: .76; }
+  31% { opacity: .88; }
+  62% { opacity: .91; }
+  69% { opacity: .96; }
+  77% { opacity: .91; }
+  84% { opacity: .72; }
+  93% { opacity: .25; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckThunderCloudBack {
+  0%, 2% { opacity: 0; transform: translate3d(-10%, -13px, 0) scale(1.10); }
+  10% { opacity: .72; }
+  22% { opacity: .96; transform: translate3d(-2%, 2px, 0) scale(1.04); }
+  64% { opacity: 1; transform: translate3d(3%, 7px, 0) scale(1.02); }
+  76% { opacity: 1; transform: translate3d(6%, 8px, 0) scale(1.01); }
+  87% { opacity: .62; }
+  100% { opacity: 0; transform: translate3d(14%, -9px, 0) scale(.98); }
+}
+
+@keyframes ckThunderCloudFront {
+  0%, 4% { opacity: 0; transform: translate3d(10%, -7px, 0) scale(1.09); }
+  13% { opacity: .58; }
+  24% { opacity: .88; transform: translate3d(2%, 4px, 0) scale(1.04); }
+  64% { opacity: .94; transform: translate3d(-2%, 8px, 0) scale(1.025); }
+  77% { opacity: .94; transform: translate3d(-5%, 9px, 0) scale(1.01); }
+  87% { opacity: .50; }
+  100% { opacity: 0; transform: translate3d(-15%, -5px, 0) scale(.98); }
+}
+
+@keyframes ckThunderWorldFlashes {
+  0%, 14.4% { opacity: 0; }
+  14.7% { opacity: .38; } 15.0% { opacity: 1; } 15.28% { opacity: .04; } 15.62% { opacity: .66; } 16.0% { opacity: 0; }
+  26.9% { opacity: 0; } 27.25% { opacity: .34; } 27.55% { opacity: .96; } 27.88% { opacity: .04; } 28.20% { opacity: .64; } 28.62% { opacity: 0; }
+  39.1% { opacity: 0; } 39.45% { opacity: .38; } 39.75% { opacity: 1; } 40.08% { opacity: .04; } 40.42% { opacity: .70; } 40.88% { opacity: 0; }
+  49.8% { opacity: 0; } 50.15% { opacity: .36; } 50.48% { opacity: .96; } 50.78% { opacity: .04; } 51.12% { opacity: .68; } 51.55% { opacity: 0; }
+  59.6% { opacity: 0; } 60.0% { opacity: .48; } 60.4% { opacity: 1; } 60.72% { opacity: .06; } 61.05% { opacity: .82; } 61.42% { opacity: 0; }
+  62.0% { opacity: .32; } 62.45% { opacity: .88; } 62.78% { opacity: .05; } 63.12% { opacity: .72; } 63.48% { opacity: 0; }
+  64.0% { opacity: .45; } 64.35% { opacity: 1; } 64.65% { opacity: .08; } 65.0% { opacity: .78; } 65.35% { opacity: 0; }
+  66.0% { opacity: .42; } 66.35% { opacity: 1; } 66.60% { opacity: .10; } 66.90% { opacity: .94; } 67.18% { opacity: .06; }
+  67.45% { opacity: 1; } 67.72% { opacity: .12; } 67.98% { opacity: .98; } 68.25% { opacity: .08; }
+  68.52% { opacity: 1; } 68.78% { opacity: .14; } 69.05% { opacity: .96; } 69.30% { opacity: .08; }
+  69.58% { opacity: 1; } 69.86% { opacity: .10; } 70.12% { opacity: .94; } 70.42% { opacity: .06; }
+  70.72% { opacity: 1; } 71.02% { opacity: .12; } 71.34% { opacity: .92; } 71.70% { opacity: .06; }
+  72.05% { opacity: .96; } 72.45% { opacity: .10; } 72.85% { opacity: .84; } 73.35% { opacity: 0; }
+  74.0% { opacity: .46; } 74.35% { opacity: .88; } 74.75% { opacity: .04; } 75.10% { opacity: .70; } 75.6% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckThunderBoltBurst {
+  0%, 6% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); filter: brightness(.9) saturate(1); }
+  12% { opacity: .34; }
+  18% { opacity: 1; transform: translate3d(.10%, -.08%, 0) scale(1.004); filter: brightness(2.05) saturate(1.25); }
+  25% { opacity: .03; }
+  35% { opacity: .90; transform: translate3d(-.08%, .05%, 0) scale(.998); filter: brightness(1.72) saturate(1.18); }
+  45% { opacity: .04; }
+  58% { opacity: .72; transform: translate3d(.06%, 0, 0) scale(1.002); filter: brightness(1.45) saturate(1.12); }
+  70% { opacity: .02; }
+  100% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes ckThunderHeroBurst {
+  0%, 4% { opacity: 0; transform: translate3d(0,0,0) scale(1); filter: brightness(1) saturate(1); }
+  8% { opacity: .48; }
+  12% { opacity: 1; transform: translate3d(.10%, -.08%, 0) scale(1.006); filter: brightness(2.75) saturate(1.36); }
+  17% { opacity: .025; }
+  23% { opacity: .98; transform: translate3d(-.10%, .05%, 0) scale(.998); filter: brightness(2.20) saturate(1.30); }
+  28% { opacity: .04; }
+  34% { opacity: 1; transform: translate3d(.07%, -.03%, 0) scale(1.010); filter: brightness(2.95) saturate(1.42); }
+  39% { opacity: .035; }
+  46% { opacity: .94; transform: translate3d(-.05%, .04%, 0) scale(1.001); filter: brightness(2.10) saturate(1.24); }
+  51% { opacity: .05; }
+  58% { opacity: 1; transform: translate3d(.06%, -.04%, 0) scale(1.008); filter: brightness(2.62) saturate(1.35); }
+  64% { opacity: .08; }
+  72% { opacity: .78; transform: translate3d(-.04%, 0, 0) scale(1.002); filter: brightness(1.78) saturate(1.18); }
+  80% { opacity: .035; }
+  88% { opacity: .56; filter: brightness(1.45); }
+  96%, 100% { opacity: 0; transform: translate3d(0,0,0) scale(1); }
+}
+
+@keyframes ckThunderPeakWhiteout {
+  0%, 65.8% { opacity: 0; }
+  66.2% { opacity: .34; }
+  66.55% { opacity: .82; }
+  66.85% { opacity: .06; }
+  67.20% { opacity: .72; }
+  67.48% { opacity: .05; }
+  67.82% { opacity: .90; }
+  68.12% { opacity: .08; }
+  68.48% { opacity: .96; }
+  68.78% { opacity: .06; }
+  69.14% { opacity: .84; }
+  69.48% { opacity: .08; }
+  69.82% { opacity: 1; }
+  70.15% { opacity: .10; }
+  70.50% { opacity: .90; }
+  70.88% { opacity: .08; }
+  71.25% { opacity: .82; }
+  71.70% { opacity: .10; }
+  72.15% { opacity: .70; }
+  72.70% { opacity: .08; }
+  73.25% { opacity: .52; }
+  73.80% { opacity: 0; }
+  74.45% { opacity: .34; }
+  74.9% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckThunderMoteWindow {
+  0%, 23% { opacity: 0; }
+  32% { opacity: .28; }
+  43% { opacity: .72; }
+  57% { opacity: .92; }
+  64% { opacity: 1; }
+  75% { opacity: 1; }
+  84% { opacity: .38; }
+  91%, 100% { opacity: 0; }
+}
+
+@keyframes ckThunderMoteDrift {
+  0% { opacity: .20; transform: translate3d(0, 9px, 0) scale(.70); }
+  45% { opacity: 1; }
+  100% { opacity: .48; transform: translate3d(var(--ck-thunder-mote-dx), var(--ck-thunder-mote-dy), 0) scale(1.38); }
+}
+
+@keyframes ckThunderPeakEnergy {
+  0%, 59% { opacity: 0; transform: translate(-50%, -50%) scale(.70); }
+  63% { opacity: .18; }
+  66% { opacity: .38; transform: translate(-50%, -50%) scale(.86); }
+  68.5% { opacity: .68; transform: translate(-50%, -50%) scale(.96); }
+  70.5% { opacity: .76; transform: translate(-50%, -50%) scale(1.05); }
+  73% { opacity: .54; transform: translate(-50%, -50%) scale(1.12); }
+  78% { opacity: .24; transform: translate(-50%, -50%) scale(1.20); }
+  86% { opacity: .06; transform: translate(-50%, -50%) scale(1.27); }
+  92%, 100% { opacity: 0; }
+}
+
+@keyframes ckThunderImpactBloom {
+  0%, 69.0% { opacity: 0; transform: translate(-50%, -50%) scale(.35); }
+  69.45% { opacity: .28; }
+  69.82% { opacity: .86; transform: translate(-50%, -50%) scale(.72); }
+  70.20% { opacity: .16; }
+  70.58% { opacity: .72; transform: translate(-50%, -50%) scale(.90); }
+  71.0% { opacity: .10; }
+  71.42% { opacity: .58; transform: translate(-50%, -50%) scale(1.02); }
+  72.1% { opacity: .20; }
+  73.0% { opacity: .08; transform: translate(-50%, -50%) scale(1.16); }
+  75.0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.22); }
+}
+
+@keyframes ckThunderPeakSparkWindow {
+  0%, 69.2% { opacity: 0; }
+  69.55% { opacity: 1; }
+  73.2% { opacity: 1; }
+  74.0%, 100% { opacity: 0; }
+}
+
+@keyframes ckThunderPeakSpark {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--ck-thunder-spark-angle)) translateY(-8px) scaleY(.35);
+  }
+  13% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--ck-thunder-spark-angle)) translateY(var(--ck-thunder-spark-distance)) scaleY(1.75);
+  }
+}
+
+@media (max-width: 720px) {
+  .ck-thunder-lightning-stage { inset: -7% -13% 17% -13%; }
+  .ck-thunder-cloud-bank { left: -24%; width: 148%; }
+  .ck-thunder-peak-energy { width: 154vw; }
+  .ck-thunder-impact-bloom { width: 64vw; height: 44vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ck-live-event-magic-thunderstorm,
+  .ck-live-event-magic-thunderstorm *,
+  .ck-live-event-magic-thunderstorm *::before,
+  .ck-live-event-magic-thunderstorm *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
