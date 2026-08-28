@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -69,6 +69,7 @@ const LUNAR_ECLIPSE_UNLOCK_STARS = 16;
 const RAINBOW_STORM_UNLOCK_STARS = 18;
 const MAGICAL_FIREFLIES_UNLOCK_STARS = 20;
 const MAGIC_THUNDERSTORM_UNLOCK_STARS = 22;
+const CRYSTAL_BLOOM_UNLOCK_STARS = 24;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -80,6 +81,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'rainbow-storm': 26800,
   'magical-fireflies': 23200,
   'magic-thunderstorm': 24800,
+  'crystal-bloom': 25200,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -726,6 +728,127 @@ function MagicalFirefliesEvent({
 }
 
 
+function CrystalBloomEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const crystals = Array.from({ length: 28 });
+  const fragments = Array.from({ length: 46 });
+  const heroClusters = [
+    { x: 17, y: 69, scale: 1.06, delay: 12.8 },
+    { x: 50, y: 65, scale: 1.22, delay: 13.35 },
+    { x: 82, y: 70, scale: 1.08, delay: 13.0 },
+  ] as const;
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-crystal-bloom is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-crystal-world-tint" />
+      <div className="ck-crystal-ground-aura" />
+      <div className="ck-crystal-prismatic-flash" />
+      <div className="ck-crystal-prismatic-rays" />
+
+      <div className="ck-crystal-field">
+        {crystals.map((_, index) => {
+          const leftSide = index % 2 === 0;
+          const lane = Math.floor(index / 2);
+          const x = leftSide
+            ? 3 + ((lane * 17) % 43)
+            : 54 + ((lane * 19) % 43);
+          const y = 61 + ((index * 11) % 27);
+          const size = 0.58 + (index % 6) * 0.11;
+          const delay = 2.4 + (index % 9) * 0.48 + Math.floor(index / 9) * 0.36;
+          const tilt = -8 + ((index * 13) % 17);
+          return (
+            <span
+              key={index}
+              className={`ck-crystal-sprout ${index % 5 === 0 ? 'is-bright' : ''}`}
+              style={{
+                '--ck-crystal-x': `${x}%`,
+                '--ck-crystal-y': `${y}%`,
+                '--ck-crystal-scale': size,
+                '--ck-crystal-delay': `${delay}s`,
+                '--ck-crystal-tilt': `${tilt}deg`,
+              } as CSSProperties}
+            >
+              <i className="ck-crystal-shard is-left" />
+              <i className="ck-crystal-shard is-main" />
+              <i className="ck-crystal-shard is-right" />
+              <b className="ck-crystal-glint" />
+            </span>
+          );
+        })}
+      </div>
+
+      <div className="ck-crystal-hero-field">
+        {heroClusters.map((cluster, index) => (
+          <span
+            key={index}
+            className={`ck-crystal-hero-cluster is-${index + 1}`}
+            style={{
+              '--ck-crystal-hero-x': `${cluster.x}%`,
+              '--ck-crystal-hero-y': `${cluster.y}%`,
+              '--ck-crystal-hero-scale': cluster.scale,
+              '--ck-crystal-hero-delay': `${cluster.delay}s`,
+            } as CSSProperties}
+          >
+            <i className="ck-crystal-hero-shard is-far-left" />
+            <i className="ck-crystal-hero-shard is-left" />
+            <i className="ck-crystal-hero-shard is-main" />
+            <i className="ck-crystal-hero-shard is-right" />
+            <i className="ck-crystal-hero-shard is-far-right" />
+            <b className="ck-crystal-hero-core" />
+          </span>
+        ))}
+      </div>
+
+      <div className="ck-crystal-fragments">
+        {fragments.map((_, index) => {
+          const angle = ((index * 137.5) % 360) * Math.PI / 180;
+          const distance = 54 + (index % 9) * 18;
+          const originX = [17, 50, 82][index % 3];
+          const originY = [69, 65, 70][index % 3];
+          return (
+            <i
+              key={index}
+              style={{
+                '--ck-crystal-fragment-x': `${originX}%`,
+                '--ck-crystal-fragment-y': `${originY}%`,
+                '--ck-crystal-fragment-dx': `${Math.cos(angle) * distance}px`,
+                '--ck-crystal-fragment-dy': `${Math.sin(angle) * distance - 34}px`,
+                '--ck-crystal-fragment-delay': `${15.55 + (index % 8) * 0.075}s`,
+                '--ck-crystal-fragment-size': `${3 + (index % 5)}px`,
+                '--ck-crystal-fragment-rot': `${(index * 47) % 180}deg`,
+              } as CSSProperties}
+            />
+          );
+        })}
+      </div>
+
+      <div className="ck-crystal-after-sparkles">
+        {Array.from({ length: 36 }).map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-crystal-spark-x': `${4 + ((index * 31) % 92)}%`,
+              '--ck-crystal-spark-y': `${48 + ((index * 23) % 42)}%`,
+              '--ck-crystal-spark-delay': `${10.8 + (index % 12) * 0.38}s`,
+              '--ck-crystal-spark-size': `${2 + (index % 4)}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
 function MagicThunderstormEvent({
   realm,
   instanceId,
@@ -1141,6 +1264,7 @@ export default function KingdomAmbientEvents({
   const canShowRainbowStorm = stars >= RAINBOW_STORM_UNLOCK_STARS;
   const canShowMagicalFireflies = stars >= MAGICAL_FIREFLIES_UNLOCK_STARS;
   const canShowMagicThunderstorm = stars >= MAGIC_THUNDERSTORM_UNLOCK_STARS;
+  const canShowCrystalBloom = stars >= CRYSTAL_BLOOM_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -1169,6 +1293,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'rainbow-storm' && !canShowRainbowStorm) return;
     if (eventId === 'magical-fireflies' && !canShowMagicalFireflies) return;
     if (eventId === 'magic-thunderstorm' && !canShowMagicThunderstorm) return;
+    if (eventId === 'crystal-bloom' && !canShowCrystalBloom) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -1198,7 +1323,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -1253,11 +1378,19 @@ export default function KingdomAmbientEvents({
     if (roll < thunderstormThreshold) return 'magic-thunderstorm';
 
     const remainingAfterThunderstorm = 1 - thunderstormThreshold;
+    const baseCrystalChance = canShowCrystalBloom
+      ? (realm === 'legendary' ? 0.17 : stars >= 30 ? 0.14 : 0.11)
+      : 0;
+    const crystalChance = stored.lastEventId === 'crystal-bloom' ? 0.018 : baseCrystalChance;
+    const crystalThreshold = thunderstormThreshold + remainingAfterThunderstorm * crystalChance;
+    if (roll < crystalThreshold) return 'crystal-bloom';
+
+    const remainingAfterCrystal = 1 - crystalThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = thunderstormThreshold + remainingAfterThunderstorm * fireflyChance;
+    const fireflyThreshold = crystalThreshold + remainingAfterCrystal * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -1281,7 +1414,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -1326,7 +1459,7 @@ export default function KingdomAmbientEvents({
   }, [activeEvent]);
 
   return (
-    <div className="ck-live-events">
+    <div className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''}`}>
       {activeEvent?.id === 'shooting-star' && (
         <div
           key={activeEvent.instanceId}
@@ -1417,6 +1550,10 @@ export default function KingdomAmbientEvents({
 
       {activeEvent?.id === 'magic-thunderstorm' && (
         <MagicThunderstormEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
+      {activeEvent?.id === 'crystal-bloom' && (
+        <CrystalBloomEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
       {activeEvent?.id === 'dragon-flight' && (
@@ -1533,6 +1670,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               ⚡ סערה
+            </button>
+          )}
+          {canShowCrystalBloom && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-crystal"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('crystal-bloom', false);
+              }}
+            >
+              💎 גבישים
             </button>
           )}
           {canShowDragonFlight && (
