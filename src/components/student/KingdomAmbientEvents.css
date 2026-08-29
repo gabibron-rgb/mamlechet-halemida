@@ -8765,3 +8765,924 @@
     filter: blur(7px) saturate(1.28);
   }
 }
+
+
+/* ========================================================================== */
+/* Living World V21 — Astral Leviathan                                        */
+/* ========================================================================== */
+
+.ck-live-event-astral-leviathan {
+  z-index: auto;
+  isolation: auto;
+  overflow: visible;
+  --ck-leviathan-event-duration: 36.8s;
+}
+
+.ck-live-events.is-leviathan-depth-split {
+  isolation: auto;
+}
+
+.ck31-map:has(> .ck-live-events.is-leviathan-depth-split) > .ck31-map-topbar,
+.ck31-map:has(> .ck-live-events.is-leviathan-depth-split) > .ck31-map-bottombar {
+  z-index: 220;
+}
+
+.ck31-map:has(> .ck-live-events.is-leviathan-depth-split) > .ck31-sandbox-banner {
+  z-index: 230;
+}
+
+.ck-leviathan-world-veil,
+.ck-leviathan-cosmic-lens,
+.ck-leviathan-star-current,
+.ck-leviathan-shadow,
+.ck-leviathan-rift,
+.ck-leviathan-wake-ribbon,
+.ck-leviathan-wake-field,
+.ck-leviathan-upward-stars,
+.ck-leviathan-finale-wave {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ck-leviathan-world-veil {
+  z-index: 4;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 50% 16%, rgba(124, 175, 255, .08), transparent 32%),
+    radial-gradient(ellipse at 27% 23%, rgba(92, 132, 255, .12), transparent 30%),
+    radial-gradient(ellipse at 76% 18%, rgba(185, 126, 255, .11), transparent 27%),
+    linear-gradient(180deg, rgba(8, 13, 33, .08), rgba(5, 8, 20, .34) 62%, rgba(4, 6, 14, .18));
+  mix-blend-mode: multiply;
+  animation: ckLeviathanWorldVeil var(--ck-leviathan-event-duration) ease-in-out both;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-world-veil {
+  background:
+    radial-gradient(ellipse at 50% 16%, rgba(162, 176, 255, .09), transparent 32%),
+    radial-gradient(ellipse at 27% 23%, rgba(126, 113, 255, .13), transparent 30%),
+    radial-gradient(ellipse at 76% 18%, rgba(210, 145, 255, .14), transparent 27%),
+    linear-gradient(180deg, rgba(10, 9, 36, .08), rgba(8, 6, 28, .35) 62%, rgba(5, 5, 16, .18));
+}
+
+.ck-leviathan-cosmic-lens {
+  z-index: 5;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 42% 24%, rgba(101, 188, 255, .08), transparent 34%),
+    radial-gradient(ellipse at 60% 30%, rgba(153, 114, 255, .10), transparent 36%),
+    radial-gradient(ellipse at 47% 22%, rgba(255,255,255,.05), transparent 22%);
+  mix-blend-mode: screen;
+  filter: blur(14px);
+  animation: ckLeviathanCosmicLens var(--ck-leviathan-event-duration) ease-in-out both;
+}
+
+.ck-leviathan-star-current,
+.ck-leviathan-wake-field,
+.ck-leviathan-upward-stars {
+  overflow: hidden;
+}
+
+.ck-leviathan-star-current {
+  z-index: 7;
+}
+
+.ck-leviathan-star-current > i {
+  position: absolute;
+  left: var(--ck-lev-star-x);
+  top: var(--ck-lev-star-y);
+  width: var(--ck-lev-star-size);
+  height: var(--ck-lev-star-size);
+  border-radius: 50%;
+  background: rgba(245, 252, 255, .98);
+  box-shadow:
+    0 0 10px rgba(135, 214, 255, .72),
+    0 0 18px rgba(92, 146, 255, .28);
+  opacity: 0;
+  animation: ckLeviathanStarCurrent 6.8s ease-out var(--ck-lev-star-delay) both;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-star-current > i {
+  box-shadow:
+    0 0 11px rgba(200, 173, 255, .76),
+    0 0 19px rgba(116, 132, 255, .28);
+}
+
+.ck-leviathan-shadow {
+  z-index: 12;
+  left: -18%;
+  top: 14%;
+  width: 96%;
+  height: 34%;
+  inset: auto;
+  opacity: 0;
+  border-radius: 60% 40% 55% 45% / 52% 46% 54% 48%;
+  background:
+    radial-gradient(ellipse at 60% 52%, rgba(5, 8, 20, .48), rgba(5, 8, 20, .18) 48%, transparent 78%);
+  filter: blur(20px);
+  animation: ckLeviathanShadow 13.4s ease-in-out 2.2s both;
+}
+
+.ck-leviathan-hero {
+  position: absolute;
+  z-index: 94;
+  left: -24%;
+  top: 6%;
+  width: clamp(780px, 108vw, 1560px);
+  height: clamp(260px, 50vw, 720px);
+  opacity: 0;
+  overflow: visible;
+  transform-origin: 46% 46%;
+  filter:
+    drop-shadow(0 0 18px rgba(130, 217, 255, .28))
+    drop-shadow(0 0 44px rgba(59, 119, 255, .18));
+  animation: ckLeviathanSwim var(--ck-leviathan-event-duration) cubic-bezier(.18,.58,.21,1) both;
+  will-change: transform, opacity;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-hero {
+  filter:
+    drop-shadow(0 0 19px rgba(207, 173, 255, .30))
+    drop-shadow(0 0 46px rgba(114, 92, 255, .20));
+}
+
+.ck-leviathan-body-glow {
+  opacity: .9;
+}
+
+.ck-leviathan-tail-group {
+  transform-origin: 155px 235px;
+  animation: ckLeviathanTailBeat 4.1s ease-in-out 9.5s infinite;
+}
+
+.ck-leviathan-tail-fin,
+.ck-leviathan-dorsal-fin,
+.ck-leviathan-side-fin {
+  fill: rgba(105, 215, 255, .32);
+  stroke: rgba(213, 248, 255, .34);
+  stroke-width: 2.4;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-tail-fin,
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-dorsal-fin,
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-side-fin {
+  fill: rgba(178, 153, 255, .34);
+  stroke: rgba(240, 233, 255, .36);
+}
+
+.ck-leviathan-tail-join,
+.ck-leviathan-mouth,
+.ck-leviathan-body-outline {
+  fill: none;
+}
+
+.ck-leviathan-tail-join {
+  stroke: rgba(214, 246, 255, .24);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.ck-leviathan-mouth {
+  stroke: rgba(239, 249, 255, .46);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+}
+
+.ck-leviathan-body-outline {
+  stroke: rgba(228, 248, 255, .40);
+  stroke-width: 4;
+  stroke-linejoin: round;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-body-outline {
+  stroke: rgba(243, 239, 255, .44);
+}
+
+.ck-leviathan-nebula {
+  opacity: .76;
+}
+
+.ck-leviathan-nebula.is-a {
+  fill: rgba(92, 225, 255, .26);
+}
+
+.ck-leviathan-nebula.is-b {
+  fill: rgba(110, 121, 255, .22);
+}
+
+.ck-leviathan-nebula.is-c {
+  fill: rgba(255, 222, 168, .15);
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-nebula.is-a {
+  fill: rgba(156, 222, 255, .24);
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-nebula.is-b {
+  fill: rgba(161, 122, 255, .26);
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-nebula.is-c {
+  fill: rgba(255, 224, 205, .14);
+}
+
+.ck-leviathan-inside-constellation {
+  fill: none;
+  stroke: rgba(240, 249, 255, .42);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 8 10;
+  animation: ckLeviathanInnerConstellation 2.8s ease-in-out infinite alternate;
+}
+
+.ck-leviathan-inside-constellation.is-two {
+  stroke-opacity: .68;
+}
+
+.ck-leviathan-body-star {
+  fill: rgba(255,255,255,.96);
+  filter: drop-shadow(0 0 6px rgba(135, 214, 255, .72));
+  animation: ckLeviathanBodyStar 2.1s ease-in-out var(--ck-lev-body-star-delay) infinite alternate;
+}
+
+.ck-leviathan-body-star.is-bright {
+  filter:
+    drop-shadow(0 0 8px rgba(255,255,255,.92))
+    drop-shadow(0 0 12px rgba(153, 228, 255, .86));
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-body-star {
+  filter: drop-shadow(0 0 6px rgba(197, 170, 255, .76));
+}
+
+.ck-leviathan-eye-glow {
+  fill: rgba(198, 241, 255, .42);
+}
+
+.ck-leviathan-eye {
+  fill: rgba(255,255,255,.98);
+  filter: drop-shadow(0 0 6px rgba(199, 245, 255, .95));
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-eye {
+  filter: drop-shadow(0 0 7px rgba(234, 226, 255, .98));
+}
+
+.ck-leviathan-rift {
+  z-index: 16;
+  left: 84%;
+  top: 18%;
+  width: clamp(110px, 15vw, 240px);
+  height: clamp(110px, 15vw, 240px);
+  inset: auto;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(.2);
+  animation: ckLeviathanRiftWindow var(--ck-leviathan-event-duration) ease-in-out both;
+}
+
+.ck-leviathan-rift-core,
+.ck-leviathan-rift > i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.ck-leviathan-rift-core {
+  width: 34%;
+  height: 34%;
+  background:
+    radial-gradient(circle, rgba(255,255,255,.92), rgba(137, 228, 255, .72) 34%, rgba(90, 112, 255, .32) 60%, rgba(0,0,0,0) 78%);
+  filter: blur(1.2px);
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-rift-core {
+  background:
+    radial-gradient(circle, rgba(255,255,255,.92), rgba(214, 203, 255, .72) 34%, rgba(137, 111, 255, .34) 60%, rgba(0,0,0,0) 78%);
+}
+
+.ck-leviathan-rift > i {
+  width: 100%;
+  height: 100%;
+  border: 2px solid rgba(163, 225, 255, .34);
+  box-shadow:
+    0 0 28px rgba(99, 204, 255, .18),
+    inset 0 0 26px rgba(130, 113, 255, .14);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(var(--ck-lev-rift-scale));
+  animation: ckLeviathanRiftRing 3.1s ease-out var(--ck-lev-rift-delay) both;
+}
+
+.ck-leviathan-wake-ribbon {
+  z-index: 93;
+  left: 2%;
+  top: 19%;
+  width: 88%;
+  height: 42%;
+  inset: auto;
+  opacity: 0;
+  background:
+    linear-gradient(90deg,
+      rgba(255,255,255,0) 0%,
+      rgba(149, 224, 255, .08) 10%,
+      rgba(117, 187, 255, .18) 32%,
+      rgba(98, 111, 255, .16) 58%,
+      rgba(255,255,255,0) 100%);
+  filter: blur(18px);
+  border-radius: 55% 45% 62% 38% / 52% 62% 38% 48%;
+  transform: rotate(-7deg);
+  animation: ckLeviathanWakeRibbon var(--ck-leviathan-event-duration) ease-in-out both;
+}
+
+.ck-leviathan-wake-field {
+  z-index: 98;
+}
+
+.ck-leviathan-wake-field > i {
+  position: absolute;
+  left: var(--ck-lev-wake-x);
+  top: var(--ck-lev-wake-y);
+  width: var(--ck-lev-wake-size);
+  height: var(--ck-lev-wake-size);
+  border-radius: 999px;
+  opacity: 0;
+  background: rgba(241, 252, 255, .98);
+  box-shadow:
+    0 0 8px rgba(136, 222, 255, .94),
+    0 0 16px rgba(121, 134, 255, .28);
+  animation: ckLeviathanWakeParticle 1.95s cubic-bezier(.17,.69,.24,1) var(--ck-lev-wake-delay) both;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-wake-field > i {
+  box-shadow:
+    0 0 9px rgba(218, 208, 255, .96),
+    0 0 18px rgba(123, 104, 255, .30);
+}
+
+.ck-leviathan-upward-stars {
+  z-index: 99;
+}
+
+.ck-leviathan-upward-stars > i {
+  position: absolute;
+  left: var(--ck-lev-up-x);
+  top: var(--ck-lev-up-y);
+  width: var(--ck-lev-up-size);
+  height: var(--ck-lev-up-size);
+  opacity: 0;
+  transform: rotate(-61deg);
+  background: linear-gradient(90deg, rgba(255,255,255,.96), rgba(151, 231, 255, .0));
+  box-shadow: 0 0 8px rgba(170, 236, 255, .66);
+  animation: ckLeviathanUpwardStar 1.5s ease-out var(--ck-lev-up-delay) both;
+}
+
+.ck-leviathan-finale-wave {
+  z-index: 8;
+  opacity: 0;
+  background:
+    radial-gradient(ellipse at 68% 26%, rgba(169, 223, 255, .18), transparent 33%),
+    radial-gradient(ellipse at 74% 36%, rgba(211, 166, 255, .12), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(130, 214, 255, .08) 28%, rgba(255,255,255,0) 60%);
+  mix-blend-mode: screen;
+  filter: blur(10px);
+  animation: ckLeviathanFinaleWave var(--ck-leviathan-event-duration) ease-out both;
+}
+
+@keyframes ckLeviathanWorldVeil {
+  0%, 4% { opacity: 0; }
+  12% { opacity: .28; }
+  40% { opacity: .52; }
+  62% { opacity: .58; }
+  82% { opacity: .36; }
+  100% { opacity: 0; }
+}
+
+@keyframes ckLeviathanCosmicLens {
+  0%, 12% { opacity: 0; transform: scale(.92); }
+  26% { opacity: .42; }
+  56% { opacity: .62; transform: scale(1.03); }
+  78% { opacity: .36; }
+  100% { opacity: 0; transform: scale(1.10); }
+}
+
+@keyframes ckLeviathanStarCurrent {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(.34); }
+  18% { opacity: var(--ck-lev-star-opacity); }
+  60% { opacity: calc(var(--ck-lev-star-opacity) + .18); transform: translate3d(var(--ck-lev-star-dx), var(--ck-lev-star-dy), 0) scale(1); }
+  82% { opacity: .28; }
+  100% { opacity: 0; transform: translate3d(calc(var(--ck-lev-star-dx) * 1.6), calc(var(--ck-lev-star-dy) * 1.3), 0) scale(.54); }
+}
+
+@keyframes ckLeviathanShadow {
+  0% { opacity: 0; transform: translate(-16%, 6%) scale(.66); }
+  16% { opacity: .10; }
+  34% { opacity: .24; transform: translate(16%, 0%) scale(.92); }
+  52% { opacity: .12; }
+  70%, 100% { opacity: 0; transform: translate(42%, -10%) scale(1.16); }
+}
+
+@keyframes ckLeviathanSwim {
+  0% { opacity: 0; transform: translate3d(-16%, 8%, 0) scale(.62) rotate(-4deg); }
+  9% { opacity: 0; }
+  18% { opacity: .82; }
+  34% { opacity: 1; transform: translate3d(5%, 2%, 0) scale(.80) rotate(-1.6deg); }
+  54% { opacity: 1; transform: translate3d(30%, -2%, 0) scale(1.00) rotate(1deg); }
+  66% { opacity: 1; transform: translate3d(44%, -6%, 0) scale(1.24) rotate(1.8deg); }
+  76% { opacity: 1; transform: translate3d(61%, -9%, 0) scale(1.30) rotate(2.4deg); }
+  85% { opacity: .94; transform: translate3d(82%, -12%, 0) scale(1.18) rotate(.8deg); }
+  94% { opacity: .28; }
+  100% { opacity: 0; transform: translate3d(102%, -12%, 0) scale(.86) rotate(-2deg); }
+}
+
+@keyframes ckLeviathanTailBeat {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(8deg); }
+}
+
+@keyframes ckLeviathanInnerConstellation {
+  0% { opacity: .36; stroke-dashoffset: 0; }
+  100% { opacity: .78; stroke-dashoffset: 18; }
+}
+
+@keyframes ckLeviathanBodyStar {
+  0% { opacity: .38; transform: scale(.72); }
+  100% { opacity: 1; transform: scale(1.18); }
+}
+
+@keyframes ckLeviathanRiftWindow {
+  0%, 70% { opacity: 0; transform: translate(-50%, -50%) scale(.2); }
+  76% { opacity: .56; transform: translate(-50%, -50%) scale(.72); }
+  84% { opacity: .92; transform: translate(-50%, -50%) scale(1); }
+  92% { opacity: .38; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.12); }
+}
+
+@keyframes ckLeviathanRiftRing {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(calc(var(--ck-lev-rift-scale) * .6)); }
+  22% { opacity: .9; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(calc(var(--ck-lev-rift-scale) * 1.4)); }
+}
+
+@keyframes ckLeviathanWakeRibbon {
+  0%, 48% { opacity: 0; transform: rotate(-7deg) scale(.86) translateX(-12%); }
+  60% { opacity: .16; }
+  68% { opacity: .34; transform: rotate(-5deg) scale(1.02) translateX(0%); }
+  80% { opacity: .28; transform: rotate(-4deg) scale(1.08) translateX(12%); }
+  92% { opacity: .12; }
+  100% { opacity: 0; transform: rotate(-3deg) scale(1.14) translateX(20%); }
+}
+
+@keyframes ckLeviathanWakeParticle {
+  0% { opacity: 0; transform: translate3d(0, 0, 0) scale(.35); }
+  15% { opacity: 1; }
+  100% { opacity: 0; transform: translate3d(var(--ck-lev-wake-dx), var(--ck-lev-wake-dy), 0) scale(.2); }
+}
+
+@keyframes ckLeviathanUpwardStar {
+  0% { opacity: 0; transform: rotate(-61deg) translate3d(0, 0, 0) scale(.4); }
+  18% { opacity: 1; }
+  100% { opacity: 0; transform: rotate(-61deg) translate3d(var(--ck-lev-up-dx), var(--ck-lev-up-dy), 0) scale(.12); }
+}
+
+@keyframes ckLeviathanFinaleWave {
+  0%, 74% { opacity: 0; }
+  80% { opacity: .12; }
+  85% { opacity: .24; }
+  90% { opacity: .10; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 760px) {
+  .ck-leviathan-hero {
+    left: -36%;
+    top: 11%;
+    width: 148vw;
+    height: 62vw;
+  }
+
+  .ck-leviathan-shadow {
+    top: 19%;
+    width: 120%;
+    height: 28%;
+  }
+
+  .ck-leviathan-rift {
+    left: 82%;
+    top: 22%;
+  }
+}
+
+
+/* ========================================================================== */
+/* Living World V21.1 — Astral Leviathan (painted asset pass)                 */
+/* ========================================================================== */
+
+/* Put the giant creature above buildings and their floating captions,
+   while still keeping the top/bottom UI bars and sandbox banner above it. */
+.ck-live-events.is-leviathan-depth-split .ck31-landmark-caption-floating {
+  z-index: 140;
+}
+
+.ck-leviathan-hero {
+  z-index: 172;
+  left: -27%;
+  top: 5%;
+  width: clamp(840px, 116vw, 1720px);
+  height: clamp(320px, 55vw, 780px);
+  opacity: 0;
+  transform-origin: 47% 46%;
+  filter:
+    drop-shadow(0 10px 20px rgba(6, 11, 27, .28))
+    drop-shadow(0 0 24px rgba(110, 217, 255, .18))
+    drop-shadow(0 0 48px rgba(82, 114, 255, .14));
+  animation: ckLeviathanSwim var(--ck-leviathan-event-duration) cubic-bezier(.18,.58,.21,1) both;
+  will-change: transform, opacity;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-hero {
+  filter:
+    drop-shadow(0 10px 20px rgba(10, 9, 30, .32))
+    drop-shadow(0 0 24px rgba(186, 165, 255, .18))
+    drop-shadow(0 0 52px rgba(115, 86, 255, .16));
+}
+
+.ck-leviathan-hero-aura,
+.ck-leviathan-hero-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ck-leviathan-hero-aura {
+  z-index: 0;
+  opacity: .72;
+  background:
+    radial-gradient(ellipse at 46% 42%, rgba(129, 226, 255, .24), transparent 38%),
+    radial-gradient(ellipse at 62% 39%, rgba(115, 122, 255, .16), transparent 33%),
+    radial-gradient(ellipse at 78% 38%, rgba(228, 191, 255, .10), transparent 24%);
+  filter: blur(18px);
+  animation: ckLeviathanAuraPulse 5.8s ease-in-out 11s infinite;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-hero-aura {
+  background:
+    radial-gradient(ellipse at 46% 42%, rgba(169, 201, 255, .22), transparent 38%),
+    radial-gradient(ellipse at 62% 39%, rgba(162, 121, 255, .18), transparent 33%),
+    radial-gradient(ellipse at 78% 38%, rgba(239, 204, 255, .12), transparent 24%);
+}
+
+.ck-leviathan-hero-art {
+  z-index: 1;
+  object-fit: contain;
+  object-position: center center;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-hero-art {
+  filter: hue-rotate(20deg) saturate(1.08) brightness(1.03);
+}
+
+/* The painted asset replaced the inline SVG whale, so these old SVG-only rules
+   no longer contribute visually, but we keep the surrounding event timing. */
+
+@keyframes ckLeviathanAuraPulse {
+  0%, 100% { opacity: .56; transform: scale(.96); }
+  50% { opacity: .88; transform: scale(1.03); }
+}
+
+@media (max-width: 760px) {
+  .ck-leviathan-hero {
+    left: -44%;
+    top: 10%;
+    width: 162vw;
+    height: 76vw;
+  }
+}
+
+
+/* ========================================================================== */
+/* Living World V21.2 — Astral Leviathan (continuous fly-through motion pass) */
+/* ========================================================================== */
+
+/* Keep the painted asset, but remove the staged feeling: no portal stop, no
+   mid-event posing. The leviathan should simply approach from far away,
+   grow steadily, pass through the camera plane, and continue beyond it. */
+
+.ck-leviathan-rift {
+  display: none;
+}
+
+.ck-leviathan-hero {
+  left: -30%;
+  top: 3%;
+  width: clamp(860px, 118vw, 1760px);
+  height: clamp(330px, 57vw, 820px);
+  transform-origin: 52% 46%;
+  animation: ckLeviathanSwimThrough var(--ck-leviathan-event-duration) linear both;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-hero {
+  animation: ckLeviathanSwimThrough var(--ck-leviathan-event-duration) linear both;
+}
+
+.ck-leviathan-shadow {
+  left: -24%;
+  top: 15%;
+  width: 92%;
+  height: 30%;
+  animation: ckLeviathanShadowThrough var(--ck-leviathan-event-duration) linear both;
+}
+
+.ck-leviathan-hero-aura {
+  animation: ckLeviathanAuraPulse 6.4s ease-in-out 8s infinite;
+}
+
+.ck-leviathan-wake-ribbon {
+  left: 10%;
+  top: 24%;
+  width: 82%;
+  height: 34%;
+  transform: rotate(-6deg);
+  animation: ckLeviathanWakeRibbonThrough var(--ck-leviathan-event-duration) linear both;
+}
+
+.ck-leviathan-wake-field > i {
+  animation-duration: 2.4s;
+}
+
+.ck-leviathan-finale-wave {
+  animation: ckLeviathanFinaleThrough var(--ck-leviathan-event-duration) linear both;
+}
+
+@keyframes ckLeviathanSwimThrough {
+  0% {
+    opacity: 0;
+    transform: translate3d(-34%, -18%, 0) scale(.16) rotate(-7deg);
+  }
+  6% {
+    opacity: .18;
+  }
+  16% {
+    opacity: .72;
+    transform: translate3d(-21%, -13%, 0) scale(.28) rotate(-5.4deg);
+  }
+  32% {
+    opacity: .94;
+    transform: translate3d(-2%, -8%, 0) scale(.50) rotate(-2.7deg);
+  }
+  48% {
+    opacity: 1;
+    transform: translate3d(20%, -3%, 0) scale(.80) rotate(-.8deg);
+  }
+  64% {
+    opacity: 1;
+    transform: translate3d(46%, 4%, 0) scale(1.20) rotate(1.4deg);
+  }
+  78% {
+    opacity: 1;
+    transform: translate3d(73%, 12%, 0) scale(1.82) rotate(3.1deg);
+  }
+  88% {
+    opacity: .98;
+    transform: translate3d(97%, 20%, 0) scale(2.52) rotate(4.5deg);
+  }
+  96% {
+    opacity: .64;
+    transform: translate3d(120%, 29%, 0) scale(3.22) rotate(5.5deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(136%, 36%, 0) scale(3.72) rotate(6.2deg);
+  }
+}
+
+@keyframes ckLeviathanShadowThrough {
+  0% {
+    opacity: 0;
+    transform: translate(-30%, -4%) scale(.18);
+  }
+  12% {
+    opacity: .12;
+  }
+  32% {
+    opacity: .22;
+    transform: translate(-2%, -2%) scale(.42);
+  }
+  52% {
+    opacity: .26;
+    transform: translate(24%, 2%) scale(.70);
+  }
+  72% {
+    opacity: .18;
+    transform: translate(52%, 7%) scale(1.08);
+  }
+  88% {
+    opacity: .08;
+    transform: translate(82%, 12%) scale(1.42);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(108%, 18%) scale(1.72);
+  }
+}
+
+@keyframes ckLeviathanWakeRibbonThrough {
+  0%, 52% {
+    opacity: 0;
+    transform: rotate(-6deg) scale(.82) translateX(-10%);
+  }
+  64% {
+    opacity: .08;
+    transform: rotate(-5deg) scale(.96) translateX(4%);
+  }
+  76% {
+    opacity: .28;
+    transform: rotate(-4deg) scale(1.08) translateX(16%);
+  }
+  88% {
+    opacity: .34;
+    transform: rotate(-3deg) scale(1.20) translateX(28%);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-2deg) scale(1.34) translateX(42%);
+  }
+}
+
+@keyframes ckLeviathanFinaleThrough {
+  0%, 70% { opacity: 0; }
+  80% { opacity: .10; }
+  90% { opacity: .18; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 760px) {
+  .ck-leviathan-hero {
+    left: -48%;
+    top: 9%;
+    width: 168vw;
+    height: 78vw;
+  }
+}
+
+
+/* ========================================================================== */
+/* Living World V21.3 — Astral Leviathan (frontal approach asset + motion)    */
+/* ========================================================================== */
+
+/* The previous pass exposed a conceptual mismatch: the leviathan felt like a
+   side-swimming whale. This pass keeps the same event shell, but swaps the art
+   for a 3/4 frontal leviathan and retunes the path so it approaches the camera
+   on one continuous trajectory. */
+
+.ck31-map:has(> .ck-live-events.is-leviathan-depth-split) .ck31-landmark-caption-floating {
+  z-index: 128;
+}
+
+.ck-leviathan-hero {
+  left: -8%;
+  top: -2%;
+  width: clamp(920px, 102vw, 1680px);
+  height: clamp(520px, 62vw, 980px);
+  transform-origin: 74% 50%;
+  animation: ckLeviathanFrontalApproach var(--ck-leviathan-event-duration) linear both;
+}
+
+.ck-live-event-astral-leviathan.is-legendary .ck-leviathan-hero {
+  animation: ckLeviathanFrontalApproach var(--ck-leviathan-event-duration) linear both;
+}
+
+.ck-leviathan-shadow {
+  left: -6%;
+  top: 16%;
+  width: 86%;
+  height: 28%;
+  animation: ckLeviathanShadowFrontal var(--ck-leviathan-event-duration) linear both;
+}
+
+.ck-leviathan-wake-ribbon {
+  left: 6%;
+  top: 15%;
+  width: 70%;
+  height: 26%;
+  transform: rotate(-9deg);
+  animation: ckLeviathanWakeRibbonFrontal var(--ck-leviathan-event-duration) linear both;
+}
+
+.ck-leviathan-finale-wave {
+  animation: ckLeviathanFinaleFrontal var(--ck-leviathan-event-duration) linear both;
+}
+
+@keyframes ckLeviathanFrontalApproach {
+  0% {
+    opacity: 0;
+    transform: translate3d(4%, -24%, 0) scale(.11) rotate(8deg);
+  }
+  8% {
+    opacity: .20;
+  }
+  18% {
+    opacity: .72;
+    transform: translate3d(8%, -19%, 0) scale(.20) rotate(7deg);
+  }
+  34% {
+    opacity: .94;
+    transform: translate3d(12%, -13%, 0) scale(.38) rotate(6deg);
+  }
+  50% {
+    opacity: 1;
+    transform: translate3d(17%, -4%, 0) scale(.68) rotate(5deg);
+  }
+  66% {
+    opacity: 1;
+    transform: translate3d(23%, 8%, 0) scale(1.12) rotate(4deg);
+  }
+  80% {
+    opacity: 1;
+    transform: translate3d(31%, 20%, 0) scale(1.82) rotate(3deg);
+  }
+  90% {
+    opacity: .98;
+    transform: translate3d(40%, 33%, 0) scale(2.72) rotate(2deg);
+  }
+  97% {
+    opacity: .54;
+    transform: translate3d(50%, 45%, 0) scale(3.54) rotate(1deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(57%, 53%, 0) scale(4.06) rotate(.4deg);
+  }
+}
+
+@keyframes ckLeviathanShadowFrontal {
+  0% {
+    opacity: 0;
+    transform: translate(0%, -10%) scale(.18);
+  }
+  16% {
+    opacity: .08;
+  }
+  34% {
+    opacity: .16;
+    transform: translate(4%, -6%) scale(.34);
+  }
+  52% {
+    opacity: .22;
+    transform: translate(9%, -2%) scale(.56);
+  }
+  70% {
+    opacity: .20;
+    transform: translate(15%, 4%) scale(.90);
+  }
+  86% {
+    opacity: .10;
+    transform: translate(23%, 11%) scale(1.26);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(30%, 18%) scale(1.56);
+  }
+}
+
+@keyframes ckLeviathanWakeRibbonFrontal {
+  0%, 56% {
+    opacity: 0;
+    transform: rotate(-9deg) scale(.68) translateX(-8%);
+  }
+  68% {
+    opacity: .10;
+    transform: rotate(-7deg) scale(.82) translateX(2%);
+  }
+  80% {
+    opacity: .28;
+    transform: rotate(-5deg) scale(1.03) translateX(10%);
+  }
+  90% {
+    opacity: .34;
+    transform: rotate(-4deg) scale(1.18) translateX(18%);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(-3deg) scale(1.32) translateX(28%);
+  }
+}
+
+@keyframes ckLeviathanFinaleFrontal {
+  0%, 74% { opacity: 0; }
+  84% { opacity: .12; }
+  92% { opacity: .19; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 760px) {
+  .ck-leviathan-hero {
+    left: -28%;
+    top: 6%;
+    width: 152vw;
+    height: 92vw;
+  }
+}

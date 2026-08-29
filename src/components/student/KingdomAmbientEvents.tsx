@@ -11,7 +11,7 @@ type Props = {
   paused?: boolean;
 };
 
-type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'magical-winter' | 'celestial-tide' | 'enchanted-star-night' | 'dragon-flight' | 'phoenix-rebirth';
+type AmbientEventId = 'shooting-star' | 'fairy-swarm' | 'floating-island' | 'aurora-sky' | 'meteor-shower' | 'lunar-eclipse' | 'rainbow-storm' | 'magical-fireflies' | 'magic-thunderstorm' | 'crystal-bloom' | 'magical-wind-vortex' | 'enchanted-petal-bloom' | 'interdimensional-portal' | 'magical-winter' | 'celestial-tide' | 'enchanted-star-night' | 'astral-leviathan' | 'dragon-flight' | 'phoenix-rebirth';
 type FairyDepth = 'back' | 'mid' | 'front';
 
 type AmbientEventState = {
@@ -76,6 +76,7 @@ const INTERDIMENSIONAL_PORTAL_UNLOCK_STARS = 24; // Placeholder; final unlock ba
 const MAGICAL_WINTER_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 const CELESTIAL_TIDE_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 const ENCHANTED_STAR_NIGHT_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
+const ASTRAL_LEVIATHAN_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -94,6 +95,7 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'magical-winter': 26600,
   'celestial-tide': 27200,
   'enchanted-star-night': 31200,
+  'astral-leviathan': 36800,
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
@@ -1286,6 +1288,107 @@ function EnchantedStarNightEvent({
   );
 }
 
+
+function AstralLeviathanEvent({
+  realm,
+  instanceId,
+}: {
+  realm: RealmId;
+  instanceId: number;
+}) {
+  const skyStars = Array.from({ length: 184 });
+  const wakeParticles = Array.from({ length: 132 });
+  const upwardStars = Array.from({ length: 16 });
+  const riftRings = Array.from({ length: 3 });
+
+  return (
+    <div
+      key={instanceId}
+      className={`ck-live-event ck-live-event-astral-leviathan is-${realm}`}
+      aria-hidden="true"
+    >
+      <div className="ck-leviathan-world-veil" />
+      <div className="ck-leviathan-cosmic-lens" />
+
+      <div className="ck-leviathan-star-current">
+        {skyStars.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-lev-star-x': `${1 + ((index * 47) % 98)}%`,
+              '--ck-lev-star-y': `${3 + ((index * 59) % 54)}%`,
+              '--ck-lev-star-size': `${1 + (index % 7) * 0.62}px`,
+              '--ck-lev-star-delay': `${1.5 + (index % 36) * 0.19}s`,
+              '--ck-lev-star-dx': `${40 + (index % 10) * 16}px`,
+              '--ck-lev-star-dy': `${-24 + ((index * 17) % 49)}px`,
+              '--ck-lev-star-opacity': `${0.34 + (index % 6) * 0.10}`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-leviathan-shadow" />
+
+      <div className="ck-leviathan-hero">
+        <div className="ck-leviathan-hero-aura" />
+        <img
+          className="ck-leviathan-hero-art"
+          src="/assets/class-kingdom/living-world/astral/astral-leviathan-v1.png"
+          alt=""
+        />
+      </div>
+
+      <div className="ck-leviathan-rift">
+        <span className="ck-leviathan-rift-core" />
+        {riftRings.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-lev-rift-delay': `${23.8 + index * 0.26}s`,
+              '--ck-lev-rift-scale': `${0.70 + index * 0.18}`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-leviathan-wake-ribbon" />
+      <div className="ck-leviathan-wake-field">
+        {wakeParticles.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-lev-wake-x': `${index < 88 ? 12 + ((index * 11) % 58) : 60 + ((index * 17) % 34)}%`,
+              '--ck-lev-wake-y': `${18 + ((index * 23) % 43)}%`,
+              '--ck-lev-wake-size': `${2.4 + (index % 7) * 1.15}px`,
+              '--ck-lev-wake-delay': `${21.1 + (index % 28) * 0.07}s`,
+              '--ck-lev-wake-dx': `${28 + ((index * 31) % 160)}px`,
+              '--ck-lev-wake-dy': `${-60 + ((index * 19) % 118)}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-leviathan-upward-stars">
+        {upwardStars.map((_, index) => (
+          <i
+            key={index}
+            style={{
+              '--ck-lev-up-x': `${58 + ((index * 9) % 33)}%`,
+              '--ck-lev-up-y': `${30 + ((index * 17) % 24)}%`,
+              '--ck-lev-up-size': `${2 + (index % 4) * 0.95}px`,
+              '--ck-lev-up-delay': `${27.3 + (index % 8) * 0.22}s`,
+              '--ck-lev-up-dx': `${18 + ((index * 13) % 42)}px`,
+              '--ck-lev-up-dy': `${-110 - (index % 5) * 26}px`,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="ck-leviathan-finale-wave" />
+    </div>
+  );
+}
+
 function CelestialTideEvent({
   realm,
   instanceId,
@@ -2186,6 +2289,7 @@ export default function KingdomAmbientEvents({
   const canShowMagicalWinter = sandboxMode || stars >= MAGICAL_WINTER_UNLOCK_STARS;
   const canShowCelestialTide = sandboxMode || stars >= CELESTIAL_TIDE_UNLOCK_STARS;
   const canShowEnchantedStarNight = sandboxMode || stars >= ENCHANTED_STAR_NIGHT_UNLOCK_STARS;
+  const canShowAstralLeviathan = sandboxMode || stars >= ASTRAL_LEVIATHAN_UNLOCK_STARS;
 
   const clearScheduledTimer = useCallback(() => {
     if (scheduleTimerRef.current !== null) {
@@ -2221,6 +2325,7 @@ export default function KingdomAmbientEvents({
     if (eventId === 'magical-winter' && !canShowMagicalWinter) return;
     if (eventId === 'celestial-tide' && !canShowCelestialTide) return;
     if (eventId === 'enchanted-star-night' && !canShowEnchantedStarNight) return;
+    if (eventId === 'astral-leviathan' && !canShowAstralLeviathan) return;
 
     clearActiveTimer();
     const pathIndex = eventId === 'shooting-star'
@@ -2250,7 +2355,7 @@ export default function KingdomAmbientEvents({
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowAstralLeviathan, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
 
   const chooseNaturalEvent = useCallback((): AmbientEventId => {
     if (!canShowFairySwarm) return 'shooting-star';
@@ -2361,11 +2466,19 @@ export default function KingdomAmbientEvents({
     if (roll < starNightThreshold) return 'enchanted-star-night';
 
     const remainingAfterStarNight = 1 - starNightThreshold;
+    const baseLeviathanChance = canShowAstralLeviathan
+      ? (realm === 'legendary' ? 0.06 : 0.028)
+      : 0;
+    const leviathanChance = stored.lastEventId === 'astral-leviathan' ? 0.0035 : baseLeviathanChance;
+    const leviathanThreshold = starNightThreshold + remainingAfterStarNight * leviathanChance;
+    if (roll < leviathanThreshold) return 'astral-leviathan';
+
+    const remainingAfterLeviathan = 1 - leviathanThreshold;
     const baseFireflyChance = canShowMagicalFireflies
       ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
       : 0;
     const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = starNightThreshold + remainingAfterStarNight * fireflyChance;
+    const fireflyThreshold = leviathanThreshold + remainingAfterLeviathan * fireflyChance;
     if (roll < fireflyThreshold) return 'magical-fireflies';
 
     const remainingAfterFireflies = 1 - fireflyThreshold;
@@ -2389,7 +2502,7 @@ export default function KingdomAmbientEvents({
     const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
     const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
     return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowAstralLeviathan, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
 
   useEffect(() => {
     clearScheduledTimer();
@@ -2435,7 +2548,7 @@ export default function KingdomAmbientEvents({
 
   return (
     <div
-      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''} ${activeEvent?.id === 'interdimensional-portal' ? 'is-portal-depth-split' : ''} ${activeEvent?.id === 'magical-winter' ? 'is-winter-depth-split' : ''} ${activeEvent?.id === 'celestial-tide' ? 'is-tide-depth-split' : ''}`}
+      className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''} ${activeEvent?.id === 'interdimensional-portal' ? 'is-portal-depth-split' : ''} ${activeEvent?.id === 'magical-winter' ? 'is-winter-depth-split' : ''} ${activeEvent?.id === 'celestial-tide' ? 'is-tide-depth-split' : ''} ${activeEvent?.id === 'astral-leviathan' ? 'is-leviathan-depth-split' : ''}`}
     >
       {activeEvent?.id === 'shooting-star' && (
         <div
@@ -2555,6 +2668,10 @@ export default function KingdomAmbientEvents({
 
       {activeEvent?.id === 'enchanted-star-night' && (
         <EnchantedStarNightEvent realm={realm} instanceId={activeEvent.instanceId} />
+      )}
+
+      {activeEvent?.id === 'astral-leviathan' && (
+        <AstralLeviathanEvent realm={realm} instanceId={activeEvent.instanceId} />
       )}
 
       {activeEvent?.id === 'dragon-flight' && (
@@ -2755,6 +2872,18 @@ export default function KingdomAmbientEvents({
               }}
             >
               🌌 ליל כוכבים
+            </button>
+          )}
+          {canShowAstralLeviathan && (
+            <button
+              type="button"
+              className="ck-live-event-test-button is-leviathan"
+              onClick={event => {
+                event.stopPropagation();
+                triggerEvent('astral-leviathan', false);
+              }}
+            >
+              🐋 לווייתן כוכבים
             </button>
           )}
           {canShowDragonFlight && (
