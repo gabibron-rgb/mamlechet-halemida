@@ -18,11 +18,20 @@ type AmbientEventState = {
   id: AmbientEventId;
   instanceId: number;
   pathIndex: number;
+  startedAt: number;
 };
 
-type StoredAmbientEventState = {
-  lastEventAt?: number;
-  lastEventId?: AmbientEventId;
+type ScheduledAmbientEvent = {
+  id: AmbientEventId;
+  startAt: number;
+  endAt: number;
+  pathIndex: number;
+};
+
+type AmbientEventRule = {
+  id: AmbientEventId;
+  unlockStars: number;
+  weight: number;
 };
 
 type FairyPalette = {
@@ -57,26 +66,31 @@ type FairyFlightPlan = {
   tilt4: number;
 };
 
-const STORAGE_PREFIX = 'mamlechet-kingdom-ambient-events-v1';
-const REAL_COOLDOWN_MS = 8 * 60 * 1000;
-const FAIRY_SWARM_UNLOCK_STARS = 4;
-const FLOATING_ISLAND_UNLOCK_STARS = 6;
-const DRAGON_FLIGHT_UNLOCK_STARS = 8;
-const AURORA_SKY_UNLOCK_STARS = 10;
-const PHOENIX_REBIRTH_UNLOCK_STARS = 12;
-const METEOR_SHOWER_UNLOCK_STARS = 14;
-const LUNAR_ECLIPSE_UNLOCK_STARS = 16;
-const RAINBOW_STORM_UNLOCK_STARS = 18;
-const MAGICAL_FIREFLIES_UNLOCK_STARS = 20;
-const MAGIC_THUNDERSTORM_UNLOCK_STARS = 22;
-const CRYSTAL_BLOOM_UNLOCK_STARS = 24;
-const MAGICAL_WIND_VORTEX_UNLOCK_STARS = 26;
-const ENCHANTED_PETAL_BLOOM_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
-const INTERDIMENSIONAL_PORTAL_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
-const MAGICAL_WINTER_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
-const CELESTIAL_TIDE_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
-const ENCHANTED_STAR_NIGHT_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
-const ASTRAL_LEVIATHAN_UNLOCK_STARS = 24; // Placeholder; final unlock balance will be set after all events are built.
+const REALTIME_BLOCK_MS = 12 * 60 * 60 * 1000;
+const EVENT_GAP_MIN_MS = 3 * 60 * 1000;
+const EVENT_GAP_MAX_MS = 7 * 60 * 1000;
+const BLOCK_FIRST_EVENT_MIN_MS = 4 * 60 * 1000;
+const BLOCK_FIRST_EVENT_MAX_MS = 7 * 60 * 1000;
+
+// Final Living World unlock balance (24 stars maximum).
+const FAIRY_SWARM_UNLOCK_STARS = 2;
+const MAGICAL_FIREFLIES_UNLOCK_STARS = 3;
+const FLOATING_ISLAND_UNLOCK_STARS = 4;
+const AURORA_SKY_UNLOCK_STARS = 5;
+const DRAGON_FLIGHT_UNLOCK_STARS = 6;
+const METEOR_SHOWER_UNLOCK_STARS = 8;
+const RAINBOW_STORM_UNLOCK_STARS = 9;
+const LUNAR_ECLIPSE_UNLOCK_STARS = 10;
+const PHOENIX_REBIRTH_UNLOCK_STARS = 11;
+const MAGICAL_WINTER_UNLOCK_STARS = 12;
+const MAGICAL_WIND_VORTEX_UNLOCK_STARS = 14;
+const CRYSTAL_BLOOM_UNLOCK_STARS = 15;
+const ENCHANTED_PETAL_BLOOM_UNLOCK_STARS = 16;
+const MAGIC_THUNDERSTORM_UNLOCK_STARS = 17;
+const CELESTIAL_TIDE_UNLOCK_STARS = 18;
+const INTERDIMENSIONAL_PORTAL_UNLOCK_STARS = 20;
+const ENCHANTED_STAR_NIGHT_UNLOCK_STARS = 22;
+const ASTRAL_LEVIATHAN_UNLOCK_STARS = 24;
 
 const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'shooting-star': 5400,
@@ -99,6 +113,35 @@ const EVENT_LIFETIME_MS: Record<AmbientEventId, number> = {
   'dragon-flight': 9000,
   'phoenix-rebirth': 10800,
 };
+
+const MAX_EVENT_LIFETIME_MS = Math.max(...Object.values(EVENT_LIFETIME_MS));
+
+const AMBIENT_EVENT_RULES: AmbientEventRule[] = [
+  // Common
+  { id: 'shooting-star', unlockStars: 1, weight: 100 },
+  { id: 'fairy-swarm', unlockStars: FAIRY_SWARM_UNLOCK_STARS, weight: 100 },
+  { id: 'magical-fireflies', unlockStars: MAGICAL_FIREFLIES_UNLOCK_STARS, weight: 100 },
+  // Rare
+  { id: 'floating-island', unlockStars: FLOATING_ISLAND_UNLOCK_STARS, weight: 55 },
+  { id: 'aurora-sky', unlockStars: AURORA_SKY_UNLOCK_STARS, weight: 55 },
+  { id: 'dragon-flight', unlockStars: DRAGON_FLIGHT_UNLOCK_STARS, weight: 55 },
+  { id: 'meteor-shower', unlockStars: METEOR_SHOWER_UNLOCK_STARS, weight: 55 },
+  // Epic
+  { id: 'rainbow-storm', unlockStars: RAINBOW_STORM_UNLOCK_STARS, weight: 28 },
+  { id: 'lunar-eclipse', unlockStars: LUNAR_ECLIPSE_UNLOCK_STARS, weight: 28 },
+  { id: 'phoenix-rebirth', unlockStars: PHOENIX_REBIRTH_UNLOCK_STARS, weight: 28 },
+  { id: 'magical-winter', unlockStars: MAGICAL_WINTER_UNLOCK_STARS, weight: 28 },
+  { id: 'magical-wind-vortex', unlockStars: MAGICAL_WIND_VORTEX_UNLOCK_STARS, weight: 28 },
+  // Legendary
+  { id: 'crystal-bloom', unlockStars: CRYSTAL_BLOOM_UNLOCK_STARS, weight: 12 },
+  { id: 'enchanted-petal-bloom', unlockStars: ENCHANTED_PETAL_BLOOM_UNLOCK_STARS, weight: 12 },
+  { id: 'magic-thunderstorm', unlockStars: MAGIC_THUNDERSTORM_UNLOCK_STARS, weight: 12 },
+  { id: 'celestial-tide', unlockStars: CELESTIAL_TIDE_UNLOCK_STARS, weight: 12 },
+  { id: 'interdimensional-portal', unlockStars: INTERDIMENSIONAL_PORTAL_UNLOCK_STARS, weight: 12 },
+  { id: 'enchanted-star-night', unlockStars: ENCHANTED_STAR_NIGHT_UNLOCK_STARS, weight: 12 },
+  // Mythic
+  { id: 'astral-leviathan', unlockStars: ASTRAL_LEVIATHAN_UNLOCK_STARS, weight: 5 },
+];
 
 const SHOOTING_STAR_PATHS = [
   { startX: -12, startY: 10, dx: 126, dy: 48, rotate: 21 },
@@ -220,26 +263,135 @@ const FAIRY_FLIGHT_PLANS: FairyFlightPlan[] = [
   },
 ];
 
-function readStoredState(storageKey: string): StoredAmbientEventState {
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return {};
-    return JSON.parse(raw) as StoredAmbientEventState;
-  } catch {
-    return {};
+function hashStringToUint32(value: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
   }
+  return hash >>> 0;
 }
 
-function saveStoredState(storageKey: string, state: StoredAmbientEventState) {
-  try {
-    window.localStorage.setItem(storageKey, JSON.stringify(state));
-  } catch {
-    // Ambient events are decorative; blocked storage should never affect the kingdom.
-  }
+function createSeededRandom(seed: number): () => number {
+  let state = seed >>> 0;
+  return () => {
+    state += 0x6D2B79F5;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-function randomBetween(min: number, max: number): number {
-  return min + Math.random() * (max - min);
+function seededBetween(random: () => number, min: number, max: number): number {
+  return min + random() * (max - min);
+}
+
+function repeatBlockCount(unlockedCount: number): number {
+  if (unlockedCount <= 1) return 0;
+  if (unlockedCount <= 3) return 1;
+  if (unlockedCount <= 5) return 2;
+  return 3;
+}
+
+function pickWeightedEvent(
+  random: () => number,
+  unlockedRules: AmbientEventRule[],
+  recentHistory: AmbientEventId[]
+): AmbientEventId {
+  const blockedCount = repeatBlockCount(unlockedRules.length);
+  const blocked = new Set(recentHistory.slice(-blockedCount));
+  let eligible = unlockedRules.filter(rule => !blocked.has(rule.id));
+
+  // Safety fallback for very small pools or future rule changes.
+  if (eligible.length === 0) eligible = unlockedRules;
+
+  const totalWeight = eligible.reduce((sum, rule) => sum + rule.weight, 0);
+  let roll = random() * totalWeight;
+
+  for (const rule of eligible) {
+    roll -= rule.weight;
+    if (roll <= 0) return rule.id;
+  }
+
+  return eligible[eligible.length - 1]?.id ?? 'shooting-star';
+}
+
+function seededPathIndex(eventId: AmbientEventId, random: () => number): number {
+  const count = eventId === 'shooting-star'
+    ? SHOOTING_STAR_PATHS.length
+    : eventId === 'floating-island'
+      ? FLOATING_ISLAND_PATHS.length
+      : eventId === 'dragon-flight'
+        ? DRAGON_FLIGHT_PATHS.length
+        : eventId === 'phoenix-rebirth'
+          ? PHOENIX_FLIGHT_PATHS.length
+          : 1;
+
+  return Math.floor(random() * count);
+}
+
+function buildRealtimeBlock(
+  classId: string,
+  stars: number,
+  blockStart: number,
+  incomingHistory: AmbientEventId[] = []
+): { events: ScheduledAmbientEvent[]; history: AmbientEventId[] } {
+  const cleanClassId = classId.trim() || 'anonymous';
+  const random = createSeededRandom(hashStringToUint32(`living-world-v2:${cleanClassId}:${blockStart}`));
+  const unlockedRules = AMBIENT_EVENT_RULES.filter(rule => stars >= rule.unlockStars);
+  if (unlockedRules.length === 0) return { events: [], history: incomingHistory.slice(-3) };
+
+  const blockEnd = blockStart + REALTIME_BLOCK_MS;
+  const events: ScheduledAmbientEvent[] = [];
+  const history = incomingHistory.slice(-3);
+  let startAt = blockStart + seededBetween(random, BLOCK_FIRST_EVENT_MIN_MS, BLOCK_FIRST_EVENT_MAX_MS);
+
+  while (startAt < blockEnd) {
+    const id = pickWeightedEvent(random, unlockedRules, history);
+    const roundedStartAt = Math.round(startAt);
+    const pathIndex = seededPathIndex(id, random);
+
+    events.push({
+      id,
+      startAt: roundedStartAt,
+      endAt: roundedStartAt + EVENT_LIFETIME_MS[id],
+      pathIndex,
+    });
+
+    history.push(id);
+    if (history.length > 3) history.shift();
+
+    // The next start is based on the longest event window so timing stays stable
+    // even when a class gains a new star and the unlocked event pool changes.
+    startAt = roundedStartAt
+      + MAX_EVENT_LIFETIME_MS
+      + seededBetween(random, EVENT_GAP_MIN_MS, EVENT_GAP_MAX_MS);
+  }
+
+  return { events, history };
+}
+
+function getRealtimeScheduleSnapshot(classId: string, stars: number, now: number): {
+  active: ScheduledAmbientEvent | null;
+  nextTransitionAt: number;
+} {
+  const currentBlockStart = Math.floor(now / REALTIME_BLOCK_MS) * REALTIME_BLOCK_MS;
+  const previous = buildRealtimeBlock(classId, stars, currentBlockStart - REALTIME_BLOCK_MS);
+  const current = buildRealtimeBlock(classId, stars, currentBlockStart, previous.history);
+  const next = buildRealtimeBlock(classId, stars, currentBlockStart + REALTIME_BLOCK_MS, current.history);
+  const events = [...previous.events, ...current.events, ...next.events];
+
+  const active = events.find(event => event.startAt <= now && now < event.endAt) ?? null;
+  if (active) {
+    return { active, nextTransitionAt: active.endAt };
+  }
+
+  const upcoming = events.find(event => event.startAt > now);
+  return {
+    active: null,
+    nextTransitionAt: upcoming?.startAt ?? now + 60_000,
+  };
 }
 
 function fairyFlightStyle(plan: FairyFlightPlan): CSSProperties {
@@ -2269,7 +2421,7 @@ export default function KingdomAmbientEvents({
   const [activeEvent, setActiveEvent] = useState<AmbientEventState | null>(null);
   const clearTimerRef = useRef<number | null>(null);
   const scheduleTimerRef = useRef<number | null>(null);
-  const storageKey = `${STORAGE_PREFIX}:${classId || 'anonymous'}`;
+  const eventLayerRef = useRef<HTMLDivElement | null>(null);
 
   const canShowShootingStar = sandboxMode || stars >= 1;
   const canShowFairySwarm = sandboxMode || stars >= FAIRY_SWARM_UNLOCK_STARS;
@@ -2305,7 +2457,7 @@ export default function KingdomAmbientEvents({
     }
   }, []);
 
-  const triggerEvent = useCallback((eventId: AmbientEventId, persist = true) => {
+  const triggerEvent = useCallback((eventId: AmbientEventId) => {
     if (paused) return;
     if (eventId === 'shooting-star' && !canShowShootingStar) return;
     if (eventId === 'fairy-swarm' && !canShowFairySwarm) return;
@@ -2337,191 +2489,107 @@ export default function KingdomAmbientEvents({
           : eventId === 'phoenix-rebirth'
             ? Math.floor(Math.random() * PHOENIX_FLIGHT_PATHS.length)
             : 0;
+    const startedAt = Date.now();
 
     setActiveEvent({
       id: eventId,
-      instanceId: Date.now() + Math.floor(Math.random() * 1000),
+      instanceId: startedAt + Math.floor(Math.random() * 1000),
       pathIndex,
+      startedAt,
     });
-
-    if (persist && !sandboxMode) {
-      saveStoredState(storageKey, {
-        lastEventAt: Date.now(),
-        lastEventId: eventId,
-      });
-    }
 
     clearTimerRef.current = window.setTimeout(() => {
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowAstralLeviathan, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused, sandboxMode, storageKey]);
-
-  const chooseNaturalEvent = useCallback((): AmbientEventId => {
-    if (!canShowFairySwarm) return 'shooting-star';
-
-    const stored = readStoredState(storageKey);
-    const roll = Math.random();
-
-    const basePhoenixChance = canShowPhoenixRebirth
-      ? (realm === 'legendary' ? 0.10 : stars >= 20 ? 0.075 : 0.055)
-      : 0;
-    const phoenixChance = stored.lastEventId === 'phoenix-rebirth' ? 0.012 : basePhoenixChance;
-    if (roll < phoenixChance) return 'phoenix-rebirth';
-
-    const remainingAfterPhoenix = 1 - phoenixChance;
-    const baseDragonChance = canShowDragonFlight
-      ? (realm === 'legendary' ? 0.18 : stars >= 16 ? 0.14 : 0.10)
-      : 0;
-    const dragonChance = stored.lastEventId === 'dragon-flight' ? 0.035 : baseDragonChance;
-    const dragonThreshold = phoenixChance + remainingAfterPhoenix * dragonChance;
-    if (roll < dragonThreshold) return 'dragon-flight';
-
-    const remainingAfterDragon = 1 - dragonThreshold;
-    const baseMeteorChance = canShowMeteorShower
-      ? (realm === 'legendary' ? 0.16 : stars >= 20 ? 0.13 : 0.10)
-      : 0;
-    const meteorChance = stored.lastEventId === 'meteor-shower' ? 0.025 : baseMeteorChance;
-    const meteorThreshold = dragonThreshold + remainingAfterDragon * meteorChance;
-    if (roll < meteorThreshold) return 'meteor-shower';
-
-    const remainingAfterMeteor = 1 - meteorThreshold;
-    const baseEclipseChance = canShowLunarEclipse
-      ? (realm === 'legendary' ? 0.12 : stars >= 22 ? 0.09 : 0.07)
-      : 0;
-    const eclipseChance = stored.lastEventId === 'lunar-eclipse' ? 0.018 : baseEclipseChance;
-    const eclipseThreshold = meteorThreshold + remainingAfterMeteor * eclipseChance;
-    if (roll < eclipseThreshold) return 'lunar-eclipse';
-
-    const remainingAfterEclipse = 1 - eclipseThreshold;
-    const baseRainbowChance = canShowRainbowStorm
-      ? (realm === 'legendary' ? 0.16 : stars >= 22 ? 0.13 : 0.10)
-      : 0;
-    const rainbowChance = stored.lastEventId === 'rainbow-storm' ? 0.025 : baseRainbowChance;
-    const rainbowThreshold = eclipseThreshold + remainingAfterEclipse * rainbowChance;
-    if (roll < rainbowThreshold) return 'rainbow-storm';
-
-    const remainingAfterRainbow = 1 - rainbowThreshold;
-    const baseThunderstormChance = canShowMagicThunderstorm
-      ? (realm === 'legendary' ? 0.16 : stars >= 28 ? 0.14 : 0.11)
-      : 0;
-    const thunderstormChance = stored.lastEventId === 'magic-thunderstorm' ? 0.02 : baseThunderstormChance;
-    const thunderstormThreshold = rainbowThreshold + remainingAfterRainbow * thunderstormChance;
-    if (roll < thunderstormThreshold) return 'magic-thunderstorm';
-
-    const remainingAfterThunderstorm = 1 - thunderstormThreshold;
-    const baseCrystalChance = canShowCrystalBloom
-      ? (realm === 'legendary' ? 0.17 : stars >= 30 ? 0.14 : 0.11)
-      : 0;
-    const crystalChance = stored.lastEventId === 'crystal-bloom' ? 0.018 : baseCrystalChance;
-    const crystalThreshold = thunderstormThreshold + remainingAfterThunderstorm * crystalChance;
-    if (roll < crystalThreshold) return 'crystal-bloom';
-
-    const remainingAfterCrystal = 1 - crystalThreshold;
-    const baseWindChance = canShowMagicalWindVortex
-      ? (realm === 'legendary' ? 0.16 : stars >= 32 ? 0.13 : 0.10)
-      : 0;
-    const windChance = stored.lastEventId === 'magical-wind-vortex' ? 0.015 : baseWindChance;
-    const windThreshold = crystalThreshold + remainingAfterCrystal * windChance;
-    if (roll < windThreshold) return 'magical-wind-vortex';
-
-    const remainingAfterWind = 1 - windThreshold;
-    const basePetalChance = canShowEnchantedPetalBloom
-      ? (realm === 'legendary' ? 0.16 : 0.10)
-      : 0;
-    const petalChance = stored.lastEventId === 'enchanted-petal-bloom' ? 0.015 : basePetalChance;
-    const petalThreshold = windThreshold + remainingAfterWind * petalChance;
-    if (roll < petalThreshold) return 'enchanted-petal-bloom';
-
-    const remainingAfterPetal = 1 - petalThreshold;
-    const basePortalChance = canShowInterdimensionalPortal
-      ? (realm === 'legendary' ? 0.13 : 0.075)
-      : 0;
-    const portalChance = stored.lastEventId === 'interdimensional-portal' ? 0.01 : basePortalChance;
-    const portalThreshold = petalThreshold + remainingAfterPetal * portalChance;
-    if (roll < portalThreshold) return 'interdimensional-portal';
-
-    const remainingAfterPortal = 1 - portalThreshold;
-    const baseWinterChance = canShowMagicalWinter
-      ? (realm === 'legendary' ? 0.14 : 0.085)
-      : 0;
-    const winterChance = stored.lastEventId === 'magical-winter' ? 0.012 : baseWinterChance;
-    const winterThreshold = portalThreshold + remainingAfterPortal * winterChance;
-    if (roll < winterThreshold) return 'magical-winter';
-
-    const remainingAfterWinter = 1 - winterThreshold;
-    const baseTideChance = canShowCelestialTide
-      ? (realm === 'legendary' ? 0.14 : 0.085)
-      : 0;
-    const tideChance = stored.lastEventId === 'celestial-tide' ? 0.012 : baseTideChance;
-    const tideThreshold = winterThreshold + remainingAfterWinter * tideChance;
-    if (roll < tideThreshold) return 'celestial-tide';
-
-    const remainingAfterTide = 1 - tideThreshold;
-    const baseStarNightChance = canShowEnchantedStarNight
-      ? (realm === 'legendary' ? 0.12 : 0.07)
-      : 0;
-    const starNightChance = stored.lastEventId === 'enchanted-star-night' ? 0.009 : baseStarNightChance;
-    const starNightThreshold = tideThreshold + remainingAfterTide * starNightChance;
-    if (roll < starNightThreshold) return 'enchanted-star-night';
-
-    const remainingAfterStarNight = 1 - starNightThreshold;
-    const baseLeviathanChance = canShowAstralLeviathan
-      ? (realm === 'legendary' ? 0.06 : 0.028)
-      : 0;
-    const leviathanChance = stored.lastEventId === 'astral-leviathan' ? 0.0035 : baseLeviathanChance;
-    const leviathanThreshold = starNightThreshold + remainingAfterStarNight * leviathanChance;
-    if (roll < leviathanThreshold) return 'astral-leviathan';
-
-    const remainingAfterLeviathan = 1 - leviathanThreshold;
-    const baseFireflyChance = canShowMagicalFireflies
-      ? (realm === 'legendary' ? 0.22 : stars >= 24 ? 0.18 : 0.14)
-      : 0;
-    const fireflyChance = stored.lastEventId === 'magical-fireflies' ? 0.035 : baseFireflyChance;
-    const fireflyThreshold = leviathanThreshold + remainingAfterLeviathan * fireflyChance;
-    if (roll < fireflyThreshold) return 'magical-fireflies';
-
-    const remainingAfterFireflies = 1 - fireflyThreshold;
-    const baseIslandChance = canShowFloatingIsland
-      ? (realm === 'legendary' ? 0.20 : stars >= 16 ? 0.18 : 0.15)
-      : 0;
-    const islandChance = stored.lastEventId === 'floating-island' ? 0.04 : baseIslandChance;
-    const islandThreshold = fireflyThreshold + remainingAfterFireflies * islandChance;
-    if (roll < islandThreshold) return 'floating-island';
-
-    const remainingAfterIsland = 1 - islandThreshold;
-    const baseAuroraChance = canShowAuroraSky
-      ? (realm === 'legendary' ? 0.28 : stars >= 18 ? 0.22 : 0.18)
-      : 0;
-    const auroraChance = stored.lastEventId === 'aurora-sky' ? 0.05 : baseAuroraChance;
-    const auroraThreshold = islandThreshold + remainingAfterIsland * auroraChance;
-    if (roll < auroraThreshold) return 'aurora-sky';
-
-    const remainingAfterAtmosphere = 1 - auroraThreshold;
-    const baseFairyChance = realm === 'legendary' ? 0.36 : stars >= 12 ? 0.32 : 0.28;
-    const fairyChance = stored.lastEventId === 'fairy-swarm' ? 0.10 : baseFairyChance;
-    const fairyThreshold = auroraThreshold + remainingAfterAtmosphere * fairyChance;
-    return roll < fairyThreshold ? 'fairy-swarm' : 'shooting-star';
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowAstralLeviathan, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, realm, stars, storageKey]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowAstralLeviathan, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused]);
 
   useEffect(() => {
     clearScheduledTimer();
-    if (paused || !canShowShootingStar || sandboxMode || activeEvent) return;
 
-    const stored = readStoredState(storageKey);
-    const elapsed = stored.lastEventAt ? Date.now() - stored.lastEventAt : Number.POSITIVE_INFINITY;
-    const cooldownRemaining = Math.max(0, REAL_COOLDOWN_MS - elapsed);
+    if (sandboxMode) return;
 
-    const naturalDelay = randomBetween(24_000, 58_000);
-    const delay = cooldownRemaining + naturalDelay;
+    clearActiveTimer();
 
-    scheduleTimerRef.current = window.setTimeout(() => {
-      scheduleTimerRef.current = null;
-      triggerEvent(chooseNaturalEvent(), true);
-    }, delay);
+    if (paused || !canShowShootingStar) {
+      setActiveEvent(null);
+      return;
+    }
 
-    return clearScheduledTimer;
-  }, [activeEvent, canShowShootingStar, chooseNaturalEvent, clearScheduledTimer, paused, sandboxMode, storageKey, realm, triggerEvent]);
+    let cancelled = false;
+
+    const syncFromRealClock = () => {
+      if (cancelled) return;
+
+      const now = Date.now();
+      const snapshot = getRealtimeScheduleSnapshot(classId, stars, now);
+      const scheduled = snapshot.active;
+
+      setActiveEvent(current => {
+        if (!scheduled) return null;
+        if (
+          current?.instanceId === scheduled.startAt
+          && current.id === scheduled.id
+          && current.pathIndex === scheduled.pathIndex
+        ) {
+          return current;
+        }
+
+        return {
+          id: scheduled.id,
+          instanceId: scheduled.startAt,
+          pathIndex: scheduled.pathIndex,
+          startedAt: scheduled.startAt,
+        };
+      });
+
+      const delay = Math.max(50, snapshot.nextTransitionAt - now + 30);
+      clearScheduledTimer();
+      scheduleTimerRef.current = window.setTimeout(syncFromRealClock, delay);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') syncFromRealClock();
+    };
+
+    syncFromRealClock();
+    window.addEventListener('focus', syncFromRealClock);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', syncFromRealClock);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearScheduledTimer();
+    };
+  }, [canShowShootingStar, classId, clearActiveTimer, clearScheduledTimer, paused, sandboxMode, stars]);
+
+  useEffect(() => {
+    if (!activeEvent || sandboxMode) return;
+
+    let secondFrame = 0;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        const eventRoot = eventLayerRef.current?.querySelector<HTMLElement>('.ck-live-event');
+        if (!eventRoot) return;
+
+        const elapsedMs = Math.max(0, Date.now() - activeEvent.startedAt);
+        const animations = eventRoot.getAnimations({ subtree: true });
+        animations.forEach(animation => {
+          try {
+            animation.currentTime = elapsedMs;
+          } catch {
+            // A decorative animation failing to seek should never break the kingdom.
+          }
+        });
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame) window.cancelAnimationFrame(secondFrame);
+    };
+  }, [activeEvent, sandboxMode]);
 
   useEffect(() => {
     return () => {
@@ -2548,6 +2616,7 @@ export default function KingdomAmbientEvents({
 
   return (
     <div
+      ref={eventLayerRef}
       className={`ck-live-events ${activeEvent?.id === 'crystal-bloom' ? 'is-crystal-depth-split' : ''} ${activeEvent?.id === 'enchanted-petal-bloom' ? 'is-petal-depth-split' : ''} ${activeEvent?.id === 'interdimensional-portal' ? 'is-portal-depth-split' : ''} ${activeEvent?.id === 'magical-winter' ? 'is-winter-depth-split' : ''} ${activeEvent?.id === 'celestial-tide' ? 'is-tide-depth-split' : ''} ${activeEvent?.id === 'astral-leviathan' ? 'is-leviathan-depth-split' : ''}`}
     >
       {activeEvent?.id === 'shooting-star' && (
@@ -2689,7 +2758,7 @@ export default function KingdomAmbientEvents({
             className="ck-live-event-test-button"
             onClick={event => {
               event.stopPropagation();
-              triggerEvent('shooting-star', false);
+              triggerEvent('shooting-star');
             }}
           >
             🌠 כוכב
@@ -2700,7 +2769,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-fairy"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('fairy-swarm', false);
+                triggerEvent('fairy-swarm');
               }}
             >
               ✨ פיות
@@ -2712,7 +2781,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-island"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('floating-island', false);
+                triggerEvent('floating-island');
               }}
             >
               🏝️ אי מרחף
@@ -2724,7 +2793,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-aurora"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('aurora-sky', false);
+                triggerEvent('aurora-sky');
               }}
             >
               🌌 אורורה
@@ -2736,7 +2805,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-meteor"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('meteor-shower', false);
+                triggerEvent('meteor-shower');
               }}
             >
               ☄️ מטאורים
@@ -2748,7 +2817,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-eclipse"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('lunar-eclipse', false);
+                triggerEvent('lunar-eclipse');
               }}
             >
               🌙 ליקוי ירח
@@ -2760,7 +2829,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-rainbow"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('rainbow-storm', false);
+                triggerEvent('rainbow-storm');
               }}
             >
               🌈 קשת קסומה
@@ -2772,7 +2841,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-fireflies"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('magical-fireflies', false);
+                triggerEvent('magical-fireflies');
               }}
             >
               ✨ גחליליות
@@ -2784,7 +2853,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-thunderstorm"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('magic-thunderstorm', false);
+                triggerEvent('magic-thunderstorm');
               }}
             >
               ⚡ סערה
@@ -2796,7 +2865,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-crystal"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('crystal-bloom', false);
+                triggerEvent('crystal-bloom');
               }}
             >
               💎 גבישים
@@ -2808,7 +2877,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-wind"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('magical-wind-vortex', false);
+                triggerEvent('magical-wind-vortex');
               }}
             >
               🌪️ רוחות קסם
@@ -2820,7 +2889,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-petal"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('enchanted-petal-bloom', false);
+                triggerEvent('enchanted-petal-bloom');
               }}
             >
               🌸 פריחה
@@ -2832,7 +2901,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-portal"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('interdimensional-portal', false);
+                triggerEvent('interdimensional-portal');
               }}
             >
               🌀 שער
@@ -2844,7 +2913,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-winter"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('magical-winter', false);
+                triggerEvent('magical-winter');
               }}
             >
               ❄️ חורף
@@ -2856,7 +2925,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-tide"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('celestial-tide', false);
+                triggerEvent('celestial-tide');
               }}
             >
               🌊 גל קסם
@@ -2868,7 +2937,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-star-night"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('enchanted-star-night', false);
+                triggerEvent('enchanted-star-night');
               }}
             >
               🌌 ליל כוכבים
@@ -2880,7 +2949,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-leviathan"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('astral-leviathan', false);
+                triggerEvent('astral-leviathan');
               }}
             >
               🐋 לווייתן כוכבים
@@ -2892,7 +2961,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-dragon"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('dragon-flight', false);
+                triggerEvent('dragon-flight');
               }}
             >
               🐉 דרקון
@@ -2904,7 +2973,7 @@ export default function KingdomAmbientEvents({
               className="ck-live-event-test-button is-phoenix"
               onClick={event => {
                 event.stopPropagation();
-                triggerEvent('phoenix-rebirth', false);
+                triggerEvent('phoenix-rebirth');
               }}
             >
               🔥 עוף חול
