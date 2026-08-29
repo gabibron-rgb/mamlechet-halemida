@@ -289,6 +289,164 @@ const chessPawn: ItemSpriteData = {
   roomHeightScale: 1.7,
 };
 
+
+const chessBracelet: ItemSpriteData = {
+  src: '/assets/items/chess-bracelet.png',
+  alt: 'צמיד שחמט',
+  className: 'object-contain drop-shadow-[0_8px_12px_rgba(0,0,0,0.30)]',
+  roomOffsetY: 12,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.4,
+  roomShelfHeightScale: 1.4,
+};
+
+const chessRook: ItemSpriteData = {
+  src: '/assets/items/chess-rook.png',
+  alt: 'צריח שחמט',
+  className: 'object-contain drop-shadow-[0_10px_14px_rgba(0,0,0,0.35)]',
+  roomOffsetY: 8,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.5,
+  roomShelfHeightScale: 1.5,
+};
+
+const chessBoardTile: ItemSpriteData = {
+  src: '/assets/items/chess-board-tile.png',
+  alt: 'תמונת לוח שחמט',
+  className: 'object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.30)]',
+  roomOffsetX: 0,
+  roomOffsetY: 0,
+  roomWidthScale: 1.2,
+  roomHeightScale: 1.2,
+};
+
+const chessGameNotebook: ItemSpriteData = {
+  src: '/assets/items/chess-game-notebook.png',
+  alt: 'מחברת משחקים',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
+  roomOffsetY: 10,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+};
+
+const chessKnightPendant: ItemSpriteData = {
+  src: '/assets/items/chess-knight-pendant.png',
+  alt: 'תליון פרש',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)] drop-shadow-[0_0_10px_rgba(245,193,65,0.20)]',
+  roomOffsetY: 8,
+  roomWidthScale: 1.3,
+  roomHeightScale: 1.3,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+};
+
+const chessMug: ItemSpriteData = {
+  src: '/assets/items/chess-mug.png',
+  alt: 'ספל שחמט',
+  className: 'object-contain drop-shadow-[0_10px_14px_rgba(0,0,0,0.32)]',
+  roomOffsetY: 8,
+  roomWidthScale: 1.35,
+  roomHeightScale: 1.35,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.35,
+  roomShelfHeightScale: 1.35,
+};
+
+const chessHourglass: ItemSpriteData = {
+  src: '/assets/items/chess-hourglass.png',
+  alt: 'שעון חול שחמט',
+  className: 'object-contain drop-shadow-[0_10px_14px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 6,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.5,
+  roomShelfHeightScale: 1.5,
+};
+
+const chessPieceSet: ItemSpriteData = {
+  src: '/assets/items/chess-piece-set.png',
+  alt: 'סט כלים קטן',
+  className: 'object-contain drop-shadow-[0_10px_14px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 10,
+  roomWidthScale: 1.45,
+  roomHeightScale: 1.45,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.5,
+  roomShelfHeightScale: 1.5,
+};
+
+const chessQueenKeychain: ItemSpriteData = {
+  src: '/assets/items/chess-queen-keychain.png',
+  alt: 'מחזיק מפתחות מלכה',
+  className: 'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.32)] drop-shadow-[0_0_12px_rgba(80,190,255,0.30)]',
+  roomOffsetY: 8,
+  roomWidthScale: 1.4,
+  roomHeightScale: 1.4,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.45,
+  roomShelfHeightScale: 1.45,
+};
+
+const chessTravelSet: ItemSpriteData = {
+  src: '/assets/items/chess-travel-set.png',
+  alt: 'ערכת שחמט לנסיעות',
+  className: 'object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.36)]',
+  roomOffsetY: 10,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetY: 18,
+  roomShelfWidthScale: 1.55,
+  roomShelfHeightScale: 1.55,
+};
+
+const chessTable: ItemSpriteData = {
+  src: '/assets/items/chess-table.png',
+  alt: 'שולחן שחמט',
+  className: 'object-contain drop-shadow-[0_16px_20px_rgba(0,0,0,0.38)]',
+  roomOffsetY: 18,
+  roomWidthScale: 1.75,
+  roomHeightScale: 1.75,
+  roomFloorOffsetY: 28,
+  roomFloorWidthScale: 1.9,
+  roomFloorHeightScale: 1.9,
+};
+
+const chessDigitalCube: ItemSpriteData = {
+  src: '/assets/items/chess-digital-cube.png',
+  alt: 'קוביית שחמט דיגיטלית',
+  className: 'object-contain drop-shadow-[0_10px_16px_rgba(0,0,0,0.34)] drop-shadow-[0_0_14px_rgba(75,205,255,0.48)]',
+  roomOffsetY: 6,
+  roomWidthScale: 1.5,
+  roomHeightScale: 1.5,
+  roomShelfOffsetY: 16,
+  roomShelfWidthScale: 1.55,
+  roomShelfHeightScale: 1.55,
+};
+
+const chessKnightLamp: ItemSpriteData = {
+  src: '/assets/items/chess-knight-lamp.png',
+  alt: 'מנורת הפרש הזוהר',
+  className: 'object-contain drop-shadow-[0_0_22px_rgba(70,205,255,0.65)] drop-shadow-[0_12px_18px_rgba(0,0,0,0.34)]',
+  roomOffsetY: 2,
+  roomWidthScale: 1.7,
+  roomHeightScale: 1.7,
+  roomShelfOffsetY: 14,
+  roomShelfWidthScale: 1.75,
+  roomShelfHeightScale: 1.75,
+  roomFloorOffsetY: 20,
+  roomFloorWidthScale: 2.0,
+  roomFloorHeightScale: 2.0,
+};
+
 const spaceMoonLamp: ItemSpriteData = {
   src: '/assets/items/space-moon-lamp.png',
   alt: 'מנורת ירח',
@@ -4571,6 +4729,19 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   chess_knight: chessKnight,
   chess_queen_statue: chessQueenStatue,
   chess_king: chessKing,
+  chess_bracelet: chessBracelet,
+  chess_rook: chessRook,
+  chess_board_tile: chessBoardTile,
+  chess_game_notebook: chessGameNotebook,
+  chess_knight_pendant: chessKnightPendant,
+  chess_mug: chessMug,
+  chess_hourglass: chessHourglass,
+  chess_piece_set: chessPieceSet,
+  chess_queen_keychain: chessQueenKeychain,
+  chess_travel_set: chessTravelSet,
+  chess_table: chessTable,
+  chess_digital_cube: chessDigitalCube,
+  chess_knight_lamp: chessKnightLamp,
   space_moon_lamp: spaceMoonLamp,
   space_rocket: spaceRocket,
   space_planet: spacePlanet,
