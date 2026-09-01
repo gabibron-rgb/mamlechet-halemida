@@ -25,8 +25,8 @@ const STAGE_SIZE: Record<CompanionStage, string> = {
   hatchling: 'h-12 w-12 sm:h-16 sm:w-16',
   young: 'h-14 w-14 sm:h-20 sm:w-20',
   grown: 'h-16 w-16 sm:h-24 sm:w-24',
-  magical: 'h-[4.5rem] w-[4.5rem] sm:h-[6.5rem] sm:w-[6.5rem]',
-  legendary: 'h-20 w-20 sm:h-28 sm:w-28',
+  magical: 'h-56 w-56 sm:h-[18.75rem] sm:w-[18.75rem]',
+  legendary: 'h-72 w-72 sm:h-[25.25rem] sm:w-[25.25rem]',
 };
 
 const STAGE_LABEL_HE: Record<CompanionStage, string> = {
@@ -38,17 +38,63 @@ const STAGE_LABEL_HE: Record<CompanionStage, string> = {
   legendary: 'חיית מחמד אגדית',
 };
 
+/**
+ * Visual calibration for full-frame companion sprites.
+ *
+ * The source PNGs are not trimmed identically: some forms have much more
+ * transparent padding, and running poses are often shorter than idle poses.
+ * A single CSS box size therefore makes the creature appear to shrink or
+ * barely grow even when the evolution stage itself is larger.
+ *
+ * Keep corrections here instead of scattering theme-specific `if` blocks
+ * throughout the renderer. Values are deliberately visual, not canvas-size
+ * based: idle and run should read as the same-sized creature in the room.
+ */
+type CompanionActivityScale = {
+  idle: number;
+  run: number;
+};
+
+const COMPANION_VISUAL_SCALE: Partial<
+  Record<string, Partial<Record<CompanionStage, CompanionActivityScale>>>
+> = {
+  // Space is already approved. Preserve its existing run normalization.
+  space: {
+    young: { idle: 1, run: 1.2 },
+    grown: { idle: 1, run: 1.2 },
+    magical: { idle: 1, run: 1.2 },
+  },
+
+  // Animals is calibrated against the approved Space and Chess worlds.
+  // Target visual progression in the room is approximately:
+  // form 1 ~140px -> form 2 ~160px -> form 3 ~190px -> form 4 ~235px.
+  animals: {
+    hatchling: { idle: 1, run: 1 },
+    young: { idle: 1.15, run: 1.29 },
+    grown: { idle: 1.075, run: 1.165 },
+    magical: { idle: 1.02, run: 1.045 },
+  },
+};
+
+function companionVisualScale(
+  theme: string | null | undefined,
+  stage: CompanionStage,
+  isWalking: boolean
+): number {
+  if (!theme) return 1;
+  const calibration = COMPANION_VISUAL_SCALE[theme]?.[stage];
+  if (!calibration) return 1;
+  return isWalking ? calibration.run : calibration.idle;
+}
+
 function randomBetween(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
 const GROUND_WALK_POINTS = [
-  // Left side: stay near the front edge so the pet never appears on the table.
   { x: 12, y: 96 },
   { x: 24, y: 95.5 },
   { x: 36, y: 94.5 },
-
-  // Open centre/right floor: allow visible depth changes as well as sideways travel.
   { x: 46, y: 92 },
   { x: 56, y: 89.5 },
   { x: 64, y: 95.5 },
@@ -57,21 +103,37 @@ const GROUND_WALK_POINTS = [
   { x: 90, y: 95.5 },
 ] as const;
 
+// Large companions visually extend far above their feet. Keeping their anchor
+// on the far-left floor makes them look as if they pass through the table.
+// Use only the genuinely open centre/right floor for grown+ companions.
+const LARGE_COMPANION_WALK_POINTS = [
+  { x: 48, y: 95.5 },
+  { x: 56, y: 92.5 },
+  { x: 64, y: 95.5 },
+  { x: 72, y: 91.5 },
+  { x: 80, y: 94 },
+  { x: 88, y: 95.5 },
+] as const;
+
 function randomGroundDestination(
   currentX: number,
-  currentY: number
+  currentY: number,
+  largeCompanion: boolean
 ): { x: number; y: number } {
-  const distantPoints = GROUND_WALK_POINTS.filter(point => {
+  const availablePoints = largeCompanion
+    ? LARGE_COMPANION_WALK_POINTS
+    : GROUND_WALK_POINTS;
+  const distantPoints = availablePoints.filter(point => {
     const horizontalChange = Math.abs(point.x - currentX);
     const depthChange = Math.abs(point.y - currentY);
     return horizontalChange >= 10 || depthChange >= 2.2;
   });
-  const pool = distantPoints.length > 0 ? distantPoints : GROUND_WALK_POINTS;
+  const pool = distantPoints.length > 0 ? distantPoints : availablePoints;
   const point = pool[Math.floor(Math.random() * pool.length)];
 
   return {
-    x: Math.max(9, Math.min(92, point.x + randomBetween(-2, 2))),
-    y: Math.max(88.8, Math.min(96.5, point.y + randomBetween(-0.7, 0.7))),
+    x: Math.max(largeCompanion ? 46 : 9, Math.min(92, point.x + randomBetween(-1.6, 1.6))),
+    y: Math.max(90.2, Math.min(96.5, point.y + randomBetween(-0.55, 0.55))),
   };
 }
 
@@ -90,8 +152,8 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     : null;
   const isEgg = companion.stage === 'egg';
   const isMagical = companion.stage === 'magical';
+  const isScienceMagical = companion.theme === 'science' && companion.stage === 'magical';
   const isLegendary = companion.stage === 'legendary';
-  const isChessPegasus = isLegendary && companion.theme === 'chess';
   const isChessHatchling =
     companion.theme === 'chess' && companion.stage === 'hatchling';
   const isChessYoung =
@@ -100,12 +162,19 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     companion.theme !== 'chess' && companion.stage === 'hatchling';
   const isNonChessYoung =
     companion.theme !== 'chess' && companion.stage === 'young';
+  const isSpaceYoung = companion.theme === 'space' && companion.stage === 'young';
+  const visualScale = companionVisualScale(
+    companion.theme,
+    companion.stage,
+    isWalking
+  );
   // New form-1 chess sprite faces right, same as the other frame-based companions.
   const isChessLeftFacingArt = false;
   const isChessKnightHop = isChessHatchling;
   const hasLegendaryBond = (companion.unlockedSkills ?? []).includes(
     'legendary_bond'
   );
+  const usesLargeFloorPath = ['grown', 'magical', 'legendary'].includes(companion.stage);
 
   useEffect(() => {
     if (!companion.unlocked || !visuals) return;
@@ -164,12 +233,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       if (cancelled) return;
 
       const current = positionRef.current;
-      const destination = isChessPegasus
-        ? {
-            x: randomBetween(17, 86),
-            y: randomBetween(30, 69),
-          }
-        : randomGroundDestination(current.x, current.y);
+      const destination = randomGroundDestination(current.x, current.y, usesLargeFloorPath);
 
       const nextFacing: RoomPosition['facing'] =
         destination.x < current.x ? 'left' : 'right';
@@ -206,14 +270,12 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       if (turnTimer !== undefined) window.clearTimeout(turnTimer);
       if (walkingTimer !== undefined) window.clearTimeout(walkingTimer);
     };
-  }, [companion.stage, companion.unlocked, isChessPegasus, isEditing, isEgg, visuals]);
+  }, [companion.stage, companion.unlocked, isEditing, isEgg, usesLargeFloorPath, visuals]);
 
   if (!companion.unlocked || !visuals) return null;
 
-  const depthScale = isChessPegasus
-    ? 0.9
-    : Math.max(0.76, Math.min(1.08, 0.76 + (position.y - 70) * 0.018));
-  const zIndex = isChessPegasus ? 720 : Math.round(500 + position.y);
+  const depthScale = Math.max(0.76, Math.min(1.08, 0.76 + (position.y - 70) * 0.018));
+  const zIndex = Math.round(500 + position.y);
   const displayName = companion.name?.trim() || visuals.nameHe;
   const formArt = companion.theme
     ? getCompanionFormArt(companion.theme, companion.stage)
@@ -227,11 +289,15 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
     ? 'h-20 w-20 sm:h-28 sm:w-28'
     : isNonChessHatchling
       ? 'h-24 w-24 sm:h-36 sm:w-36'
+      : isSpaceYoung
+        ? 'h-[8.25rem] w-[8.25rem] sm:h-[11rem] sm:w-[11rem]'
       : isChessYoung || isNonChessYoung
         ? 'h-[9.375rem] w-[9.375rem] sm:h-[12.5rem] sm:w-[12.5rem]'
         : companion.stage === 'grown'
           ? 'h-[11.25rem] w-[11.25rem] sm:h-60 sm:w-60'
-          : STAGE_SIZE[companion.stage];
+          : isScienceMagical
+            ? 'h-[13.25rem] w-[13.25rem] sm:h-[17.75rem] sm:w-[17.75rem]'
+            : STAGE_SIZE[companion.stage];
   const facingScale = isChessLeftFacingArt
     ? position.facing === 'left' ? 1 : -1
     : position.facing === 'left' ? -1 : 1;
@@ -279,7 +345,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         </>
       )}
 
-      {isMagical && (
+      {isMagical && !hasCustomFormArt && (
         <div className="absolute -inset-3 animate-pulse rounded-full border border-fuchsia-200/50 shadow-[0_0_26px_rgba(216,180,254,0.62)]" />
       )}
 
@@ -287,28 +353,15 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         <div className="absolute -inset-3 animate-pulse rounded-full border border-yellow-200/55 shadow-[0_0_28px_rgba(250,204,21,0.7)]" />
       )}
 
-      {isChessPegasus && (
-        <>
-          <div className="absolute -left-9 top-1/3 origin-bottom-right animate-[companionWingLeft_1.35s_ease-in-out_infinite] text-5xl drop-shadow-[0_0_10px_rgba(255,255,255,0.75)] motion-reduce:animate-none sm:-left-12 sm:text-7xl">
-            🪽
-          </div>
-          <div className="absolute -right-9 top-1/3 origin-bottom-left animate-[companionWingRight_1.35s_ease-in-out_infinite] text-5xl drop-shadow-[0_0_10px_rgba(255,255,255,0.75)] motion-reduce:animate-none sm:-right-12 sm:text-7xl">
-            🪽
-          </div>
-        </>
-      )}
-
       <div
         className={`companion-motion relative flex overflow-visible ${stageSizeClass} items-center justify-center drop-shadow-xl motion-reduce:animate-none ${
-          isChessPegasus
-            ? 'animate-[companionLegendaryFloat_2.9s_ease-in-out_infinite]'
-            : ''
+          ''
         }`}
         style={{
           '--companion-facing': facingScale,
           // Ground companions do not use the global float animation anymore,
           // so apply their facing directly instead of relying on a keyframe.
-          transform: isChessPegasus ? undefined : `scaleX(${facingScale})`,
+          transform: `scaleX(${facingScale})`,
           transformOrigin: 'center bottom',
         } as CSSProperties}
       >
@@ -345,6 +398,14 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
                 } ${isWalking ? 'companion-running' : ''} ${
                   isWalking && isChessKnightHop ? 'companion-knight-hop' : ''
                 }`}
+                style={
+                  visualScale !== 1
+                    ? {
+                        transform: `scale(${visualScale})`,
+                        transformOrigin: 'center bottom',
+                      }
+                    : undefined
+                }
               >
                 <AnimatedCompanionArt
                   art={formArt}
@@ -389,11 +450,9 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
 
       <div
         className={`absolute left-1/2 -translate-x-1/2 rounded-[50%] bg-black/35 ${
-          isChessPegasus
-            ? '-bottom-7 h-2 w-16 opacity-50 blur-[2px]'
-            : isChessHatchling
-              ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
-              : '-bottom-1 h-2 w-4/5 blur-[2px]'
+          isChessHatchling
+            ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
+            : '-bottom-1 h-2 w-4/5 blur-[2px]'
         }`}
       />
     </div>

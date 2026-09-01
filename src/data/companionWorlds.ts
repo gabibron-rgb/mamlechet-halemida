@@ -902,6 +902,52 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 125,
       },
     },
+    magical: {
+      nameHe: 'פרש הכנפיים — צורה 4',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/chess/form4/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/chess/form4/frames/idle-1.png',
+          '/assets/companions/chess/form4/frames/idle-2.png',
+          '/assets/companions/chess/form4/frames/idle-3.png',
+          '/assets/companions/chess/form4/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/chess/form4/frames/run-1.png',
+          '/assets/companions/chess/form4/frames/run-2.png',
+          '/assets/companions/chess/form4/frames/run-3.png',
+          '/assets/companions/chess/form4/frames/run-4.png',
+          '/assets/companions/chess/form4/frames/run-5.png',
+          '/assets/companions/chess/form4/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 320,
+        runFrameDurationMs: 122,
+      },
+    },
+    legendary: {
+      nameHe: 'פגסוס השחמט — צורה 5',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/chess/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/chess/form5/frames/idle-1.png',
+          '/assets/companions/chess/form5/frames/idle-2.png',
+          '/assets/companions/chess/form5/frames/idle-3.png',
+          '/assets/companions/chess/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/chess/form5/frames/run-1.png',
+          '/assets/companions/chess/form5/frames/run-2.png',
+          '/assets/companions/chess/form5/frames/run-3.png',
+          '/assets/companions/chess/form5/frames/run-4.png',
+          '/assets/companions/chess/form5/frames/run-5.png',
+          '/assets/companions/chess/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 300,
+        runFrameDurationMs: 116,
+      },
+    },
   },
 };
 
@@ -978,7 +1024,7 @@ const FORM3_GROWN_ART: Partial<Record<ThemeId, CompanionFormArt>> = {
     },
   },
   animals: {
-    nameHe: 'פיץ — שועל שומר היער',
+    nameHe: 'פיץ — טיגריס שומר הפרא',
     movementProfile: 'ground',
     frameAnimation: {
       staticSrc: '/assets/companions/animals/form3/frames/idle-1.png',
@@ -1256,12 +1302,340 @@ const FORM3_GROWN_ART: Partial<Record<ThemeId, CompanionFormArt>> = {
 };
 // FORM3_FULL_REBUILD_2026_08_25_END
 
+// FORM4_MAGICAL_BATCH_2026_08_29_START
+const FORM4_MAGICAL_ART: Partial<Record<ThemeId, CompanionFormArt>> = {
+  science: {
+    nameHe: 'אטומיקס — אלכימאי הביו־אור',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/science/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/science/form4/frames/idle-1.png',
+        '/assets/companions/science/form4/frames/idle-2.png',
+        '/assets/companions/science/form4/frames/idle-3.png',
+        '/assets/companions/science/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/science/form4/frames/run-1.png',
+        '/assets/companions/science/form4/frames/run-2.png',
+        '/assets/companions/science/form4/frames/run-3.png',
+        '/assets/companions/science/form4/frames/run-4.png',
+        '/assets/companions/science/form4/frames/run-5.png',
+        '/assets/companions/science/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  space: {
+    nameHe: 'נובה — שומרת הערפילית',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/space/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/space/form4/frames/idle-1.png',
+        '/assets/companions/space/form4/frames/idle-2.png',
+        '/assets/companions/space/form4/frames/idle-3.png',
+        '/assets/companions/space/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/space/form4/frames/run-1.png',
+        '/assets/companions/space/form4/frames/run-2.png',
+        '/assets/companions/space/form4/frames/run-3.png',
+        '/assets/companions/space/form4/frames/run-4.png',
+        '/assets/companions/space/form4/frames/run-5.png',
+        '/assets/companions/space/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  animals: {
+    nameHe: 'פיץ — אריה שומר הממלכה',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/animals/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/animals/form4/frames/idle-1.png',
+        '/assets/companions/animals/form4/frames/idle-2.png',
+        '/assets/companions/animals/form4/frames/idle-3.png',
+        '/assets/companions/animals/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/animals/form4/frames/run-1.png',
+        '/assets/companions/animals/form4/frames/run-2.png',
+        '/assets/companions/animals/form4/frames/run-3.png',
+        '/assets/companions/animals/form4/frames/run-4.png',
+        '/assets/companions/animals/form4/frames/run-5.png',
+        '/assets/companions/animals/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  nature: {
+    nameHe: 'עלה — רוח החורש',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/nature/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/nature/form4/frames/idle-1.png',
+        '/assets/companions/nature/form4/frames/idle-2.png',
+        '/assets/companions/nature/form4/frames/idle-3.png',
+        '/assets/companions/nature/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/nature/form4/frames/run-1.png',
+        '/assets/companions/nature/form4/frames/run-2.png',
+        '/assets/companions/nature/form4/frames/run-3.png',
+        '/assets/companions/nature/form4/frames/run-4.png',
+        '/assets/companions/nature/form4/frames/run-5.png',
+        '/assets/companions/nature/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  robotics: {
+    nameHe: 'ביט־X — שומר הסייבר',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/robotics/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/robotics/form4/frames/idle-1.png',
+        '/assets/companions/robotics/form4/frames/idle-2.png',
+        '/assets/companions/robotics/form4/frames/idle-3.png',
+        '/assets/companions/robotics/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/robotics/form4/frames/run-1.png',
+        '/assets/companions/robotics/form4/frames/run-2.png',
+        '/assets/companions/robotics/form4/frames/run-3.png',
+        '/assets/companions/robotics/form4/frames/run-4.png',
+        '/assets/companions/robotics/form4/frames/run-5.png',
+        '/assets/companions/robotics/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  fantasy: {
+    nameHe: 'לונה — דרקון הרונות הקסום',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/fantasy/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/fantasy/form4/frames/idle-1.png',
+        '/assets/companions/fantasy/form4/frames/idle-2.png',
+        '/assets/companions/fantasy/form4/frames/idle-3.png',
+        '/assets/companions/fantasy/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/fantasy/form4/frames/run-1.png',
+        '/assets/companions/fantasy/form4/frames/run-2.png',
+        '/assets/companions/fantasy/form4/frames/run-3.png',
+        '/assets/companions/fantasy/form4/frames/run-4.png',
+        '/assets/companions/fantasy/form4/frames/run-5.png',
+        '/assets/companions/fantasy/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  art: {
+    nameHe: 'פלטה — מאסטרית הצבע הקסומה',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/art/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/art/form4/frames/idle-1.png',
+        '/assets/companions/art/form4/frames/idle-2.png',
+        '/assets/companions/art/form4/frames/idle-3.png',
+        '/assets/companions/art/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/art/form4/frames/run-1.png',
+        '/assets/companions/art/form4/frames/run-2.png',
+        '/assets/companions/art/form4/frames/run-3.png',
+        '/assets/companions/art/form4/frames/run-4.png',
+        '/assets/companions/art/form4/frames/run-5.png',
+        '/assets/companions/art/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  building: {
+    nameHe: 'בוני — אדריכל הממלכה',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/building/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/building/form4/frames/idle-1.png',
+        '/assets/companions/building/form4/frames/idle-2.png',
+        '/assets/companions/building/form4/frames/idle-3.png',
+        '/assets/companions/building/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/building/form4/frames/run-1.png',
+        '/assets/companions/building/form4/frames/run-2.png',
+        '/assets/companions/building/form4/frames/run-3.png',
+        '/assets/companions/building/form4/frames/run-4.png',
+        '/assets/companions/building/form4/frames/run-5.png',
+        '/assets/companions/building/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  sports: {
+    nameHe: 'ספרינט — אלוף הלהבה',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/sports/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/sports/form4/frames/idle-1.png',
+        '/assets/companions/sports/form4/frames/idle-2.png',
+        '/assets/companions/sports/form4/frames/idle-3.png',
+        '/assets/companions/sports/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/sports/form4/frames/run-1.png',
+        '/assets/companions/sports/form4/frames/run-2.png',
+        '/assets/companions/sports/form4/frames/run-3.png',
+        '/assets/companions/sports/form4/frames/run-4.png',
+        '/assets/companions/sports/form4/frames/run-5.png',
+        '/assets/companions/sports/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  music: {
+    nameHe: 'מנגינה — מאסטרו הכנפיים',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/music/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/music/form4/frames/idle-1.png',
+        '/assets/companions/music/form4/frames/idle-2.png',
+        '/assets/companions/music/form4/frames/idle-3.png',
+        '/assets/companions/music/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/music/form4/frames/run-1.png',
+        '/assets/companions/music/form4/frames/run-2.png',
+        '/assets/companions/music/form4/frames/run-3.png',
+        '/assets/companions/music/form4/frames/run-4.png',
+        '/assets/companions/music/form4/frames/run-5.png',
+        '/assets/companions/music/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  books: {
+    nameHe: 'דפדף — חכם הארכיון',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/books/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/books/form4/frames/idle-1.png',
+        '/assets/companions/books/form4/frames/idle-2.png',
+        '/assets/companions/books/form4/frames/idle-3.png',
+        '/assets/companions/books/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/books/form4/frames/run-1.png',
+        '/assets/companions/books/form4/frames/run-2.png',
+        '/assets/companions/books/form4/frames/run-3.png',
+        '/assets/companions/books/form4/frames/run-4.png',
+        '/assets/companions/books/form4/frames/run-5.png',
+        '/assets/companions/books/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  math: {
+    nameHe: 'פאי — גאומטריקאי הקסם',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/math/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/math/form4/frames/idle-1.png',
+        '/assets/companions/math/form4/frames/idle-2.png',
+        '/assets/companions/math/form4/frames/idle-3.png',
+        '/assets/companions/math/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/math/form4/frames/run-1.png',
+        '/assets/companions/math/form4/frames/run-2.png',
+        '/assets/companions/math/form4/frames/run-3.png',
+        '/assets/companions/math/form4/frames/run-4.png',
+        '/assets/companions/math/form4/frames/run-5.png',
+        '/assets/companions/math/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  generic: {
+    nameHe: 'ניצוץ — שומר הממלכה',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/generic/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/generic/form4/frames/idle-1.png',
+        '/assets/companions/generic/form4/frames/idle-2.png',
+        '/assets/companions/generic/form4/frames/idle-3.png',
+        '/assets/companions/generic/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/generic/form4/frames/run-1.png',
+        '/assets/companions/generic/form4/frames/run-2.png',
+        '/assets/companions/generic/form4/frames/run-3.png',
+        '/assets/companions/generic/form4/frames/run-4.png',
+        '/assets/companions/generic/form4/frames/run-5.png',
+        '/assets/companions/generic/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+  ballet: {
+    nameHe: 'ברבורית — פרימה קסומה',
+    movementProfile: 'ground',
+    frameAnimation: {
+      staticSrc: '/assets/companions/ballet/form4/frames/idle-1.png',
+      idleFrames: [
+        '/assets/companions/ballet/form4/frames/idle-1.png',
+        '/assets/companions/ballet/form4/frames/idle-2.png',
+        '/assets/companions/ballet/form4/frames/idle-3.png',
+        '/assets/companions/ballet/form4/frames/idle-4.png',
+      ],
+      runFrames: [
+        '/assets/companions/ballet/form4/frames/run-1.png',
+        '/assets/companions/ballet/form4/frames/run-2.png',
+        '/assets/companions/ballet/form4/frames/run-3.png',
+        '/assets/companions/ballet/form4/frames/run-4.png',
+        '/assets/companions/ballet/form4/frames/run-5.png',
+        '/assets/companions/ballet/form4/frames/run-6.png',
+      ],
+      idleFrameDurationMs: 310,
+      runFrameDurationMs: 124,
+    },
+  },
+};
+// FORM4_MAGICAL_BATCH_2026_08_29_END
+
 export function getCompanionFormArt(
   theme: ThemeId,
   stage: CompanionStage
 ): CompanionFormArt | null {
   if (stage === 'egg') return null;
   if (stage === 'grown') return FORM3_GROWN_ART[theme] ?? COMPANION_FORM_ART[theme]?.[stage] ?? null;
+  if (stage === 'magical') return FORM4_MAGICAL_ART[theme] ?? COMPANION_FORM_ART[theme]?.[stage] ?? null;
   return COMPANION_FORM_ART[theme]?.[stage] ?? null;
 }
 
