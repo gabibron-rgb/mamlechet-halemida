@@ -227,7 +227,7 @@ export default function ClassRosterManagerModal({
               <div className="text-base font-black text-white">⚡ הוספה מהירה</div>
               <p className="mt-1 text-xs leading-5 text-magic-soft/60">
                 הדבק/י רשימת שמות, תלמיד אחד בכל שורה. אפשר להעתיק ישירות מעמודה באקסל.
-                שמות המשתמש והקודים בני 4 הספרות נוצרים לבד.
+                שם המשתמש נוצר אוטומטית משם פרטי + האות הראשונה של שם המשפחה, והקוד הוא בן 4 ספרות.
               </p>
             </div>
             <div className="shrink-0 rounded-full border border-white/10 bg-magic-bg/50 px-3 py-1 text-[11px] font-bold text-magic-soft/70">

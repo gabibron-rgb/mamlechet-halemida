@@ -6,6 +6,7 @@ import {
   getRecentInventorySales,
   resetStudentPin,
   restoreInventorySale,
+  updateStudentCredentials,
   type InventorySaleRow,
   type StudentCredentialRow,
 } from '../../lib/teacherManagement';
@@ -57,6 +58,10 @@ export default function StudentManagementModal({
   const [credential, setCredential] = useState<StudentCredentialRow | null>(null);
   const [credentialLoading, setCredentialLoading] = useState(false);
   const [pinResetting, setPinResetting] = useState(false);
+  const [credentialEditing, setCredentialEditing] = useState(false);
+  const [credentialSaving, setCredentialSaving] = useState(false);
+  const [loginNameDraft, setLoginNameDraft] = useState('');
+  const [loginCodeDraft, setLoginCodeDraft] = useState('');
   const [credentialMessage, setCredentialMessage] = useState<string | null>(null);
   const [sales, setSales] = useState<InventorySaleRow[]>([]);
   const [salesLoading, setSalesLoading] = useState(false);
@@ -96,9 +101,13 @@ export default function StudentManagementModal({
       }),
     ]);
 
-    setCredential(
-      credentialRows.find(row => row.id === student.id) ?? null
-    );
+    const nextCredential =
+      credentialRows.find(row => row.id === student.id) ?? null;
+    setCredential(nextCredential);
+    if (!credentialEditing && nextCredential) {
+      setLoginNameDraft(nextCredential.loginName);
+      setLoginCodeDraft(nextCredential.loginCode);
+    }
     setSales(saleRows);
     setCredentialLoading(false);
     setSalesLoading(false);
@@ -114,6 +123,10 @@ export default function StudentManagementModal({
     setGenderMessage(null);
     setGenderError(null);
     setCredential(null);
+    setCredentialEditing(false);
+    setCredentialSaving(false);
+    setLoginNameDraft('');
+    setLoginCodeDraft('');
     setCredentialMessage(null);
     setSales([]);
     setPinResetting(false);
@@ -124,7 +137,7 @@ export default function StudentManagementModal({
   }, [open, student?.id, teacherId, currentClass.id]);
 
   function close() {
-    if (saving || genderSaving || pinResetting || archiving || restoringSaleId) return;
+    if (saving || genderSaving || pinResetting || credentialSaving || archiving || restoringSaleId) return;
     setTargetClassId('');
     setConfirming(false);
     setArchiveConfirming(false);
@@ -199,8 +212,77 @@ export default function StudentManagementModal({
     setCredential(current =>
       current ? { ...current, loginCode: result.data } : current
     );
+    setLoginCodeDraft(result.data);
     setCredentialMessage(`הקוד החדש הוא ${result.data}.`);
     setPinResetting(false);
+  }
+
+  function startCredentialEdit() {
+    if (!credential) return;
+    setLoginNameDraft(credential.loginName);
+    setLoginCodeDraft(credential.loginCode);
+    setCredentialMessage(null);
+    setError(null);
+    setCredentialEditing(true);
+  }
+
+  function cancelCredentialEdit() {
+    if (credentialSaving) return;
+    if (credential) {
+      setLoginNameDraft(credential.loginName);
+      setLoginCodeDraft(credential.loginCode);
+    }
+    setCredentialEditing(false);
+    setError(null);
+  }
+
+  async function saveCredentials() {
+    if (!teacherId || !student || !credential || credentialSaving) return;
+
+    const cleanLoginName = loginNameDraft.trim();
+    const cleanLoginCode = loginCodeDraft.trim();
+
+    if (!cleanLoginName) {
+      setError('יש להזין שם משתמש.');
+      return;
+    }
+
+    if (!/^\d{4}$/.test(cleanLoginCode)) {
+      setError('הקוד האישי חייב להכיל בדיוק 4 ספרות.');
+      return;
+    }
+
+    setCredentialSaving(true);
+    setCredentialMessage(null);
+    setError(null);
+
+    const result = await updateStudentCredentials({
+      teacherId,
+      studentId: student.id,
+      loginName: cleanLoginName,
+      loginCode: cleanLoginCode,
+    });
+
+    if (!result.ok) {
+      setError(result.message);
+      setCredentialSaving(false);
+      return;
+    }
+
+    setCredential(current =>
+      current
+        ? {
+            ...current,
+            loginName: result.data.loginName,
+            loginCode: result.data.loginCode,
+          }
+        : current
+    );
+    setLoginNameDraft(result.data.loginName);
+    setLoginCodeDraft(result.data.loginCode);
+    setCredentialEditing(false);
+    setCredentialMessage('פרטי ההתחברות עודכנו. ההתקדמות של התלמיד/ה נשארה ללא שינוי.');
+    setCredentialSaving(false);
   }
 
   async function handleCopyCredentials() {
@@ -273,40 +355,102 @@ export default function StudentManagementModal({
           <section className="rounded-2xl border border-magic-accent/20 bg-magic-accent/5 p-4">
             <div className="text-sm font-black text-white">🔑 פרטי התחברות</div>
             <p className="mt-1 text-xs leading-5 text-magic-soft/55">
-              פרטי ההתחברות זמינים למורה גם אחרי יצירת המשתמש. אפשר להעתיק או לאפס קוד בכל רגע.
+              פרטי ההתחברות זמינים למורה גם אחרי יצירת המשתמש. אפשר להעתיק, לערוך שם משתמש וקוד, או לייצר קוד חדש.
             </p>
 
             {credentialLoading ? (
               <div className="mt-4 text-center text-xs font-bold text-magic-soft/55">טוען...</div>
             ) : credential ? (
               <>
-                <div className="mt-4 grid grid-cols-2 gap-2">
-                  <div className="rounded-xl bg-magic-bg/55 p-3">
-                    <div className="text-[10px] font-bold text-magic-soft/45">שם משתמש</div>
-                    <div className="mt-1 break-all font-black text-white">{credential.loginName}</div>
+                {credentialEditing ? (
+                  <div className="mt-4 rounded-xl border border-magic-accent/20 bg-magic-bg/40 p-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="text-[10px] font-bold text-magic-soft/55">שם משתמש</span>
+                        <input
+                          value={loginNameDraft}
+                          onChange={event => {
+                            setLoginNameDraft(event.target.value);
+                            setError(null);
+                          }}
+                          maxLength={30}
+                          autoComplete="off"
+                          className="mt-1 w-full rounded-lg border border-white/15 bg-magic-bg/70 px-3 py-2 font-black text-white outline-none focus:border-magic-accent/60"
+                        />
+                      </label>
+                      <label className="block">
+                        <span className="text-[10px] font-bold text-magic-soft/55">קוד אישי — 4 ספרות</span>
+                        <input
+                          value={loginCodeDraft}
+                          onChange={event => {
+                            setLoginCodeDraft(event.target.value.replace(/\D/g, '').slice(0, 4));
+                            setError(null);
+                          }}
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength={4}
+                          autoComplete="off"
+                          className="mt-1 w-full rounded-lg border border-white/15 bg-magic-bg/70 px-3 py-2 font-mono text-lg font-black tracking-widest text-magic-accent outline-none focus:border-magic-accent/60"
+                        />
+                      </label>
+                    </div>
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        type="button"
+                        disabled={credentialSaving}
+                        onClick={cancelCredentialEdit}
+                        className="flex-1 rounded-lg border border-white/10 bg-magic-bg/55 py-2 text-xs font-bold text-magic-soft disabled:opacity-40"
+                      >
+                        ביטול
+                      </button>
+                      <button
+                        type="button"
+                        disabled={credentialSaving || !loginNameDraft.trim() || loginCodeDraft.length !== 4}
+                        onClick={() => void saveCredentials()}
+                        className="flex-1 rounded-lg bg-magic-accent py-2 text-xs font-black text-magic-bg disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        {credentialSaving ? 'שומר...' : '✓ שמירת פרטים'}
+                      </button>
+                    </div>
                   </div>
-                  <div className="rounded-xl bg-magic-bg/55 p-3">
-                    <div className="text-[10px] font-bold text-magic-soft/45">קוד אישי</div>
-                    <div className="mt-1 font-mono text-xl font-black tracking-widest text-magic-accent">{credential.loginCode}</div>
-                  </div>
-                </div>
-                <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => void handleCopyCredentials()}
-                    className="rounded-xl border border-white/10 bg-magic-bg/45 py-2.5 text-xs font-black text-magic-soft"
-                  >
-                    📋 העתק פרטים
-                  </button>
-                  <button
-                    type="button"
-                    disabled={pinResetting}
-                    onClick={() => void handleResetPin()}
-                    className="rounded-xl border border-amber-300/20 bg-amber-500/8 py-2.5 text-xs font-black text-amber-100 disabled:opacity-40"
-                  >
-                    {pinResetting ? 'מאפס...' : '🔄 איפוס קוד'}
-                  </button>
-                </div>
+                ) : (
+                  <>
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <div className="rounded-xl bg-magic-bg/55 p-3">
+                        <div className="text-[10px] font-bold text-magic-soft/45">שם משתמש</div>
+                        <div className="mt-1 break-all font-black text-white">{credential.loginName}</div>
+                      </div>
+                      <div className="rounded-xl bg-magic-bg/55 p-3">
+                        <div className="text-[10px] font-bold text-magic-soft/45">קוד אישי</div>
+                        <div className="mt-1 font-mono text-xl font-black tracking-widest text-magic-accent">{credential.loginCode}</div>
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => void handleCopyCredentials()}
+                        className="rounded-xl border border-white/10 bg-magic-bg/45 py-2.5 text-xs font-black text-magic-soft"
+                      >
+                        📋 העתק
+                      </button>
+                      <button
+                        type="button"
+                        onClick={startCredentialEdit}
+                        className="rounded-xl border border-magic-accent/20 bg-magic-accent/8 py-2.5 text-xs font-black text-magic-accent"
+                      >
+                        ✏️ עריכה
+                      </button>
+                      <button
+                        type="button"
+                        disabled={pinResetting}
+                        onClick={() => void handleResetPin()}
+                        className="rounded-xl border border-amber-300/20 bg-amber-500/8 py-2.5 text-xs font-black text-amber-100 disabled:opacity-40"
+                      >
+                        {pinResetting ? 'מאפס...' : '🔄 קוד חדש'}
+                      </button>
+                    </div>
+                  </>
+                )}
                 {credentialMessage && (
                   <div className="mt-3 rounded-xl border border-emerald-300/20 bg-emerald-500/8 px-3 py-2 text-center text-xs font-bold text-emerald-100/85">
                     {credentialMessage}
@@ -593,7 +737,7 @@ export default function StudentManagementModal({
           <button
             type="button"
             onClick={close}
-            disabled={saving || archiving || pinResetting || restoringSaleId !== null}
+            disabled={saving || archiving || pinResetting || credentialSaving || restoringSaleId !== null}
             className="rounded-xl bg-magic-bg/60 py-3 font-bold text-magic-soft disabled:opacity-40"
           >
             סגירה

@@ -20,6 +20,11 @@ type TeacherResetPinRpcRow = {
   login_code: string | number | null;
 };
 
+type TeacherUpdatedCredentialRpcRow = {
+  login_name: string | null;
+  login_code: string | number | null;
+};
+
 export type TeacherSeatUsage = {
   activeCount: number;
   studentLimit: number | null;
@@ -79,6 +84,15 @@ function rpcMessage(error: unknown, fallback: string): string {
     }
     if (message.includes('EMPTY_STUDENT_LIST')) {
       return 'לא נמצאו שמות תלמידים להוספה.';
+    }
+    if (message.includes('LOGIN_NAME_TAKEN')) {
+      return 'שם המשתמש הזה כבר תפוס. נסה/י שם אחר.';
+    }
+    if (message.includes('INVALID_LOGIN_NAME')) {
+      return 'שם המשתמש אינו תקין. השתמש/י באותיות או מספרים בלבד.';
+    }
+    if (message.includes('INVALID_LOGIN_CODE')) {
+      return 'הקוד האישי חייב להכיל בדיוק 4 ספרות.';
     }
   }
 
@@ -228,6 +242,39 @@ export async function resetStudentPin(input: {
   return {
     ok: true,
     data: String((data as TeacherResetPinRpcRow).login_code ?? '').padStart(4, '0'),
+  };
+}
+
+export async function updateStudentCredentials(input: {
+  teacherId: string;
+  studentId: string;
+  loginName: string;
+  loginCode: string;
+}): Promise<TeacherActionResult<{ loginName: string; loginCode: string }>> {
+  const { data, error } = await supabase
+    .rpc('teacher_update_student_credentials', {
+      p_teacher_id: input.teacherId,
+      p_student_id: input.studentId,
+      p_login_name: input.loginName.trim(),
+      p_login_code: input.loginCode.trim(),
+    })
+    .maybeSingle();
+
+  if (error || !data) {
+    if (error) console.error('Error updating student credentials:', error);
+    return {
+      ok: false,
+      message: rpcMessage(error, 'לא הצלחנו לעדכן את פרטי ההתחברות.'),
+    };
+  }
+
+  const row = data as TeacherUpdatedCredentialRpcRow;
+  return {
+    ok: true,
+    data: {
+      loginName: String(row.login_name ?? ''),
+      loginCode: String(row.login_code ?? '').padStart(4, '0'),
+    },
   };
 }
 
