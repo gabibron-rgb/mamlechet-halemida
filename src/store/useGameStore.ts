@@ -8,6 +8,7 @@ import type { CapacityKey } from '../data/levels';
 import { genId } from '../utils/storage';
 import type { BoxTier } from '../data/boxes';
 import { supabase } from '../lib/supabaseClient';
+import { sellStudentInventoryItem } from '../lib/inventorySales';
 import { getCompanionFlourish } from '../data/companionFlourishes';
 import { companionStageForProgress } from '../data/companionEvolution';
 import {
@@ -300,6 +301,12 @@ type GameStore = {
     inventoryIndex: number,
     patch: Partial<InventoryEntry>
   ) => void;
+  sellInventoryEntry: (
+    studentId: StudentId,
+    inventoryIndex: number,
+    expectedItemId: string,
+    refundPoints: number
+  ) => Promise<boolean>;
 
   addPoints: (id: StudentId, delta: number) => Promise<void>;
   addXp: (id: StudentId, delta: number) => void;
@@ -655,6 +662,7 @@ export const useGameStore = create<GameStore>()(
           .from('students')
           .select('*')
           .eq('id', studentId)
+          .is('archived_at', null)
           .maybeSingle();
 
         if (error) {
@@ -682,6 +690,7 @@ export const useGameStore = create<GameStore>()(
           .from('students')
           .select('*')
           .eq('class_id', classId)
+          .is('archived_at', null)
           .order('created_at', { ascending: true });
 
         if (error) {
@@ -2600,6 +2609,45 @@ export const useGameStore = create<GameStore>()(
         if (updatedStudent) {
           void syncStudentToSupabase(updatedStudent);
         }
+      },
+
+      sellInventoryEntry: async (
+        studentId,
+        inventoryIndex,
+        expectedItemId,
+        refundPoints
+      ) => {
+        const student = get().students[studentId];
+        if (!student) return false;
+        const entry = student.inventory[inventoryIndex];
+        if (!entry || entry.itemId !== expectedItemId) return false;
+
+        const result = await sellStudentInventoryItem({
+          studentId: student.supabaseId ?? student.id,
+          inventoryIndex,
+          expectedItemId,
+          refundPoints,
+        });
+
+        if (!result.ok) return false;
+
+        set(state => {
+          const current = state.students[studentId];
+          if (!current) return state;
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: {
+                ...current,
+                points: result.points,
+                inventory: result.inventory,
+              },
+            },
+          };
+        });
+
+        return true;
       },
 
       addPoints: async (id, delta) => {

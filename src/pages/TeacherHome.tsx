@@ -16,6 +16,7 @@ import ClassGoalCreateModal from '../components/teacher/ClassGoalCreateModal';
 import ClassKingdomSummary from '../components/teacher/ClassKingdomSummary';
 import ClassKingdomManagerModal from '../components/teacher/ClassKingdomManagerModal';
 import StudentManagementModal from '../components/teacher/StudentManagementModal';
+import ClassRosterManagerModal from '../components/teacher/ClassRosterManagerModal';
 
 export default function TeacherHome() {
   const navigate = useNavigate();
@@ -66,6 +67,7 @@ export default function TeacherHome() {
   const [missionCreateOpen, setMissionCreateOpen] = useState(false);
   const [classGoalCreateOpen, setClassGoalCreateOpen] = useState(false);
   const [classKingdomManagerOpen, setClassKingdomManagerOpen] = useState(false);
+  const [rosterManagerOpen, setRosterManagerOpen] = useState(false);
 
   const trophyStudent = trophyStudentId
     ? students.find(student => student.id === trophyStudentId) ?? null
@@ -114,6 +116,22 @@ export default function TeacherHome() {
     if (currentClassId) {
       await loadStudentsFromSupabase(currentClassId);
     }
+  }
+
+  async function refreshCurrentStudents() {
+    if (!currentClassId) return;
+    await loadStudentsFromSupabase(currentClassId);
+  }
+
+  async function handleStudentArchived(studentName: string) {
+    setManagedStudentId(null);
+    setTransferFeedback(`${studentName} הועבר/ה לארכיון. ההתקדמות נשמרה.`);
+    await refreshCurrentStudents();
+  }
+
+  async function handleInventoryRestored(studentName: string) {
+    setTransferFeedback(`החפץ של ${studentName} שוחזר בהצלחה.`);
+    await refreshCurrentStudents();
   }
 
   return (
@@ -196,13 +214,23 @@ export default function TeacherHome() {
 
         {/* Student list */}
         <div className="bg-magic-panel/80 rounded-3xl p-6 mb-4">
-          <h2 className="text-magic-accent font-bold mb-3">
-            תלמידים ({students.length})
-          </h2>
+          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-magic-accent font-bold">
+              תלמידים ({students.length})
+            </h2>
+            {currentTeacherId && (
+              <button
+                type="button"
+                onClick={() => setRosterManagerOpen(true)}
+                className="rounded-xl border border-magic-accent/30 bg-magic-accent/10 px-4 py-2 text-sm font-black text-magic-accent transition-colors hover:bg-magic-accent/15"
+              >
+                👥 הוספה ופרטי התחברות
+              </button>
+            )}
+          </div>
           {students.length === 0 ? (
             <p className="text-magic-soft/70 text-sm">
-              עדיין אין תלמידים. הם ייכנסו עם קוד הכיתה:{' '}
-              <span className="font-bold text-magic-accent">{cls.code}</span>
+              עדיין אין תלמידים. לחצו על „הוספה ופרטי התחברות” והדביקו רשימת שמות — המערכת תיצור את כולם בבת אחת.
             </p>
           ) : (
             <ul className="flex flex-col gap-2">
@@ -323,7 +351,20 @@ export default function TeacherHome() {
         currentClass={cls}
         teacherClasses={teacherClasses}
         onTransferred={handleStudentTransferred}
+        onArchived={handleStudentArchived}
+        onInventoryRestored={handleInventoryRestored}
       />
+
+
+      {currentTeacherId && (
+        <ClassRosterManagerModal
+          open={rosterManagerOpen}
+          onClose={() => setRosterManagerOpen(false)}
+          teacherId={currentTeacherId}
+          currentClass={cls}
+          onStudentsChanged={refreshCurrentStudents}
+        />
+      )}
 
       <FlourishAwardModal
         open={flourishStudentId !== null}

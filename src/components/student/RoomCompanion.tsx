@@ -154,6 +154,9 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   const isMagical = companion.stage === 'magical';
   const isScienceMagical = companion.theme === 'science' && companion.stage === 'magical';
   const isLegendary = companion.stage === 'legendary';
+  const isRoboticsLegendary =
+    companion.theme === 'robotics' && companion.stage === 'legendary';
+  const isRoboticsHovering = isRoboticsLegendary && isWalking;
   const isChessHatchling =
     companion.theme === 'chess' && companion.stage === 'hatchling';
   const isChessYoung =
@@ -241,9 +244,11 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         destination.x - current.x,
         (destination.y - current.y) * 1.8
       );
-      const durationMs = Math.round(
-        Math.max(1500, Math.min(2900, 1250 + distance * 24))
-      );
+      const durationMs = isRoboticsLegendary
+        ? Math.round(Math.max(1250, Math.min(2250, 980 + distance * 20)))
+        : Math.round(
+            Math.max(1500, Math.min(2900, 1250 + distance * 24))
+          );
 
       // Turn first, then start walking. This prevents the 2D sprite from
       // visibly moonwalking when the next destination is behind it.
@@ -270,7 +275,15 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       if (turnTimer !== undefined) window.clearTimeout(turnTimer);
       if (walkingTimer !== undefined) window.clearTimeout(walkingTimer);
     };
-  }, [companion.stage, companion.unlocked, isEditing, isEgg, usesLargeFloorPath, visuals]);
+  }, [
+    companion.stage,
+    companion.unlocked,
+    isEditing,
+    isEgg,
+    isRoboticsLegendary,
+    usesLargeFloorPath,
+    visuals,
+  ]);
 
   if (!companion.unlocked || !visuals) return null;
 
@@ -305,6 +318,58 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   return (
     <>
       <CompanionAnimationStyles />
+      <style>{`
+        @keyframes companionRoboticsHoverBob {
+          0%, 100% {
+            transform: translateY(-1px) rotate(-0.25deg);
+            filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.5));
+          }
+          50% {
+            transform: translateY(-5px) rotate(0.25deg);
+            filter: drop-shadow(0 0 11px rgba(34, 211, 238, 0.9));
+          }
+        }
+        @keyframes companionRoboticsIdlePulse {
+          0%, 100% { filter: drop-shadow(0 0 2px rgba(34, 211, 238, 0.28)); }
+          50% { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.68)); }
+        }
+        @keyframes companionRoboticsThruster {
+          0%, 100% {
+            opacity: 0.66;
+            transform: translateX(-50%) scaleX(0.76) scaleY(0.82);
+          }
+          50% {
+            opacity: 1;
+            transform: translateX(-50%) scaleX(1.03) scaleY(1.28);
+          }
+        }
+        .companion-robotics-hover-bob {
+          animation: companionRoboticsHoverBob 720ms ease-in-out infinite;
+        }
+        .companion-robotics-idle-pulse {
+          animation: companionRoboticsIdlePulse 2.2s ease-in-out infinite;
+        }
+        .companion-robotics-thruster {
+          animation: companionRoboticsThruster 330ms ease-in-out infinite;
+          background: linear-gradient(
+            to bottom,
+            rgba(224, 247, 255, 0.98) 0%,
+            rgba(34, 211, 238, 0.96) 34%,
+            rgba(37, 99, 235, 0.72) 72%,
+            rgba(37, 99, 235, 0) 100%
+          );
+          clip-path: polygon(31% 0%, 69% 0%, 100% 100%, 0% 100%);
+          filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.92));
+          transform-origin: top center;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .companion-robotics-hover-bob,
+          .companion-robotics-idle-pulse,
+          .companion-robotics-thruster {
+            animation: none !important;
+          }
+        }
+      `}</style>
     <div
       role="img"
       aria-label={`${STAGE_LABEL_HE[companion.stage]} בשם ${displayName}`}
@@ -361,10 +426,27 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
           '--companion-facing': facingScale,
           // Ground companions do not use the global float animation anymore,
           // so apply their facing directly instead of relying on a keyframe.
-          transform: `scaleX(${facingScale})`,
+          transform: `translateY(${isRoboticsHovering ? '-14px' : '0px'}) scaleX(${facingScale})`,
           transformOrigin: 'center bottom',
+          transition: isRoboticsLegendary
+            ? 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)'
+            : undefined,
         } as CSSProperties}
       >
+        {isRoboticsHovering && (
+          <div className="pointer-events-none absolute inset-0 z-20 overflow-visible" aria-hidden="true">
+            {[35, 50, 65].map((left, index) => (
+              <span
+                key={left}
+                className="companion-robotics-thruster absolute bottom-[3%] h-[13%] w-[5.5%]"
+                style={{
+                  left: `${left}%`,
+                  animationDelay: `${index * -80}ms`,
+                }}
+              />
+            ))}
+          </div>
+        )}
         {isEgg ? (
           <div
             className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[50%_50%_46%_46%] border-2 border-white/45"
@@ -413,6 +495,13 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
                   stage={companion.stage}
                   motion={false}
                   activity={isWalking ? 'run' : 'idle'}
+                  className={
+                    isRoboticsLegendary
+                      ? isWalking
+                        ? 'companion-robotics-hover-bob'
+                        : 'companion-robotics-idle-pulse'
+                      : ''
+                  }
                 />
               </div>
             ) : null}
@@ -449,10 +538,12 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       </div>
 
       <div
-        className={`absolute left-1/2 -translate-x-1/2 rounded-[50%] bg-black/35 ${
-          isChessHatchling
-            ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
-            : '-bottom-1 h-2 w-4/5 blur-[2px]'
+        className={`absolute left-1/2 -translate-x-1/2 rounded-[50%] bg-black/35 transition-all duration-300 ${
+          isRoboticsHovering
+            ? '-bottom-1 h-1.5 w-[56%] opacity-25 blur-[3px]'
+            : isChessHatchling
+              ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
+              : '-bottom-1 h-2 w-4/5 blur-[2px]'
         }`}
       />
     </div>

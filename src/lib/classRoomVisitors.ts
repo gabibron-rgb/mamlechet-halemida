@@ -133,6 +133,7 @@ export async function fetchClassRoomVisitors(
     .from('students')
     .select('id, name, class_id, level, gender, inventory, meta')
     .eq('class_id', cleanClassId)
+    .is('archived_at', null)
     .order('name', { ascending: true });
 
   if (error) {

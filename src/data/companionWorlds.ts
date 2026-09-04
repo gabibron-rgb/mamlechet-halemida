@@ -200,6 +200,29 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 132,
       },
     },
+    legendary: {
+      nameHe: 'אטומיקס — אדון הליבה הקוונטית',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/science/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/science/form5/frames/idle-1.png',
+          '/assets/companions/science/form5/frames/idle-2.png',
+          '/assets/companions/science/form5/frames/idle-3.png',
+          '/assets/companions/science/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/science/form5/frames/run-1.png',
+          '/assets/companions/science/form5/frames/run-2.png',
+          '/assets/companions/science/form5/frames/run-3.png',
+          '/assets/companions/science/form5/frames/run-4.png',
+          '/assets/companions/science/form5/frames/run-5.png',
+          '/assets/companions/science/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 310,
+        runFrameDurationMs: 150,
+      },
+    },
   },
   space: {
     hatchling: {
@@ -245,6 +268,29 @@ export const COMPANION_FORM_ART: Partial<
         ],
         idleFrameDurationMs: 320,
         runFrameDurationMs: 132,
+      },
+    },
+    legendary: {
+      nameHe: 'נובה — קיסרית הקוסמוס',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/space/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/space/form5/frames/idle-1.png',
+          '/assets/companions/space/form5/frames/idle-2.png',
+          '/assets/companions/space/form5/frames/idle-3.png',
+          '/assets/companions/space/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/space/form5/frames/run-1.png',
+          '/assets/companions/space/form5/frames/run-2.png',
+          '/assets/companions/space/form5/frames/run-3.png',
+          '/assets/companions/space/form5/frames/run-4.png',
+          '/assets/companions/space/form5/frames/run-5.png',
+          '/assets/companions/space/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 300,
+        runFrameDurationMs: 145,
       },
     },
   },
@@ -294,6 +340,29 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 132,
       },
     },
+    legendary: {
+      nameHe: 'פיץ — שומר הלהבה האגדית',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/animals/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/animals/form5/frames/idle-1.png',
+          '/assets/companions/animals/form5/frames/idle-2.png',
+          '/assets/companions/animals/form5/frames/idle-3.png',
+          '/assets/companions/animals/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/animals/form5/frames/run-1.png',
+          '/assets/companions/animals/form5/frames/run-2.png',
+          '/assets/companions/animals/form5/frames/run-3.png',
+          '/assets/companions/animals/form5/frames/run-4.png',
+          '/assets/companions/animals/form5/frames/run-5.png',
+          '/assets/companions/animals/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 310,
+        runFrameDurationMs: 150,
+      },
+    },
   },
   nature: {
     hatchling: {
@@ -341,6 +410,29 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 132,
       },
     },
+    legendary: {
+      nameHe: 'עלה — נשמת עץ העולם',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/nature/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/nature/form5/frames/idle-1.png',
+          '/assets/companions/nature/form5/frames/idle-2.png',
+          '/assets/companions/nature/form5/frames/idle-3.png',
+          '/assets/companions/nature/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/nature/form5/frames/run-1.png',
+          '/assets/companions/nature/form5/frames/run-2.png',
+          '/assets/companions/nature/form5/frames/run-3.png',
+          '/assets/companions/nature/form5/frames/run-4.png',
+          '/assets/companions/nature/form5/frames/run-5.png',
+          '/assets/companions/nature/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 310,
+        runFrameDurationMs: 150,
+      },
+    },
   },
   robotics: {
     hatchling: {
@@ -386,6 +478,29 @@ export const COMPANION_FORM_ART: Partial<
         ],
         idleFrameDurationMs: 320,
         runFrameDurationMs: 132,
+      },
+    },
+    legendary: {
+      nameHe: 'ביט־Ω — טיטאן הסייבר',
+      movementProfile: 'flying',
+      frameAnimation: {
+        staticSrc: '/assets/companions/robotics/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/robotics/form5/frames/idle-1.png',
+          '/assets/companions/robotics/form5/frames/idle-2.png',
+          '/assets/companions/robotics/form5/frames/idle-3.png',
+          '/assets/companions/robotics/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/robotics/form5/frames/run-1.png',
+          '/assets/companions/robotics/form5/frames/run-2.png',
+          '/assets/companions/robotics/form5/frames/run-3.png',
+          '/assets/companions/robotics/form5/frames/run-4.png',
+          '/assets/companions/robotics/form5/frames/run-5.png',
+          '/assets/companions/robotics/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 300,
+        runFrameDurationMs: 155,
       },
     },
   },
@@ -790,6 +905,7 @@ export const COMPANION_FORM_ART: Partial<
           '/assets/companions/ballet/form1/frames/run-3.png',
           '/assets/companions/ballet/form1/frames/run-4.png',
           '/assets/companions/ballet/form1/frames/run-5.png',
+          '/assets/companions/ballet/form1/frames/run-6.png',
         ],
         idleFrameDurationMs: 360,
         runFrameDurationMs: 135,
@@ -816,6 +932,31 @@ export const COMPANION_FORM_ART: Partial<
         ],
         idleFrameDurationMs: 320,
         runFrameDurationMs: 132,
+      },
+    },
+    legendary: {
+      nameHe: 'ברבורית — מלכת הברבורים השמימית',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/ballet/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/ballet/form5/frames/idle-1.png',
+          '/assets/companions/ballet/form5/frames/idle-1.png',
+          '/assets/companions/ballet/form5/frames/idle-2.png',
+          '/assets/companions/ballet/form5/frames/idle-3.png',
+          '/assets/companions/ballet/form5/frames/idle-3.png',
+          '/assets/companions/ballet/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/ballet/form5/frames/run-1.png',
+          '/assets/companions/ballet/form5/frames/run-2.png',
+          '/assets/companions/ballet/form5/frames/run-3.png',
+          '/assets/companions/ballet/form5/frames/run-4.png',
+          '/assets/companions/ballet/form5/frames/run-5.png',
+          '/assets/companions/ballet/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 285,
+        runFrameDurationMs: 185,
       },
     },
   },
@@ -1024,7 +1165,7 @@ const FORM3_GROWN_ART: Partial<Record<ThemeId, CompanionFormArt>> = {
     },
   },
   animals: {
-    nameHe: 'פיץ — טיגריס שומר הפרא',
+    nameHe: 'פיץ — שועל שומר היער',
     movementProfile: 'ground',
     frameAnimation: {
       staticSrc: '/assets/companions/animals/form3/frames/idle-1.png',
@@ -1351,7 +1492,7 @@ const FORM4_MAGICAL_ART: Partial<Record<ThemeId, CompanionFormArt>> = {
     },
   },
   animals: {
-    nameHe: 'פיץ — אריה שומר הממלכה',
+    nameHe: 'פיץ — שומר הפרא הקסום',
     movementProfile: 'ground',
     frameAnimation: {
       staticSrc: '/assets/companions/animals/form4/frames/idle-1.png',

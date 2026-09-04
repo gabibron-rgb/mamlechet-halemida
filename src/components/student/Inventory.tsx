@@ -154,6 +154,7 @@ function compareInventoryRows(
 
 export default function Inventory({ student, onGoRoom }: Props) {
   const updateStudent = useGameStore((s) => s.updateStudent);
+  const sellInventoryEntry = useGameStore((s) => s.sellInventoryEntry);
 
   const [message, setMessage] = useState<string | null>(null);
   const [openedReward, setOpenedReward] = useState<OpenedReward | null>(null);
@@ -165,6 +166,7 @@ export default function Inventory({ student, onGoRoom }: Props) {
   const [placementFilter, setPlacementFilter] =
     useState<PlacementFilter>('all');
   const [sortMode, setSortMode] = useState<InventorySort>('newest');
+  const [sellingIndex, setSellingIndex] = useState<number | null>(null);
 
   const ownedItemIds = new Set(
     student.inventory
@@ -303,7 +305,9 @@ export default function Inventory({ student, onGoRoom }: Props) {
     (item) => !ownedItemIds.has(item.id)
   ).length;
 
-  function sell(idx: number) {
+  async function sell(idx: number) {
+    if (sellingIndex !== null) return;
+
     const entry = student.inventory[idx];
     if (!entry) return;
 
@@ -317,13 +321,30 @@ export default function Inventory({ student, onGoRoom }: Props) {
     }
 
     const refund = sellValueOf(item);
-    const nextInv = [...student.inventory];
-    nextInv.splice(idx, 1);
 
-    updateStudent(student.id, {
-      points: student.points + refund,
-      inventory: nextInv,
-    });
+    if (
+      (item.rarity === 'epic' || item.rarity === 'legendary') &&
+      !window.confirm(
+        `למכור את ${item.nameHe} תמורת ${refund} נק׳?\n\nזה פריט ${item.rarity === 'legendary' ? 'אגדי' : 'אפי'}. אם המכירה נעשתה בטעות, המורה יוכל לשחזר אותה.`
+      )
+    ) {
+      return;
+    }
+
+    setSellingIndex(idx);
+    const ok = await sellInventoryEntry(
+      student.id,
+      idx,
+      entry.itemId,
+      refund
+    );
+    setSellingIndex(null);
+
+    if (!ok) {
+      setMessage('המכירה לא נשמרה. נסה/י שוב.');
+      setTimeout(() => setMessage(null), 1800);
+      return;
+    }
 
     setMessage(`מכרת את ${item.nameHe} (+${refund} נק׳)`);
     setTimeout(() => setMessage(null), 1500);
@@ -1129,10 +1150,13 @@ export default function Inventory({ student, onGoRoom }: Props) {
               {item && canSell(item) ? (
                 <button
                   type="button"
-                  onClick={() => sell(idx)}
-                  className="text-magic-soft/70 hover:text-magic-accent text-xs mt-2"
+                  onClick={() => void sell(idx)}
+                  disabled={sellingIndex !== null}
+                  className="text-magic-soft/70 hover:text-magic-accent text-xs mt-2 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  מכור/י (+{sellValueOf(item)} נק׳)
+                  {sellingIndex === idx
+                    ? 'מוכר...'
+                    : `מכור/י (+${sellValueOf(item)} נק׳)`}
                 </button>
               ) : (
                 <span className="text-magic-soft/40 text-xs mt-2 block">

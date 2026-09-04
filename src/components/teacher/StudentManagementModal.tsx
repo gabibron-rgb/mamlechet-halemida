@@ -1,4 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
+import { getItemById } from '../../data/items';
+import {
+  archiveStudent,
+  getClassStudentCredentials,
+  getRecentInventorySales,
+  resetStudentPin,
+  restoreInventorySale,
+  type InventorySaleRow,
+  type StudentCredentialRow,
+} from '../../lib/teacherManagement';
 import { transferStudentWithinTeacherClasses } from '../../lib/studentTransfers';
 import type { ClassDef } from '../../store/useClassStore';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
@@ -12,7 +22,19 @@ type Props = {
   currentClass: ClassDef;
   teacherClasses: ClassDef[];
   onTransferred: (studentName: string, targetClass: ClassDef) => Promise<void> | void;
+  onArchived: (studentName: string) => Promise<void> | void;
+  onInventoryRestored: (studentName: string) => Promise<void> | void;
 };
+
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (error) {
+    console.error('Clipboard write failed:', error);
+    return false;
+  }
+}
 
 export default function StudentManagementModal({
   open,
@@ -22,6 +44,8 @@ export default function StudentManagementModal({
   currentClass,
   teacherClasses,
   onTransferred,
+  onArchived,
+  onInventoryRestored,
 }: Props) {
   const [targetClassId, setTargetClassId] = useState('');
   const [confirming, setConfirming] = useState(false);
@@ -30,6 +54,15 @@ export default function StudentManagementModal({
   const [genderSaving, setGenderSaving] = useState(false);
   const [genderMessage, setGenderMessage] = useState<string | null>(null);
   const [genderError, setGenderError] = useState<string | null>(null);
+  const [credential, setCredential] = useState<StudentCredentialRow | null>(null);
+  const [credentialLoading, setCredentialLoading] = useState(false);
+  const [pinResetting, setPinResetting] = useState(false);
+  const [credentialMessage, setCredentialMessage] = useState<string | null>(null);
+  const [sales, setSales] = useState<InventorySaleRow[]>([]);
+  const [salesLoading, setSalesLoading] = useState(false);
+  const [restoringSaleId, setRestoringSaleId] = useState<string | null>(null);
+  const [archiveConfirming, setArchiveConfirming] = useState(false);
+  const [archiving, setArchiving] = useState(false);
 
   const setStudentGender = useGameStore(state => state.setStudentGender);
 
@@ -44,6 +77,33 @@ export default function StudentManagementModal({
   const targetClass =
     targetClasses.find(cls => cls.id === targetClassId) ?? null;
 
+  async function loadTeacherData() {
+    if (!teacherId || !student) return;
+
+    setCredentialLoading(true);
+    setSalesLoading(true);
+
+    const [credentialRows, saleRows] = await Promise.all([
+      getClassStudentCredentials({
+        teacherId,
+        classId: currentClass.id,
+        includeArchived: true,
+      }),
+      getRecentInventorySales({
+        teacherId,
+        studentId: student.id,
+        limit: 12,
+      }),
+    ]);
+
+    setCredential(
+      credentialRows.find(row => row.id === student.id) ?? null
+    );
+    setSales(saleRows);
+    setCredentialLoading(false);
+    setSalesLoading(false);
+  }
+
   useEffect(() => {
     if (!open) return;
     setTargetClassId('');
@@ -53,12 +113,21 @@ export default function StudentManagementModal({
     setGenderSaving(false);
     setGenderMessage(null);
     setGenderError(null);
-  }, [open, student?.id]);
+    setCredential(null);
+    setCredentialMessage(null);
+    setSales([]);
+    setPinResetting(false);
+    setRestoringSaleId(null);
+    setArchiveConfirming(false);
+    setArchiving(false);
+    void loadTeacherData();
+  }, [open, student?.id, teacherId, currentClass.id]);
 
   function close() {
-    if (saving || genderSaving) return;
+    if (saving || genderSaving || pinResetting || archiving || restoringSaleId) return;
     setTargetClassId('');
     setConfirming(false);
+    setArchiveConfirming(false);
     setError(null);
     onClose();
   }
@@ -109,6 +178,83 @@ export default function StudentManagementModal({
     onClose();
   }
 
+  async function handleResetPin() {
+    if (!teacherId || !student || pinResetting) return;
+
+    setPinResetting(true);
+    setCredentialMessage(null);
+    setError(null);
+
+    const result = await resetStudentPin({
+      teacherId,
+      studentId: student.id,
+    });
+
+    if (!result.ok) {
+      setError(result.message);
+      setPinResetting(false);
+      return;
+    }
+
+    setCredential(current =>
+      current ? { ...current, loginCode: result.data } : current
+    );
+    setCredentialMessage(`הקוד החדש הוא ${result.data}.`);
+    setPinResetting(false);
+  }
+
+  async function handleCopyCredentials() {
+    if (!credential) return;
+    const ok = await copyText(
+      `${student?.name ?? credential.name}\nשם משתמש: ${credential.loginName}\nקוד: ${credential.loginCode}`
+    );
+    setCredentialMessage(ok ? 'פרטי ההתחברות הועתקו.' : 'לא הצלחנו להעתיק ללוח.');
+  }
+
+  async function handleRestoreSale(sale: InventorySaleRow) {
+    if (!teacherId || !student || restoringSaleId || sale.restoredAt) return;
+
+    setRestoringSaleId(sale.id);
+    setError(null);
+
+    const result = await restoreInventorySale({
+      teacherId,
+      studentId: student.id,
+      saleId: sale.id,
+    });
+
+    if (!result.ok) {
+      setError(result.message);
+      setRestoringSaleId(null);
+      return;
+    }
+
+    await Promise.all([loadTeacherData(), onInventoryRestored(student.name)]);
+    setRestoringSaleId(null);
+  }
+
+  async function handleArchive() {
+    if (!teacherId || !student || archiving) return;
+
+    setArchiving(true);
+    setError(null);
+
+    const result = await archiveStudent({
+      teacherId,
+      studentId: student.id,
+    });
+
+    if (!result.ok) {
+      setError(result.message);
+      setArchiving(false);
+      return;
+    }
+
+    await onArchived(student.name);
+    setArchiving(false);
+    onClose();
+  }
+
   return (
     <Modal open={open} onClose={close} title="ניהול תלמיד/ה">
       {!student ? (
@@ -123,6 +269,56 @@ export default function StudentManagementModal({
               {currentClass.nameHe} · רמה {student.level} · {student.points} נק׳
             </div>
           </div>
+
+          <section className="rounded-2xl border border-magic-accent/20 bg-magic-accent/5 p-4">
+            <div className="text-sm font-black text-white">🔑 פרטי התחברות</div>
+            <p className="mt-1 text-xs leading-5 text-magic-soft/55">
+              פרטי ההתחברות זמינים למורה גם אחרי יצירת המשתמש. אפשר להעתיק או לאפס קוד בכל רגע.
+            </p>
+
+            {credentialLoading ? (
+              <div className="mt-4 text-center text-xs font-bold text-magic-soft/55">טוען...</div>
+            ) : credential ? (
+              <>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-magic-bg/55 p-3">
+                    <div className="text-[10px] font-bold text-magic-soft/45">שם משתמש</div>
+                    <div className="mt-1 break-all font-black text-white">{credential.loginName}</div>
+                  </div>
+                  <div className="rounded-xl bg-magic-bg/55 p-3">
+                    <div className="text-[10px] font-bold text-magic-soft/45">קוד אישי</div>
+                    <div className="mt-1 font-mono text-xl font-black tracking-widest text-magic-accent">{credential.loginCode}</div>
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void handleCopyCredentials()}
+                    className="rounded-xl border border-white/10 bg-magic-bg/45 py-2.5 text-xs font-black text-magic-soft"
+                  >
+                    📋 העתק פרטים
+                  </button>
+                  <button
+                    type="button"
+                    disabled={pinResetting}
+                    onClick={() => void handleResetPin()}
+                    className="rounded-xl border border-amber-300/20 bg-amber-500/8 py-2.5 text-xs font-black text-amber-100 disabled:opacity-40"
+                  >
+                    {pinResetting ? 'מאפס...' : '🔄 איפוס קוד'}
+                  </button>
+                </div>
+                {credentialMessage && (
+                  <div className="mt-3 rounded-xl border border-emerald-300/20 bg-emerald-500/8 px-3 py-2 text-center text-xs font-bold text-emerald-100/85">
+                    {credentialMessage}
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="mt-4 rounded-xl border border-dashed border-white/15 p-3 text-center text-xs text-magic-soft/55">
+                לא נמצאו פרטי התחברות עבור התלמיד/ה.
+              </div>
+            )}
+          </section>
 
           <section className="rounded-2xl border border-sky-300/15 bg-sky-500/5 p-4">
             <div className="flex items-start justify-between gap-3">
@@ -185,13 +381,67 @@ export default function StudentManagementModal({
             )}
           </section>
 
+          <section className="rounded-2xl border border-violet-300/15 bg-violet-500/5 p-4">
+            <div className="text-sm font-black text-white">↩️ שחזור חפצים שנמכרו</div>
+            <p className="mt-1 text-xs leading-5 text-magic-soft/55">
+              נשמרת היסטוריית מכירות. אם חפץ נמכר בטעות או שמישהו נכנס לחשבון של תלמיד אחר, אפשר להחזיר אותו בלחיצה.
+            </p>
+
+            {salesLoading ? (
+              <div className="mt-4 text-center text-xs font-bold text-magic-soft/55">טוען היסטוריה...</div>
+            ) : sales.length === 0 ? (
+              <div className="mt-4 rounded-xl border border-dashed border-white/10 p-3 text-center text-xs text-magic-soft/45">
+                אין מכירות מתועדות עדיין.
+              </div>
+            ) : (
+              <div className="mt-4 flex flex-col gap-2">
+                {sales.map(sale => {
+                  const itemId = typeof sale.itemEntry.itemId === 'string'
+                    ? sale.itemEntry.itemId
+                    : '';
+                  const item = itemId ? getItemById(itemId) : undefined;
+                  const soldAt = new Date(sale.soldAt).toLocaleString('he-IL', {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                  });
+
+                  return (
+                    <div key={sale.id} className="flex flex-col gap-2 rounded-xl bg-magic-bg/45 p-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <div className="text-sm font-bold text-white">
+                          {item?.nameHe ?? (itemId || 'חפץ שנמכר')}
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-magic-soft/50">
+                          {soldAt} · התקבלו {sale.refundPoints} נק׳
+                          {sale.restoredAt ? ' · שוחזר' : ''}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={Boolean(sale.restoredAt) || restoringSaleId !== null}
+                        onClick={() => void handleRestoreSale(sale)}
+                        className="rounded-lg border border-emerald-300/20 bg-emerald-500/8 px-3 py-2 text-xs font-black text-emerald-100 disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        {sale.restoredAt
+                          ? '✓ שוחזר'
+                          : restoringSaleId === sale.id
+                            ? 'משחזר...'
+                            : 'שחזר/י חפץ'}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+
           {!confirming ? (
             <section className="rounded-2xl border border-white/10 bg-magic-bg/30 p-4">
               <div className="mb-1 text-sm font-black text-white">
                 העברה לכיתה אחרת
               </div>
               <p className="mb-4 text-xs leading-5 text-magic-soft/55">
-                פעולה ניהולית נדירה. אפשר להעביר כרגע רק בין כיתות של אותו חשבון מורה.
+                ההתקדמות האישית נשמרת. התלמיד/ה יצטרף/תצטרף לעולם ולמצב הממלכה של הכיתה החדשה.
               </p>
 
               {targetClasses.length === 0 ? (
@@ -293,6 +543,47 @@ export default function StudentManagementModal({
             </section>
           ) : null}
 
+          <section className="rounded-2xl border border-red-300/15 bg-red-500/5 p-4">
+            <div className="text-sm font-black text-white">📦 ארכיון תלמיד/ה</div>
+            <p className="mt-1 text-xs leading-5 text-magic-soft/55">
+              במקום למחוק משתמש, מעבירים אותו לארכיון. כל ההתקדמות נשמרת, הכניסה נחסמת והמקום במכסה משתחרר. אפשר להחזיר אותו אחר כך דרך ניהול תלמידי הכיתה.
+            </p>
+
+            {!archiveConfirming ? (
+              <button
+                type="button"
+                onClick={() => setArchiveConfirming(true)}
+                className="mt-4 w-full rounded-xl border border-red-300/20 bg-red-500/8 py-2.5 text-xs font-black text-red-100"
+              >
+                העבר/י לארכיון
+              </button>
+            ) : (
+              <div className="mt-4 rounded-xl border border-red-300/20 bg-red-500/8 p-3">
+                <div className="text-center text-xs font-black text-red-100">
+                  להעביר את {student.name} לארכיון?
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    disabled={archiving}
+                    onClick={() => setArchiveConfirming(false)}
+                    className="rounded-lg bg-magic-bg/60 py-2 text-xs font-bold text-magic-soft disabled:opacity-40"
+                  >
+                    ביטול
+                  </button>
+                  <button
+                    type="button"
+                    disabled={archiving}
+                    onClick={() => void handleArchive()}
+                    className="rounded-lg bg-red-300 py-2 text-xs font-black text-red-950 disabled:opacity-40"
+                  >
+                    {archiving ? 'מעביר...' : 'כן, לארכיון'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+
           {error && !confirming && (
             <div className="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-center text-xs font-bold text-red-200">
               {error}
@@ -302,7 +593,7 @@ export default function StudentManagementModal({
           <button
             type="button"
             onClick={close}
-            disabled={saving}
+            disabled={saving || archiving || pinResetting || restoringSaleId !== null}
             className="rounded-xl bg-magic-bg/60 py-3 font-bold text-magic-soft disabled:opacity-40"
           >
             סגירה

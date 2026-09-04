@@ -5,6 +5,7 @@ export async function getStudentByLoginName(loginName: string) {
     .from('students')
     .select('*')
     .eq('login_name', loginName)
+    .is('archived_at', null)
     .single();
 
   if (error) {

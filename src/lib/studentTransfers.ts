@@ -106,7 +106,8 @@ export async function transferStudentWithinTeacherClasses({
   const { data: targetStudents, error: targetStudentsError } = await supabase
     .from('students')
     .select('meta')
-    .eq('class_id', cleanTargetClassId);
+    .eq('class_id', cleanTargetClassId)
+    .is('archived_at', null);
 
   if (targetStudentsError) {
     console.error('Error loading target class state:', targetStudentsError);
@@ -121,6 +122,7 @@ export async function transferStudentWithinTeacherClasses({
     .from('students')
     .select('id, class_id, meta')
     .eq('id', cleanStudentId)
+    .is('archived_at', null)
     .maybeSingle();
 
   if (studentError) {
@@ -153,6 +155,7 @@ export async function transferStudentWithinTeacherClasses({
     })
     .eq('id', cleanStudentId)
     .eq('class_id', cleanSourceClassId)
+    .is('archived_at', null)
     .select('id, class_id')
     .maybeSingle();
 

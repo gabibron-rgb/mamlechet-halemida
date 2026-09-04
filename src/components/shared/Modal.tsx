@@ -5,9 +5,10 @@ type Props = {
   onClose: () => void;
   title?: string;
   children: ReactNode;
+  size?: 'default' | 'wide';
 };
 
-export default function Modal({ open, onClose, title, children }: Props) {
+export default function Modal({ open, onClose, title, children, size = 'default' }: Props) {
   if (!open) return null;
   return (
     <div
@@ -15,7 +16,7 @@ export default function Modal({ open, onClose, title, children }: Props) {
       onClick={onClose}
     >
       <div
-        className="bg-magic-panel rounded-3xl shadow-2xl border border-magic-soft/30 p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
+        className={`bg-magic-panel rounded-3xl shadow-2xl border border-magic-soft/30 p-6 w-full max-h-[90vh] overflow-y-auto ${size === 'wide' ? 'max-w-4xl' : 'max-w-lg'}`}
         onClick={e => e.stopPropagation()}
       >
         {title && (
