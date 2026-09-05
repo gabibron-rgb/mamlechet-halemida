@@ -3,6 +3,7 @@ import { COMPANION_STAGE_ORDER, type CompanionStage } from '../data/companionWor
 import { THEMES, type ThemeId } from '../data/themes';
 import { normalizeSpecialUnlocks } from '../data/achievements';
 import { studentTitleDisplayLabel, type StudentGender } from '../data/studentTitles';
+import { normalizeStudentAvatarId, type StudentAvatarId } from '../data/studentAvatars';
 import type {
   CompanionState,
   InventoryEntry,
@@ -19,6 +20,7 @@ export type ClassRoomVisitor = {
   trophies: StudentState['trophies'];
   specialUnlocks: StudentState['specialUnlocks'];
   activeTitleLabel: string | null;
+  activeAvatarId: StudentAvatarId;
 };
 
 function numberOrZero(value: unknown): number {
@@ -158,5 +160,6 @@ export async function fetchClassRoomVisitors(
     activeTitleLabel: row.gender
       ? visitorActiveTitleLabel(row.meta, normalizeGender(row.gender))
       : null,
+    activeAvatarId: normalizeStudentAvatarId(row.meta?.activeAvatarId),
   }));
 }

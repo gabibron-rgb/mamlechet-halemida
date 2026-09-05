@@ -7,6 +7,7 @@ import { useGameStore } from '../store/useGameStore';
 import { xpToNextLevel } from '../logic/leveling';
 import { COMPANION_STAGE_ORDER } from '../data/companionWorlds';
 import { studentTitleDisplayLabel } from '../data/studentTitles';
+import { getStudentAvatar } from '../data/studentAvatars';
 
 import Shop from '../components/student/Shop';
 import Inventory from '../components/student/Inventory';
@@ -22,6 +23,13 @@ import TrophyRoom from '../components/student/TrophyRoom';
 import { TrophyAwardCeremony } from '../components/student/TrophyAwardCeremony';
 import { LevelUpCeremony } from '../components/student/LevelUpCeremony';
 import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
+import StudentOnboarding from '../components/student/StudentOnboarding';
+import StudentProfilePanel from '../components/student/StudentProfilePanel';
+import {
+  isGameSoundEnabled,
+  playGameSound,
+  setGameSoundEnabled,
+} from '../lib/gameSounds';
 
 type Tab =
   | 'progress'
@@ -70,6 +78,51 @@ export default function StudentHome() {
   const [tab, setTab] = useState<Tab>('progress');
   const [ceremonyOpen, setCeremonyOpen] = useState(false);
   const [themeUnlockOpen, setThemeUnlockOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [soundEnabled, setSoundEnabledState] = useState(() =>
+    isGameSoundEnabled()
+  );
+
+  function toggleSound() {
+    const nextEnabled = !soundEnabled;
+    setGameSoundEnabled(nextEnabled);
+    setSoundEnabledState(nextEnabled);
+
+    if (nextEnabled) {
+      playGameSound('soundOn');
+    }
+  }
+
+  useEffect(() => {
+    if (!student?.id) return;
+
+    const storageKey = `kingdom-student-onboarding-v1:${student.id}`;
+
+    try {
+      const alreadySeen = window.localStorage.getItem(storageKey) === 'done';
+      if (!alreadySeen) {
+        setOnboardingOpen(true);
+      }
+    } catch {
+      // If storage is blocked, the game should still work normally.
+    }
+  }, [student?.id]);
+
+  function finishOnboarding() {
+    if (student?.id) {
+      try {
+        window.localStorage.setItem(
+          `kingdom-student-onboarding-v1:${student.id}`,
+          'done'
+        );
+      } catch {
+        // Storage failure should never block the student.
+      }
+    }
+
+    setOnboardingOpen(false);
+    setTab('progress');
+  }
 
   if (!student) {
     return (
@@ -130,33 +183,64 @@ export default function StudentHome() {
       unlock.kind === 'title' &&
       unlock.unlockId === student.activeTitleUnlockId
   ) ?? null;
+  const activeAvatar = getStudentAvatar(student.activeAvatarId);
 
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-start gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-black text-magic-accent">
-              שלום {student.name} 👋
-            </h1>
-            {student.gender && activeTitle && (
-              <div className="mt-2 inline-flex rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-black text-yellow-100">
-                👑 {studentTitleDisplayLabel(activeTitle.unlockId, activeTitle.labelHe, student.gender)}
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-magic-panel/70 text-3xl shadow-lg"
+              title={`דמות הפרופיל: ${activeAvatar.nameHe}`}
+            >
+              {activeAvatar.emoji}
+            </div>
+
+            <div>
+              <h1 className="text-2xl font-black text-magic-accent">
+                שלום {student.name} 👋
+              </h1>
+              {student.gender && activeTitle && (
+                <div className="mt-2 inline-flex rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-black text-yellow-100">
+                  👑 {studentTitleDisplayLabel(activeTitle.unlockId, activeTitle.labelHe, student.gender)}
+                </div>
+              )}
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              logout();
-              navigate('/');
-            }}
-            className="text-magic-soft/60 text-sm hover:text-magic-soft"
-          >
-            יציאה
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleSound}
+              aria-pressed={soundEnabled}
+              className="rounded-xl border border-white/10 bg-magic-panel/60 px-3 py-2 text-sm font-bold text-magic-soft/80 transition-colors hover:bg-magic-panel hover:text-white"
+              title={soundEnabled ? 'השתק/י אפקטים קוליים' : 'הפעל/י אפקטים קוליים'}
+            >
+              {soundEnabled ? '🔊 צלילים' : '🔇 מושתק'}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setOnboardingOpen(true)}
+              className="rounded-xl border border-white/10 bg-magic-panel/60 px-3 py-2 text-sm font-bold text-magic-soft/80 transition-colors hover:bg-magic-panel hover:text-white"
+              title="פתח/י שוב את ההדרכה"
+            >
+              ❔ הדרכה
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                navigate('/');
+              }}
+              className="text-magic-soft/60 text-sm hover:text-magic-soft"
+            >
+              יציאה
+            </button>
+          </div>
         </div>
 
         {/* Stats card */}
@@ -194,7 +278,10 @@ export default function StudentHome() {
 
               <button
                 type="button"
-                onClick={() => setCeremonyOpen(true)}
+                onClick={() => {
+                  playGameSound('levelUp');
+                  setCeremonyOpen(true);
+                }}
                 className="rounded-lg bg-yellow-400 px-4 py-1.5 font-semibold text-indigo-950 hover:bg-yellow-300 mr-2"
               >
                 חגוג עכשיו
@@ -299,6 +386,7 @@ export default function StudentHome() {
                 onGoShop={() => setTab('shop')}
                 onGoInventory={() => setTab('inventory')}
               />
+              <StudentProfilePanel student={student} />
               <AchievementsPanel student={student} />
             </>
           )}
@@ -330,6 +418,17 @@ export default function StudentHome() {
 
           {tab === 'trophies' && <TrophyRoom student={student} />}
         </div>
+
+        {onboardingOpen &&
+          !ceremonyOpen &&
+          !themeUnlockOpen &&
+          !activeUnseenTrophy && (
+            <StudentOnboarding
+              onNavigate={(destination) => setTab(destination)}
+              onComplete={finishOnboarding}
+              onSkip={finishOnboarding}
+            />
+          )}
 
         {ceremonyOpen && pending > 0 && (
           <LevelUpCeremony

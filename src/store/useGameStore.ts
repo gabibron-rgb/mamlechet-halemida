@@ -69,6 +69,7 @@ import {
   type JourneyRecord,
 } from '../data/specialJourneys';
 import { reconcileBasicStudentTitles, type StudentGender } from '../data/studentTitles';
+import { DEFAULT_STUDENT_AVATAR_ID, normalizeStudentAvatarId, type StudentAvatarId } from '../data/studentAvatars';
 
 export type StudentId = string;
 
@@ -151,6 +152,7 @@ export type StudentState = {
   journeyRecords: JourneyRecord[];
   specialUnlocks: SpecialUnlockEntry[];
   activeTitleUnlockId: string | null;
+  activeAvatarId: StudentAvatarId;
   pastRewards: string[];
   trophies: { id: string; trophyTheme: string; caption: string; awardedAt: number }[];
   seenTrophyIds: string[];
@@ -360,6 +362,7 @@ async function syncStudentToSupabase(student: StudentState) {
       journeyRecords: student.journeyRecords ?? [],
       specialUnlocks: student.specialUnlocks ?? [],
       activeTitleUnlockId: student.activeTitleUnlockId ?? null,
+      activeAvatarId: student.activeAvatarId ?? DEFAULT_STUDENT_AVATAR_ID,
       pastRewards: student.pastRewards,
       trophies: student.trophies,
       seenTrophyIds: student.seenTrophyIds ?? [],
@@ -471,6 +474,7 @@ function defaultStudent(name: string, classId: string): StudentState {
     journeyRecords: [],
     specialUnlocks: [],
     activeTitleUnlockId: null,
+    activeAvatarId: DEFAULT_STUDENT_AVATAR_ID,
     pastRewards: [],
     trophies: [],
     seenTrophyIds: [],
@@ -584,6 +588,7 @@ function studentFromSupabase(row: any, classId: string): StudentState {
     journeyRecords: normalizeJourneyRecords(meta.journeyRecords),
     specialUnlocks,
     activeTitleUnlockId,
+    activeAvatarId: normalizeStudentAvatarId(meta.activeAvatarId),
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],

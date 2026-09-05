@@ -691,6 +691,29 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 132,
       },
     },
+    legendary: {
+      nameHe: 'בוני — טיטאן הבנייה',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/building/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/building/form5/frames/idle-1.png',
+          '/assets/companions/building/form5/frames/idle-2.png',
+          '/assets/companions/building/form5/frames/idle-3.png',
+          '/assets/companions/building/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/building/form5/frames/run-1.png',
+          '/assets/companions/building/form5/frames/run-2.png',
+          '/assets/companions/building/form5/frames/run-3.png',
+          '/assets/companions/building/form5/frames/run-4.png',
+          '/assets/companions/building/form5/frames/run-5.png',
+          '/assets/companions/building/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 300,
+        runFrameDurationMs: 128,
+      },
+    },
   },
 
   sports: {
@@ -737,6 +760,29 @@ export const COMPANION_FORM_ART: Partial<
         ],
         idleFrameDurationMs: 320,
         runFrameDurationMs: 132,
+      },
+    },
+    legendary: {
+      nameHe: 'ספרינט — אלוף האגדות',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/sports/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/sports/form5/frames/idle-1.png',
+          '/assets/companions/sports/form5/frames/idle-2.png',
+          '/assets/companions/sports/form5/frames/idle-3.png',
+          '/assets/companions/sports/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/sports/form5/frames/run-1.png',
+          '/assets/companions/sports/form5/frames/run-2.png',
+          '/assets/companions/sports/form5/frames/run-3.png',
+          '/assets/companions/sports/form5/frames/run-4.png',
+          '/assets/companions/sports/form5/frames/run-5.png',
+          '/assets/companions/sports/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 420,
+        runFrameDurationMs: 112,
       },
     },
   },
@@ -787,6 +833,29 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 132,
       },
     },
+    legendary: {
+      nameHe: 'מנגינה — ריבונית הסימפוניה',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/music/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/music/form5/frames/idle-1.png',
+          '/assets/companions/music/form5/frames/idle-2.png',
+          '/assets/companions/music/form5/frames/idle-3.png',
+          '/assets/companions/music/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/music/form5/frames/run-1.png',
+          '/assets/companions/music/form5/frames/run-2.png',
+          '/assets/companions/music/form5/frames/run-3.png',
+          '/assets/companions/music/form5/frames/run-4.png',
+          '/assets/companions/music/form5/frames/run-5.png',
+          '/assets/companions/music/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 330,
+        runFrameDurationMs: 122,
+      },
+    },
   },
 
   books: {
@@ -833,6 +902,29 @@ export const COMPANION_FORM_ART: Partial<
         ],
         idleFrameDurationMs: 320,
         runFrameDurationMs: 132,
+      },
+    },
+    legendary: {
+      nameHe: 'דפדף — שומר הספרייה האינסופית',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/books/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/books/form5/frames/idle-1.png',
+          '/assets/companions/books/form5/frames/idle-2.png',
+          '/assets/companions/books/form5/frames/idle-3.png',
+          '/assets/companions/books/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/books/form5/frames/run-1.png',
+          '/assets/companions/books/form5/frames/run-2.png',
+          '/assets/companions/books/form5/frames/run-3.png',
+          '/assets/companions/books/form5/frames/run-4.png',
+          '/assets/companions/books/form5/frames/run-5.png',
+          '/assets/companions/books/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 390,
+        runFrameDurationMs: 122,
       },
     },
   },
@@ -883,6 +975,30 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 132,
       },
     },
+    legendary: {
+      nameHe: 'פאי — אדון האינסוף',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/math/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/math/form5/frames/idle-1.png',
+          '/assets/companions/math/form5/frames/idle-2.png',
+          '/assets/companions/math/form5/frames/idle-3.png',
+          '/assets/companions/math/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/math/form5/frames/run-1.png',
+          '/assets/companions/math/form5/frames/run-2.png',
+          '/assets/companions/math/form5/frames/run-3.png',
+          '/assets/companions/math/form5/frames/run-4.png',
+          '/assets/companions/math/form5/frames/run-5.png',
+          '/assets/companions/math/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 350,
+        runFrameDurationMs: 120,
+      },
+    },
+
   },
 
   generic: {
@@ -931,6 +1047,30 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 132,
       },
     },
+    legendary: {
+      nameHe: 'ניצוץ — שומר הממלכה האגדי',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/generic/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/generic/form5/frames/idle-1.png',
+          '/assets/companions/generic/form5/frames/idle-2.png',
+          '/assets/companions/generic/form5/frames/idle-3.png',
+          '/assets/companions/generic/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/generic/form5/frames/run-1.png',
+          '/assets/companions/generic/form5/frames/run-2.png',
+          '/assets/companions/generic/form5/frames/run-3.png',
+          '/assets/companions/generic/form5/frames/run-4.png',
+          '/assets/companions/generic/form5/frames/run-5.png',
+          '/assets/companions/generic/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 340,
+        runFrameDurationMs: 124,
+      },
+    },
+
   },
 
   ballet: {

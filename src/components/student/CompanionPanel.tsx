@@ -44,6 +44,7 @@ import CompanionJournal from './CompanionJournal';
 import CompanionReactionCard from './CompanionReactionCard';
 import CompanionStoryPanel from './CompanionStoryPanel';
 import AnimatedCompanionArt, { CompanionAnimationStyles } from './AnimatedCompanionArt';
+import { playGameSound } from '../../lib/gameSounds';
 
 type Props = {
   student: StudentState;
@@ -2150,7 +2151,10 @@ function EvolutionCeremony({
 
             <button
               type="button"
-              onClick={() => setStep('reveal')}
+              onClick={() => {
+                playGameSound('evolution');
+                setStep('reveal');
+              }}
               className="mt-6 w-full rounded-2xl bg-gradient-to-l from-yellow-300 to-amber-400 px-6 py-4 text-base font-black text-purple-950 shadow-lg transition-transform hover:scale-[1.015]"
             >
               לגלות את הצורה החדשה ✨

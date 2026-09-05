@@ -12,6 +12,7 @@ import type { ThemeId } from '../../data/themes';
 import Modal from '../shared/Modal';
 import ItemSprite from './ItemSprite';
 import { getExclusiveAchievementItem } from '../../data/exclusiveAchievementRewards';
+import { playBoxRewardSound } from '../../lib/gameSounds';
 
 type Props = {
   student: StudentState;
@@ -416,6 +417,8 @@ export default function Inventory({ student, onGoRoom }: Props) {
     const ownedInRewardTheme = rewardThemeItems.filter(item =>
       ownedBeforeOpening.has(item.id)
     ).length;
+
+    playBoxRewardSound(reward.item.rarity);
 
     setOpenedReward({
       itemId: reward.item.id,

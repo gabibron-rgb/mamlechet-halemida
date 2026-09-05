@@ -6,6 +6,7 @@ import {
   type ClassRoomVisitor,
 } from '../../lib/classRoomVisitors';
 import RoomView from './RoomView';
+import { getStudentAvatar } from '../../data/studentAvatars';
 
 const REFRESH_MS = 15_000;
 
@@ -118,23 +119,29 @@ export default function ClassRoomsPanel({
     const trophies = [...selectedVisitor.trophies]
       .sort((a, b) => b.awardedAt - a.awardedAt)
       .slice(0, 6);
+    const selectedAvatar = getStudentAvatar(selectedVisitor.activeAvatarId);
 
     return (
       <div className="space-y-5">
         <div className="flex flex-col gap-3 rounded-3xl border border-white/10 bg-magic-bg/30 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="text-xs font-black text-magic-soft/50">🏘️ ביקור בחדר</div>
-            <h2 className="mt-1 text-2xl font-black text-magic-accent">
-              החדר של {selectedVisitor.name}
-            </h2>
+          <div className="flex items-start gap-3">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-black/15 text-3xl">
+              {selectedAvatar.emoji}
+            </div>
+            <div>
+              <div className="text-xs font-black text-magic-soft/50">🏘️ ביקור בחדר</div>
+              <h2 className="mt-1 text-2xl font-black text-magic-accent">
+                החדר של {selectedVisitor.name}
+              </h2>
             {selectedVisitor.activeTitleLabel && (
               <div className="mt-2 inline-flex rounded-full border border-yellow-300/25 bg-yellow-300/10 px-3 py-1 text-xs font-black text-yellow-100">
                 👑 {selectedVisitor.activeTitleLabel}
               </div>
             )}
-            <p className="mt-1 text-xs text-magic-soft/60">
-              צפייה בלבד — שום דבר שתעשה כאן לא משנה את החדר של {selectedVisitor.name}.
-            </p>
+              <p className="mt-1 text-xs text-magic-soft/60">
+                {selectedAvatar.nameHe} · צפייה בלבד — שום דבר שתעשה כאן לא משנה את החדר של {selectedVisitor.name}.
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
@@ -247,6 +254,7 @@ export default function ClassRoomsPanel({
             const companionLabel = visitor.companion.unlocked
               ? visitor.companion.name?.trim() || 'חיית מחמד'
               : 'החיה עדיין נעולה';
+            const avatar = getStudentAvatar(visitor.activeAvatarId);
 
             return (
               <button
@@ -266,10 +274,12 @@ export default function ClassRoomsPanel({
                       </div>
                     )}
                     <div className="mt-1 text-xs text-magic-soft/50">
-                      🏠 {placedCount} חפצים מוצבים
+                      {avatar.nameHe} · 🏠 {placedCount} חפצים מוצבים
                     </div>
                   </div>
-                  <div className="text-4xl transition group-hover:scale-110">🏰</div>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/15 text-3xl transition group-hover:scale-110">
+                    {avatar.emoji}
+                  </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-2 text-center text-[10px]">

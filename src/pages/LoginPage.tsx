@@ -14,6 +14,7 @@ import { normalizeStudentClassGoals } from '../data/classGoals';
 import { normalizeClassKingdomClaimedRewards } from '../data/classKingdom';
 import { normalizeAchievementRecords, normalizeSpecialUnlocks } from '../data/achievements';
 import { normalizeJourneyRecords } from '../data/specialJourneys';
+import { normalizeStudentAvatarId } from '../data/studentAvatars';
 
 type Mode = 'choose' | 'student' | 'teacher';
 
@@ -111,6 +112,7 @@ function buildStudentFromSupabase(row: any): StudentState {
     journeyRecords: normalizeJourneyRecords(meta.journeyRecords),
     specialUnlocks,
     activeTitleUnlockId,
+    activeAvatarId: normalizeStudentAvatarId(meta.activeAvatarId),
 
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],

@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { TROPHY_THEMES } from '../../data/trophies';
 import type { StudentState } from '../../store/useGameStore';
+import { playGameSound } from '../../lib/gameSounds';
 
 type TrophyEntry = StudentState['trophies'][number];
 
@@ -34,6 +36,10 @@ export function TrophyAwardCeremony({
   );
   const emoji = definition?.emoji ?? '🏆';
   const name = definition?.nameHe ?? 'גביע מיוחד';
+
+  useEffect(() => {
+    playGameSound('trophy');
+  }, [trophy.id]);
 
   return (
     <div

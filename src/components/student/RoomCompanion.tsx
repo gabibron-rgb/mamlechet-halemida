@@ -74,6 +74,31 @@ const COMPANION_VISUAL_SCALE: Partial<
     grown: { idle: 1.075, run: 1.165 },
     magical: { idle: 1.02, run: 1.045 },
   },
+
+  // Music Form 5 has a wider Symphony Halo and grand wings. A small stage
+  // scale bump preserves the intended legendary body size in the room.
+  music: {
+    legendary: { idle: 1.08, run: 1.12 },
+  },
+
+  // Books Form 5 uses very large page-wings and an Infinite Library halo.
+  // Give the actual owl a modest legendary scale bump so the evolution
+  // reads as a bigger creature, not only as bigger effects around it.
+  books: {
+    legendary: { idle: 1.12, run: 1.14 },
+  },
+
+  // Math Form 5 has a wide Infinity Engine and geometric halo.
+  // Keep the red panda itself visibly larger than Form 4, not only the effects.
+  math: {
+    legendary: { idle: 1.12, run: 1.15 },
+  },
+
+  // General Form 5 clean rebuild: same calibration for idle/run.
+  // The source art is never enlarged; the legendary stage container provides the growth.
+  generic: {
+    legendary: { idle: 1.05, run: 1.05 },
+  },
 };
 
 function companionVisualScale(
@@ -91,7 +116,12 @@ function randomBetween(min: number, max: number): number {
   return min + Math.random() * (max - min);
 }
 
-const GROUND_WALK_POINTS = [
+type GroundWalkPoint = {
+  x: number;
+  y: number;
+};
+
+const GROUND_WALK_POINTS: readonly GroundWalkPoint[] = [
   { x: 12, y: 96 },
   { x: 24, y: 95.5 },
   { x: 36, y: 94.5 },
@@ -106,7 +136,7 @@ const GROUND_WALK_POINTS = [
 // Large companions visually extend far above their feet. Keeping their anchor
 // on the far-left floor makes them look as if they pass through the table.
 // Use only the genuinely open centre/right floor for grown+ companions.
-const LARGE_COMPANION_WALK_POINTS = [
+const LARGE_COMPANION_WALK_POINTS: readonly GroundWalkPoint[] = [
   { x: 48, y: 95.5 },
   { x: 56, y: 92.5 },
   { x: 64, y: 95.5 },
@@ -115,14 +145,106 @@ const LARGE_COMPANION_WALK_POINTS = [
   { x: 88, y: 95.5 },
 ] as const;
 
+// Boni's rebuilt legendary form is wider than the earlier worlds and looked as
+// if it lived only on the right side of the room. Give it a dedicated route
+// that spans the whole open floor while still avoiding obvious table overlap.
+const BUILDING_LEGENDARY_WALK_POINTS: readonly GroundWalkPoint[] = [
+  { x: 26, y: 95.9 },
+  { x: 36, y: 95.1 },
+  { x: 46, y: 93.8 },
+  { x: 56, y: 91.2 },
+  { x: 66, y: 92.5 },
+  { x: 76, y: 94.4 },
+  { x: 84, y: 95.6 },
+] as const;
+
+// Books Form 5 is unusually wide because the Infinite Library halo and page
+// wings extend far beyond the owl's body. Keep its anchor inside a dedicated
+// safe corridor so the full silhouette stays on-screen and does not enter the
+// capybara area on the right.
+const BOOKS_LEGENDARY_WALK_POINTS: readonly GroundWalkPoint[] = [
+  { x: 38, y: 95.7 },
+  { x: 44, y: 94.8 },
+  { x: 50, y: 93.4 },
+  { x: 56, y: 91.8 },
+  { x: 62, y: 92.6 },
+  { x: 68, y: 94.2 },
+  { x: 72, y: 95.3 },
+] as const;
+
+// Math Form 5 is also very wide because the Infinity Engine, Möbius ring and
+// polyhedra extend beyond the panda. Give it a safe but useful room corridor.
+const MATH_LEGENDARY_WALK_POINTS: readonly GroundWalkPoint[] = [
+  // Much wider route: the panda now explores most of the usable floor.
+  // The extra range is added mainly on the left, while the right edge is
+  // slightly safer so the wide Infinity Engine stays away from the capybara.
+  { x: 26, y: 95.9 },
+  { x: 34, y: 95.2 },
+  { x: 42, y: 94.2 },
+  { x: 50, y: 92.8 },
+  { x: 58, y: 91.4 },
+  { x: 66, y: 92.8 },
+  { x: 72, y: 94.4 },
+  { x: 75, y: 95.4 },
+] as const;
+
+// General Form 5: wide crystal wings, but no giant external effects.
+// Use most of the open floor while keeping the right side clear of the capybara.
+const GENERIC_LEGENDARY_WALK_POINTS: readonly GroundWalkPoint[] = [
+  { x: 29, y: 95.9 },
+  { x: 36, y: 95.1 },
+  { x: 43, y: 94.2 },
+  { x: 50, y: 92.8 },
+  { x: 57, y: 91.5 },
+  { x: 63, y: 92.8 },
+  { x: 68, y: 94.3 },
+  { x: 72, y: 95.4 },
+] as const;
+
+function getGroundWalkPoints(
+  theme: string | null | undefined,
+  stage: CompanionStage
+): readonly GroundWalkPoint[] {
+  if (theme === 'building' && stage === 'legendary') {
+    return BUILDING_LEGENDARY_WALK_POINTS;
+  }
+
+  if (theme === 'books' && stage === 'legendary') {
+    return BOOKS_LEGENDARY_WALK_POINTS;
+  }
+
+  if (theme === 'math' && stage === 'legendary') {
+    return MATH_LEGENDARY_WALK_POINTS;
+  }
+
+  if (theme === 'generic' && stage === 'legendary') {
+    return GENERIC_LEGENDARY_WALK_POINTS;
+  }
+
+  return ['grown', 'magical', 'legendary'].includes(stage)
+    ? LARGE_COMPANION_WALK_POINTS
+    : GROUND_WALK_POINTS;
+}
+
+function getInitialGroundPosition(
+  theme: string | null | undefined,
+  stage: CompanionStage
+): RoomPosition {
+  const points = getGroundWalkPoints(theme, stage);
+  const point = points[Math.floor(points.length / 2)] ?? { x: 64, y: 95.5 };
+
+  return {
+    x: point.x,
+    y: point.y,
+    facing: 'left',
+  };
+}
+
 function randomGroundDestination(
   currentX: number,
   currentY: number,
-  largeCompanion: boolean
+  availablePoints: readonly GroundWalkPoint[]
 ): { x: number; y: number } {
-  const availablePoints = largeCompanion
-    ? LARGE_COMPANION_WALK_POINTS
-    : GROUND_WALK_POINTS;
   const distantPoints = availablePoints.filter(point => {
     const horizontalChange = Math.abs(point.x - currentX);
     const depthChange = Math.abs(point.y - currentY);
@@ -130,20 +252,20 @@ function randomGroundDestination(
   });
   const pool = distantPoints.length > 0 ? distantPoints : availablePoints;
   const point = pool[Math.floor(Math.random() * pool.length)];
+  const minX = Math.min(...availablePoints.map(candidate => candidate.x)) - 2.5;
+  const maxX = Math.max(...availablePoints.map(candidate => candidate.x)) + 2.5;
 
   return {
-    x: Math.max(largeCompanion ? 46 : 9, Math.min(92, point.x + randomBetween(-1.6, 1.6))),
-    y: Math.max(90.2, Math.min(96.5, point.y + randomBetween(-0.55, 0.55))),
+    x: Math.max(minX, Math.min(maxX, point.x + randomBetween(-1.3, 1.3))),
+    y: Math.max(90.2, Math.min(96.5, point.y + randomBetween(-0.45, 0.45))),
   };
 }
 
 export default function RoomCompanion({ companion, isEditing }: Props) {
   const [isWalking, setIsWalking] = useState(false);
-  const [position, setPosition] = useState<RoomPosition>({
-    x: 82,
-    y: 93.5,
-    facing: 'left',
-  });
+  const [position, setPosition] = useState<RoomPosition>(() =>
+    getInitialGroundPosition(companion.theme, companion.stage)
+  );
   const positionRef = useRef(position);
   const [movementDurationMs, setMovementDurationMs] = useState(2400);
 
@@ -154,9 +276,6 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   const isMagical = companion.stage === 'magical';
   const isScienceMagical = companion.theme === 'science' && companion.stage === 'magical';
   const isLegendary = companion.stage === 'legendary';
-  const isRoboticsLegendary =
-    companion.theme === 'robotics' && companion.stage === 'legendary';
-  const isRoboticsHovering = isRoboticsLegendary && isWalking;
   const isChessHatchling =
     companion.theme === 'chess' && companion.stage === 'hatchling';
   const isChessYoung =
@@ -177,7 +296,8 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   const hasLegendaryBond = (companion.unlockedSkills ?? []).includes(
     'legendary_bond'
   );
-  const usesLargeFloorPath = ['grown', 'magical', 'legendary'].includes(companion.stage);
+  const walkPoints = getGroundWalkPoints(companion.theme, companion.stage);
+  const walkPointKey = walkPoints.map(point => `${point.x}:${point.y}`).join('|');
 
   useEffect(() => {
     if (!companion.unlocked || !visuals) return;
@@ -189,6 +309,13 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       setIsWalking(false);
       return;
     }
+
+    const groundedPosition = getInitialGroundPosition(
+      companion.theme,
+      companion.stage
+    );
+    positionRef.current = groundedPosition;
+    setPosition(groundedPosition);
 
     if (isEditing) {
       setIsWalking(false);
@@ -236,7 +363,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       if (cancelled) return;
 
       const current = positionRef.current;
-      const destination = randomGroundDestination(current.x, current.y, usesLargeFloorPath);
+      const destination = randomGroundDestination(current.x, current.y, walkPoints);
 
       const nextFacing: RoomPosition['facing'] =
         destination.x < current.x ? 'left' : 'right';
@@ -244,11 +371,9 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         destination.x - current.x,
         (destination.y - current.y) * 1.8
       );
-      const durationMs = isRoboticsLegendary
-        ? Math.round(Math.max(1250, Math.min(2250, 980 + distance * 20)))
-        : Math.round(
-            Math.max(1500, Math.min(2900, 1250 + distance * 24))
-          );
+      const durationMs = Math.round(
+        Math.max(1500, Math.min(2900, 1250 + distance * 24))
+      );
 
       // Turn first, then start walking. This prevents the 2D sprite from
       // visibly moonwalking when the next destination is behind it.
@@ -275,15 +400,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       if (turnTimer !== undefined) window.clearTimeout(turnTimer);
       if (walkingTimer !== undefined) window.clearTimeout(walkingTimer);
     };
-  }, [
-    companion.stage,
-    companion.unlocked,
-    isEditing,
-    isEgg,
-    isRoboticsLegendary,
-    usesLargeFloorPath,
-    visuals,
-  ]);
+  }, [companion.stage, companion.theme, companion.unlocked, isEditing, isEgg, visuals, walkPointKey]);
 
   if (!companion.unlocked || !visuals) return null;
 
@@ -318,58 +435,6 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
   return (
     <>
       <CompanionAnimationStyles />
-      <style>{`
-        @keyframes companionRoboticsHoverBob {
-          0%, 100% {
-            transform: translateY(-1px) rotate(-0.25deg);
-            filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.5));
-          }
-          50% {
-            transform: translateY(-5px) rotate(0.25deg);
-            filter: drop-shadow(0 0 11px rgba(34, 211, 238, 0.9));
-          }
-        }
-        @keyframes companionRoboticsIdlePulse {
-          0%, 100% { filter: drop-shadow(0 0 2px rgba(34, 211, 238, 0.28)); }
-          50% { filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.68)); }
-        }
-        @keyframes companionRoboticsThruster {
-          0%, 100% {
-            opacity: 0.66;
-            transform: translateX(-50%) scaleX(0.76) scaleY(0.82);
-          }
-          50% {
-            opacity: 1;
-            transform: translateX(-50%) scaleX(1.03) scaleY(1.28);
-          }
-        }
-        .companion-robotics-hover-bob {
-          animation: companionRoboticsHoverBob 720ms ease-in-out infinite;
-        }
-        .companion-robotics-idle-pulse {
-          animation: companionRoboticsIdlePulse 2.2s ease-in-out infinite;
-        }
-        .companion-robotics-thruster {
-          animation: companionRoboticsThruster 330ms ease-in-out infinite;
-          background: linear-gradient(
-            to bottom,
-            rgba(224, 247, 255, 0.98) 0%,
-            rgba(34, 211, 238, 0.96) 34%,
-            rgba(37, 99, 235, 0.72) 72%,
-            rgba(37, 99, 235, 0) 100%
-          );
-          clip-path: polygon(31% 0%, 69% 0%, 100% 100%, 0% 100%);
-          filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.92));
-          transform-origin: top center;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .companion-robotics-hover-bob,
-          .companion-robotics-idle-pulse,
-          .companion-robotics-thruster {
-            animation: none !important;
-          }
-        }
-      `}</style>
     <div
       role="img"
       aria-label={`${STAGE_LABEL_HE[companion.stage]} בשם ${displayName}`}
@@ -414,7 +479,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
         <div className="absolute -inset-3 animate-pulse rounded-full border border-fuchsia-200/50 shadow-[0_0_26px_rgba(216,180,254,0.62)]" />
       )}
 
-      {isLegendary && (
+      {isLegendary && companion.theme !== 'generic' && (
         <div className="absolute -inset-3 animate-pulse rounded-full border border-yellow-200/55 shadow-[0_0_28px_rgba(250,204,21,0.7)]" />
       )}
 
@@ -426,27 +491,10 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
           '--companion-facing': facingScale,
           // Ground companions do not use the global float animation anymore,
           // so apply their facing directly instead of relying on a keyframe.
-          transform: `translateY(${isRoboticsHovering ? '-14px' : '0px'}) scaleX(${facingScale})`,
+          transform: `scaleX(${facingScale})`,
           transformOrigin: 'center bottom',
-          transition: isRoboticsLegendary
-            ? 'transform 260ms cubic-bezier(0.22, 1, 0.36, 1)'
-            : undefined,
         } as CSSProperties}
       >
-        {isRoboticsHovering && (
-          <div className="pointer-events-none absolute inset-0 z-20 overflow-visible" aria-hidden="true">
-            {[35, 50, 65].map((left, index) => (
-              <span
-                key={left}
-                className="companion-robotics-thruster absolute bottom-[3%] h-[13%] w-[5.5%]"
-                style={{
-                  left: `${left}%`,
-                  animationDelay: `${index * -80}ms`,
-                }}
-              />
-            ))}
-          </div>
-        )}
         {isEgg ? (
           <div
             className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[50%_50%_46%_46%] border-2 border-white/45"
@@ -495,13 +543,6 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
                   stage={companion.stage}
                   motion={false}
                   activity={isWalking ? 'run' : 'idle'}
-                  className={
-                    isRoboticsLegendary
-                      ? isWalking
-                        ? 'companion-robotics-hover-bob'
-                        : 'companion-robotics-idle-pulse'
-                      : ''
-                  }
                 />
               </div>
             ) : null}
@@ -538,12 +579,10 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
       </div>
 
       <div
-        className={`absolute left-1/2 -translate-x-1/2 rounded-[50%] bg-black/35 transition-all duration-300 ${
-          isRoboticsHovering
-            ? '-bottom-1 h-1.5 w-[56%] opacity-25 blur-[3px]'
-            : isChessHatchling
-              ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
-              : '-bottom-1 h-2 w-4/5 blur-[2px]'
+        className={`absolute left-1/2 -translate-x-1/2 rounded-[50%] bg-black/35 ${
+          isChessHatchling
+            ? 'bottom-[8%] h-1.5 w-[62%] opacity-45 blur-[1.5px]'
+            : '-bottom-1 h-2 w-4/5 blur-[2px]'
         }`}
       />
     </div>

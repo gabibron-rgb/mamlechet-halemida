@@ -18,6 +18,7 @@ import { useGameStore, type StudentState } from '../../store/useGameStore';
 import SpecialJourneysPanel from './SpecialJourneysPanel';
 import StudentTitlesPanel from './StudentTitlesPanel';
 import { getExclusiveAchievementItem } from '../../data/exclusiveAchievementRewards';
+import { playGameSound } from '../../lib/gameSounds';
 
 type Props = {
   student: StudentState;
@@ -145,6 +146,8 @@ export default function AchievementsPanel({ student }: Props) {
       setMessage('לא הצלחתי לאסוף את הפרס. כדאי לרענן ולנסות שוב.');
       return;
     }
+
+    playGameSound('achievement');
 
     const rewardText = (definition.rewards ?? [])
       .map(reward => rewardLabelForStudent(reward, student))
