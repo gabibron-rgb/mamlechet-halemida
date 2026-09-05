@@ -550,6 +550,29 @@ export const COMPANION_FORM_ART: Partial<
         runFrameDurationMs: 132,
       },
     },
+    legendary: {
+      nameHe: 'לונה — קיסרית הרונות',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/fantasy/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/fantasy/form5/frames/idle-1.png',
+          '/assets/companions/fantasy/form5/frames/idle-2.png',
+          '/assets/companions/fantasy/form5/frames/idle-3.png',
+          '/assets/companions/fantasy/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/fantasy/form5/frames/run-1.png',
+          '/assets/companions/fantasy/form5/frames/run-2.png',
+          '/assets/companions/fantasy/form5/frames/run-3.png',
+          '/assets/companions/fantasy/form5/frames/run-4.png',
+          '/assets/companions/fantasy/form5/frames/run-5.png',
+          '/assets/companions/fantasy/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 300,
+        runFrameDurationMs: 142,
+      },
+    },
   },
   art: {
     hatchling: {
@@ -595,6 +618,29 @@ export const COMPANION_FORM_ART: Partial<
         ],
         idleFrameDurationMs: 320,
         runFrameDurationMs: 132,
+      },
+    },
+    legendary: {
+      nameHe: 'פלטה — מוזת הצבע החי',
+      movementProfile: 'ground',
+      frameAnimation: {
+        staticSrc: '/assets/companions/art/form5/frames/idle-1.png',
+        idleFrames: [
+          '/assets/companions/art/form5/frames/idle-1.png',
+          '/assets/companions/art/form5/frames/idle-2.png',
+          '/assets/companions/art/form5/frames/idle-3.png',
+          '/assets/companions/art/form5/frames/idle-4.png',
+        ],
+        runFrames: [
+          '/assets/companions/art/form5/frames/run-1.png',
+          '/assets/companions/art/form5/frames/run-2.png',
+          '/assets/companions/art/form5/frames/run-3.png',
+          '/assets/companions/art/form5/frames/run-4.png',
+          '/assets/companions/art/form5/frames/run-5.png',
+          '/assets/companions/art/form5/frames/run-6.png',
+        ],
+        idleFrameDurationMs: 300,
+        runFrameDurationMs: 142,
       },
     },
   },
