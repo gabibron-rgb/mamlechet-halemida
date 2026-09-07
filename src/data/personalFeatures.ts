@@ -6,7 +6,12 @@ export type PersonalFeatureType =
 
 export type PersonalGuestMovement = 'ground' | 'flying' | 'static';
 export type PersonalGuestFacing = 'left' | 'right';
-export type PersonalGuestRoomId = 'main' | 'hobby_room' | 'treasure_gallery';
+export type PersonalGuestRoomId =
+  | 'main'
+  | 'magic_room'
+  | 'hobby_room'
+  | 'wonder_hall'
+  | 'treasure_gallery';
 
 export type PersonalGuestConfig = {
   name?: string;
@@ -86,7 +91,9 @@ export function personalGuestConfigFromFeature(
       ? roomIds.filter(
           (roomId): roomId is PersonalGuestRoomId =>
             roomId === 'main' ||
+            roomId === 'magic_room' ||
             roomId === 'hobby_room' ||
+            roomId === 'wonder_hall' ||
             roomId === 'treasure_gallery'
         )
       : ['main'],

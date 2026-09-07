@@ -8,7 +8,12 @@ export type DisplayKind =
   | 'floorItem'
   | 'furniture';
 
-export type RoomLayoutId = 'main' | 'hobby_room' | 'treasure_gallery';
+export type RoomLayoutId =
+  | 'main'
+  | 'magic_room'
+  | 'hobby_room'
+  | 'wonder_hall'
+  | 'treasure_gallery';
 
 export type RoomSurface = {
   zIndex: number;

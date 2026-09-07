@@ -56,6 +56,53 @@ const DISPLAY_KIND_LABEL_HE: Record<DisplayKind, string> = {
   furniture: 'רהיט',
 };
 
+const ROOM_SCENE_META: Record<
+  StudentRoomId,
+  {
+    imageSrc: string;
+    altHe: string;
+    imageClass: string;
+    overlayClass: string;
+    badgeHe: string | null;
+  }
+> = {
+  main: {
+    imageSrc: '/rooms/kingdom-room.png',
+    altHe: 'החדר בממלכה',
+    imageClass: '',
+    overlayClass: 'bg-black/5',
+    badgeHe: null,
+  },
+  magic_room: {
+    imageSrc: '/rooms/magic-room.png',
+    altHe: 'חדר הקסם',
+    imageClass: '',
+    overlayClass: 'bg-black/5',
+    badgeHe: '🪄 חדר הקסם',
+  },
+  hobby_room: {
+    imageSrc: '/rooms/hobby-room.png',
+    altHe: 'חדר התחביבים',
+    imageClass: 'brightness-[0.98] saturate-[1.05]',
+    overlayClass: 'bg-gradient-to-br from-sky-300/5 via-transparent to-indigo-950/10',
+    badgeHe: '🧩 חדר התחביבים',
+  },
+  wonder_hall: {
+    imageSrc: '/rooms/wonder-hall-room.png',
+    altHe: 'היכל הפלאות',
+    imageClass: '',
+    overlayClass: 'bg-black/5',
+    badgeHe: '🌟 היכל הפלאות',
+  },
+  treasure_gallery: {
+    imageSrc: '/rooms/treasure-gallery-room.png',
+    altHe: 'גלריית האוצרות',
+    imageClass: 'brightness-[0.9] saturate-[1.15]',
+    overlayClass: 'bg-gradient-to-br from-yellow-300/10 via-transparent to-purple-950/15',
+    badgeHe: '👑 גלריית האוצרות',
+  },
+};
+
 const RARITY_SCALE_LIMITS: Record<Rarity, { min: number; max: number; step: number }> = {
   common: {
     min: 0.25,
@@ -705,6 +752,8 @@ function freeRoomZone(item: DisplayItem): Zone {
     );
   }
 
+  const roomMeta = ROOM_SCENE_META[roomId];
+
   return (
     <div
       ref={roomRef}
@@ -713,44 +762,20 @@ function freeRoomZone(item: DisplayItem): Zone {
       className="relative mx-auto aspect-[16/10] w-full max-w-6xl overflow-hidden rounded-2xl border border-yellow-300/20 bg-black shadow-2xl"
     >
       <img
-        src={
-          roomId === 'treasure_gallery'
-            ? '/rooms/treasure-gallery-room.png'
-            : roomId === 'hobby_room'
-              ? '/rooms/hobby-room.png'
-              : '/rooms/kingdom-room.png'
-        }
-        alt={
-          roomId === 'treasure_gallery'
-            ? 'גלריית האוצרות'
-            : roomId === 'hobby_room'
-              ? 'חדר התחביבים'
-              : 'החדר בממלכה'
-        }
-        className={`absolute inset-0 h-full w-full object-cover object-top ${
-          roomId === 'treasure_gallery'
-            ? 'brightness-[0.9] saturate-[1.15]'
-            : roomId === 'hobby_room'
-              ? 'brightness-[0.98] saturate-[1.05]'
-              : ''
-        }`}
+        src={roomMeta.imageSrc}
+        alt={roomMeta.altHe}
+        className={`absolute inset-0 h-full w-full object-cover object-top ${roomMeta.imageClass}`}
         draggable={false}
       />
 
-      <div
-        className={`absolute inset-0 ${
-          roomId === 'treasure_gallery'
-            ? 'bg-gradient-to-br from-yellow-300/10 via-transparent to-purple-950/15'
-            : roomId === 'hobby_room'
-              ? 'bg-gradient-to-br from-sky-300/5 via-transparent to-indigo-950/10'
-              : 'bg-black/5'
-        }`}
-      />
+      <div className={`absolute inset-0 ${roomMeta.overlayClass}`} />
+
+
       {roomId !== 'main' && (
         <>
           <div className="pointer-events-none absolute inset-3 rounded-xl border-2 border-yellow-300/20 shadow-[inset_0_0_30px_rgba(250,204,21,0.08)]" />
           <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 rounded-full border border-yellow-200/25 bg-black/30 px-4 py-1 text-xs font-black text-yellow-100 backdrop-blur-sm">
-            {roomId === 'treasure_gallery' ? '👑 גלריית האוצרות' : '🧩 חדר התחביבים'}
+            {roomMeta.badgeHe}
           </div>
         </>
       )}
@@ -1068,7 +1093,11 @@ export default function RoomView({ student, readOnly = false }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [previewCompanionStage, setPreviewCompanionStage] =
     useState<CompanionStage | null>(null);
-  const availableRooms = availableStudentRooms(student.specialUnlocks, student.level);
+  // Local development helper: expose all level-gated rooms for testing without
+  // changing the student's real level or any Supabase data. Achievement-gated
+  // rooms (such as the treasure gallery) still require their actual unlock.
+  const roomAccessLevel = import.meta.env.DEV ? Number.MAX_SAFE_INTEGER : student.level;
+  const availableRooms = availableStudentRooms(student.specialUnlocks, roomAccessLevel);
   const [requestedRoomId, setRequestedRoomId] = useState<StudentRoomId>('main');
   const activeRoom =
     availableRooms.find(room => room.id === requestedRoomId) ?? availableRooms[0];

@@ -38,14 +38,26 @@ const SOURCE_ORDER: ItemLabSource[] = [
 
 const ROOM_LABEL_HE: Record<RoomLayoutId, string> = {
   main: 'החדר הראשי',
+  magic_room: 'חדר הקסם',
   hobby_room: 'חדר התחביבים',
+  wonder_hall: 'היכל הפלאות',
   treasure_gallery: 'גלריית האוצרות',
 };
 
 const ROOM_BACKGROUND: Record<RoomLayoutId, string> = {
   main: '/rooms/kingdom-room.png',
+  magic_room: '/rooms/magic-room.png',
   hobby_room: '/rooms/hobby-room.png',
+  wonder_hall: '/rooms/wonder-hall-room.png',
   treasure_gallery: '/rooms/treasure-gallery-room.png',
+};
+
+const ROOM_EMOJI: Record<RoomLayoutId, string> = {
+  main: '🏰',
+  magic_room: '🪄',
+  hobby_room: '🧩',
+  wonder_hall: '🌟',
+  treasure_gallery: '👑',
 };
 
 const RARITIES: Rarity[] = [
@@ -1092,7 +1104,7 @@ export default function ItemLab() {
 
                 <div className="flex flex-col items-start gap-2 md:items-end">
                   <div className="flex flex-wrap gap-2">
-                    {(['main', 'hobby_room', 'treasure_gallery'] as RoomLayoutId[]).map(roomId => (
+                    {(['main', 'magic_room', 'hobby_room', 'wonder_hall', 'treasure_gallery'] as RoomLayoutId[]).map(roomId => (
                       <button
                         key={roomId}
                         type="button"
@@ -1103,7 +1115,7 @@ export default function ItemLab() {
                             : 'bg-white/5 text-white/65 hover:bg-white/10'
                         }`}
                       >
-                        {roomId === 'main' ? '🏰' : roomId === 'hobby_room' ? '🧩' : '👑'} {ROOM_LABEL_HE[roomId]}
+                        {ROOM_EMOJI[roomId]} {ROOM_LABEL_HE[roomId]}
                       </button>
                     ))}
                   </div>

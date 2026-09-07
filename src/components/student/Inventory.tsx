@@ -11,7 +11,7 @@ import { THEMES } from '../../data/themes';
 import type { ThemeId } from '../../data/themes';
 import Modal from '../shared/Modal';
 import ItemSprite from './ItemSprite';
-import { getExclusiveAchievementItem } from '../../data/exclusiveAchievementRewards';
+import { getExclusiveAchievementItem, STUDENT_ROOMS } from '../../data/exclusiveAchievementRewards';
 import { playBoxRewardSound } from '../../lib/gameSounds';
 
 type Props = {
@@ -1142,11 +1142,10 @@ export default function Inventory({ student, onGoRoom }: Props) {
 
               {isPlaced && (
                 <div className="mt-2 text-[10px] font-bold text-sky-300">
-                  {entry.roomId === 'treasure_gallery'
-                    ? '👑 מונח בגלריית האוצרות'
-                    : entry.roomId === 'hobby_room'
-                      ? '🧩 מונח בחדר התחביבים'
-                      : '🏠 מונח בחדר הראשי'}
+                  {(() => {
+                    const room = STUDENT_ROOMS.find(candidate => candidate.id === (entry.roomId ?? 'main'));
+                    return `📍 מיקום: ${room?.emoji ?? '🏠'} ${room?.shortNameHe ?? 'החדר הראשי'}`;
+                  })()}
                 </div>
               )}
 

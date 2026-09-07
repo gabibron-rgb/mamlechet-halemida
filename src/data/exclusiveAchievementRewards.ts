@@ -81,7 +81,12 @@ export function getExclusiveAchievementItem(
   return EXCLUSIVE_ACHIEVEMENT_ITEM_BY_ID[itemId] ?? null;
 }
 
-export type StudentRoomId = 'main' | 'hobby_room' | 'treasure_gallery';
+export type StudentRoomId =
+  | 'main'
+  | 'magic_room'
+  | 'hobby_room'
+  | 'wonder_hall'
+  | 'treasure_gallery';
 
 export type StudentRoomDefinition = {
   id: StudentRoomId;
@@ -104,6 +109,15 @@ export const STUDENT_ROOMS: StudentRoomDefinition[] = [
     levelRequired: 1,
   },
   {
+    id: 'magic_room',
+    nameHe: 'חדר הקסם',
+    shortNameHe: 'חדר הקסם',
+    emoji: '🪄',
+    descriptionHe: 'חדר נוסף וחופשי שנפתח ברמה 4 — עוד מקום לעצב, לאסוף ולהציג כל מה שאוהבים.',
+    unlockId: null,
+    levelRequired: 4,
+  },
+  {
     id: 'hobby_room',
     nameHe: 'חדר התחביבים',
     shortNameHe: 'חדר התחביבים',
@@ -111,6 +125,15 @@ export const STUDENT_ROOMS: StudentRoomDefinition[] = [
     descriptionHe: 'חדר נוסף וחופשי שנפתח ברמה 6 ונותן מקום לעוד אוספים, יצירות ותחביבים.',
     unlockId: null,
     levelRequired: 6,
+  },
+  {
+    id: 'wonder_hall',
+    nameHe: 'היכל הפלאות',
+    shortNameHe: 'היכל הפלאות',
+    emoji: '🌟',
+    descriptionHe: 'היכל אישי ומרשים שנפתח ברמה 11 — מקום גדול נוסף לפריטים נדירים ולאוספים שהולכים וגדלים.',
+    unlockId: null,
+    levelRequired: 11,
   },
   {
     id: 'treasure_gallery',
