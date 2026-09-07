@@ -1,0 +1,415 @@
+.level-room-card {
+  isolation: isolate;
+  min-height: min(690px, calc(100vh - 2rem));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.level-room-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(167, 139, 250, 0.24), transparent 34%),
+    linear-gradient(180deg, rgba(30, 27, 75, 0.7), rgba(46, 16, 101, 0.96));
+}
+
+.level-room-card--magic::before {
+  background:
+    radial-gradient(circle at 50% 43%, rgba(196, 181, 253, 0.32), transparent 32%),
+    radial-gradient(circle at 14% 22%, rgba(59, 130, 246, 0.18), transparent 24%),
+    linear-gradient(180deg, #171342 0%, #31205f 50%, #180d38 100%);
+}
+
+.level-room-card--hobby::before {
+  background:
+    radial-gradient(circle at 50% 43%, rgba(125, 211, 252, 0.26), transparent 32%),
+    radial-gradient(circle at 82% 22%, rgba(250, 204, 21, 0.12), transparent 24%),
+    linear-gradient(180deg, #10233f 0%, #15365b 50%, #0b1b35 100%);
+}
+
+.level-room-card--wonder::before {
+  background:
+    radial-gradient(circle at 50% 39%, rgba(253, 224, 71, 0.34), transparent 31%),
+    radial-gradient(circle at 50% 45%, rgba(96, 165, 250, 0.29), transparent 50%),
+    linear-gradient(180deg, #07152f 0%, #0c2860 48%, #241552 100%);
+}
+
+.level-room-reveal {
+  position: relative;
+  width: 100%;
+  min-height: 590px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+}
+
+.level-room-reveal__content {
+  position: relative;
+  z-index: 4;
+  width: min(100%, 570px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: level-room-content-enter 700ms cubic-bezier(.17,.9,.24,1.15) both;
+}
+
+.level-room-reveal__level {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 6px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.45);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.level-room-reveal__eyebrow {
+  margin-top: 12px;
+  color: #ddd6fe;
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.level-room-card--wonder .level-room-reveal__eyebrow {
+  color: #fde68a;
+}
+
+.level-room-portal {
+  position: relative;
+  width: 190px;
+  height: 238px;
+  margin: 20px 0 10px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.level-room-portal__halo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  transform: translate(-50%, -49%);
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.44) 0%, rgba(124, 58, 237, 0.16) 46%, transparent 72%);
+  filter: blur(2px);
+  animation: level-room-halo 2.1s ease-in-out infinite;
+}
+
+.level-room-portal__door {
+  position: relative;
+  width: 126px;
+  height: 194px;
+  border: 4px solid rgba(254, 240, 138, 0.92);
+  border-bottom-width: 7px;
+  border-radius: 68px 68px 14px 14px;
+  padding: 8px;
+  background: linear-gradient(180deg, rgba(76, 29, 149, 0.82), rgba(30, 27, 75, 0.94));
+  box-shadow:
+    0 0 20px rgba(196, 181, 253, 0.58),
+    0 0 55px rgba(124, 58, 237, 0.44),
+    inset 0 0 30px rgba(255, 255, 255, 0.08);
+  transform-origin: 50% 100%;
+  animation: level-room-door-enter 900ms cubic-bezier(.17,.9,.24,1.15) both;
+}
+
+.level-room-portal__inner {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 55px 55px 8px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.23), transparent 24%),
+    linear-gradient(180deg, rgba(109, 40, 217, 0.72), rgba(30, 27, 75, 0.9));
+  overflow: hidden;
+}
+
+.level-room-portal__inner span {
+  font-size: 4.8rem;
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.32));
+  animation: level-room-symbol 1.8s ease-in-out infinite;
+}
+
+.level-room-portal__floor-glow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 230px;
+  height: 36px;
+  border-radius: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(196, 181, 253, 0.55), transparent 70%);
+  filter: blur(4px);
+  animation: level-room-floor-glow 2s ease-in-out infinite;
+}
+
+.level-room-card--hobby .level-room-portal__door {
+  border-color: rgba(125, 211, 252, 0.92);
+  background: linear-gradient(180deg, rgba(14, 116, 144, 0.78), rgba(15, 23, 42, 0.94));
+  box-shadow:
+    0 0 20px rgba(125, 211, 252, 0.5),
+    0 0 55px rgba(14, 165, 233, 0.32),
+    inset 0 0 30px rgba(255, 255, 255, 0.08);
+}
+
+.level-room-card--hobby .level-room-portal__inner {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.22), transparent 24%),
+    linear-gradient(180deg, rgba(14, 116, 144, 0.68), rgba(15, 23, 42, 0.9));
+}
+
+.level-room-card--wonder .level-room-portal {
+  width: 230px;
+  height: 270px;
+  margin-top: 12px;
+}
+
+.level-room-card--wonder .level-room-portal__halo {
+  width: 230px;
+  height: 230px;
+  background: radial-gradient(circle, rgba(253, 224, 71, 0.46) 0%, rgba(96, 165, 250, 0.22) 44%, transparent 73%);
+  box-shadow: 0 0 70px rgba(250, 204, 21, 0.16);
+}
+
+.level-room-card--wonder .level-room-portal__door {
+  width: 148px;
+  height: 222px;
+  border-width: 5px;
+  border-bottom-width: 8px;
+  border-color: rgba(253, 224, 71, 0.96);
+  background: linear-gradient(180deg, rgba(30, 64, 175, 0.82), rgba(49, 46, 129, 0.95));
+  box-shadow:
+    0 0 24px rgba(253, 224, 71, 0.62),
+    0 0 72px rgba(96, 165, 250, 0.48),
+    0 0 115px rgba(124, 58, 237, 0.24),
+    inset 0 0 34px rgba(255, 255, 255, 0.12);
+}
+
+.level-room-card--wonder .level-room-portal__inner {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.34), transparent 18%),
+    radial-gradient(circle at 50% 55%, rgba(59, 130, 246, 0.32), transparent 48%),
+    linear-gradient(180deg, rgba(29, 78, 216, 0.74), rgba(49, 46, 129, 0.92));
+}
+
+.level-room-card--wonder .level-room-portal__inner span {
+  font-size: 5.6rem;
+}
+
+.level-room-reveal__title {
+  margin: 0;
+  font-size: clamp(2rem, 6vw, 3.1rem);
+  line-height: 1.04;
+  font-weight: 950;
+  color: #fde68a;
+  text-shadow: 0 0 24px rgba(250, 204, 21, 0.24);
+  animation: level-room-title-shimmer 2.8s ease-in-out infinite;
+}
+
+.level-room-card--wonder .level-room-reveal__title {
+  font-size: clamp(2.35rem, 7vw, 3.65rem);
+  text-shadow:
+    0 0 22px rgba(253, 224, 71, 0.32),
+    0 0 48px rgba(96, 165, 250, 0.2);
+}
+
+.level-room-reveal__description {
+  max-width: 520px;
+  margin: 12px auto 0;
+  color: #ede9fe;
+  font-size: 0.98rem;
+  line-height: 1.65;
+}
+
+.level-room-reveal__actions {
+  margin-top: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.level-room-reveal__primary,
+.level-room-reveal__secondary {
+  border: 0;
+  border-radius: 14px;
+  padding: 11px 22px;
+  font-weight: 900;
+  transition: transform 160ms ease, filter 160ms ease, background 160ms ease;
+}
+
+.level-room-reveal__primary {
+  background: #facc15;
+  color: #1e1b4b;
+  box-shadow: 0 8px 24px rgba(250, 204, 21, 0.2);
+}
+
+.level-room-reveal__primary:hover {
+  transform: translateY(-2px) scale(1.02);
+  filter: brightness(1.07);
+}
+
+.level-room-reveal__secondary {
+  background: rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.level-room-reveal__secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.level-room-rays {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: 43%;
+  width: 580px;
+  height: 580px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  opacity: 0.2;
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.28) 0deg 3deg,
+    transparent 3deg 18deg
+  );
+  mask-image: radial-gradient(circle, rgba(0, 0, 0, 0.9), transparent 67%);
+  animation: level-room-rays-spin 22s linear infinite;
+}
+
+.level-room-card--wonder .level-room-rays {
+  width: 760px;
+  height: 760px;
+  opacity: 0.3;
+  animation-duration: 16s;
+}
+
+.level-room-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.level-room-particle {
+  --angle: calc((360deg / var(--particle-count)) * var(--particle-index));
+  --distance: calc(120px + (var(--particle-index) % 4) * 32px);
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fde68a;
+  box-shadow: 0 0 12px rgba(253, 224, 71, 0.72);
+  transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--distance));
+  animation: level-room-particle-float 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--particle-index) * -140ms);
+}
+
+.level-room-card--magic .level-room-particle {
+  background: #c4b5fd;
+  box-shadow: 0 0 12px rgba(196, 181, 253, 0.8);
+}
+
+.level-room-card--hobby .level-room-particle {
+  background: #7dd3fc;
+  box-shadow: 0 0 12px rgba(125, 211, 252, 0.72);
+}
+
+.level-room-card--wonder .level-room-particle:nth-child(3n) {
+  width: 8px;
+  height: 8px;
+}
+
+@keyframes level-room-content-enter {
+  0% { opacity: 0; transform: translateY(24px) scale(0.94); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes level-room-door-enter {
+  0% { opacity: 0; transform: translateY(28px) scale(0.68); }
+  62% { opacity: 1; transform: translateY(-5px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes level-room-halo {
+  0%, 100% { transform: translate(-50%, -49%) scale(0.94); opacity: 0.62; }
+  50% { transform: translate(-50%, -49%) scale(1.08); opacity: 1; }
+}
+
+@keyframes level-room-floor-glow {
+  0%, 100% { opacity: 0.55; transform: translateX(-50%) scaleX(0.88); }
+  50% { opacity: 0.96; transform: translateX(-50%) scaleX(1.12); }
+}
+
+@keyframes level-room-symbol {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-7px) scale(1.055); }
+}
+
+@keyframes level-room-title-shimmer {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.2); }
+}
+
+@keyframes level-room-rays-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes level-room-particle-float {
+  0%, 100% { opacity: 0.25; margin-top: 9px; }
+  50% { opacity: 1; margin-top: -11px; }
+}
+
+@media (max-height: 720px) {
+  .level-room-card {
+    min-height: auto;
+  }
+
+  .level-room-reveal {
+    min-height: 500px;
+  }
+
+  .level-room-portal {
+    transform: scale(0.82);
+    margin-top: -2px;
+    margin-bottom: -10px;
+  }
+
+  .level-room-card--wonder .level-room-portal {
+    transform: scale(0.76);
+    margin-top: -18px;
+    margin-bottom: -28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-room-reveal__content,
+  .level-room-portal__door,
+  .level-room-portal__halo,
+  .level-room-portal__floor-glow,
+  .level-room-portal__inner span,
+  .level-room-reveal__title,
+  .level-room-rays,
+  .level-room-particle {
+    animation: none !important;
+  }
+}

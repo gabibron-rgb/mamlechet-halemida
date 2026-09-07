@@ -156,6 +156,7 @@ export type StudentState = {
   pastRewards: string[];
   trophies: { id: string; trophyTheme: string; caption: string; awardedAt: number }[];
   seenTrophyIds: string[];
+  seenRoomUnlockLevels: number[];
   pityCounters: Record<string, number>;
   pendingLevelUps: number;
   pendingThemeUnlocks: number;
@@ -178,6 +179,7 @@ type GameStore = {
   ) => void;
   removeTrophy: (studentId: StudentId, trophyId: string) => void;
   markTrophySeen: (studentId: StudentId, trophyId: string) => void;
+  markRoomUnlockSeen: (studentId: StudentId, level: number) => void;
   awardBehaviorPoints: (
     studentId: StudentId,
     amount: number,
@@ -366,6 +368,7 @@ async function syncStudentToSupabase(student: StudentState) {
       pastRewards: student.pastRewards,
       trophies: student.trophies,
       seenTrophyIds: student.seenTrophyIds ?? [],
+      seenRoomUnlockLevels: student.seenRoomUnlockLevels ?? [],
       pityCounters: student.pityCounters,
       pendingLevelUps: student.pendingLevelUps,
       pendingThemeUnlocks: student.pendingThemeUnlocks,
@@ -478,6 +481,7 @@ function defaultStudent(name: string, classId: string): StudentState {
     pastRewards: [],
     trophies: [],
     seenTrophyIds: [],
+    seenRoomUnlockLevels: [],
     pityCounters: {},
     pendingLevelUps: 0,
     pendingThemeUnlocks: 0,
@@ -592,6 +596,12 @@ function studentFromSupabase(row: any, classId: string): StudentState {
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
+    seenRoomUnlockLevels: Array.isArray(meta.seenRoomUnlockLevels)
+      ? meta.seenRoomUnlockLevels.filter(
+          (value: unknown): value is number =>
+            typeof value === 'number' && Number.isInteger(value)
+        )
+      : [],
     pityCounters: meta.pityCounters ?? {},
 
     pendingLevelUps: meta.pendingLevelUps ?? 0,
@@ -950,6 +960,36 @@ export const useGameStore = create<GameStore>()(
           updatedStudent = {
             ...student,
             seenTrophyIds: [...seenTrophyIds, trophyId],
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      markRoomUnlockSeen: (studentId, level) => {
+        let updatedStudent: StudentState | null = null;
+
+        if (![4, 6, 11].includes(level)) return;
+
+        set((state) => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const seenRoomUnlockLevels = student.seenRoomUnlockLevels ?? [];
+          if (seenRoomUnlockLevels.includes(level)) return state;
+
+          updatedStudent = {
+            ...student,
+            seenRoomUnlockLevels: [...seenRoomUnlockLevels, level],
           };
 
           return {
@@ -2837,11 +2877,17 @@ export const useGameStore = create<GameStore>()(
             roomRotation: 0,
           };
 
+          const seenRoomUnlockLevels = student.seenRoomUnlockLevels ?? [];
+          const nextSeenRoomUnlockLevels = [4, 6, 11].includes(payload.newLevel)
+            ? Array.from(new Set([...seenRoomUnlockLevels, payload.newLevel]))
+            : seenRoomUnlockLevels;
+
           updatedStudent = withReconciledAchievements({
             ...student,
             points: student.points + payload.pointBonus,
             capacities,
             inventory: [...student.inventory, cosmeticEntry],
+            seenRoomUnlockLevels: nextSeenRoomUnlockLevels,
             pendingLevelUps: Math.max(0, (student.pendingLevelUps ?? 0) - 1),
             pendingThemeUnlocks:
               (student.pendingThemeUnlocks ?? 0) +

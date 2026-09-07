@@ -21,7 +21,10 @@ import RoomView from '../components/student/RoomView';
 import ClassRoomsPanel from '../components/student/ClassRoomsPanel';
 import TrophyRoom from '../components/student/TrophyRoom';
 import { TrophyAwardCeremony } from '../components/student/TrophyAwardCeremony';
-import { LevelUpCeremony } from '../components/student/LevelUpCeremony';
+import {
+  LevelUpCeremony,
+  RoomUnlockCeremony,
+} from '../components/student/LevelUpCeremony';
 import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
 import StudentOnboarding from '../components/student/StudentOnboarding';
 import StudentProfilePanel from '../components/student/StudentProfilePanel';
@@ -30,6 +33,8 @@ import {
   playGameSound,
   setGameSoundEnabled,
 } from '../lib/gameSounds';
+
+const RETROACTIVE_ROOM_UNLOCK_LEVELS = [4, 11] as const;
 
 type Tab =
   | 'progress'
@@ -73,12 +78,15 @@ export default function StudentHome() {
   const completeLevelUp = useGameStore(s => s.completeLevelUp);
   const completeThemeUnlock = useGameStore(s => s.completeThemeUnlock);
   const markTrophySeen = useGameStore(s => s.markTrophySeen);
+  const markRoomUnlockSeen = useGameStore(s => s.markRoomUnlockSeen);
 
   // ברירת המחדל עכשיו היא "התקדמות", כי זה מסך כניסה הרבה יותר ברור לילדים.
   const [tab, setTab] = useState<Tab>('progress');
   const [ceremonyOpen, setCeremonyOpen] = useState(false);
   const [themeUnlockOpen, setThemeUnlockOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [onboardingChecked, setOnboardingChecked] = useState(false);
+  const [previewRoomUnlockLevel, setPreviewRoomUnlockLevel] = useState<number | null>(null);
   const [soundEnabled, setSoundEnabledState] = useState(() =>
     isGameSoundEnabled()
   );
@@ -105,6 +113,8 @@ export default function StudentHome() {
       }
     } catch {
       // If storage is blocked, the game should still work normally.
+    } finally {
+      setOnboardingChecked(true);
     }
   }, [student?.id]);
 
@@ -150,6 +160,17 @@ export default function StudentHome() {
 
   const pending = student.pendingLevelUps ?? 0;
   const pendingThemeUnlocks = student.pendingThemeUnlocks ?? 0;
+  const seenRoomUnlockLevels = student.seenRoomUnlockLevels ?? [];
+  const isLocalItemTester =
+    import.meta.env.DEV &&
+    (student.loginName === 'itemtester' || student.name === 'בודק חפצים');
+
+  const retroactiveRoomUnlockLevel =
+    pending === 0
+      ? RETROACTIVE_ROOM_UNLOCK_LEVELS.find(
+          level => student.level >= level && !seenRoomUnlockLevels.includes(level)
+        ) ?? null
+      : null;
 
   const nextCelebrationLevel =
     pending > 0 ? student.level - pending + 1 : student.level;
@@ -289,6 +310,29 @@ export default function StudentHome() {
             </div>
           )}
 
+          {isLocalItemTester && (
+            <div className="mt-3 rounded-xl border border-cyan-400/35 bg-cyan-950/35 px-4 py-3 text-center text-sm">
+              <div className="mb-2 font-semibold text-cyan-100">
+                🧪 בודק חפצים — תצוגה מקומית של טקסי פתיחת חדרים
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
+                {[4, 6, 11].map(level => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => setPreviewRoomUnlockLevel(level)}
+                    className="rounded-lg border border-cyan-300/30 bg-cyan-900/45 px-3 py-1.5 font-semibold text-cyan-50 hover:bg-cyan-800/55"
+                  >
+                    טקס רמה {level}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-2 text-xs text-cyan-100/65">
+                התצוגה לא מעניקה פרסים ולא משנה נתוני תלמיד.
+              </div>
+            </div>
+          )}
+
           {pendingThemeUnlocks > 0 && (
             <div className="mt-3 rounded-xl border border-purple-400/40 bg-purple-900/40 px-5 py-3 text-center text-magic-accent text-sm">
               <span className="mr-2">
@@ -422,6 +466,7 @@ export default function StudentHome() {
         {onboardingOpen &&
           !ceremonyOpen &&
           !themeUnlockOpen &&
+          previewRoomUnlockLevel === null &&
           !activeUnseenTrophy && (
             <StudentOnboarding
               onNavigate={(destination) => setTab(destination)}
@@ -439,6 +484,7 @@ export default function StudentHome() {
               completeLevelUp(student.id, payload);
             }}
             onClose={() => setCeremonyOpen(false)}
+            onGoRoom={() => setTab('room')}
           />
         )}
 
@@ -453,7 +499,41 @@ export default function StudentHome() {
           />
         )}
 
-        {activeUnseenTrophy && !ceremonyOpen && !themeUnlockOpen && (
+        {previewRoomUnlockLevel !== null && !ceremonyOpen && !themeUnlockOpen && (
+          <RoomUnlockCeremony
+            level={previewRoomUnlockLevel}
+            onEnterRoom={() => {
+              setPreviewRoomUnlockLevel(null);
+              setTab('room');
+            }}
+            onStay={() => setPreviewRoomUnlockLevel(null)}
+          />
+        )}
+
+        {onboardingChecked &&
+          retroactiveRoomUnlockLevel !== null &&
+          previewRoomUnlockLevel === null &&
+          !onboardingOpen &&
+          !ceremonyOpen &&
+          !themeUnlockOpen &&
+          !activeUnseenTrophy && (
+            <RoomUnlockCeremony
+              level={retroactiveRoomUnlockLevel}
+              onEnterRoom={() => {
+                markRoomUnlockSeen(student.id, retroactiveRoomUnlockLevel);
+                setTab('room');
+              }}
+              onStay={() => {
+                markRoomUnlockSeen(student.id, retroactiveRoomUnlockLevel);
+              }}
+            />
+          )}
+
+        {activeUnseenTrophy &&
+          previewRoomUnlockLevel === null &&
+          retroactiveRoomUnlockLevel === null &&
+          !ceremonyOpen &&
+          !themeUnlockOpen && (
           <TrophyAwardCeremony
             studentName={student.name}
             trophy={activeUnseenTrophy}

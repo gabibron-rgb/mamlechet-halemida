@@ -1,9 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import type { Cosmetic } from '../../data/cosmetics';
 import type { CapacityKey } from '../../data/levels';
 import { rollCosmeticChoices, capacityBumpForLevel, pointBonus } from '../../logic/levelUp';
+import './LevelUpCeremony.css';
 
-type CeremonyStep = 'chest' | 'picker' | 'summary';
+type CeremonyStep = 'chest' | 'picker' | 'summary' | 'roomReveal';
+
+export type RoomUnlockInfo = {
+  emoji: string;
+  nameHe: string;
+  eyebrowHe: string;
+  descriptionHe: string;
+  theme: 'magic' | 'hobby' | 'wonder';
+};
 
 interface LevelUpCeremonyProps {
   studentName: string;
@@ -16,6 +25,7 @@ interface LevelUpCeremonyProps {
     newLevel: number;
   }) => void;
   onClose: () => void;
+  onGoRoom?: () => void;
 }
 
 const CAPACITY_LABEL_HE: Record<CapacityKey, string> = {
@@ -26,12 +36,37 @@ const CAPACITY_LABEL_HE: Record<CapacityKey, string> = {
   petArea: 'אזור חיות מחמד',
 };
 
+export const ROOM_UNLOCK_BY_LEVEL: Partial<Record<number, RoomUnlockInfo>> = {
+  4: {
+    emoji: '🪄',
+    nameHe: 'חדר הקסם',
+    eyebrowHe: 'דלת חדשה נפתחה בממלכה שלך',
+    descriptionHe: 'חדר קסום חדש מחכה לעיצוב שלך. כל מה שתציב/י בו נשמר בנפרד מהחדרים האחרים.',
+    theme: 'magic',
+  },
+  6: {
+    emoji: '🧩',
+    nameHe: 'חדר התחביבים',
+    eyebrowHe: 'הממלכה שלך ממשיכה להתרחב',
+    descriptionHe: 'נפתח לך חדר נוסף לאוספים, יצירות, תחביבים וכל הדברים שתרצה/י להציג בדרך שלך.',
+    theme: 'hobby',
+  },
+  11: {
+    emoji: '🌟',
+    nameHe: 'היכל הפלאות',
+    eyebrowHe: 'הגעת לאחד המקומות הנדירים בממלכה',
+    descriptionHe: 'היכל גדול ומיוחד נפתח עבורך. זה המקום לפריטים הנדירים, האוספים המרשימים והעיצוב הכי שאפתני שלך.',
+    theme: 'wonder',
+  },
+};
+
 export function LevelUpCeremony({
   studentName,
   newLevel,
   ownedCosmeticIds,
   onComplete,
   onClose,
+  onGoRoom,
 }: LevelUpCeremonyProps) {
   const [step, setStep] = useState<CeremonyStep>('chest');
   const [selected, setSelected] = useState<Cosmetic | null>(null);
@@ -42,28 +77,53 @@ export function LevelUpCeremony({
   );
   const capacityKey = useMemo(() => capacityBumpForLevel(newLevel), [newLevel]);
   const bonus = useMemo(() => pointBonus(newLevel), [newLevel]);
+  const roomUnlock = ROOM_UNLOCK_BY_LEVEL[newLevel] ?? null;
 
-  function handleConfirm() {
+  function finishCeremony(goToRoom = false) {
     if (!selected) return;
+
     onComplete({
       cosmeticId: selected.id,
       capacityKey,
       pointBonus: bonus,
       newLevel,
     });
+
+    if (goToRoom) {
+      onGoRoom?.();
+    }
+
     onClose();
+  }
+
+  function handleSummaryContinue() {
+    if (!selected) return;
+
+    if (roomUnlock) {
+      setStep('roomReveal');
+      return;
+    }
+
+    finishCeremony(false);
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
     >
-      <div className="ceremony-card relative w-full max-w-2xl rounded-2xl bg-gradient-to-b from-indigo-950 to-purple-950 p-8 text-white shadow-2xl ring-1 ring-purple-400/30">
-        <CeremonyHeader studentName={studentName} newLevel={newLevel} />
+      <div
+        className={[
+          'ceremony-card relative w-full max-w-2xl overflow-hidden rounded-2xl bg-gradient-to-b from-indigo-950 to-purple-950 p-8 text-white shadow-2xl ring-1 ring-purple-400/30',
+          step === 'roomReveal' && roomUnlock ? `level-room-card level-room-card--${roomUnlock.theme}` : '',
+        ].join(' ')}
+      >
+        {step !== 'roomReveal' && (
+          <CeremonyHeader studentName={studentName} newLevel={newLevel} />
+        )}
 
-        <div className="mt-6 min-h-[260px]">
+        <div className={step === 'roomReveal' ? '' : 'mt-6 min-h-[260px]'}>
           {step === 'chest' && (
             <ChestRevealStep onOpen={() => setStep('picker')} />
           )}
@@ -81,7 +141,16 @@ export function LevelUpCeremony({
               capacityKey={capacityKey}
               capacityLabel={CAPACITY_LABEL_HE[capacityKey]}
               pointBonus={bonus}
-              onConfirm={handleConfirm}
+              hasRoomUnlock={Boolean(roomUnlock)}
+              onConfirm={handleSummaryContinue}
+            />
+          )}
+          {step === 'roomReveal' && roomUnlock && (
+            <RoomUnlockRevealStep
+              unlock={roomUnlock}
+              newLevel={newLevel}
+              onEnterRoom={() => finishCeremony(true)}
+              onStay={() => finishCeremony(false)}
             />
           )}
         </div>
@@ -210,12 +279,14 @@ function SummaryStep({
   capacityKey: _capacityKey,
   capacityLabel,
   pointBonus,
+  hasRoomUnlock,
   onConfirm,
 }: {
   cosmetic: Cosmetic;
   capacityKey: CapacityKey;
   capacityLabel: string;
   pointBonus: number;
+  hasRoomUnlock: boolean;
   onConfirm: () => void;
 }) {
   return (
@@ -244,8 +315,113 @@ function SummaryStep({
         onClick={onConfirm}
         className="mt-2 rounded-xl bg-yellow-400 px-8 py-3 font-bold text-indigo-950 shadow-lg transition hover:bg-yellow-300"
       >
-        קבל/י את הפרסים
+        {hasRoomUnlock ? 'קבל/י את הפרסים וגלה/י מה נפתח' : 'קבל/י את הפרסים'}
       </button>
+    </div>
+  );
+}
+
+function RoomUnlockRevealStep({
+  unlock,
+  newLevel,
+  onEnterRoom,
+  onStay,
+}: {
+  unlock: RoomUnlockInfo;
+  newLevel: number;
+  onEnterRoom: () => void;
+  onStay: () => void;
+}) {
+  const particles = unlock.theme === 'wonder' ? 18 : 10;
+
+  return (
+    <div className="level-room-reveal" dir="rtl">
+      <div className="level-room-rays" aria-hidden="true" />
+
+      <div className="level-room-particles" aria-hidden="true">
+        {Array.from({ length: particles }, (_, index) => (
+          <span
+            key={index}
+            className="level-room-particle"
+            style={{
+              '--particle-index': index,
+              '--particle-count': particles,
+            } as CSSProperties}
+          />
+        ))}
+      </div>
+
+      <div className="level-room-reveal__content">
+        <div className="level-room-reveal__level">רמה {newLevel}</div>
+        <div className="level-room-reveal__eyebrow">{unlock.eyebrowHe}</div>
+
+        <div className="level-room-portal" aria-hidden="true">
+          <div className="level-room-portal__halo" />
+          <div className="level-room-portal__door">
+            <div className="level-room-portal__inner">
+              <span>{unlock.emoji}</span>
+            </div>
+          </div>
+          <div className="level-room-portal__floor-glow" />
+        </div>
+
+        <h2 className="level-room-reveal__title">{unlock.nameHe}</h2>
+        <p className="level-room-reveal__description">{unlock.descriptionHe}</p>
+
+        <div className="level-room-reveal__actions">
+          <button
+            type="button"
+            onClick={onEnterRoom}
+            className="level-room-reveal__primary"
+          >
+            להיכנס לחדר החדש ✨
+          </button>
+          <button
+            type="button"
+            onClick={onStay}
+            className="level-room-reveal__secondary"
+          >
+            אחר כך
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+export function RoomUnlockCeremony({
+  level,
+  onEnterRoom,
+  onStay,
+}: {
+  level: number;
+  onEnterRoom: () => void;
+  onStay: () => void;
+}) {
+  const unlock = ROOM_UNLOCK_BY_LEVEL[level];
+  if (!unlock) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div
+        className={[
+          'ceremony-card relative w-full max-w-2xl overflow-hidden rounded-2xl bg-gradient-to-b from-indigo-950 to-purple-950 p-8 text-white shadow-2xl ring-1 ring-purple-400/30',
+          'level-room-card',
+          `level-room-card--${unlock.theme}`,
+        ].join(' ')}
+      >
+        <RoomUnlockRevealStep
+          unlock={unlock}
+          newLevel={level}
+          onEnterRoom={onEnterRoom}
+          onStay={onStay}
+        />
+      </div>
     </div>
   );
 }

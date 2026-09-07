@@ -117,6 +117,12 @@ function buildStudentFromSupabase(row: any): StudentState {
     pastRewards: Array.isArray(meta.pastRewards) ? meta.pastRewards : [],
     trophies: Array.isArray(meta.trophies) ? meta.trophies : [],
     seenTrophyIds: Array.isArray(meta.seenTrophyIds) ? meta.seenTrophyIds : [],
+    seenRoomUnlockLevels: Array.isArray(meta.seenRoomUnlockLevels)
+      ? meta.seenRoomUnlockLevels.filter(
+          (value: unknown): value is number =>
+            typeof value === 'number' && Number.isInteger(value)
+        )
+      : [],
     pityCounters: meta.pityCounters ?? {},
 
     pendingLevelUps: meta.pendingLevelUps ?? 0,
