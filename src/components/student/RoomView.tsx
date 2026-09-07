@@ -535,6 +535,125 @@ if (spriteData && !isFreeRoom) {
   };
 }
 
+const WONDER_STAGE_CENTER = { x: 50, y: 79 };
+const WONDER_STAGE_RADIUS = { x: 13, y: 11 };
+
+function wonderStageDistance(item: DisplayItem): number | null {
+  if (item.rarity !== 'epic' && item.rarity !== 'legendary') return null;
+
+  const x = item.entry.roomX;
+  const y = item.entry.roomY;
+
+  if (x === null || x === undefined || y === null || y === undefined) {
+    return null;
+  }
+
+  const dx = (x - WONDER_STAGE_CENTER.x) / WONDER_STAGE_RADIUS.x;
+  const dy = (y - WONDER_STAGE_CENTER.y) / WONDER_STAGE_RADIUS.y;
+  const distance = dx * dx + dy * dy;
+
+  return distance <= 1 ? distance : null;
+}
+
+function findWonderStageItem(items: DisplayItem[]): DisplayItem | null {
+  const candidates = items
+    .map(item => ({ item, distance: wonderStageDistance(item) }))
+    .filter(
+      (candidate): candidate is { item: DisplayItem; distance: number } =>
+        candidate.distance !== null
+    )
+    .sort((a, b) => {
+      // אם בטעות מונחים שני פריטים על הסמל, Legendary מקבל קדימות.
+      const rarityPriority =
+        Number(b.item.rarity === 'legendary') - Number(a.item.rarity === 'legendary');
+
+      if (rarityPriority !== 0) return rarityPriority;
+      return a.distance - b.distance;
+    });
+
+  return candidates[0]?.item ?? null;
+}
+
+function WonderHallStageEffect({
+  activeItem,
+}: {
+  activeItem: DisplayItem | null;
+}) {
+  const isLegendary = activeItem?.rarity === 'legendary';
+  const isActive = activeItem !== null;
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[40] overflow-hidden">
+      {isActive && (
+        <>
+          <div
+            className={`absolute inset-0 animate-pulse ${
+              isLegendary
+                ? 'bg-[radial-gradient(circle_at_50%_78%,rgba(250,204,21,0.22),transparent_44%)]'
+                : 'bg-[radial-gradient(circle_at_50%_78%,rgba(168,85,247,0.20),transparent_43%)]'
+            }`}
+          />
+
+          <div
+            className={`absolute left-1/2 top-[20%] h-[61%] w-[24%] -translate-x-1/2 opacity-50 blur-sm ${
+              isLegendary
+                ? 'bg-gradient-to-b from-yellow-100/5 via-yellow-200/20 to-yellow-300/35'
+                : 'bg-gradient-to-b from-fuchsia-100/5 via-purple-300/18 to-violet-400/30'
+            }`}
+            style={{
+              clipPath: 'polygon(45% 0%, 55% 0%, 100% 100%, 0% 100%)',
+            }}
+          />
+        </>
+      )}
+
+      <div
+        className={`absolute left-1/2 top-[79%] h-[15%] w-[28%] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border transition-all duration-700 ${
+          isActive
+            ? isLegendary
+              ? 'border-yellow-200/80 bg-yellow-300/10 shadow-[0_0_18px_rgba(253,224,71,0.75),0_0_55px_rgba(250,204,21,0.42),inset_0_0_24px_rgba(255,255,255,0.18)]'
+              : 'border-fuchsia-200/75 bg-purple-400/10 shadow-[0_0_18px_rgba(216,180,254,0.70),0_0_48px_rgba(168,85,247,0.40),inset_0_0_22px_rgba(255,255,255,0.14)]'
+            : 'border-sky-100/15 bg-sky-200/[0.025] shadow-[0_0_16px_rgba(125,211,252,0.10)]'
+        }`}
+      >
+        <div
+          className={`absolute inset-[9%] rounded-[50%] border ${
+            isActive
+              ? isLegendary
+                ? 'animate-[spin_12s_linear_infinite] border-dashed border-yellow-100/70'
+                : 'animate-[spin_15s_linear_infinite] border-dashed border-fuchsia-100/60'
+              : 'border-white/5'
+          }`}
+        />
+      </div>
+
+      {isActive && (
+        <div className="absolute left-1/2 top-[79%] h-[22%] w-[35%] -translate-x-1/2 -translate-y-1/2">
+          {[
+            ['11%', '56%', '0s'],
+            ['25%', '18%', '0.45s'],
+            ['48%', '4%', '0.9s'],
+            ['72%', '20%', '0.2s'],
+            ['88%', '55%', '0.75s'],
+            ['58%', '83%', '1.1s'],
+            ['34%', '78%', '0.6s'],
+          ].map(([left, top, delay], index) => (
+            <span
+              key={`${left}-${top}`}
+              className={`absolute animate-pulse text-sm ${
+                isLegendary ? 'text-yellow-100' : 'text-fuchsia-100'
+              }`}
+              style={{ left, top, animationDelay: delay }}
+            >
+              {index % 2 === 0 ? '✦' : '✧'}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function getRarityRoomEffect(rarity?: string) {
   if (rarity === 'common') {
     return '';
@@ -753,6 +872,9 @@ function freeRoomZone(item: DisplayItem): Zone {
   }
 
   const roomMeta = ROOM_SCENE_META[roomId];
+  const wonderStageItem = roomId === 'wonder_hall'
+    ? findWonderStageItem(placedItems)
+    : null;
 
   return (
     <div
@@ -770,6 +892,9 @@ function freeRoomZone(item: DisplayItem): Zone {
 
       <div className={`absolute inset-0 ${roomMeta.overlayClass}`} />
 
+      {roomId === 'wonder_hall' && (
+        <WonderHallStageEffect activeItem={wonderStageItem} />
+      )}
 
       {roomId !== 'main' && (
         <>
@@ -788,7 +913,13 @@ function freeRoomZone(item: DisplayItem): Zone {
       />
 
       {placedItems.map(item => {
-        const rarityEffect = getRarityRoomEffect(item.rarity);
+        const isWonderStageItem =
+          wonderStageItem?.inventoryIndex === item.inventoryIndex;
+        const rarityEffect = isWonderStageItem
+          ? item.rarity === 'legendary'
+            ? 'drop-shadow(0 0 16px rgba(255,245,160,1)) drop-shadow(0 0 34px rgba(250,204,21,0.95)) drop-shadow(0 0 54px rgba(255,140,40,0.55))'
+            : 'drop-shadow(0 0 14px rgba(233,213,255,1)) drop-shadow(0 0 30px rgba(168,85,247,0.9)) drop-shadow(0 0 46px rgba(99,102,241,0.5))'
+          : getRarityRoomEffect(item.rarity);
         const isSelected =
           isEditing && selectedInventoryIndex === item.inventoryIndex;
 
@@ -897,7 +1028,9 @@ function freeRoomZone(item: DisplayItem): Zone {
             style={itemRoomStyle(item, roomId)}
           >
             <div
-              className="h-full w-full border-0 bg-transparent shadow-none ring-0 [&>*]:!h-full [&>*]:!w-full"
+              className={`h-full w-full border-0 bg-transparent shadow-none ring-0 [&>*]:!h-full [&>*]:!w-full ${
+                isWonderStageItem ? 'animate-pulse' : ''
+              }`}
               style={{
                 filter: rarityEffect || undefined,
               }}
@@ -1142,6 +1275,9 @@ export default function RoomView({ student, readOnly = false }: Props) {
       : placedItems.find(
           item => item.inventoryIndex === selectedItem.inventoryIndex
         ) ?? null;
+
+  const wonderStageItem =
+    activeRoomId === 'wonder_hall' ? findWonderStageItem(placedItems) : null;
 
   function resizeItemInRoom(inventoryIndex: number, direction: 'up' | 'down') {
     const item = placedItems.find(
@@ -1479,11 +1615,29 @@ export default function RoomView({ student, readOnly = false }: Props) {
           </div>
         )}
 
+        {activeRoomId === 'wonder_hall' && (
+          <div
+            className={`mt-3 rounded-2xl border px-4 py-2 text-center text-sm font-bold transition-all ${
+              wonderStageItem
+                ? wonderStageItem.rarity === 'legendary'
+                  ? 'border-yellow-300/35 bg-yellow-300/10 text-yellow-100 shadow-[0_0_22px_rgba(250,204,21,0.12)]'
+                  : 'border-fuchsia-300/30 bg-fuchsia-400/10 text-fuchsia-100 shadow-[0_0_20px_rgba(168,85,247,0.10)]'
+                : 'border-sky-200/10 bg-sky-300/5 text-sky-100/65'
+            }`}
+          >
+            {wonderStageItem
+              ? `✨ ההיכל התעורר — ${wonderStageItem.nameHe} מצא מקום מיוחד.`
+              : '✦ נדמה שהסמל שבמרכז ההיכל מחכה למשהו מיוחד...'}
+          </div>
+        )}
+
         <div className="mt-3 text-center text-sm text-magic-soft/70">
           {readOnly
             ? 'ביקור בחדר — זהו מצב צפייה בלבד.'
             : isEditing
-              ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי בחדר.'
+              ? activeRoomId === 'wonder_hall'
+                ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי. אולי שווה לנסות גם את הסמל שבמרכז ההיכל.'
+                : 'מצב עריכה פעיל: גרור חפצים למקום הרצוי בחדר.'
               : 'לחץ על חפץ כדי לראות מידע עליו. כדי להזיז חפצים, עבור למצב עריכה.'}
         </div>
 
