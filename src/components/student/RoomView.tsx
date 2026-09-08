@@ -745,6 +745,146 @@ function MagicRoomEnchantmentEffect({
   );
 }
 
+type HobbyFavoriteSpot = {
+  id: 'upper' | 'middle' | 'lower';
+  x: number;
+  y: number;
+  radiusX: number;
+  radiusY: number;
+};
+
+const HOBBY_FAVORITE_SPOTS: HobbyFavoriteSpot[] = [
+  { id: 'upper', x: 44, y: 27.2, radiusX: 7.2, radiusY: 4.2 },
+  { id: 'middle', x: 44, y: 37.2, radiusX: 7.2, radiusY: 4.2 },
+  { id: 'lower', x: 44, y: 47.2, radiusX: 7.2, radiusY: 4.2 },
+];
+
+type HobbyFavoritePlacement = {
+  spot: HobbyFavoriteSpot;
+  item: DisplayItem;
+};
+
+function hobbyFavoriteDistance(
+  item: DisplayItem,
+  spot: HobbyFavoriteSpot
+): number | null {
+  // מדפי האהובים מיועדים לפריטי אוסף קטנים/בינוניים, לא לשטיחים,
+  // קישוטי קיר או רהיטים גדולים.
+  if (
+    item.displayKind === 'rug' ||
+    item.displayKind === 'wallDecor' ||
+    item.displayKind === 'furniture'
+  ) {
+    return null;
+  }
+
+  const x = item.entry.roomX;
+  const y = item.entry.roomY;
+
+  if (x === null || x === undefined || y === null || y === undefined) {
+    return null;
+  }
+
+  const dx = (x - spot.x) / spot.radiusX;
+  const dy = (y - spot.y) / spot.radiusY;
+  const distance = dx * dx + dy * dy;
+
+  return distance <= 1 ? distance : null;
+}
+
+function findHobbyFavoriteItems(items: DisplayItem[]): HobbyFavoritePlacement[] {
+  const usedInventoryIndexes = new Set<number>();
+  const placements: HobbyFavoritePlacement[] = [];
+
+  for (const spot of HOBBY_FAVORITE_SPOTS) {
+    const candidate = items
+      .filter(item => !usedInventoryIndexes.has(item.inventoryIndex))
+      .map(item => ({ item, distance: hobbyFavoriteDistance(item, spot) }))
+      .filter(
+        (entry): entry is { item: DisplayItem; distance: number } =>
+          entry.distance !== null
+      )
+      .sort((a, b) => a.distance - b.distance)[0];
+
+    if (!candidate) continue;
+
+    usedInventoryIndexes.add(candidate.item.inventoryIndex);
+    placements.push({ spot, item: candidate.item });
+  }
+
+  return placements;
+}
+
+function HobbyFavoriteShelfEffect({
+  placements,
+}: {
+  placements: HobbyFavoritePlacement[];
+}) {
+  const activeSpotIds = new Set(placements.map(placement => placement.spot.id));
+  const completed = placements.length === HOBBY_FAVORITE_SPOTS.length;
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[35] overflow-hidden">
+      {completed && (
+        <div className="absolute inset-0 animate-pulse bg-[radial-gradient(circle_at_44%_34%,rgba(253,230,138,0.10),transparent_27%)]" />
+      )}
+
+      {HOBBY_FAVORITE_SPOTS.map((spot, index) => {
+        const isActive = activeSpotIds.has(spot.id);
+
+        return (
+          <div
+            key={spot.id}
+            className="absolute -translate-x-1/2 -translate-y-full"
+            style={{
+              left: `${spot.x}%`,
+              top: `${spot.y}%`,
+              width: '12%',
+              height: '10%',
+            }}
+          >
+            <div
+              className={`absolute inset-0 rounded-[50%] transition-all duration-500 ${
+                isActive
+                  ? 'bg-[radial-gradient(ellipse_at_center,rgba(254,240,138,0.18)_0%,rgba(250,204,21,0.09)_40%,transparent_73%)] shadow-[0_0_18px_rgba(250,204,21,0.20)]'
+                  : 'bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.035)_0%,transparent_72%)]'
+              }`}
+            />
+
+            <span
+              className={`absolute right-[7%] top-[8%] transition-all duration-500 ${
+                isActive
+                  ? 'animate-pulse text-sm text-yellow-100 drop-shadow-[0_0_7px_rgba(250,204,21,0.85)]'
+                  : 'text-[10px] text-yellow-100/16'
+              }`}
+              style={{ animationDelay: `${index * 0.4}s` }}
+            >
+              {isActive ? '★' : '☆'}
+            </span>
+
+            {isActive && (
+              <>
+                <span
+                  className="absolute left-[8%] top-[35%] animate-pulse text-[10px] text-yellow-100/85"
+                  style={{ animationDelay: `${0.25 + index * 0.25}s` }}
+                >
+                  ✦
+                </span>
+                <span
+                  className="absolute right-[18%] top-[55%] animate-pulse text-[9px] text-amber-100/80"
+                  style={{ animationDelay: `${0.7 + index * 0.2}s` }}
+                >
+                  ✧
+                </span>
+              </>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function getRarityRoomEffect(rarity?: string) {
   if (rarity === 'common') {
     return '';
@@ -969,6 +1109,9 @@ function freeRoomZone(item: DisplayItem): Zone {
   const magicEnchantedItem = roomId === 'magic_room'
     ? findMagicEnchantedItem(placedItems)
     : null;
+  const hobbyFavoriteItems = roomId === 'hobby_room'
+    ? findHobbyFavoriteItems(placedItems)
+    : [];
 
   return (
     <div
@@ -994,6 +1137,10 @@ function freeRoomZone(item: DisplayItem): Zone {
         <MagicRoomEnchantmentEffect activeItem={magicEnchantedItem} />
       )}
 
+      {roomId === 'hobby_room' && (
+        <HobbyFavoriteShelfEffect placements={hobbyFavoriteItems} />
+      )}
+
       {roomId !== 'main' && (
         <>
           <div className="pointer-events-none absolute inset-3 rounded-xl border-2 border-yellow-300/20 shadow-[inset_0_0_30px_rgba(250,204,21,0.08)]" />
@@ -1015,13 +1162,18 @@ function freeRoomZone(item: DisplayItem): Zone {
           wonderStageItem?.inventoryIndex === item.inventoryIndex;
         const isMagicEnchantedItem =
           magicEnchantedItem?.inventoryIndex === item.inventoryIndex;
+        const isHobbyFavoriteItem = hobbyFavoriteItems.some(
+          placement => placement.item.inventoryIndex === item.inventoryIndex
+        );
         const rarityEffect = isWonderStageItem
           ? item.rarity === 'legendary'
             ? 'drop-shadow(0 0 16px rgba(255,245,160,1)) drop-shadow(0 0 34px rgba(250,204,21,0.95)) drop-shadow(0 0 54px rgba(255,140,40,0.55))'
             : 'drop-shadow(0 0 14px rgba(233,213,255,1)) drop-shadow(0 0 30px rgba(168,85,247,0.9)) drop-shadow(0 0 46px rgba(99,102,241,0.5))'
           : isMagicEnchantedItem
             ? `${getRarityRoomEffect(item.rarity)} drop-shadow(0 0 12px rgba(224,231,255,0.95)) drop-shadow(0 0 26px rgba(139,92,246,0.82)) drop-shadow(0 0 38px rgba(59,130,246,0.42))`.trim()
-            : getRarityRoomEffect(item.rarity);
+            : isHobbyFavoriteItem
+              ? `${getRarityRoomEffect(item.rarity)} drop-shadow(0 0 9px rgba(254,249,195,0.92)) drop-shadow(0 0 18px rgba(250,204,21,0.50))`.trim()
+              : getRarityRoomEffect(item.rarity);
         const isSelected =
           isEditing && selectedInventoryIndex === item.inventoryIndex;
 
@@ -1135,7 +1287,9 @@ function freeRoomZone(item: DisplayItem): Zone {
                   ? 'animate-pulse'
                   : isMagicEnchantedItem
                     ? 'animate-[pulse_2.4s_ease-in-out_infinite]'
-                    : ''
+                    : isHobbyFavoriteItem
+                      ? 'animate-[pulse_3.8s_ease-in-out_infinite]'
+                      : ''
               }`}
               style={{
                 filter: rarityEffect || undefined,
@@ -1386,6 +1540,8 @@ export default function RoomView({ student, readOnly = false }: Props) {
     activeRoomId === 'wonder_hall' ? findWonderStageItem(placedItems) : null;
   const magicEnchantedItem =
     activeRoomId === 'magic_room' ? findMagicEnchantedItem(placedItems) : null;
+  const hobbyFavoriteItems =
+    activeRoomId === 'hobby_room' ? findHobbyFavoriteItems(placedItems) : [];
 
   function resizeItemInRoom(inventoryIndex: number, direction: 'up' | 'down') {
     const item = placedItems.find(
@@ -1737,6 +1893,24 @@ export default function RoomView({ student, readOnly = false }: Props) {
           </div>
         )}
 
+        {activeRoomId === 'hobby_room' && (
+          <div
+            className={`mt-3 rounded-2xl border px-4 py-2 text-center text-sm font-bold transition-all ${
+              hobbyFavoriteItems.length === 3
+                ? 'border-yellow-300/35 bg-yellow-300/10 text-yellow-100 shadow-[0_0_20px_rgba(250,204,21,0.12)]'
+                : hobbyFavoriteItems.length > 0
+                  ? 'border-amber-200/20 bg-amber-200/5 text-amber-100/85'
+                  : 'border-sky-200/10 bg-sky-300/5 text-sky-100/65'
+            }`}
+          >
+            {hobbyFavoriteItems.length === 3
+              ? '🌟 שלישיית האהובים הושלמה — שלושה דברים שבחרת קיבלו מקום של כבוד.'
+              : hobbyFavoriteItems.length > 0
+                ? `⭐ ${hobbyFavoriteItems.length} מתוך 3 מקומות האהובים כבר מצאו פריט.`
+                : '☆ יש בחדר הזה שלושה מקומות שמחכים לדברים שבאמת חשובים לך...'}
+          </div>
+        )}
+
         {activeRoomId === 'wonder_hall' && (
           <div
             className={`mt-3 rounded-2xl border px-4 py-2 text-center text-sm font-bold transition-all ${
@@ -1761,7 +1935,9 @@ export default function RoomView({ student, readOnly = false }: Props) {
                 ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי. אולי שווה לנסות גם את הסמל שבמרכז ההיכל.'
                 : activeRoomId === 'magic_room'
                   ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי. בחדר הקסם כדאי להתנסות קצת...'
-                  : 'מצב עריכה פעיל: גרור חפצים למקום הרצוי בחדר.'
+                  : activeRoomId === 'hobby_room'
+                    ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי. אולי יש בחדר שלושה מקומות שמתאימים במיוחד לדברים האהובים עליך...'
+                    : 'מצב עריכה פעיל: גרור חפצים למקום הרצוי בחדר.'
               : 'לחץ על חפץ כדי לראות מידע עליו. כדי להזיז חפצים, עבור למצב עריכה.'}
         </div>
 
