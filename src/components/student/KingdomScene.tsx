@@ -149,6 +149,7 @@ export default function KingdomScene({ student }: Props) {
         open={!!selected}
         onClose={() => setSelected(null)}
         entry={selected?.entry ?? null}
+        inventory={student.inventory}
       />
     </>
   );

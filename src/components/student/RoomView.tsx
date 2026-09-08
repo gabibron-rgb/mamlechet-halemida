@@ -9,6 +9,7 @@ import { getRoomSurface, snapItemToRoomSurface } from '../../data/roomSurfaces';
 import type { DisplayKind } from '../../data/roomSurfaces';
 import { ITEM_SPRITES } from '../../data/itemSprites';
 import { THEMES, type ThemeId } from '../../data/themes';
+import { buildItemHistory } from '../../logic/itemHistory';
 import RoomCompanion from './RoomCompanion';
 import PersonalRoomGuests from './PersonalRoomGuests';
 import {
@@ -330,20 +331,24 @@ function getAllowedZones(entry: InventoryEntry): Zone[] {
 
 function InfoModal({
   item,
+  inventory,
   onClose,
   onRemove,
 }: {
   item: DisplayItem;
+  inventory: InventoryEntry[];
   onClose: () => void;
   onRemove?: () => void;
 }) {
+  const history = buildItemHistory(item.entry, inventory);
+
   return (
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-3xl border border-yellow-300/30 bg-magic-panel p-5 text-center shadow-2xl"
+        className="max-h-[90vh] w-full max-w-sm overflow-y-auto rounded-3xl border border-yellow-300/30 bg-magic-panel p-5 text-center shadow-2xl"
         onClick={event => event.stopPropagation()}
       >
         <div className="mx-auto mb-3 flex h-28 w-28 items-center justify-center">
@@ -364,6 +369,46 @@ function InfoModal({
 
         <div className="mt-2 text-xs text-magic-soft/50">
           מתאים ל: {DISPLAY_KIND_LABEL_HE[item.displayKind]}
+        </div>
+
+        <div className={`mt-4 rounded-2xl border p-3 text-right ${
+          history.exclusive
+            ? 'border-yellow-300/25 bg-yellow-300/5'
+            : 'border-white/10 bg-black/15'
+        }`}>
+          <div className="mb-2 text-center text-sm font-black text-yellow-100">
+            📜 הסיפור של החפץ
+          </div>
+
+          {history.acquiredDateHe && (
+            <div className="mb-2 flex items-start justify-between gap-3 text-xs">
+              <span className="shrink-0 text-magic-soft/55">נאסף בתאריך</span>
+              <span className="font-bold text-white">{history.acquiredDateHe}</span>
+            </div>
+          )}
+
+          <div className="rounded-xl bg-white/5 px-3 py-2">
+            <div className="text-xs font-black text-yellow-100">
+              {history.originTitleHe}
+            </div>
+            {history.originDetailHe && (
+              <div className="mt-1 text-[11px] leading-5 text-magic-soft/65">
+                {history.originDetailHe}
+              </div>
+            )}
+          </div>
+
+          {history.collectionProgressHe && (
+            <div className="mt-2 rounded-xl bg-sky-400/5 px-3 py-2 text-xs font-bold text-sky-100">
+              🧰 {history.collectionProgressHe}
+            </div>
+          )}
+
+          {history.rarityContextHe && (
+            <div className="mt-2 text-[11px] leading-5 text-magic-soft/60">
+              ✨ {history.rarityContextHe}
+            </div>
+          )}
         </div>
 
         <div className="mt-5 flex gap-2">
@@ -2024,6 +2069,7 @@ export default function RoomView({ student, readOnly = false }: Props) {
       {!isEditing && selectedItem && (
         <InfoModal
           item={selectedItem}
+          inventory={student.inventory}
           onClose={() => setSelectedItem(null)}
           onRemove={
             readOnly

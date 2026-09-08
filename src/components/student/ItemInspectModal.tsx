@@ -2,11 +2,13 @@ import Modal from '../shared/Modal';
 import { getItemById } from '../../data/items';
 import PlacedItemVisual from './PlacedItemVisual';
 import type { InventoryEntry } from '../../store/useGameStore';
+import { buildItemHistory } from '../../logic/itemHistory';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   entry: InventoryEntry | null;
+  inventory?: InventoryEntry[];
 };
 
 const RARITY_HE: Record<string, string> = {
@@ -26,8 +28,9 @@ const ZONE_HE: Record<string, string> = {
   petarea: 'רצפת הממלכה',
 };
 
-export default function ItemInspectModal({ open, onClose, entry }: Props) {
+export default function ItemInspectModal({ open, onClose, entry, inventory = [] }: Props) {
   const item = entry ? getItemById(entry.itemId) : null;
+  const history = entry ? buildItemHistory(entry, inventory.length > 0 ? inventory : [entry]) : null;
 
   return (
     <Modal open={open} onClose={onClose} title="בדיקת חפץ">
@@ -60,6 +63,33 @@ export default function ItemInspectModal({ open, onClose, entry }: Props) {
               </div>
             </div>
           </div>
+
+          {history && (
+            <div className={`rounded-2xl border p-3 text-right ${
+              history.exclusive
+                ? 'border-yellow-300/25 bg-yellow-300/5'
+                : 'border-white/10 bg-black/15'
+            }`}>
+              <div className="mb-2 text-center text-sm font-black text-yellow-100">
+                📜 הסיפור של החפץ
+              </div>
+              {history.acquiredDateHe && (
+                <div className="mb-2 text-xs text-magic-soft/65">
+                  נאסף בתאריך: <span className="font-bold text-white">{history.acquiredDateHe}</span>
+                </div>
+              )}
+              <div className="text-xs font-black text-yellow-100">{history.originTitleHe}</div>
+              {history.originDetailHe && (
+                <div className="mt-1 text-[11px] leading-5 text-magic-soft/65">{history.originDetailHe}</div>
+              )}
+              {history.collectionProgressHe && (
+                <div className="mt-2 text-xs font-bold text-sky-100">🧰 {history.collectionProgressHe}</div>
+              )}
+              {history.rarityContextHe && (
+                <div className="mt-2 text-[11px] text-magic-soft/60">✨ {history.rarityContextHe}</div>
+              )}
+            </div>
+          )}
 
           <div className="text-xs text-magic-soft/60">
             כרגע ההסרה מהממלכה עדיין מתבצעת דרך לשונית "חדר".
