@@ -9,7 +9,12 @@ import { genId } from '../utils/storage';
 import type { BoxTier } from '../data/boxes';
 import { supabase } from '../lib/supabaseClient';
 import { sellStudentInventoryItem } from '../lib/inventorySales';
-import { getCompanionFlourish } from '../data/companionFlourishes';
+import {
+  getCompanionFlourish,
+  getCompanionFlourishLevelDefinition,
+  getCompanionFlourishProgress,
+  normalizeCompanionFlourishLevelRecord,
+} from '../data/companionFlourishes';
 import { companionStageForProgress } from '../data/companionEvolution';
 import {
   companionStageMeetsRequirement,
@@ -103,6 +108,9 @@ export type CompanionState = {
   celebratedStages: CompanionStage[];
   activeFlourishes: string[];
   ownedFlourishes: string[];
+  celebratedFlourishes: string[];
+  flourishLevels: Record<string, number>;
+  celebratedFlourishLevels: Record<string, number>;
   unlockedSkills: string[];
   treasuresFound: number;
   behaviorMemories: CompanionBehaviorMemory[];
@@ -180,6 +188,11 @@ type GameStore = {
   removeTrophy: (studentId: StudentId, trophyId: string) => void;
   markTrophySeen: (studentId: StudentId, trophyId: string) => void;
   markRoomUnlockSeen: (studentId: StudentId, level: number) => void;
+  markCompanionFlourishSeen: (
+    studentId: StudentId,
+    flourishId: string,
+    level?: number
+  ) => void;
   awardBehaviorPoints: (
     studentId: StudentId,
     amount: number,
@@ -213,11 +226,12 @@ type GameStore = {
     studentId: StudentId,
     flourishId: string,
     pointBonus: number
-  ) => Promise<boolean>;
+  ) => Promise<string | null>;
   undoCompanionFlourishAward: (
     studentId: StudentId,
     flourishId: string,
-    pointBonus: number
+    pointBonus: number,
+    flourishMemoryId?: string
   ) => Promise<void>;
   unlockCompanionSkill: (
     studentId: StudentId,
@@ -464,6 +478,9 @@ function defaultStudent(name: string, classId: string): StudentState {
       celebratedStages: ['egg'],
       activeFlourishes: [],
       ownedFlourishes: [],
+      celebratedFlourishes: [],
+      flourishLevels: {},
+      celebratedFlourishLevels: {},
       unlockedSkills: [],
       treasuresFound: 0,
       behaviorMemories: [],
@@ -566,6 +583,21 @@ function studentFromSupabase(row: any, classId: string): StudentState {
       ownedFlourishes: Array.isArray(meta.companion?.ownedFlourishes)
         ? meta.companion.ownedFlourishes
         : [],
+      celebratedFlourishes: Array.isArray(meta.companion?.celebratedFlourishes)
+        ? meta.companion.celebratedFlourishes
+        : [],
+      flourishLevels: normalizeCompanionFlourishLevelRecord(
+        meta.companion?.flourishLevels,
+        Array.isArray(meta.companion?.ownedFlourishes)
+          ? meta.companion.ownedFlourishes
+          : []
+      ),
+      celebratedFlourishLevels: normalizeCompanionFlourishLevelRecord(
+        meta.companion?.celebratedFlourishLevels,
+        Array.isArray(meta.companion?.celebratedFlourishes)
+          ? meta.companion.celebratedFlourishes
+          : []
+      ),
       unlockedSkills: Array.isArray(meta.companion?.unlockedSkills)
         ? meta.companion.unlockedSkills
         : [],
@@ -990,6 +1022,70 @@ export const useGameStore = create<GameStore>()(
           updatedStudent = {
             ...student,
             seenRoomUnlockLevels: [...seenRoomUnlockLevels, level],
+          };
+
+          return {
+            students: {
+              ...state.students,
+              [studentId]: updatedStudent,
+            },
+          };
+        });
+
+        if (updatedStudent) {
+          void syncStudentToSupabase(updatedStudent);
+        }
+      },
+
+      markCompanionFlourishSeen: (studentId, flourishId, level) => {
+        let updatedStudent: StudentState | null = null;
+        const cleanFlourishId = flourishId.trim();
+
+        if (!cleanFlourishId || !getCompanionFlourish(cleanFlourishId)) return;
+
+        set(state => {
+          const student = state.students[studentId];
+          if (!student) return state;
+
+          const ownedFlourishes = student.companion.ownedFlourishes ?? [];
+          if (!ownedFlourishes.includes(cleanFlourishId)) return state;
+
+          const currentLevel = Math.max(
+            1,
+            Math.floor(
+              student.companion.flourishLevels?.[cleanFlourishId] ?? 1
+            )
+          );
+          const requestedLevel = Math.max(
+            1,
+            Math.min(currentLevel, Math.floor(level ?? currentLevel))
+          );
+          const celebratedFlourishLevels =
+            student.companion.celebratedFlourishLevels ?? {};
+          const alreadyCelebrated = Math.max(
+            0,
+            Math.floor(celebratedFlourishLevels[cleanFlourishId] ?? 0)
+          );
+
+          if (alreadyCelebrated >= requestedLevel) return state;
+
+          const celebratedFlourishes =
+            student.companion.celebratedFlourishes ?? [];
+
+          updatedStudent = {
+            ...student,
+            companion: {
+              ...student.companion,
+              celebratedFlourishes: celebratedFlourishes.includes(
+                cleanFlourishId
+              )
+                ? celebratedFlourishes
+                : [...celebratedFlourishes, cleanFlourishId],
+              celebratedFlourishLevels: {
+                ...celebratedFlourishLevels,
+                [cleanFlourishId]: requestedLevel,
+              },
+            },
           };
 
           return {
@@ -1435,55 +1531,96 @@ export const useGameStore = create<GameStore>()(
         const safePointBonus = Math.max(0, Math.round(pointBonus));
         const flourish = getCompanionFlourish(cleanFlourishId);
         const awardedAt = Date.now();
+        const flourishMemoryId = `flourish:${cleanFlourishId}:${genId('award')}`;
 
-        if (!flourish) return false;
+        if (!flourish) return null;
 
         set(state => {
           const student = state.students[studentId];
           if (!student) return state;
 
-          const ownedFlourishes = student.companion.ownedFlourishes ?? [];
-          if (ownedFlourishes.includes(cleanFlourishId)) return state;
-          const behaviorMemories =
-            student.companion.behaviorMemories ?? [];
           const traitId = companionTraitForReason(flourish.reasonId);
-          const memoryId = `flourish:${cleanFlourishId}`;
-          const nextMemories =
-            traitId && !behaviorMemories.some(memory => memory.id === memoryId)
-              ? [
-                  ...behaviorMemories,
-                  {
-                    id: memoryId,
-                    traitId,
-                    reasonId: flourish.reasonId,
-                    pointAmount: safePointBonus,
-                    awardedAt,
-                    source: 'flourish' as const,
-                  },
-                ]
-              : behaviorMemories;
+          if (!traitId) return state;
+
+          const ownedFlourishes = student.companion.ownedFlourishes ?? [];
+          const behaviorMemories = student.companion.behaviorMemories ?? [];
+          const previousProgress = getCompanionFlourishProgress(
+            behaviorMemories,
+            cleanFlourishId
+          );
+          const nextMemories: CompanionBehaviorMemory[] = [
+            ...behaviorMemories,
+            {
+              id: flourishMemoryId,
+              traitId,
+              reasonId: flourish.reasonId,
+              pointAmount: safePointBonus,
+              awardedAt,
+              source: 'flourish',
+            },
+          ];
+          const nextProgress = getCompanionFlourishProgress(
+            nextMemories,
+            cleanFlourishId
+          );
           const nextChallenges = reconcileLatestCompanionTraitChallenge(
             student.companion.traitChallenges ?? [],
             nextMemories,
             awardedAt
           );
+
           const journalEntries = student.companion.journalEntries ?? [];
-          const flourishJournalId = `journal:flourish:${cleanFlourishId}`;
-          const entriesWithFlourish =
-            traitId &&
-            !journalEntries.some(entry => entry.id === flourishJournalId)
-              ? [
-                  ...journalEntries,
-                  {
-                    id: flourishJournalId,
-                    traitId,
-                    reasonId: flourish.reasonId,
-                    message: `${flourish.nameHe}: ${flourish.descriptionHe}`,
-                    createdAt: awardedAt,
-                    source: 'flourish' as const,
-                  },
-                ]
-              : journalEntries;
+          let entriesWithFlourish = journalEntries;
+          const firstJournalId = `journal:flourish:${cleanFlourishId}`;
+
+          if (
+            previousProgress.level === 0 &&
+            nextProgress.level >= 1 &&
+            !entriesWithFlourish.some(entry => entry.id === firstJournalId)
+          ) {
+            entriesWithFlourish = [
+              ...entriesWithFlourish,
+              {
+                id: firstJournalId,
+                traitId,
+                reasonId: flourish.reasonId,
+                message: `${flourish.nameHe}: ${flourish.descriptionHe}`,
+                createdAt: awardedAt,
+                source: 'flourish' as const,
+              },
+            ];
+          }
+
+          if (
+            nextProgress.level > previousProgress.level &&
+            nextProgress.level > 1
+          ) {
+            const levelDefinition = getCompanionFlourishLevelDefinition(
+              nextProgress.level
+            );
+            const milestoneJournalId =
+              `journal:flourish:${cleanFlourishId}:level:${nextProgress.level}`;
+
+            if (
+              levelDefinition &&
+              !entriesWithFlourish.some(
+                entry => entry.id === milestoneJournalId
+              )
+            ) {
+              entriesWithFlourish = [
+                ...entriesWithFlourish,
+                {
+                  id: milestoneJournalId,
+                  traitId,
+                  reasonId: flourish.reasonId,
+                  message: `${flourish.nameHe} עלה לדרגת ${levelDefinition.icon} ${levelDefinition.nameHe} אחרי ${nextProgress.days} ימי הוכחה שונים.`,
+                  createdAt: awardedAt,
+                  source: 'flourish' as const,
+                },
+              ];
+            }
+          }
+
           const nextJournalEntries = reconcileJournalWithLatestChallenge(
             entriesWithFlourish,
             nextChallenges,
@@ -1503,7 +1640,17 @@ export const useGameStore = create<GameStore>()(
               }),
               petPoints:
                 (student.companion.petPoints ?? 0) + safePointBonus,
-              ownedFlourishes: [...ownedFlourishes, cleanFlourishId],
+              ownedFlourishes: ownedFlourishes.includes(cleanFlourishId)
+                ? ownedFlourishes
+                : [...ownedFlourishes, cleanFlourishId],
+              celebratedFlourishes:
+                student.companion.celebratedFlourishes ?? [],
+              flourishLevels: {
+                ...(student.companion.flourishLevels ?? {}),
+                [cleanFlourishId]: nextProgress.level,
+              },
+              celebratedFlourishLevels:
+                student.companion.celebratedFlourishLevels ?? {},
               activeFlourishes: student.companion.activeFlourishes ?? [],
               celebratedStages:
                 student.companion.celebratedStages ?? ['egg'],
@@ -1521,43 +1668,106 @@ export const useGameStore = create<GameStore>()(
           };
         });
 
-        if (!updatedStudent) return false;
+        if (!updatedStudent) return null;
 
         await syncStudentToSupabase(updatedStudent);
-        return true;
+        return flourishMemoryId;
       },
 
       undoCompanionFlourishAward: async (
         studentId,
         flourishId,
-        pointBonus
+        pointBonus,
+        flourishMemoryId
       ) => {
         let updatedStudent: StudentState | null = null;
         const cleanFlourishId = flourishId.trim();
         const safePointBonus = Math.max(0, Math.round(pointBonus));
+        const flourish = getCompanionFlourish(cleanFlourishId);
+
+        if (!flourish) return;
 
         set(state => {
           const student = state.students[studentId];
           if (!student) return state;
 
-          const ownedFlourishes = student.companion.ownedFlourishes ?? [];
-          if (!ownedFlourishes.includes(cleanFlourishId)) return state;
+          const behaviorMemories = student.companion.behaviorMemories ?? [];
+          const matchingMemories = behaviorMemories
+            .filter(
+              memory =>
+                memory.source === 'flourish' &&
+                memory.reasonId === flourish.reasonId
+            )
+            .sort((first, second) => second.awardedAt - first.awardedAt);
 
-          const nextMemories = (
-            student.companion.behaviorMemories ?? []
-          ).filter(memory => memory.id !== `flourish:${cleanFlourishId}`);
+          const exactMemory = flourishMemoryId
+            ? matchingMemories.find(memory => memory.id === flourishMemoryId)
+            : null;
+          const legacyMemory = matchingMemories.find(
+            memory => memory.id === `flourish:${cleanFlourishId}`
+          );
+          const memoryToRemove = exactMemory ?? legacyMemory ?? matchingMemories[0];
+
+          if (!memoryToRemove) return state;
+
+          const nextMemories = behaviorMemories.filter(
+            memory => memory.id !== memoryToRemove.id
+          );
+          const nextProgress = getCompanionFlourishProgress(
+            nextMemories,
+            cleanFlourishId
+          );
           const nextChallenges = reconcileLatestCompanionTraitChallenge(
             student.companion.traitChallenges ?? [],
             nextMemories,
             Date.now()
           );
-          const journalEntries = (
+
+          const ownedFlourishes = student.companion.ownedFlourishes ?? [];
+          const celebratedFlourishes =
+            student.companion.celebratedFlourishes ?? [];
+          const activeFlourishes = student.companion.activeFlourishes ?? [];
+          const flourishLevels = {
+            ...(student.companion.flourishLevels ?? {}),
+          };
+          const celebratedFlourishLevels = {
+            ...(student.companion.celebratedFlourishLevels ?? {}),
+          };
+
+          if (nextProgress.level > 0) {
+            flourishLevels[cleanFlourishId] = nextProgress.level;
+            if (
+              (celebratedFlourishLevels[cleanFlourishId] ?? 0) >
+              nextProgress.level
+            ) {
+              celebratedFlourishLevels[cleanFlourishId] = nextProgress.level;
+            }
+          } else {
+            delete flourishLevels[cleanFlourishId];
+            delete celebratedFlourishLevels[cleanFlourishId];
+          }
+
+          const nextJournalEntriesBase = (
             student.companion.journalEntries ?? []
-          ).filter(
-            entry => entry.id !== `journal:flourish:${cleanFlourishId}`
-          );
+          ).filter(entry => {
+            if (nextProgress.level === 0) {
+              return !(
+                entry.id === `journal:flourish:${cleanFlourishId}` ||
+                entry.id.startsWith(
+                  `journal:flourish:${cleanFlourishId}:level:`
+                )
+              );
+            }
+
+            const milestonePrefix =
+              `journal:flourish:${cleanFlourishId}:level:`;
+            if (!entry.id.startsWith(milestonePrefix)) return true;
+
+            const level = Number(entry.id.slice(milestonePrefix.length));
+            return !Number.isFinite(level) || level <= nextProgress.level;
+          });
           const nextJournalEntries = reconcileJournalWithLatestChallenge(
-            journalEntries,
+            nextJournalEntriesBase,
             nextChallenges,
             Date.now()
           );
@@ -1567,16 +1777,32 @@ export const useGameStore = create<GameStore>()(
             points: Math.max(0, student.points - safePointBonus),
             companion: {
               ...student.companion,
+              stage: companionStageForProgress({
+                bond: student.companion.bond ?? 0,
+                currentStage: student.companion.stage,
+                behaviorMemories: nextMemories,
+                traitChallenges: nextChallenges,
+              }),
               petPoints: Math.max(
                 0,
                 (student.companion.petPoints ?? 0) - safePointBonus
               ),
-              ownedFlourishes: ownedFlourishes.filter(
-                id => id !== cleanFlourishId
-              ),
-              activeFlourishes: (
-                student.companion.activeFlourishes ?? []
-              ).filter(id => id !== cleanFlourishId),
+              ownedFlourishes:
+                nextProgress.level > 0
+                  ? ownedFlourishes
+                  : ownedFlourishes.filter(id => id !== cleanFlourishId),
+              celebratedFlourishes:
+                nextProgress.level > 0
+                  ? celebratedFlourishes
+                  : celebratedFlourishes.filter(
+                      id => id !== cleanFlourishId
+                    ),
+              flourishLevels,
+              celebratedFlourishLevels,
+              activeFlourishes:
+                nextProgress.level > 0
+                  ? activeFlourishes
+                  : activeFlourishes.filter(id => id !== cleanFlourishId),
               behaviorMemories: nextMemories,
               traitChallenges: nextChallenges,
               journalEntries: nextJournalEntries,

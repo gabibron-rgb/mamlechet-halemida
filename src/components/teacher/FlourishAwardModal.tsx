@@ -1,6 +1,12 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-import { COMPANION_FLOURISHES } from '../../data/companionFlourishes';
+import {
+  COMPANION_FLOURISHES,
+  getCompanionFlourishLevelDefinition,
+  getCompanionFlourishLevelForDays,
+  getCompanionFlourishProgress,
+  hasCompanionFlourishAwardOnDay,
+} from '../../data/companionFlourishes';
 import { AWARD_SIZES } from '../../data/reasons';
 import { useClassStore } from '../../store/useClassStore';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
@@ -33,10 +39,30 @@ export default function FlourishAwardModal({
   const selectedFlourish = COMPANION_FLOURISHES.find(
     flourish => flourish.id === selectedId
   );
-  const ownedFlourishIds = useMemo(
-    () => new Set(student?.companion.ownedFlourishes ?? []),
-    [student?.companion.ownedFlourishes]
+  const memories = student?.companion.behaviorMemories ?? [];
+  const selectedProgress = selectedFlourish
+    ? getCompanionFlourishProgress(memories, selectedFlourish.id)
+    : null;
+  const selectedStoredLevel = selectedFlourish
+    ? Math.max(
+        selectedProgress?.level ?? 0,
+        student?.companion.flourishLevels?.[selectedFlourish.id] ?? 0
+      )
+    : 0;
+  const selectedLevelDefinition = getCompanionFlourishLevelDefinition(
+    selectedStoredLevel
   );
+  const selectedAlreadyCountedToday = selectedFlourish
+    ? hasCompanionFlourishAwardOnDay(memories, selectedFlourish.id)
+    : false;
+  const projectedDays = selectedProgress
+    ? selectedProgress.days + (selectedAlreadyCountedToday ? 0 : 1)
+    : 0;
+  const projectedLevel = getCompanionFlourishLevelForDays(projectedDays);
+  const projectedLevelDefinition = getCompanionFlourishLevelDefinition(
+    projectedLevel
+  );
+  const willLevelUp = projectedLevel > selectedStoredLevel;
 
   useEffect(() => {
     if (!open) return;
@@ -64,16 +90,16 @@ export default function FlourishAwardModal({
     setIsSaving(true);
     setError(null);
 
-    const success = await awardCompanionFlourish(
+    const flourishMemoryId = await awardCompanionFlourish(
       student.id,
       selectedFlourish.id,
       pointBonus
     );
 
-    if (!success) {
+    if (!flourishMemoryId) {
       setIsSaving(false);
       setReviewing(false);
-      setError('לא ניתן היה להעניק את האות. ייתכן שהוא כבר בבעלות התלמיד/ה.');
+      setError('לא ניתן היה להעניק את האות. יש לנסות שוב.');
       return;
     }
 
@@ -84,6 +110,7 @@ export default function FlourishAwardModal({
       reasonId: selectedFlourish.reasonId,
       note: `הענקת ${selectedFlourish.nameHe}`,
       flourishId: selectedFlourish.id,
+      flourishMemoryId,
     });
 
     setIsSaving(false);
@@ -117,6 +144,11 @@ export default function FlourishAwardModal({
             <div className="mt-2 text-sm text-magic-soft/75">
               {selectedFlourish.descriptionHe}
             </div>
+            <div className="mt-3 inline-flex rounded-full bg-black/20 px-3 py-1 text-xs font-black text-white/80">
+              {selectedLevelDefinition
+                ? `${selectedLevelDefinition.icon} ${selectedLevelDefinition.nameHe} · ${selectedProgress?.days ?? 0} ימים`
+                : '🌱 האות ייפתח עכשיו'}
+            </div>
           </div>
 
           <div className="rounded-2xl bg-magic-bg/45 p-4 text-sm leading-6 text-white">
@@ -127,13 +159,35 @@ export default function FlourishAwardModal({
               +{pointBonus} נקודות רגילות וגם +{pointBonus} נקודות חיה
             </div>
             <div className="mt-1 text-fuchsia-200">
-              העיטור ייפתח אצל חיית המחמד ויהיה זמין להפעלה.
+              {selectedStoredLevel === 0
+                ? 'האות ייפתח ויתחיל מסלול התפתחות של 5 דרגות.'
+                : 'ההענקה תתווסף למסלול של האות. המורה לא צריכה לבחור דרגה.'}
             </div>
           </div>
 
+          {selectedAlreadyCountedToday ? (
+            <div className="rounded-xl border border-amber-300/20 bg-amber-500/10 px-4 py-3 text-center text-xs font-bold leading-5 text-amber-100">
+              האות הזה כבר נספר היום למסלול. ההענקה עדיין תיתן נקודות, אבל לא תוסיף יום התקדמות נוסף.
+            </div>
+          ) : willLevelUp && projectedLevelDefinition ? (
+            <div className="rounded-xl border border-yellow-300/25 bg-yellow-500/10 px-4 py-3 text-center text-xs font-black leading-5 text-yellow-100">
+              ✨ ההענקה הזאת תעלה את האות לדרגת {projectedLevelDefinition.icon}{' '}
+              {projectedLevelDefinition.nameHe}.
+            </div>
+          ) : selectedProgress?.next ? (
+            <div className="rounded-xl border border-fuchsia-300/15 bg-fuchsia-500/5 px-4 py-3 text-center text-xs font-bold text-fuchsia-100">
+              אחרי ההענקה: {projectedDays}/{selectedProgress.next.minDays} ימים בדרך ל־
+              {selectedProgress.next.icon} {selectedProgress.next.nameHe}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-yellow-300/20 bg-yellow-500/10 px-4 py-3 text-center text-xs font-black text-yellow-100">
+              👑 האות כבר בדרגת מאסטר. אפשר להמשיך להעניק אותו כהכרה בהתנהגות טובה.
+            </div>
+          )}
+
           {!student.companion.unlocked && (
             <div className="rounded-xl border border-cyan-300/20 bg-cyan-500/10 px-4 py-3 text-center text-xs font-bold text-cyan-100">
-              החיה עדיין לא נפתחה. האות יישמר ויחכה לה עד רמה 5.
+              החיה עדיין לא נפתחה. האות וההתקדמות שלו יישמרו ויחכו לה עד רמה 5.
             </div>
           )}
 
@@ -169,22 +223,31 @@ export default function FlourishAwardModal({
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {COMPANION_FLOURISHES.map(flourish => {
                 const selected = selectedId === flourish.id;
-                const alreadyOwned = ownedFlourishIds.has(flourish.id);
+                const progress = getCompanionFlourishProgress(
+                  memories,
+                  flourish.id
+                );
+                const storedLevel = Math.max(
+                  progress.level,
+                  student.companion.flourishLevels?.[flourish.id] ?? 0
+                );
+                const levelDefinition = getCompanionFlourishLevelDefinition(
+                  storedLevel
+                );
 
                 return (
                   <button
                     type="button"
                     key={flourish.id}
-                    disabled={alreadyOwned}
                     onClick={() => {
                       setSelectedId(flourish.id);
                       setError(null);
                     }}
                     className={`rounded-2xl border p-3 text-center transition-colors ${
-                      alreadyOwned
-                        ? 'cursor-not-allowed border-white/5 bg-white/[0.03] opacity-40'
-                        : selected
-                          ? 'border-fuchsia-300 bg-fuchsia-500/15 text-fuchsia-100'
+                      selected
+                        ? 'border-fuchsia-300 bg-fuchsia-500/15 text-fuchsia-100'
+                        : storedLevel >= 5
+                          ? 'border-yellow-300/25 bg-yellow-500/10 text-white hover:bg-yellow-500/15'
                           : 'border-white/10 bg-magic-bg/35 text-white hover:bg-magic-bg/60'
                     }`}
                   >
@@ -192,11 +255,11 @@ export default function FlourishAwardModal({
                     <div className="mt-2 text-xs font-black">
                       {flourish.nameHe}
                     </div>
-                    {alreadyOwned && (
-                      <div className="mt-1 text-[9px] font-bold">
-                        כבר התקבל
-                      </div>
-                    )}
+                    <div className="mt-1 text-[9px] font-bold text-magic-soft/70">
+                      {levelDefinition
+                        ? `${levelDefinition.icon} ${levelDefinition.nameHe} · ${progress.days} ימים`
+                        : 'טרם נפתח'}
+                    </div>
                   </button>
                 );
               })}
@@ -224,7 +287,7 @@ export default function FlourishAwardModal({
               ))}
             </div>
             <div className="mt-2 text-[10px] text-magic-soft/50">
-              הבונוס יתווסף גם לנקודות החיה, בדיוק כמו כל נקודה שהמורה מעניקה.
+              הבונוס יתווסף גם לנקודות החיה. אותה תכונה באותו יום מקדמת את מסלול האות פעם אחת בלבד.
             </div>
           </div>
 

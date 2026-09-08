@@ -30,7 +30,8 @@ export default function ActivityLog({ classId }: Props) {
         void undoCompanionFlourishAward(
           id,
           entry.flourishId as string,
-          entry.amount
+          entry.amount,
+          entry.flourishMemoryId
         )
       );
       return;

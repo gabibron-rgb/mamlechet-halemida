@@ -2,6 +2,7 @@ import { supabase } from './supabaseClient';
 import { COMPANION_STAGE_ORDER, type CompanionStage } from '../data/companionWorlds';
 import { THEMES, type ThemeId } from '../data/themes';
 import { normalizeSpecialUnlocks } from '../data/achievements';
+import { normalizeCompanionFlourishLevelRecord } from '../data/companionFlourishes';
 import { studentTitleDisplayLabel, type StudentGender } from '../data/studentTitles';
 import { normalizeStudentAvatarId, type StudentAvatarId } from '../data/studentAvatars';
 import type {
@@ -77,6 +78,12 @@ function visitorCompanion(meta: any): CompanionState {
       : ['egg'],
     activeFlourishes: stringArray(raw.activeFlourishes),
     ownedFlourishes: [],
+    celebratedFlourishes: [],
+    flourishLevels: normalizeCompanionFlourishLevelRecord(
+      raw.flourishLevels,
+      stringArray(raw.activeFlourishes)
+    ),
+    celebratedFlourishLevels: {},
     unlockedSkills: stringArray(raw.unlockedSkills),
     treasuresFound: Math.max(0, Math.floor(numberOrZero(raw.treasuresFound))),
 

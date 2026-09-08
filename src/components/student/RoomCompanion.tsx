@@ -460,6 +460,7 @@ export default function RoomCompanion({ companion, isEditing }: Props) {
 
       <CompanionFlourishEffects
         activeFlourishes={companion.activeFlourishes ?? []}
+        flourishLevels={companion.flourishLevels ?? {}}
         variant="room"
       />
 

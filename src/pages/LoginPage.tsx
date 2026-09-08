@@ -7,6 +7,7 @@ import { getStudentByLoginName } from '../lib/supabaseStudents';
 import { getTeacherByCredentials, getClassesByTeacherId } from '../lib/supabaseTeachers';
 import { DEFAULT_UNLOCKED_THEMES } from '../data/themes';
 import { normalizeCompanionBehaviorMemories } from '../data/companionTraits';
+import { normalizeCompanionFlourishLevelRecord } from '../data/companionFlourishes';
 import { normalizeCompanionTraitChallenges } from '../data/companionTraitChallenges';
 import { normalizeCompanionJournalEntries } from '../data/companionJournal';
 import { normalizeStudentMissions } from '../data/missions';
@@ -85,6 +86,21 @@ function buildStudentFromSupabase(row: any): StudentState {
       ownedFlourishes: Array.isArray(meta.companion?.ownedFlourishes)
         ? meta.companion.ownedFlourishes
         : [],
+      celebratedFlourishes: Array.isArray(meta.companion?.celebratedFlourishes)
+        ? meta.companion.celebratedFlourishes
+        : [],
+      flourishLevels: normalizeCompanionFlourishLevelRecord(
+        meta.companion?.flourishLevels,
+        Array.isArray(meta.companion?.ownedFlourishes)
+          ? meta.companion.ownedFlourishes
+          : []
+      ),
+      celebratedFlourishLevels: normalizeCompanionFlourishLevelRecord(
+        meta.companion?.celebratedFlourishLevels,
+        Array.isArray(meta.companion?.celebratedFlourishes)
+          ? meta.companion.celebratedFlourishes
+          : []
+      ),
       unlockedSkills: Array.isArray(meta.companion?.unlockedSkills)
         ? meta.companion.unlockedSkills
         : [],

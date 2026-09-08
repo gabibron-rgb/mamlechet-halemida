@@ -16,7 +16,11 @@ import {
   COMPANION_INTERACTIONS,
   type CompanionInteractionId,
 } from '../../logic/companion';
-import { COMPANION_FLOURISHES } from '../../data/companionFlourishes';
+import {
+  COMPANION_FLOURISHES,
+  getCompanionFlourishLevelDefinition,
+  getCompanionFlourishProgress,
+} from '../../data/companionFlourishes';
 import {
   pickCompanionInteractionEvent,
   type CompanionInteractionEvent,
@@ -42,6 +46,7 @@ import CompanionBehaviorProfile from './CompanionBehaviorProfile';
 import CompanionTraitChallengePanel from './CompanionTraitChallengePanel';
 import CompanionJournal from './CompanionJournal';
 import CompanionReactionCard from './CompanionReactionCard';
+import CompanionFlourishCeremony from './CompanionFlourishCeremony';
 import CompanionStoryPanel from './CompanionStoryPanel';
 import AnimatedCompanionArt, { CompanionAnimationStyles } from './AnimatedCompanionArt';
 import { playGameSound } from '../../lib/gameSounds';
@@ -148,6 +153,8 @@ export default function CompanionPanel({ student }: Props) {
   );
   const [isChangingWorld, setIsChangingWorld] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [previewFlourishId, setPreviewFlourishId] = useState<string | null>(null);
+  const [previewFlourishLevel, setPreviewFlourishLevel] = useState(1);
   const [celebratedStage, setCelebratedStage] =
     useState<CompanionStage | null>(null);
   const [previewStage, setPreviewStage] = useState<CompanionStage | null>(null);
@@ -995,6 +1002,7 @@ export default function CompanionPanel({ student }: Props) {
           themeName={themeNameOf(companion.theme)}
           petName={companionDisplayName}
           activeFlourishes={companion.activeFlourishes ?? []}
+          flourishLevels={companion.flourishLevels ?? {}}
           hasLegendaryBond={unlockedSkills.includes('legendary_bond')}
         />
 
@@ -1278,9 +1286,20 @@ export default function CompanionPanel({ student }: Props) {
 
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {COMPANION_FLOURISHES.map(flourish => {
-              const owned = (companion.ownedFlourishes ?? []).includes(
+              const progress = getCompanionFlourishProgress(
+                companion.behaviorMemories ?? [],
                 flourish.id
               );
+              const storedLevel = Math.max(
+                progress.level,
+                companion.flourishLevels?.[flourish.id] ?? 0
+              );
+              const levelDefinition = getCompanionFlourishLevelDefinition(
+                storedLevel
+              );
+              const owned =
+                storedLevel > 0 ||
+                (companion.ownedFlourishes ?? []).includes(flourish.id);
               const active = (companion.activeFlourishes ?? []).includes(
                 flourish.id
               );
@@ -1293,9 +1312,13 @@ export default function CompanionPanel({ student }: Props) {
                   onClick={() => toggleFlourish(flourish.id)}
                   className={`rounded-2xl border p-3 text-center transition-all ${
                     active
-                      ? 'border-fuchsia-200 bg-fuchsia-400/20 shadow-[0_0_20px_rgba(232,121,249,0.2)]'
+                      ? storedLevel >= 5
+                        ? 'border-yellow-200 bg-yellow-400/15 shadow-[0_0_26px_rgba(250,204,21,0.25)]'
+                        : 'border-fuchsia-200 bg-fuchsia-400/20 shadow-[0_0_20px_rgba(232,121,249,0.2)]'
                       : owned
-                        ? 'border-white/15 bg-magic-bg/45 hover:border-fuchsia-300/40'
+                        ? storedLevel >= 5
+                          ? 'border-yellow-300/25 bg-yellow-500/10 hover:border-yellow-200/45'
+                          : 'border-white/15 bg-magic-bg/45 hover:border-fuchsia-300/40'
                         : 'cursor-not-allowed border-white/5 bg-black/10 opacity-35'
                   }`}
                 >
@@ -1308,6 +1331,37 @@ export default function CompanionPanel({ student }: Props) {
                   <div className="mt-1 min-h-8 text-[9px] leading-4 text-magic-soft/55">
                     {flourish.descriptionHe}
                   </div>
+
+                  {levelDefinition ? (
+                    <>
+                      <div className="mt-2 text-[10px] font-black text-white/85">
+                        {levelDefinition.icon} {levelDefinition.nameHe} · {progress.days} ימים
+                      </div>
+                      {progress.next ? (
+                        <>
+                          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-black/25">
+                            <div
+                              className="h-full rounded-full bg-fuchsia-300 transition-all"
+                              style={{ width: `${progress.percentToNext}%` }}
+                            />
+                          </div>
+                          <div className="mt-1 text-[9px] font-bold text-magic-soft/45">
+                            {progress.days}/{progress.next.minDays} ל־{progress.next.icon}{' '}
+                            {progress.next.nameHe}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="mt-2 text-[9px] font-black text-yellow-200">
+                          👑 מסלול הושלם
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="mt-2 text-[10px] font-black text-magic-soft/45">
+                      טרם התקבל
+                    </div>
+                  )}
+
                   <div
                     className={`mt-2 text-[10px] font-black ${
                       active
@@ -1317,15 +1371,91 @@ export default function CompanionPanel({ student }: Props) {
                           : 'text-magic-soft/45'
                     }`}
                   >
-                    {active ? '✓ פעיל' : owned ? 'לחיצה להפעלה' : 'טרם התקבל'}
+                    {active ? '✓ פעיל' : owned ? 'לחיצה להפעלה' : '🔒 נעול'}
                   </div>
                 </button>
               );
             })}
           </div>
+
+          <div className="mt-3 rounded-xl border border-white/5 bg-black/15 px-3 py-2 text-[10px] leading-5 text-magic-soft/65">
+            כל אות מתקדם ב־5 דרגות. אותה התנהגות באותו יום נספרת למסלול פעם אחת בלבד — כך אי אפשר לסיים את המערכת בכמה ימים.
+          </div>
+
+          {isLocalDebug && (
+            <div className="mt-4 rounded-2xl border border-dashed border-cyan-300/25 bg-cyan-500/5 p-3">
+              <div className="text-[10px] font-black text-cyan-100">
+                בדיקת טקסי אותות — מקומית בלבד
+              </div>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="text-[9px] font-bold text-cyan-100/60">דרגה:</span>
+                {[1, 2, 3, 4, 5].map(level => {
+                  const definition = getCompanionFlourishLevelDefinition(level);
+                  return (
+                    <button
+                      key={`preview-level-${level}`}
+                      type="button"
+                      onClick={() => setPreviewFlourishLevel(level)}
+                      className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                        previewFlourishLevel === level
+                          ? 'bg-cyan-300 text-slate-950'
+                          : 'border border-cyan-300/15 bg-black/20 text-cyan-100'
+                      }`}
+                    >
+                      {definition?.icon} {level}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {COMPANION_FLOURISHES.map(flourish => (
+                  <button
+                    key={`preview-${flourish.id}`}
+                    type="button"
+                    onClick={() => setPreviewFlourishId(flourish.id)}
+                    className="rounded-full border border-cyan-300/15 bg-black/20 px-3 py-1.5 text-xs font-black text-cyan-100 hover:bg-black/30"
+                  >
+                    {flourish.emoji} {flourish.nameHe.replace('אות ', '')}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
+        {previewFlourishId && (
+          <CompanionFlourishCeremony
+            companion={companion}
+            flourishId={previewFlourishId}
+            level={previewFlourishLevel}
+            days={
+              getCompanionFlourishLevelDefinition(previewFlourishLevel)?.minDays
+            }
+            isActive={(companion.activeFlourishes ?? []).includes(
+              previewFlourishId
+            )}
+            preview
+            onActivate={() => setPreviewFlourishId(null)}
+            onLater={() => setPreviewFlourishId(null)}
+            onOpenCompanion={() => setPreviewFlourishId(null)}
+          />
+        )}
+
         <CompanionJournal companion={companion} />
+
+        {previewFlourishId && (
+          <CompanionFlourishCeremony
+            companion={companion}
+            flourishId={previewFlourishId}
+            isActive={(companion.activeFlourishes ?? []).includes(
+              previewFlourishId
+            )}
+            preview
+            onActivate={() => setPreviewFlourishId(null)}
+            onLater={() => setPreviewFlourishId(null)}
+            onOpenCompanion={() => setPreviewFlourishId(null)}
+          />
+        )}
 
         {import.meta.env.DEV && (
           <div className="mt-4 rounded-2xl border border-dashed border-fuchsia-300/30 bg-fuchsia-500/5 p-4">
@@ -1749,6 +1879,7 @@ function CompanionAvatar({
   themeName,
   petName,
   activeFlourishes = [],
+  flourishLevels = {},
   hasLegendaryBond = false,
 }: {
   stage: CompanionStage;
@@ -1756,12 +1887,16 @@ function CompanionAvatar({
   themeName: string;
   petName: string;
   activeFlourishes?: string[];
+  flourishLevels?: Record<string, number>;
   hasLegendaryBond?: boolean;
 }) {
   if (stage === 'egg') {
     return (
       <div className="relative mx-auto my-8 flex h-56 w-48 items-center justify-center">
-        <CompanionFlourishEffects activeFlourishes={activeFlourishes} />
+        <CompanionFlourishEffects
+          activeFlourishes={activeFlourishes}
+          flourishLevels={flourishLevels}
+        />
         <div
           aria-label={`ביצה קסומה מעולם ${themeName}`}
           className="relative flex h-52 w-40 animate-[bounce_3s_ease-in-out_infinite] items-center justify-center overflow-hidden rounded-[50%_50%_46%_46%] border-4 border-white/35 shadow-2xl"
@@ -1819,7 +1954,10 @@ function CompanionAvatar({
 
   return (
     <div className={`relative mx-auto my-8 flex ${avatarShellSize} items-end justify-center`}>
-      <CompanionFlourishEffects activeFlourishes={activeFlourishes} />
+      <CompanionFlourishEffects
+        activeFlourishes={activeFlourishes}
+        flourishLevels={flourishLevels}
+      />
       {hasLegendaryBond && (
         <>
           <div className="absolute inset-1 animate-pulse rounded-full border-2 border-cyan-200/55 shadow-[0_0_75px_rgba(103,232,249,0.68)]" />

@@ -18,6 +18,7 @@ export type ActivityEntry = {
   reasonId: string | null;
   note?: string;
   flourishId?: string;
+  flourishMemoryId?: string;
   createdAt: number;
   undone: boolean;
 };

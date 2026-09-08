@@ -8,6 +8,10 @@ import { xpToNextLevel } from '../logic/leveling';
 import { COMPANION_STAGE_ORDER } from '../data/companionWorlds';
 import { studentTitleDisplayLabel } from '../data/studentTitles';
 import { getStudentAvatar } from '../data/studentAvatars';
+import {
+  COMPANION_FLOURISHES,
+  getCompanionFlourishDayCount,
+} from '../data/companionFlourishes';
 
 import Shop from '../components/student/Shop';
 import Inventory from '../components/student/Inventory';
@@ -28,6 +32,7 @@ import {
 import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
 import StudentOnboarding from '../components/student/StudentOnboarding';
 import StudentProfilePanel from '../components/student/StudentProfilePanel';
+import CompanionFlourishCeremony from '../components/student/CompanionFlourishCeremony';
 import {
   isGameSoundEnabled,
   playGameSound,
@@ -79,6 +84,10 @@ export default function StudentHome() {
   const completeThemeUnlock = useGameStore(s => s.completeThemeUnlock);
   const markTrophySeen = useGameStore(s => s.markTrophySeen);
   const markRoomUnlockSeen = useGameStore(s => s.markRoomUnlockSeen);
+  const markCompanionFlourishSeen = useGameStore(
+    s => s.markCompanionFlourishSeen
+  );
+  const updateStudent = useGameStore(s => s.updateStudent);
 
   // ברירת המחדל עכשיו היא "התקדמות", כי זה מסך כניסה הרבה יותר ברור לילדים.
   const [tab, setTab] = useState<Tab>('progress');
@@ -184,6 +193,39 @@ export default function StudentHome() {
     .filter(trophy => !seenTrophyIds.has(trophy.id))
     .sort((first, second) => first.awardedAt - second.awardedAt);
   const activeUnseenTrophy = unseenTrophies[0] ?? null;
+  const celebratedFlourishIds = new Set(
+    student.companion.celebratedFlourishes ?? []
+  );
+  const celebratedFlourishLevels =
+    student.companion.celebratedFlourishLevels ?? {};
+  const ownedFlourishIds = new Set(student.companion.ownedFlourishes ?? []);
+  const pendingFlourishMilestones = COMPANION_FLOURISHES.flatMap(flourish => {
+    const storedLevel = Math.max(
+      student.companion.flourishLevels?.[flourish.id] ?? 0,
+      ownedFlourishIds.has(flourish.id) ? 1 : 0
+    );
+    const celebratedLevel = Math.max(
+      celebratedFlourishLevels[flourish.id] ?? 0,
+      celebratedFlourishIds.has(flourish.id) ? 1 : 0
+    );
+
+    if (storedLevel <= celebratedLevel) return [];
+
+    return [
+      {
+        flourishId: flourish.id,
+        level: storedLevel,
+        days: getCompanionFlourishDayCount(
+          student.companion.behaviorMemories ?? [],
+          flourish.id
+        ),
+      },
+    ];
+  });
+  const activeFlourishMilestone =
+    student.companion.unlocked && pendingFlourishMilestones.length > 0
+      ? pendingFlourishMilestones[0]
+      : null;
   const companionStageIndex = COMPANION_STAGE_ORDER.indexOf(
     student.companion.stage
   );
@@ -547,6 +589,70 @@ export default function StudentHome() {
             }}
           />
         )}
+
+        {activeFlourishMilestone &&
+          !activeUnseenTrophy &&
+          previewRoomUnlockLevel === null &&
+          retroactiveRoomUnlockLevel === null &&
+          !onboardingOpen &&
+          !ceremonyOpen &&
+          !themeUnlockOpen && (
+            <CompanionFlourishCeremony
+              companion={student.companion}
+              flourishId={activeFlourishMilestone.flourishId}
+              level={activeFlourishMilestone.level}
+              days={activeFlourishMilestone.days}
+              isActive={(student.companion.activeFlourishes ?? []).includes(
+                activeFlourishMilestone.flourishId
+              )}
+              onActivate={() => {
+                const flourishId = activeFlourishMilestone.flourishId;
+                const flourishLevel = activeFlourishMilestone.level;
+                const activeFlourishes =
+                  student.companion.activeFlourishes ?? [];
+                const celebratedFlourishes =
+                  student.companion.celebratedFlourishes ?? [];
+                const celebratedLevels =
+                  student.companion.celebratedFlourishLevels ?? {};
+
+                updateStudent(student.id, {
+                  companion: {
+                    ...student.companion,
+                    activeFlourishes: activeFlourishes.includes(flourishId)
+                      ? activeFlourishes
+                      : [...activeFlourishes, flourishId],
+                    celebratedFlourishes: celebratedFlourishes.includes(
+                      flourishId
+                    )
+                      ? celebratedFlourishes
+                      : [...celebratedFlourishes, flourishId],
+                    celebratedFlourishLevels: {
+                      ...celebratedLevels,
+                      [flourishId]: Math.max(
+                        celebratedLevels[flourishId] ?? 0,
+                        flourishLevel
+                      ),
+                    },
+                  },
+                });
+              }}
+              onLater={() => {
+                markCompanionFlourishSeen(
+                  student.id,
+                  activeFlourishMilestone.flourishId,
+                  activeFlourishMilestone.level
+                );
+              }}
+              onOpenCompanion={() => {
+                markCompanionFlourishSeen(
+                  student.id,
+                  activeFlourishMilestone.flourishId,
+                  activeFlourishMilestone.level
+                );
+                setTab('companion');
+              }}
+            />
+          )}
       </div>
     </div>
   );
