@@ -654,6 +654,97 @@ function WonderHallStageEffect({
   );
 }
 
+
+const MAGIC_ENCHANT_CENTER = { x: 70, y: 48 };
+const MAGIC_ENCHANT_RADIUS = { x: 15, y: 8 };
+
+function magicEnchantDistance(item: DisplayItem): number | null {
+  // השולחן הקסום מיועד לחפץ לבחירת הילד, לא לשטיח שלם.
+  if (item.displayKind === 'rug') return null;
+
+  const x = item.entry.roomX;
+  const y = item.entry.roomY;
+
+  if (x === null || x === undefined || y === null || y === undefined) {
+    return null;
+  }
+
+  const dx = (x - MAGIC_ENCHANT_CENTER.x) / MAGIC_ENCHANT_RADIUS.x;
+  const dy = (y - MAGIC_ENCHANT_CENTER.y) / MAGIC_ENCHANT_RADIUS.y;
+  const distance = dx * dx + dy * dy;
+
+  return distance <= 1 ? distance : null;
+}
+
+function findMagicEnchantedItem(items: DisplayItem[]): DisplayItem | null {
+  return (
+    items
+      .map(item => ({ item, distance: magicEnchantDistance(item) }))
+      .filter(
+        (candidate): candidate is { item: DisplayItem; distance: number } =>
+          candidate.distance !== null
+      )
+      .sort((a, b) => a.distance - b.distance)[0]?.item ?? null
+  );
+}
+
+function MagicRoomEnchantmentEffect({
+  activeItem,
+}: {
+  activeItem: DisplayItem | null;
+}) {
+  const isActive = activeItem !== null;
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[40] overflow-hidden">
+      <div
+        className={`absolute left-[70%] top-[31%] h-[25%] w-[23%] -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-700 ${
+          isActive
+            ? 'animate-pulse bg-[radial-gradient(circle,rgba(196,181,253,0.22)_0%,rgba(99,102,241,0.13)_42%,transparent_72%)] shadow-[0_0_50px_rgba(139,92,246,0.22)]'
+            : 'bg-[radial-gradient(circle,rgba(191,219,254,0.06)_0%,transparent_72%)]'
+        }`}
+      />
+
+      <div
+        className={`absolute left-[70%] top-[48%] h-[10%] w-[29%] -translate-x-1/2 -translate-y-1/2 rounded-[50%] border transition-all duration-700 ${
+          isActive
+            ? 'border-violet-200/65 bg-indigo-300/[0.08] shadow-[0_0_18px_rgba(196,181,253,0.55),0_0_42px_rgba(99,102,241,0.28)]'
+            : 'border-violet-100/10 bg-violet-300/[0.015] shadow-[0_0_13px_rgba(167,139,250,0.06)]'
+        }`}
+      />
+
+      {isActive && (
+        <>
+          <div className="absolute left-[70%] top-[18%] h-[31%] w-[14%] -translate-x-1/2 bg-gradient-to-b from-violet-100/0 via-indigo-200/[0.12] to-violet-300/25 blur-sm"
+            style={{ clipPath: 'polygon(43% 0%, 57% 0%, 100% 100%, 0% 100%)' }}
+          />
+
+          <div className="absolute left-[70%] top-[40%] h-[26%] w-[31%] -translate-x-1/2 -translate-y-1/2">
+            {[
+              ['8%', '56%', '0s', '✦'],
+              ['18%', '28%', '0.55s', '✧'],
+              ['38%', '10%', '0.2s', '✦'],
+              ['60%', '5%', '0.8s', '✧'],
+              ['79%', '22%', '0.35s', '✦'],
+              ['91%', '54%', '1.05s', '✧'],
+              ['70%', '78%', '0.65s', '✦'],
+              ['31%', '82%', '1.2s', '✧'],
+            ].map(([left, top, delay, glyph]) => (
+              <span
+                key={`${left}-${top}`}
+                className="absolute animate-pulse text-sm text-violet-100 drop-shadow-[0_0_8px_rgba(196,181,253,0.95)]"
+                style={{ left, top, animationDelay: delay }}
+              >
+                {glyph}
+              </span>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function getRarityRoomEffect(rarity?: string) {
   if (rarity === 'common') {
     return '';
@@ -875,6 +966,9 @@ function freeRoomZone(item: DisplayItem): Zone {
   const wonderStageItem = roomId === 'wonder_hall'
     ? findWonderStageItem(placedItems)
     : null;
+  const magicEnchantedItem = roomId === 'magic_room'
+    ? findMagicEnchantedItem(placedItems)
+    : null;
 
   return (
     <div
@@ -896,6 +990,10 @@ function freeRoomZone(item: DisplayItem): Zone {
         <WonderHallStageEffect activeItem={wonderStageItem} />
       )}
 
+      {roomId === 'magic_room' && (
+        <MagicRoomEnchantmentEffect activeItem={magicEnchantedItem} />
+      )}
+
       {roomId !== 'main' && (
         <>
           <div className="pointer-events-none absolute inset-3 rounded-xl border-2 border-yellow-300/20 shadow-[inset_0_0_30px_rgba(250,204,21,0.08)]" />
@@ -915,11 +1013,15 @@ function freeRoomZone(item: DisplayItem): Zone {
       {placedItems.map(item => {
         const isWonderStageItem =
           wonderStageItem?.inventoryIndex === item.inventoryIndex;
+        const isMagicEnchantedItem =
+          magicEnchantedItem?.inventoryIndex === item.inventoryIndex;
         const rarityEffect = isWonderStageItem
           ? item.rarity === 'legendary'
             ? 'drop-shadow(0 0 16px rgba(255,245,160,1)) drop-shadow(0 0 34px rgba(250,204,21,0.95)) drop-shadow(0 0 54px rgba(255,140,40,0.55))'
             : 'drop-shadow(0 0 14px rgba(233,213,255,1)) drop-shadow(0 0 30px rgba(168,85,247,0.9)) drop-shadow(0 0 46px rgba(99,102,241,0.5))'
-          : getRarityRoomEffect(item.rarity);
+          : isMagicEnchantedItem
+            ? `${getRarityRoomEffect(item.rarity)} drop-shadow(0 0 12px rgba(224,231,255,0.95)) drop-shadow(0 0 26px rgba(139,92,246,0.82)) drop-shadow(0 0 38px rgba(59,130,246,0.42))`.trim()
+            : getRarityRoomEffect(item.rarity);
         const isSelected =
           isEditing && selectedInventoryIndex === item.inventoryIndex;
 
@@ -1029,7 +1131,11 @@ function freeRoomZone(item: DisplayItem): Zone {
           >
             <div
               className={`h-full w-full border-0 bg-transparent shadow-none ring-0 [&>*]:!h-full [&>*]:!w-full ${
-                isWonderStageItem ? 'animate-pulse' : ''
+                isWonderStageItem
+                  ? 'animate-pulse'
+                  : isMagicEnchantedItem
+                    ? 'animate-[pulse_2.4s_ease-in-out_infinite]'
+                    : ''
               }`}
               style={{
                 filter: rarityEffect || undefined,
@@ -1278,6 +1384,8 @@ export default function RoomView({ student, readOnly = false }: Props) {
 
   const wonderStageItem =
     activeRoomId === 'wonder_hall' ? findWonderStageItem(placedItems) : null;
+  const magicEnchantedItem =
+    activeRoomId === 'magic_room' ? findMagicEnchantedItem(placedItems) : null;
 
   function resizeItemInRoom(inventoryIndex: number, direction: 'up' | 'down') {
     const item = placedItems.find(
@@ -1615,6 +1723,20 @@ export default function RoomView({ student, readOnly = false }: Props) {
           </div>
         )}
 
+        {activeRoomId === 'magic_room' && (
+          <div
+            className={`mt-3 rounded-2xl border px-4 py-2 text-center text-sm font-bold transition-all ${
+              magicEnchantedItem
+                ? 'border-violet-300/35 bg-violet-400/10 text-violet-100 shadow-[0_0_20px_rgba(139,92,246,0.12)]'
+                : 'border-indigo-200/10 bg-indigo-300/5 text-indigo-100/65'
+            }`}
+          >
+            {magicEnchantedItem
+              ? `🪄 הקסם התעורר — ${magicEnchantedItem.nameHe} הוקסם.`
+              : '✧ משהו בחדר הזה יודע להעיר קסם רדום בחפצים...'}
+          </div>
+        )}
+
         {activeRoomId === 'wonder_hall' && (
           <div
             className={`mt-3 rounded-2xl border px-4 py-2 text-center text-sm font-bold transition-all ${
@@ -1637,7 +1759,9 @@ export default function RoomView({ student, readOnly = false }: Props) {
             : isEditing
               ? activeRoomId === 'wonder_hall'
                 ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי. אולי שווה לנסות גם את הסמל שבמרכז ההיכל.'
-                : 'מצב עריכה פעיל: גרור חפצים למקום הרצוי בחדר.'
+                : activeRoomId === 'magic_room'
+                  ? 'מצב עריכה פעיל: גרור חפצים למקום הרצוי. בחדר הקסם כדאי להתנסות קצת...'
+                  : 'מצב עריכה פעיל: גרור חפצים למקום הרצוי בחדר.'
               : 'לחץ על חפץ כדי לראות מידע עליו. כדי להזיז חפצים, עבור למצב עריכה.'}
         </div>
 
