@@ -20,6 +20,7 @@ import {
   COMPANION_FLOURISHES,
   getCompanionFlourishLevelDefinition,
   getCompanionFlourishProgress,
+  getCompanionFlourishReward,
 } from '../../data/companionFlourishes';
 import {
   pickCompanionInteractionEvent,
@@ -1303,6 +1304,15 @@ export default function CompanionPanel({ student }: Props) {
               const active = (companion.activeFlourishes ?? []).includes(
                 flourish.id
               );
+              const nextRewardLevel = storedLevel > 0 && storedLevel < 5
+                ? storedLevel + 1
+                : null;
+              const nextReward = nextRewardLevel
+                ? getCompanionFlourishReward(flourish.id, nextRewardLevel)
+                : null;
+              const masterReward = storedLevel >= 5
+                ? getCompanionFlourishReward(flourish.id, 5)
+                : null;
 
               return (
                 <button
@@ -1362,6 +1372,20 @@ export default function CompanionPanel({ student }: Props) {
                     </div>
                   )}
 
+                  {owned && (nextReward || masterReward) && (
+                    <div className="mt-2 rounded-lg bg-black/15 px-2 py-1.5 text-[9px] font-bold leading-4 text-white/55">
+                      {nextReward ? (
+                        <>
+                          הבא: {nextReward.icon} {nextReward.titleHe}
+                        </>
+                      ) : masterReward ? (
+                        <span className="text-yellow-100">
+                          👑 {masterReward.titleHe} פתוח
+                        </span>
+                      ) : null}
+                    </div>
+                  )}
+
                   <div
                     className={`mt-2 text-[10px] font-black ${
                       active
@@ -1380,6 +1404,13 @@ export default function CompanionPanel({ student }: Props) {
 
           <div className="mt-3 rounded-xl border border-white/5 bg-black/15 px-3 py-2 text-[10px] leading-5 text-magic-soft/65">
             כל אות מתקדם ב־5 דרגות. אותה התנהגות באותו יום נספרת למסלול פעם אחת בלבד — כך אי אפשר לסיים את המערכת בכמה ימים.
+          </div>
+
+          <div className="mt-2 grid grid-cols-2 gap-2 text-center text-[9px] font-black sm:grid-cols-4">
+            <div className="rounded-xl border border-white/5 bg-white/5 px-2 py-2 text-white/65">🥉 עיטור מתפתח</div>
+            <div className="rounded-xl border border-white/5 bg-white/5 px-2 py-2 text-white/65">🥈 חתימת אופי</div>
+            <div className="rounded-xl border border-white/5 bg-white/5 px-2 py-2 text-white/65">🥇 הילת חדר</div>
+            <div className="rounded-xl border border-yellow-300/15 bg-yellow-400/5 px-2 py-2 text-yellow-100/80">👑 חותם מאסטר</div>
           </div>
 
           {isLocalDebug && (
@@ -1442,20 +1473,6 @@ export default function CompanionPanel({ student }: Props) {
         )}
 
         <CompanionJournal companion={companion} />
-
-        {previewFlourishId && (
-          <CompanionFlourishCeremony
-            companion={companion}
-            flourishId={previewFlourishId}
-            isActive={(companion.activeFlourishes ?? []).includes(
-              previewFlourishId
-            )}
-            preview
-            onActivate={() => setPreviewFlourishId(null)}
-            onLater={() => setPreviewFlourishId(null)}
-            onOpenCompanion={() => setPreviewFlourishId(null)}
-          />
-        )}
 
         {import.meta.env.DEV && (
           <div className="mt-4 rounded-2xl border border-dashed border-fuchsia-300/30 bg-fuchsia-500/5 p-4">

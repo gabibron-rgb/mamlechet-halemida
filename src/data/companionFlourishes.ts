@@ -37,6 +37,15 @@ export type CompanionFlourishProgress = {
   percentToNext: number;
 };
 
+export type CompanionFlourishRewardLevel = 2 | 3 | 4 | 5;
+
+export type CompanionFlourishReward = {
+  level: CompanionFlourishRewardLevel;
+  icon: string;
+  titleHe: string;
+  descriptionHe: string;
+};
+
 export const COMPANION_FLOURISH_LEVELS: CompanionFlourishLevelDefinition[] = [
   { level: 1, minDays: 1, nameHe: 'התחלה', icon: '🌱' },
   { level: 2, minDays: 3, nameHe: 'מתפתח', icon: '🥉' },
@@ -108,6 +117,48 @@ export const COMPANION_FLOURISHES: CompanionFlourish[] = [
   },
 ];
 
+export const COMPANION_FLOURISH_REWARDS: Record<
+  CompanionFlourishId,
+  Record<CompanionFlourishRewardLevel, CompanionFlourishReward>
+> = {
+  perseverance: {
+    2: { level: 2, icon: '✧', titleHe: 'ניצוצות נחישות', descriptionHe: 'עיטור ההתמדה מקבל שכבת ניצוצות נוספת סביב החיה.' },
+    3: { level: 3, icon: '🔥', titleHe: 'להבת חתימה', descriptionHe: 'להבה אישית מתחילה לנוע לצד החיה כשהאות פעיל.' },
+    4: { level: 4, icon: '⭕', titleHe: 'מעגל כוח', descriptionHe: 'בחדר מופיעה הילה חמה מתחת לחיה כשהאות פעיל.' },
+    5: { level: 5, icon: '👑', titleHe: 'חותם מאסטר האש', descriptionHe: 'נפתח חותם מאסטר ייחודי של התמדה ליד החיה.' },
+  },
+  friendship: {
+    2: { level: 2, icon: '💗', titleHe: 'לבבות חמים', descriptionHe: 'עיטור החברות מקבל עוד פעימות לב קטנות.' },
+    3: { level: 3, icon: '💞', titleHe: 'פעימת חברות', descriptionHe: 'סמל חברות חי ופועם מתחיל ללוות את החיה.' },
+    4: { level: 4, icon: '⭕', titleHe: 'הילה מחבקת', descriptionHe: 'בחדר מופיעה הילה ורודה ועדינה סביב אזור החיה.' },
+    5: { level: 5, icon: '👑', titleHe: 'חותם לב הזהב', descriptionHe: 'נפתח חותם מאסטר ייחודי של חברות.' },
+  },
+  creativity: {
+    2: { level: 2, icon: '✨', titleHe: 'ניצוצות צבע', descriptionHe: 'העיטור מקבל שכבת אור צבעונית נוספת.' },
+    3: { level: 3, icon: '🌈', titleHe: 'חתימת קשת', descriptionHe: 'קשת קטנה ודינמית מתחילה להופיע לצד החיה.' },
+    4: { level: 4, icon: '⭕', titleHe: 'הילה פריזמטית', descriptionHe: 'בחדר מופיעה הילה צבעונית ורכה מתחת לחיה.' },
+    5: { level: 5, icon: '👑', titleHe: 'חותם מאסטר הדמיון', descriptionHe: 'נפתח חותם מאסטר ייחודי של יצירתיות.' },
+  },
+  curiosity: {
+    2: { level: 2, icon: '💡', titleHe: 'ניצוצות גילוי', descriptionHe: 'עיטור הסקרנות מקבל עוד נקודות אור קטנות.' },
+    3: { level: 3, icon: '🔎', titleHe: 'סימן החוקר', descriptionHe: 'סמל חקר נע ליד החיה כאילו הוא סורק ומחפש.' },
+    4: { level: 4, icon: '⭕', titleHe: 'מעגל גילוי', descriptionHe: 'בחדר מופיע מעגל אור כחול ועדין מתחת לחיה.' },
+    5: { level: 5, icon: '👑', titleHe: 'חותם מאסטר הגילוי', descriptionHe: 'נפתח חותם מאסטר ייחודי של סקרנות.' },
+  },
+  helping: {
+    2: { level: 2, icon: '✨', titleHe: 'אור של עזרה', descriptionHe: 'עיטור העזרה מקבל עוד נקודות אור שמתחברות סביב החיה.' },
+    3: { level: 3, icon: '🤝', titleHe: 'חתימת שותפות', descriptionHe: 'סמל שותפות מונפש מתחיל ללוות את החיה.' },
+    4: { level: 4, icon: '⭕', titleHe: 'הילה מגוננת', descriptionHe: 'בחדר מופיעה הילה ירוקה ועדינה סביב אזור החיה.' },
+    5: { level: 5, icon: '👑', titleHe: 'חותם מאסטר הנתינה', descriptionHe: 'נפתח חותם מאסטר ייחודי של עזרה לאחר.' },
+  },
+  breakthrough: {
+    2: { level: 2, icon: '⚡', titleHe: 'ניצוץ פריצה', descriptionHe: 'עיטור פריצת הדרך מקבל עוד ברק וכוכבים.' },
+    3: { level: 3, icon: '✦', titleHe: 'כוכב חתימה', descriptionHe: 'כוכב חי ומתפרץ מתחיל להופיע לצד החיה.' },
+    4: { level: 4, icon: '⭕', titleHe: 'הילה זוהרת', descriptionHe: 'בחדר מופיעה הילה זהובה וחזקה יותר מתחת לחיה.' },
+    5: { level: 5, icon: '👑', titleHe: 'חותם מאסטר פריצת הדרך', descriptionHe: 'נפתח חותם מאסטר ייחודי של פריצת דרך.' },
+  },
+};
+
 export const COMPANION_FLOURISH_BY_ID = Object.fromEntries(
   COMPANION_FLOURISHES.map(flourish => [flourish.id, flourish])
 ) as Record<CompanionFlourishId, CompanionFlourish>;
@@ -116,6 +167,18 @@ export function getCompanionFlourish(
   flourishId: string
 ): CompanionFlourish | undefined {
   return COMPANION_FLOURISHES.find(flourish => flourish.id === flourishId);
+}
+
+export function getCompanionFlourishReward(
+  flourishId: string,
+  level: number
+): CompanionFlourishReward | null {
+  const flourish = getCompanionFlourish(flourishId);
+  if (!flourish || level < 2 || level > 5) return null;
+
+  return COMPANION_FLOURISH_REWARDS[flourish.id][
+    level as CompanionFlourishRewardLevel
+  ];
 }
 
 export function getCompanionFlourishLevelDefinition(

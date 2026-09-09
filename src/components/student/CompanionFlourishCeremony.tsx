@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import {
   getCompanionFlourish,
   getCompanionFlourishLevelDefinition,
+  getCompanionFlourishReward,
   type CompanionFlourishId,
 } from '../../data/companionFlourishes';
 import {
@@ -100,6 +101,7 @@ export default function CompanionFlourishCeremony({
   const ceremonyMessage = isFirstLevel
     ? flourish.ceremonyMessageHe
     : LEVEL_MESSAGES[level] ?? 'הדרך שלך ממשיכה להתחזק.';
+  const unlockedReward = getCompanionFlourishReward(flourish.id, level);
   const intensityScale = 1 + Math.max(0, level - 1) * 0.07;
 
   return (
@@ -280,6 +282,24 @@ export default function CompanionFlourishCeremony({
               ✨ {signatureLabel}
             </div>
           </div>
+
+          {unlockedReward && (
+            <div
+              className="mt-4 rounded-2xl border px-4 py-3 text-right"
+              style={{
+                borderColor: `${flourish.glowColor}55`,
+                backgroundColor: `${flourish.glowColor}16`,
+              }}
+            >
+              <div className="text-[10px] font-black text-white/45">🎁 נפתח עכשיו</div>
+              <div className="mt-1 text-sm font-black text-white">
+                {unlockedReward.icon} {unlockedReward.titleHe}
+              </div>
+              <div className="mt-1 text-[11px] font-bold leading-5 text-white/60">
+                {unlockedReward.descriptionHe}
+              </div>
+            </div>
+          )}
 
           <div className="mt-5 rounded-2xl bg-white/5 px-4 py-3 text-xs font-bold leading-5 text-white/55">
             {isFirstLevel ? (
