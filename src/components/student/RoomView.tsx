@@ -107,27 +107,27 @@ const ROOM_SCENE_META: Record<
 const RARITY_SCALE_LIMITS: Record<Rarity, { min: number; max: number; step: number }> = {
   common: {
     min: 0.25,
-    max: 1.15,
+    max: 2.5,
     step: 0.1,
   },
   uncommon: {
     min: 0.25,
-    max: 1.3,
+    max: 2.5,
     step: 0.1,
   },
   rare: {
     min: 0.25,
-    max: 1.5,
+    max: 2.5,
     step: 0.1,
   },
   epic: {
     min: 0.25,
-    max: 1.8,
+    max: 2.5,
     step: 0.1,
   },
   legendary: {
     min: 0.25,
-    max: 2.2,
+    max: 2.5,
     step: 0.1,
   },
 };
