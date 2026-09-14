@@ -33,6 +33,7 @@ import { ThemeUnlockCeremony } from '../components/student/ThemeUnlockCeremony';
 import StudentOnboarding from '../components/student/StudentOnboarding';
 import StudentProfilePanel from '../components/student/StudentProfilePanel';
 import CompanionFlourishCeremony from '../components/student/CompanionFlourishCeremony';
+import StudentNavigation, { type StudentNavigationTab } from '../components/student/StudentNavigation';
 import {
   isGameSoundEnabled,
   playGameSound,
@@ -41,17 +42,7 @@ import {
 
 const RETROACTIVE_ROOM_UNLOCK_LEVELS = [4, 11] as const;
 
-type Tab =
-  | 'progress'
-  | 'missions'
-  | 'classKingdom'
-  | 'room'
-  | 'classRooms'
-  | 'shop'
-  | 'inventory'
-  | 'collection'
-  | 'companion'
-  | 'trophies';
+type Tab = StudentNavigationTab;
 
 export default function StudentHome() {
   const navigate = useNavigate();
@@ -394,66 +385,14 @@ export default function StudentHome() {
 
         <ClassGoalBanner goals={student.classGoals ?? []} />
 
-        {/* Tabs */}
-        <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10">
-          <TabButton active={tab === 'progress'} onClick={() => setTab('progress')}>
-            התקדמות
-          </TabButton>
-
-          <TabButton active={tab === 'missions'} onClick={() => setTab('missions')}>
-            📋 משימות{activeMissionCount > 0 ? ` (${activeMissionCount})` : ''}
-          </TabButton>
-
-          <TabButton
-            active={tab === 'classKingdom'}
-            onClick={() => setTab('classKingdom')}
-          >
-            🏰 הכיתה
-          </TabButton>
-
-          <TabButton active={tab === 'room'} onClick={() => setTab('room')}>
-            🏠 חדר
-          </TabButton>
-
-          <TabButton
-            active={tab === 'classRooms'}
-            onClick={() => setTab('classRooms')}
-          >
-            🏘️ חדרי הכיתה
-          </TabButton>
-
-          <TabButton active={tab === 'shop'} onClick={() => setTab('shop')}>
-            חנות
-          </TabButton>
-
-          <TabButton
-            active={tab === 'inventory'}
-            onClick={() => setTab('inventory')}
-          >
-            מלאי ({student.inventory.length})
-          </TabButton>
-
-          <TabButton
-            active={tab === 'collection'}
-            onClick={() => setTab('collection')}
-          >
-            📖 האוסף שלי
-          </TabButton>
-
-          <TabButton
-            active={tab === 'companion'}
-            onClick={() => setTab('companion')}
-          >
-            🐾 חיית מחמד{hasPendingCompanionEvolution ? ' ✨' : ''}
-          </TabButton>
-
-          <TabButton
-            active={tab === 'trophies'}
-            onClick={() => setTab('trophies')}
-          >
-            🏆 חדר הפרסים
-          </TabButton>
-        </div>
+        {/* Student navigation */}
+        <StudentNavigation
+          activeTab={tab}
+          onSelect={setTab}
+          activeMissionCount={activeMissionCount}
+          inventoryCount={student.inventory.length}
+          hasPendingCompanionEvolution={hasPendingCompanionEvolution}
+        />
 
         {/* Tab content */}
         <div className="bg-magic-panel/80 rounded-3xl p-6">
@@ -821,30 +760,6 @@ function ActionButton({
         primary
           ? 'bg-magic-accent text-magic-bg hover:opacity-90'
           : 'bg-magic-bg/50 text-magic-soft hover:bg-magic-bg/80'
-      }`}
-    >
-      {children}
-    </button>
-  );
-}
-
-function TabButton({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex-1 py-2 rounded-xl font-bold text-sm transition-colors ${
-        active
-          ? 'bg-magic-accent text-magic-bg'
-          : 'bg-magic-panel/60 text-magic-soft hover:bg-magic-panel'
       }`}
     >
       {children}

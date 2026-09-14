@@ -18,6 +18,8 @@ import ClassKingdomManagerModal from '../components/teacher/ClassKingdomManagerM
 import StudentManagementModal from '../components/teacher/StudentManagementModal';
 import ClassRosterManagerModal from '../components/teacher/ClassRosterManagerModal';
 
+type TeacherView = 'lesson' | 'management';
+
 export default function TeacherHome() {
   const navigate = useNavigate();
   const currentClassId = useSessionStore(s => s.currentClassId);
@@ -39,7 +41,7 @@ export default function TeacherHome() {
   const allStudents = useGameStore(s => s.students);
   const loadStudentsFromSupabase = useGameStore(s => s.loadStudentsFromSupabase);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!currentClassId) return;
 
     void loadStudentsFromSupabase(currentClassId);
@@ -52,11 +54,13 @@ export default function TeacherHome() {
       window.clearInterval(intervalId);
     };
   }, [currentClassId, loadStudentsFromSupabase]);
+
   const students = useMemo(
     () => Object.values(allStudents).filter(st => st.classId === currentClassId),
     [allStudents, currentClassId]
   );
 
+  const [teacherView, setTeacherView] = useState<TeacherView>('lesson');
   const [awardOpen, setAwardOpen] = useState(false);
   const [preselected, setPreselected] = useState<string | null>(null);
   const [trophyStudentId, setTrophyStudentId] = useState<string | null>(null);
@@ -136,15 +140,14 @@ export default function TeacherHome() {
 
   return (
     <div className="min-h-screen p-6">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-black text-magic-accent">{cls.nameHe}</h1>
-            <p className="text-magic-soft text-sm">
-  ברוכים הבאים לממלכת הלמידה
-</p>
+            <p className="text-magic-soft text-sm">ממלכת הלמידה — מסך מורה</p>
           </div>
+
           <div className="flex items-center gap-3">
             <button
               type="button"
@@ -157,7 +160,10 @@ export default function TeacherHome() {
               🏫 הכיתות שלי
             </button>
             <button
-              onClick={() => { logout(); navigate('/'); }}
+              onClick={() => {
+                logout();
+                navigate('/');
+              }}
               className="text-magic-soft/60 text-sm hover:text-magic-soft"
             >
               יציאה
@@ -165,38 +171,50 @@ export default function TeacherHome() {
           </div>
         </div>
 
-        {/* Quick group award */}
-        <div className="bg-magic-panel/80 rounded-3xl p-5 mb-4 flex justify-between items-center">
-          <div>
-            <div className="text-magic-accent font-bold">מתן נקודות מהיר</div>
-            <div className="text-magic-soft/70 text-sm">
-              בחר/י תלמיד/ה או את כל הכיתה
-            </div>
-          </div>
+        {/* Teacher mode switch */}
+        <div className="mb-5 grid grid-cols-2 gap-2 rounded-3xl border border-white/10 bg-magic-panel/55 p-2">
           <button
-            onClick={() => openAwardFor(null)}
-            disabled={students.length === 0}
-            className="bg-magic-accent text-magic-bg font-bold py-2 px-5 rounded-xl hover:scale-105 transition-transform disabled:opacity-40 disabled:cursor-not-allowed"
+            type="button"
+            onClick={() => setTeacherView('lesson')}
+            className={`rounded-2xl px-4 py-3 text-right transition-colors ${
+              teacherView === 'lesson'
+                ? 'bg-magic-accent text-magic-bg'
+                : 'text-magic-soft hover:bg-white/5'
+            }`}
           >
-            ✨ תן/י נקודות
+            <div className="font-black">⚡ בזמן שיעור</div>
+            <div
+              className={`mt-1 text-xs ${
+                teacherView === 'lesson'
+                  ? 'text-magic-bg/70'
+                  : 'text-magic-soft/55'
+              }`}
+            >
+              הכרה מהירה בלי להעמיס על השיעור
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTeacherView('management')}
+            className={`rounded-2xl px-4 py-3 text-right transition-colors ${
+              teacherView === 'management'
+                ? 'bg-magic-accent text-magic-bg'
+                : 'text-magic-soft hover:bg-white/5'
+            }`}
+          >
+            <div className="font-black">⚙️ ניהול ותכנון</div>
+            <div
+              className={`mt-1 text-xs ${
+                teacherView === 'management'
+                  ? 'text-magic-bg/70'
+                  : 'text-magic-soft/55'
+              }`}
+            >
+              משימות, יעדים, ממלכה וניהול תלמידים
+            </div>
           </button>
         </div>
-
-        <ClassGoalBoard
-          classId={cls.id}
-          students={students}
-          onCreateGoal={() => setClassGoalCreateOpen(true)}
-        />
-
-        <ClassKingdomSummary
-          students={students}
-          onManage={() => setClassKingdomManagerOpen(true)}
-        />
-
-        <MissionBoard
-          students={students}
-          onCreateMission={() => setMissionCreateOpen(true)}
-        />
 
         {transferFeedback && (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl border border-emerald-300/20 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-100">
@@ -212,92 +230,212 @@ export default function TeacherHome() {
           </div>
         )}
 
-        {/* Student list */}
-        <div className="bg-magic-panel/80 rounded-3xl p-6 mb-4">
-          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-magic-accent font-bold">
-              תלמידים ({students.length})
-            </h2>
-            {currentTeacherId && (
+        {teacherView === 'lesson' ? (
+          <>
+            {/* Quick group award */}
+            <div className="mb-4 flex flex-col gap-4 rounded-3xl border border-magic-accent/25 bg-magic-panel/80 p-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-lg font-black text-magic-accent">
+                  ✨ מתן נקודות מהיר
+                </div>
+                <div className="mt-1 text-sm text-magic-soft/70">
+                  לתלמיד/ה, לקבוצה או לכל הכיתה
+                </div>
+              </div>
+              <button
+                onClick={() => openAwardFor(null)}
+                disabled={students.length === 0}
+                className="rounded-xl bg-magic-accent px-6 py-3 font-black text-magic-bg transition-transform hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                תן/י נקודות
+              </button>
+            </div>
+
+            {/* Student quick recognition list */}
+            <div className="mb-4 rounded-3xl bg-magic-panel/80 p-6">
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="font-black text-magic-accent">
+                    הכרה מהירה בכיתה
+                  </h2>
+                  <p className="mt-1 text-xs text-magic-soft/55">
+                    שלוש הפעולות המרכזיות זמינות ישירות ליד כל תלמיד/ה
+                  </p>
+                </div>
+                <div className="rounded-full bg-magic-bg/50 px-3 py-1 text-xs font-bold text-magic-soft/70">
+                  {students.length} תלמידים
+                </div>
+              </div>
+
+              {students.length === 0 ? (
+                <div className="rounded-2xl border border-white/10 bg-magic-bg/30 p-5 text-center">
+                  <p className="text-sm text-magic-soft/70">
+                    עדיין אין תלמידים בכיתה.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setTeacherView('management')}
+                    className="mt-3 rounded-xl bg-magic-accent px-4 py-2 text-sm font-black text-magic-bg"
+                  >
+                    לעבור לניהול כיתה
+                  </button>
+                </div>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {students.map(st => (
+                    <li
+                      key={st.id}
+                      className="flex flex-col gap-3 rounded-2xl bg-magic-bg/40 p-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0 text-right">
+                        <div className="font-bold text-white">{st.name}</div>
+                        <div className="mt-0.5 text-xs text-magic-soft/60">
+                          {st.points} נק׳ · רמה {st.level}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => openAwardFor(st.id)}
+                          className="rounded-lg bg-magic-accent px-3 py-2 text-xs font-black text-magic-bg transition-transform hover:scale-[1.02] sm:text-sm"
+                        >
+                          + נקודות
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFlourishStudentId(st.id)}
+                          className="rounded-lg border border-fuchsia-300/35 bg-fuchsia-500/10 px-3 py-2 text-xs font-bold text-fuchsia-200 transition-colors hover:bg-fuchsia-500/20 sm:text-sm"
+                        >
+                          🐾 אות חיה
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTrophyStudentId(st.id)}
+                          className="rounded-lg border border-yellow-300/35 bg-yellow-400/10 px-3 py-2 text-xs font-bold text-yellow-200 transition-colors hover:bg-yellow-400/20 sm:text-sm"
+                        >
+                          🏆 גביע
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-magic-panel/45 px-4 py-3 text-center text-xs text-magic-soft/55">
+              צריך משימה, יעד כיתתי, ניהול גביעים או שינוי בפרטי תלמיד?
+              {' '}
               <button
                 type="button"
-                onClick={() => setRosterManagerOpen(true)}
-                className="rounded-xl border border-magic-accent/30 bg-magic-accent/10 px-4 py-2 text-sm font-black text-magic-accent transition-colors hover:bg-magic-accent/15"
+                onClick={() => setTeacherView('management')}
+                className="font-black text-magic-accent hover:underline"
               >
-                👥 הוספה ופרטי התחברות
+                מעבר לניהול ותכנון
               </button>
-            )}
-          </div>
-          {students.length === 0 ? (
-            <p className="text-magic-soft/70 text-sm">
-              עדיין אין תלמידים. לחצו על „הוספה ופרטי התחברות” והדביקו רשימת שמות — המערכת תיצור את כולם בבת אחת.
-            </p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {students.map(st => (
-                <li
-                  key={st.id}
-                  className="flex flex-col gap-3 bg-magic-bg/40 rounded-xl p-3 sm:flex-row sm:items-center sm:justify-between"
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Management intro */}
+            <div className="mb-4 rounded-3xl border border-white/10 bg-magic-panel/70 p-5">
+              <div className="font-black text-white">⚙️ ניהול ותכנון</div>
+              <div className="mt-1 text-sm text-magic-soft/65">
+                כל הכלים שפחות צריכים להיות מול העיניים בזמן הוראה מרוכזים כאן.
+              </div>
+
+              {currentTeacherId && (
+                <button
+                  type="button"
+                  onClick={() => setRosterManagerOpen(true)}
+                  className="mt-4 rounded-xl border border-magic-accent/30 bg-magic-accent/10 px-4 py-2 text-sm font-black text-magic-accent transition-colors hover:bg-magic-accent/15"
                 >
-                  <div className="flex flex-col text-right">
-                    <span className="text-white font-bold">{st.name}</span>
-                    <span className="text-magic-soft text-xs">
-                      {st.points} נק׳ · רמה {st.level} · {st.xp} XP · {st.trophies.length} גביעים · {(st.missions ?? []).filter(mission => mission.completedAt === null && mission.cancelledAt === null).length} משימות
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 sm:flex">
-                    <button
-                      type="button"
-                      onClick={() => setFlourishStudentId(st.id)}
-                      className="rounded-lg border border-fuchsia-300/35 bg-fuchsia-500/10 px-3 py-2 text-xs font-bold text-fuchsia-200 transition-colors hover:bg-fuchsia-500/20 sm:text-sm"
-                    >
-                      🐾 אות חיה
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTrophyStudentId(st.id)}
-                      className="rounded-lg border border-yellow-300/35 bg-yellow-400/10 px-3 py-2 text-xs font-bold text-yellow-200 transition-colors hover:bg-yellow-400/20 sm:text-sm"
-                    >
-                      🏆 גביע חדש
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setManagedTrophyStudentId(st.id)}
-                      disabled={st.trophies.length === 0}
-                      className="rounded-lg border border-white/15 bg-magic-bg/45 px-3 py-2 text-xs font-bold text-magic-soft transition-colors hover:bg-magic-bg/70 disabled:cursor-not-allowed disabled:opacity-35 sm:text-sm"
-                    >
-                      📜 גביעים ({st.trophies.length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => openAwardFor(st.id)}
-                      className="bg-magic-accent text-magic-bg text-xs sm:text-sm font-bold py-2 px-3 rounded-lg hover:scale-105 transition-transform"
-                    >
-                      +נקודות
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setManagedStudentId(st.id)}
-                      className="rounded-lg border border-white/10 bg-magic-bg/35 px-3 py-2 text-sm font-black text-magic-soft/55 transition-colors hover:bg-magic-bg/65 hover:text-magic-soft"
-                      title="פעולות נוספות"
-                      aria-label={`פעולות נוספות עבור ${st.name}`}
-                    >
-                      ⋯
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                  👥 הוספה ופרטי התחברות
+                </button>
+              )}
+            </div>
 
-        <CompanionProgressBoard students={students} />
+            <ClassGoalBoard
+              classId={cls.id}
+              students={students}
+              onCreateGoal={() => setClassGoalCreateOpen(true)}
+            />
 
-        {/* Activity log */}
-        <div className="bg-magic-panel/80 rounded-3xl p-6">
-          <h2 className="text-magic-accent font-bold mb-3">יומן פעילות</h2>
-          <ActivityLog classId={cls.id} />
-        </div>
+            <ClassKingdomSummary
+              students={students}
+              onManage={() => setClassKingdomManagerOpen(true)}
+            />
+
+            <MissionBoard
+              students={students}
+              onCreateMission={() => setMissionCreateOpen(true)}
+            />
+
+            {/* Student management */}
+            <div className="mb-4 rounded-3xl bg-magic-panel/80 p-6">
+              <h2 className="mb-1 font-black text-magic-accent">
+                ניהול תלמידים
+              </h2>
+              <p className="mb-4 text-xs text-magic-soft/55">
+                פעולות שלא חייבות להיות פתוחות בזמן שיעור
+              </p>
+
+              {students.length === 0 ? (
+                <p className="text-sm text-magic-soft/70">
+                  עדיין אין תלמידים בכיתה.
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {students.map(st => (
+                    <li
+                      key={st.id}
+                      className="flex flex-col gap-3 rounded-2xl bg-magic-bg/40 p-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0 text-right">
+                        <div className="font-bold text-white">{st.name}</div>
+                        <div className="mt-0.5 text-xs text-magic-soft/60">
+                          {st.points} נק׳ · רמה {st.level} · {st.xp} XP · {st.trophies.length} גביעים ·{' '}
+                          {(st.missions ?? []).filter(
+                            mission =>
+                              mission.completedAt === null &&
+                              mission.cancelledAt === null
+                          ).length}{' '}
+                          משימות
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 sm:flex">
+                        <button
+                          type="button"
+                          onClick={() => setManagedTrophyStudentId(st.id)}
+                          disabled={st.trophies.length === 0}
+                          className="rounded-lg border border-white/15 bg-magic-bg/45 px-3 py-2 text-xs font-bold text-magic-soft transition-colors hover:bg-magic-bg/70 disabled:cursor-not-allowed disabled:opacity-35 sm:text-sm"
+                        >
+                          📜 גביעים ({st.trophies.length})
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setManagedStudentId(st.id)}
+                          className="rounded-lg border border-white/10 bg-magic-bg/35 px-3 py-2 text-xs font-black text-magic-soft transition-colors hover:bg-magic-bg/65 sm:text-sm"
+                        >
+                          ⚙️ פרטים ופעולות
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <CompanionProgressBoard students={students} />
+
+            {/* Activity log */}
+            <div className="rounded-3xl bg-magic-panel/80 p-6">
+              <h2 className="mb-3 font-bold text-magic-accent">יומן פעילות</h2>
+              <ActivityLog classId={cls.id} />
+            </div>
+          </>
+        )}
       </div>
 
       {currentTeacherId && (
@@ -354,7 +492,6 @@ export default function TeacherHome() {
         onArchived={handleStudentArchived}
         onInventoryRestored={handleInventoryRestored}
       />
-
 
       {currentTeacherId && (
         <ClassRosterManagerModal
