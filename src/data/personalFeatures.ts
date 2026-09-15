@@ -1,3 +1,5 @@
+import { personalGuestAssetUrl } from '../lib/assetUrls';
+
 export type PersonalFeatureType =
   | 'personal_guest'
   | 'avatar'
@@ -68,7 +70,7 @@ export function personalGuestConfigFromFeature(
   const roomIds = feature.config.roomIds;
 
   return {
-    imageSrc: imageSrc.trim(),
+    imageSrc: personalGuestAssetUrl(imageSrc.trim()),
     name:
       typeof feature.config.name === 'string' && feature.config.name.trim()
         ? feature.config.name.trim()
@@ -113,8 +115,12 @@ export function personalGuestConfigFromFeature(
       typeof feature.config.shadowScale === 'number'
         ? Math.max(0.35, Math.min(1.8, feature.config.shadowScale))
         : 1,
-    idleFrames: stringArray(feature.config.idleFrames),
-    runFrames: stringArray(feature.config.runFrames),
+    idleFrames: stringArray(feature.config.idleFrames)?.map(frame =>
+      personalGuestAssetUrl(frame)
+    ),
+    runFrames: stringArray(feature.config.runFrames)?.map(frame =>
+      personalGuestAssetUrl(frame)
+    ),
     idleFrameDurationMs:
       typeof feature.config.idleFrameDurationMs === 'number'
         ? Math.max(80, Math.min(2000, feature.config.idleFrameDurationMs))

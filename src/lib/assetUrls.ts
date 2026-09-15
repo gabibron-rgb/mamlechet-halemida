@@ -81,3 +81,24 @@ export function roomAssetUrl(pathOrFilename: string): string {
 
   return `${ROOM_ASSET_BASE_URL}/${filename}`;
 }
+
+export const PERSONAL_GUEST_ASSET_BASE_URL =
+  'https://assets.learningkingdom.co.il/assets/personal-guests';
+
+/**
+ * Resolves personal-guest image/frame paths to the Cloudflare R2 custom domain.
+ * Existing absolute/data/blob URLs are left unchanged.
+ */
+export function personalGuestAssetUrl(pathOrFilename: string): string {
+  const value = pathOrFilename.trim();
+
+  if (/^(?:https?:|data:|blob:)/i.test(value)) {
+    return value;
+  }
+
+  const filename = value
+    .replace(/^\/?assets\/personal-guests\//, '')
+    .replace(/^\/+/, '');
+
+  return `${PERSONAL_GUEST_ASSET_BASE_URL}/${filename}`;
+}
