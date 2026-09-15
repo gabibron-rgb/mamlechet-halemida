@@ -1,4 +1,5 @@
 import type { ThemeId } from './themes';
+import { companionAssetUrl } from '../lib/assetUrls';
 
 export type CompanionStage =
   | 'egg'
@@ -150,9 +151,11 @@ export type CompanionFormArt = {
 };
 
 // CHESS_HATCHLING_RIG_UPDATED_2026_08_23
-export const COMPANION_FORM_ART: Partial<
+type CompanionFormArtMap = Partial<
   Record<ThemeId, Partial<Record<CompanionEvolutionStage, CompanionFormArt>>>
-> = {
+>;
+
+const COMPANION_FORM_ART_LOCAL: CompanionFormArtMap = {
 
   science: {
     hatchling: {
@@ -1279,6 +1282,75 @@ export const COMPANION_FORM_ART: Partial<
 };
 
 
+function resolveCompanionFormArtAssets(art: CompanionFormArt): CompanionFormArt {
+  const resolved: CompanionFormArt = { ...art };
+
+  if (art.imageSrc) {
+    resolved.imageSrc = companionAssetUrl(art.imageSrc);
+  }
+
+  if (art.layers) {
+    resolved.layers = art.layers.map(layer => ({
+      ...layer,
+      src: companionAssetUrl(layer.src),
+    }));
+  }
+
+  if (art.frameAnimation) {
+    const frameAnimation: CompanionFrameAnimation = {
+      ...art.frameAnimation,
+      staticSrc: companionAssetUrl(art.frameAnimation.staticSrc),
+    };
+
+    if (art.frameAnimation.idleFrames) {
+      frameAnimation.idleFrames = art.frameAnimation.idleFrames.map(frame =>
+        companionAssetUrl(frame)
+      );
+    }
+
+    if (art.frameAnimation.runFrames) {
+      frameAnimation.runFrames = art.frameAnimation.runFrames.map(frame =>
+        companionAssetUrl(frame)
+      );
+    }
+
+    resolved.frameAnimation = frameAnimation;
+  }
+
+  return resolved;
+}
+
+function resolveCompanionFormArtMap(
+  source: CompanionFormArtMap
+): CompanionFormArtMap {
+  const resolved: CompanionFormArtMap = {};
+
+  for (const [theme, stages] of Object.entries(source) as Array<
+    [
+      ThemeId,
+      Partial<Record<CompanionEvolutionStage, CompanionFormArt>>,
+    ]
+  >) {
+    const resolvedStages: Partial<
+      Record<CompanionEvolutionStage, CompanionFormArt>
+    > = {};
+
+    for (const [stage, art] of Object.entries(stages) as Array<
+      [CompanionEvolutionStage, CompanionFormArt]
+    >) {
+      resolvedStages[stage] = resolveCompanionFormArtAssets(art);
+    }
+
+    resolved[theme] = resolvedStages;
+  }
+
+  return resolved;
+}
+
+export const COMPANION_FORM_ART: CompanionFormArtMap =
+  resolveCompanionFormArtMap(COMPANION_FORM_ART_LOCAL);
+
+
 // FORM3_FULL_REBUILD_2026_08_25_START
 const FORM3_GROWN_ART: Partial<Record<ThemeId, CompanionFormArt>> = {
   chess: {
@@ -1961,9 +2033,15 @@ export function getCompanionFormArt(
   stage: CompanionStage
 ): CompanionFormArt | null {
   if (stage === 'egg') return null;
-  if (stage === 'grown') return FORM3_GROWN_ART[theme] ?? COMPANION_FORM_ART[theme]?.[stage] ?? null;
-  if (stage === 'magical') return FORM4_MAGICAL_ART[theme] ?? COMPANION_FORM_ART[theme]?.[stage] ?? null;
-  return COMPANION_FORM_ART[theme]?.[stage] ?? null;
+
+  const art =
+    stage === 'grown'
+      ? FORM3_GROWN_ART[theme] ?? COMPANION_FORM_ART[theme]?.[stage] ?? null
+      : stage === 'magical'
+        ? FORM4_MAGICAL_ART[theme] ?? COMPANION_FORM_ART[theme]?.[stage] ?? null
+        : COMPANION_FORM_ART[theme]?.[stage] ?? null;
+
+  return art ? resolveCompanionFormArtAssets(art) : null;
 }
 
 export type CompanionNextStage = {
