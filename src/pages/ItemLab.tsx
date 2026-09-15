@@ -20,6 +20,7 @@ import {
 import type { DisplayKind, RoomLayoutId } from '../data/roomSurfaces';
 import { THEMES } from '../data/themes';
 import ItemSprite from '../components/student/ItemSprite';
+import { itemAssetUrl } from '../lib/assetUrls';
 
 const LAB_THEMES: Array<{ id: string; nameHe: string }> = [
   { id: 'all', nameHe: 'כל הנושאים' },
@@ -207,7 +208,7 @@ function createSpriteDraft(item: ItemLabItem): ItemSpriteData {
   }
 
   return {
-    src: `/assets/items/${item.id.replace(/_/g, '-')}.png`,
+    src: itemAssetUrl(`${item.id.replace(/_/g, '-')}.png`),
     alt: item.nameHe,
     className:
       'object-contain drop-shadow-[0_8px_14px_rgba(0,0,0,0.30)]',
@@ -230,8 +231,20 @@ function loadSavedLabState(items: ItemLabItem[]): SavedLabState {
     }
 
     const saved = JSON.parse(savedText) as Partial<SavedLabState>;
-    const savedDrafts: Record<string, ItemSpriteData> =
+    const savedDraftsRaw: Record<string, ItemSpriteData> =
       saved.drafts && typeof saved.drafts === 'object' ? saved.drafts : {};
+    const savedDrafts: Record<string, ItemSpriteData> = Object.fromEntries(
+      Object.entries(savedDraftsRaw).map(([id, draft]) => [
+        id,
+        {
+          ...draft,
+          src:
+            typeof draft.src === 'string'
+              ? itemAssetUrl(draft.src)
+              : defaultDrafts[id]?.src ?? '',
+        },
+      ]),
+    );
     const validItemIds = new Set(items.map(item => item.id));
     const savedEditedItemIds = Array.isArray(saved.editedItemIds)
       ? saved.editedItemIds.filter(
@@ -500,7 +513,7 @@ function spriteCode(item: ItemLabItem, draft: ItemSpriteData): string {
   return [
     spriteDefinitionCode(item, draft),
     '',
-    '// בתוך ITEM_SPRITES:',
+    '// בתוך RAW_ITEM_SPRITES:',
     spriteMappingLine(item),
   ].join('\n');
 }
@@ -519,7 +532,7 @@ function allEditedSpriteCode(
     '',
     definitions.join('\n\n'),
     '',
-    '// את השורות הבאות יש להוסיף בתוך ITEM_SPRITES',
+    '// את השורות הבאות יש להוסיף בתוך RAW_ITEM_SPRITES',
     ...mappings,
   ].join('\n');
 }

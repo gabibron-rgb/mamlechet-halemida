@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { Rarity } from '../../data/boxes';
 import { ITEM_SPRITES } from '../../data/itemSprites';
 import { getExclusiveAchievementItem } from '../../data/exclusiveAchievementRewards';
+import { itemAssetUrl } from '../../lib/assetUrls';
 import KingdomBannerSprite from './KingdomBannerSprite';
 
 type Props = {
@@ -11,11 +12,11 @@ type Props = {
 };
 
 const ITEM_IMAGE_SRC: Record<string, string> = {
-  achievement_collector_statuette: '/assets/items/achievement-collector-statuette.png',
-  achievement_crystal_showcase: '/assets/items/achievement-crystal-showcase.png',
-  achievement_kingdom_treasure_statue: '/assets/items/achievement-kingdom-treasure-statue.png',
-  achievement_legends_pedestal: '/assets/items/achievement-legends-pedestal.png',
-  achievement_hall_of_fame_banner: '/assets/items/achievement-hall-of-fame-banner.png',
+  achievement_collector_statuette: itemAssetUrl('achievement-collector-statuette.png'),
+  achievement_crystal_showcase: itemAssetUrl('achievement-crystal-showcase.png'),
+  achievement_kingdom_treasure_statue: itemAssetUrl('achievement-kingdom-treasure-statue.png'),
+  achievement_legends_pedestal: itemAssetUrl('achievement-legends-pedestal.png'),
+  achievement_hall_of_fame_banner: itemAssetUrl('achievement-hall-of-fame-banner.png'),
 };
 
 function auraClass(rarity?: Rarity): string {

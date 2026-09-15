@@ -1,3 +1,5 @@
+import { itemAssetUrl } from '../lib/assetUrls';
+
 export type ItemSpriteData = {
   src: string;
   alt: string;
@@ -4662,7 +4664,7 @@ const achievementHallOfFameBanner: ItemSpriteData = {
   roomHeightScale: 1.2,
 };
 
-export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
+const RAW_ITEM_SPRITES: Record<string, ItemSpriteData> = {
   achievement_collector_statuette: achievementCollectorStatuette,
   achievement_crystal_showcase: achievementCrystalShowcase,
   achievement_kingdom_treasure_statue: achievementKingdomTreasureStatue,
@@ -5020,3 +5022,10 @@ export const ITEM_SPRITES: Record<string, ItemSpriteData> = {
   frame_royal_gold: frameRoyalGold,
   frame_arcane: frameArcane,
 };
+
+export const ITEM_SPRITES: Record<string, ItemSpriteData> = Object.fromEntries(
+  Object.entries(RAW_ITEM_SPRITES).map(([itemId, sprite]) => [
+    itemId,
+    { ...sprite, src: itemAssetUrl(sprite.src) },
+  ]),
+);
