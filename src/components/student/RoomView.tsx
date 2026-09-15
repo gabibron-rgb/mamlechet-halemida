@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from 'react';
+import { roomAssetUrl } from '../../lib/assetUrls';
 import { getItemById, type Zone } from '../../data/items';
 import { COSMETIC_BY_ID } from '../../data/cosmetics';
 import { useGameStore, type InventoryEntry, type StudentState } from '../../store/useGameStore';
@@ -68,35 +69,35 @@ const ROOM_SCENE_META: Record<
   }
 > = {
   main: {
-    imageSrc: '/rooms/kingdom-room.png',
+    imageSrc: roomAssetUrl('/rooms/kingdom-room.png'),
     altHe: 'החדר בממלכה',
     imageClass: '',
     overlayClass: 'bg-black/5',
     badgeHe: null,
   },
   magic_room: {
-    imageSrc: '/rooms/magic-room.png',
+    imageSrc: roomAssetUrl('/rooms/magic-room.png'),
     altHe: 'חדר הקסם',
     imageClass: '',
     overlayClass: 'bg-black/5',
     badgeHe: '🪄 חדר הקסם',
   },
   hobby_room: {
-    imageSrc: '/rooms/hobby-room.png',
+    imageSrc: roomAssetUrl('/rooms/hobby-room.png'),
     altHe: 'חדר התחביבים',
     imageClass: 'brightness-[0.98] saturate-[1.05]',
     overlayClass: 'bg-gradient-to-br from-sky-300/5 via-transparent to-indigo-950/10',
     badgeHe: '🧩 חדר התחביבים',
   },
   wonder_hall: {
-    imageSrc: '/rooms/wonder-hall-room.png',
+    imageSrc: roomAssetUrl('/rooms/wonder-hall-room.png'),
     altHe: 'היכל הפלאות',
     imageClass: '',
     overlayClass: 'bg-black/5',
     badgeHe: '🌟 היכל הפלאות',
   },
   treasure_gallery: {
-    imageSrc: '/rooms/treasure-gallery-room.png',
+    imageSrc: roomAssetUrl('/rooms/treasure-gallery-room.png'),
     altHe: 'גלריית האוצרות',
     imageClass: 'brightness-[0.9] saturate-[1.15]',
     overlayClass: 'bg-gradient-to-br from-yellow-300/10 via-transparent to-purple-950/15',

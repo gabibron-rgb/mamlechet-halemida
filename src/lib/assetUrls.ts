@@ -60,3 +60,24 @@ export function classKingdomAssetUrl(pathOrFilename: string): string {
 
   return `${CLASS_KINGDOM_ASSET_BASE_URL}/${filename}`;
 }
+
+export const ROOM_ASSET_BASE_URL =
+  'https://assets.learningkingdom.co.il/rooms';
+
+/**
+ * Resolves personal-room background paths to the Cloudflare R2 custom domain.
+ * Existing absolute/data/blob URLs are left unchanged.
+ */
+export function roomAssetUrl(pathOrFilename: string): string {
+  const value = pathOrFilename.trim();
+
+  if (/^(?:https?:|data:|blob:)/i.test(value)) {
+    return value;
+  }
+
+  const filename = value
+    .replace(/^\/?rooms\//, '')
+    .replace(/^\/+/, '');
+
+  return `${ROOM_ASSET_BASE_URL}/${filename}`;
+}

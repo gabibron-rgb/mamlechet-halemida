@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { roomAssetUrl } from '../lib/assetUrls';
 import type { PointerEvent as ReactPointerEvent } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -1014,7 +1015,7 @@ export default function CompanionLab() {
 
             <div
               className="relative aspect-video overflow-hidden rounded-2xl border border-white/10 bg-cover bg-center shadow-2xl"
-              style={{ backgroundImage: "url('/rooms/kingdom-room.png')" }}
+              style={{ backgroundImage: `url('${roomAssetUrl('/rooms/kingdom-room.png')}')` }}
             >
               <div
                 className={`absolute h-28 w-28 sm:h-32 sm:w-32 ${movementProfile === 'flying' ? 'left-[62%] top-[31%]' : 'left-[56%] top-[77%]'}`}

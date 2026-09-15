@@ -20,7 +20,7 @@ import {
 import type { DisplayKind, RoomLayoutId } from '../data/roomSurfaces';
 import { THEMES } from '../data/themes';
 import ItemSprite from '../components/student/ItemSprite';
-import { itemAssetUrl } from '../lib/assetUrls';
+import { itemAssetUrl, roomAssetUrl } from '../lib/assetUrls';
 
 const LAB_THEMES: Array<{ id: string; nameHe: string }> = [
   { id: 'all', nameHe: 'כל הנושאים' },
@@ -46,11 +46,11 @@ const ROOM_LABEL_HE: Record<RoomLayoutId, string> = {
 };
 
 const ROOM_BACKGROUND: Record<RoomLayoutId, string> = {
-  main: '/rooms/kingdom-room.png',
-  magic_room: '/rooms/magic-room.png',
-  hobby_room: '/rooms/hobby-room.png',
-  wonder_hall: '/rooms/wonder-hall-room.png',
-  treasure_gallery: '/rooms/treasure-gallery-room.png',
+  main: roomAssetUrl('/rooms/kingdom-room.png'),
+  magic_room: roomAssetUrl('/rooms/magic-room.png'),
+  hobby_room: roomAssetUrl('/rooms/hobby-room.png'),
+  wonder_hall: roomAssetUrl('/rooms/wonder-hall-room.png'),
+  treasure_gallery: roomAssetUrl('/rooms/treasure-gallery-room.png'),
 };
 
 const ROOM_EMOJI: Record<RoomLayoutId, string> = {
