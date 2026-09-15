@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
+import { classKingdomAssetUrl } from '../../lib/assetUrls';
 import './KingdomAmbientEvents.css';
 
 type RealmId = 'main' | 'legendary';
@@ -152,7 +153,7 @@ const SHOOTING_STAR_PATHS = [
 
 
 const FLOATING_ISLAND_ASSET =
-  '/assets/class-kingdom/living-world/floating-island/floating-island.png';
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/floating-island/floating-island.png');
 
 const FLOATING_ISLAND_PATHS = [
   {
@@ -177,10 +178,10 @@ const FLOATING_ISLAND_PATHS = [
 
 
 const DRAGON_FRAME_ASSETS = [
-  '/assets/class-kingdom/living-world/dragon/dragon-wing-up.png',
-  '/assets/class-kingdom/living-world/dragon/dragon-wing-mid.png',
-  '/assets/class-kingdom/living-world/dragon/dragon-wing-down.png',
-  '/assets/class-kingdom/living-world/dragon/dragon-wing-deep.png',
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/dragon/dragon-wing-up.png'),
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/dragon/dragon-wing-mid.png'),
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/dragon/dragon-wing-down.png'),
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/dragon/dragon-wing-deep.png'),
 ] as const;
 
 const DRAGON_FLIGHT_PATHS = [
@@ -191,13 +192,13 @@ const DRAGON_FLIGHT_PATHS = [
 
 
 const PHOENIX_FRAME_ASSETS = [
-  '/assets/class-kingdom/living-world/phoenix/phoenix-wing-up.png',
-  '/assets/class-kingdom/living-world/phoenix/phoenix-wing-mid.png',
-  '/assets/class-kingdom/living-world/phoenix/phoenix-wing-down.png',
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/phoenix/phoenix-wing-up.png'),
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/phoenix/phoenix-wing-mid.png'),
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/phoenix/phoenix-wing-down.png'),
 ] as const;
 
 const PHOENIX_REBORN_ASSET =
-  '/assets/class-kingdom/living-world/phoenix/phoenix-wing-reborn.png';
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/phoenix/phoenix-wing-reborn.png');
 
 const PHOENIX_FLIGHT_PATHS = [
   { y0: 66, y1: 48, rebirthY: 30, y4: 20, tilt0: -9, tilt1: -2, tilt2: 6, tilt4: -5, rebirthX: 52 },
@@ -207,10 +208,10 @@ const PHOENIX_FLIGHT_PATHS = [
 
 
 const FAIRY_ASSETS = [
-  '/assets/class-kingdom/living-world/fairies/moonlit-fairy.png',
-  '/assets/class-kingdom/living-world/fairies/amethyst-fairy.png',
-  '/assets/class-kingdom/living-world/fairies/rose-fairy.png',
-  '/assets/class-kingdom/living-world/fairies/starlight-fairy.png',
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/fairies/moonlit-fairy.png'),
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/fairies/amethyst-fairy.png'),
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/fairies/rose-fairy.png'),
+  classKingdomAssetUrl('/assets/class-kingdom/living-world/fairies/starlight-fairy.png'),
 ] as const;
 
 const FAIRY_ASSET_SEQUENCE = [0, 1, 2, 3, 0, 2, 1] as const;
@@ -679,19 +680,19 @@ function AuroraSkyEvent({
       <div className="ck-aurora-real-lights">
         <img
           className="ck-aurora-real-image ck-aurora-real-image-main"
-          src="/assets/class-kingdom/living-world/aurora/aurora-borealis.png"
+          src={classKingdomAssetUrl("/assets/class-kingdom/living-world/aurora/aurora-borealis.png")}
           alt=""
           draggable={false}
         />
         <img
           className="ck-aurora-real-image ck-aurora-real-image-secondary"
-          src="/assets/class-kingdom/living-world/aurora/aurora-borealis.png"
+          src={classKingdomAssetUrl("/assets/class-kingdom/living-world/aurora/aurora-borealis.png")}
           alt=""
           draggable={false}
         />
         <img
           className="ck-aurora-real-image ck-aurora-real-image-tertiary"
-          src="/assets/class-kingdom/living-world/aurora/aurora-borealis.png"
+          src={classKingdomAssetUrl("/assets/class-kingdom/living-world/aurora/aurora-borealis.png")}
           alt=""
           draggable={false}
         />
@@ -719,11 +720,11 @@ function LunarEclipseEvent({
     >
       <div className="ck-eclipse-world-dim" />
       <div className="ck-eclipse-sky-stage">
-        <img className="ck-eclipse-sky-frame ck-eclipse-sky-dark" src="/assets/class-kingdom/living-world/eclipse/eclipse-sky-dark.png" alt="" draggable={false} />
-        <img className="ck-eclipse-sky-frame ck-eclipse-sky-full" src="/assets/class-kingdom/living-world/eclipse/eclipse-full-moon.png" alt="" draggable={false} />
-        <img className="ck-eclipse-sky-frame ck-eclipse-sky-partial" src="/assets/class-kingdom/living-world/eclipse/eclipse-partial.png" alt="" draggable={false} />
-        <img className="ck-eclipse-sky-frame ck-eclipse-sky-near-total" src="/assets/class-kingdom/living-world/eclipse/eclipse-near-total.png" alt="" draggable={false} />
-        <img className="ck-eclipse-sky-frame ck-eclipse-sky-blood" src="/assets/class-kingdom/living-world/eclipse/eclipse-blood-moon.png" alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-dark" src={classKingdomAssetUrl("/assets/class-kingdom/living-world/eclipse/eclipse-sky-dark.png")} alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-full" src={classKingdomAssetUrl("/assets/class-kingdom/living-world/eclipse/eclipse-full-moon.png")} alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-partial" src={classKingdomAssetUrl("/assets/class-kingdom/living-world/eclipse/eclipse-partial.png")} alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-near-total" src={classKingdomAssetUrl("/assets/class-kingdom/living-world/eclipse/eclipse-near-total.png")} alt="" draggable={false} />
+        <img className="ck-eclipse-sky-frame ck-eclipse-sky-blood" src={classKingdomAssetUrl("/assets/class-kingdom/living-world/eclipse/eclipse-blood-moon.png")} alt="" draggable={false} />
       </div>
       <div className="ck-eclipse-totality-ambient" />
     </div>
@@ -771,13 +772,13 @@ function RainbowStormEvent({
         <div className="ck-rainbow-sunbreak" />
         <img
           className="ck-rainbow-double-arc ck-rainbow-double-arc-glow"
-          src="/assets/class-kingdom/living-world/rainbow/magical-double-rainbow.svg"
+          src={classKingdomAssetUrl("/assets/class-kingdom/living-world/rainbow/magical-double-rainbow.svg")}
           alt=""
           draggable={false}
         />
         <img
           className="ck-rainbow-double-arc ck-rainbow-double-arc-main"
-          src="/assets/class-kingdom/living-world/rainbow/magical-double-rainbow.svg"
+          src={classKingdomAssetUrl("/assets/class-kingdom/living-world/rainbow/magical-double-rainbow.svg")}
           alt=""
           draggable={false}
         />
@@ -1485,7 +1486,7 @@ function AstralLeviathanEvent({
         <div className="ck-leviathan-hero-aura" />
         <img
           className="ck-leviathan-hero-art"
-          src="/assets/class-kingdom/living-world/astral/astral-leviathan-v1.png"
+          src={classKingdomAssetUrl("/assets/class-kingdom/living-world/astral/astral-leviathan-v1.png")}
           alt=""
         />
       </div>

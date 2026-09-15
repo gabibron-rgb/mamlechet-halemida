@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { classKingdomAssetUrl } from '../../lib/assetUrls';
 import {
   CLASS_KINGDOM_LEVELS,
   classKingdomLevel,
@@ -81,7 +82,7 @@ type SpecialAchievementCeremonyDetail = {
   achievementIcon: string;
 };
 
-const ASSET_ROOT = '/assets/class-kingdom/buildings';
+const ASSET_ROOT = classKingdomAssetUrl('/assets/class-kingdom/buildings');
 const LEGENDARY_REALM_UNLOCK_STARS = 11;
 
 const REALMS: RealmDefinition[] = [
@@ -92,7 +93,7 @@ const REALMS: RealmDefinition[] = [
     emoji: '🏰',
     descriptionHe: 'אזור ההתחלה של הממלכה: הקהילה, הלמידה והמבנים הראשונים של הכיתה.',
     unlockStars: 0,
-    backgroundSrc: '/assets/class-kingdom/background/kingdom-background-v3.png',
+    backgroundSrc: classKingdomAssetUrl('/assets/class-kingdom/background/kingdom-background-v3.png'),
   },
   {
     id: 'legendary',
@@ -101,7 +102,7 @@ const REALMS: RealmDefinition[] = [
     emoji: '🌌',
     descriptionHe: 'אזור מתקדם ומטורף של איים מרחפים, מצודות גבוהות ומבני שיא של הכיתה.',
     unlockStars: LEGENDARY_REALM_UNLOCK_STARS,
-    backgroundSrc: '/assets/class-kingdom/background/legendary-kingdom-background-v1.png',
+    backgroundSrc: classKingdomAssetUrl('/assets/class-kingdom/background/legendary-kingdom-background-v1.png'),
   },
 ];
 

@@ -39,3 +39,24 @@ export function companionAssetUrl(pathOrFilename: string): string {
 
   return `${COMPANION_ASSET_BASE_URL}/${filename}`;
 }
+
+export const CLASS_KINGDOM_ASSET_BASE_URL =
+  'https://assets.learningkingdom.co.il/assets/class-kingdom';
+
+/**
+ * Resolves class-kingdom image/SVG paths to the Cloudflare R2 custom domain.
+ * Existing absolute/data/blob URLs are left unchanged.
+ */
+export function classKingdomAssetUrl(pathOrFilename: string): string {
+  const value = pathOrFilename.trim();
+
+  if (/^(?:https?:|data:|blob:)/i.test(value)) {
+    return value;
+  }
+
+  const filename = value
+    .replace(/^\/?assets\/class-kingdom\//, '')
+    .replace(/^\/+/, '');
+
+  return `${CLASS_KINGDOM_ASSET_BASE_URL}/${filename}`;
+}
