@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useSessionStore } from '../../store/useSessionStore';
+import { markStudentOnboardingSeen } from '../../lib/studentOnboardingPersistence';
 
 type Destination =
   | 'progress'
@@ -75,7 +77,9 @@ export default function StudentOnboarding({
   onComplete: () => void;
   onSkip: () => void;
 }) {
+  const currentStudentId = useSessionStore(s => s.currentStudentId);
   const [stepIndex, setStepIndex] = useState(0);
+  const [saving, setSaving] = useState(false);
   const step = STEPS[stepIndex];
   const isLast = stepIndex === STEPS.length - 1;
 
@@ -88,9 +92,22 @@ export default function StudentOnboarding({
     onNavigate(step.destination);
   }, [onNavigate, step.destination]);
 
+  async function saveAndClose(callback: () => void) {
+    if (saving) return;
+    setSaving(true);
+
+    try {
+      if (currentStudentId) {
+        await markStudentOnboardingSeen(currentStudentId);
+      }
+    } finally {
+      callback();
+    }
+  }
+
   function goNext() {
     if (isLast) {
-      onComplete();
+      void saveAndClose(onComplete);
       return;
     }
 
@@ -157,16 +174,22 @@ export default function StudentOnboarding({
             <button
               type="button"
               onClick={goNext}
-              className="min-w-32 rounded-2xl bg-magic-accent px-5 py-3 font-black text-magic-bg transition-transform hover:scale-[1.02]"
+              disabled={saving}
+              className="min-w-32 rounded-2xl bg-magic-accent px-5 py-3 font-black text-magic-bg transition-transform hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60 disabled:hover:scale-100"
             >
-              {isLast ? 'יאללה לממלכה ✨' : 'הבא'}
+              {saving
+                ? 'שומר...'
+                : isLast
+                  ? 'יאללה לממלכה ✨'
+                  : 'הבא'}
             </button>
 
             {stepIndex > 0 && (
               <button
                 type="button"
                 onClick={goBack}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-bold text-magic-soft hover:bg-white/10"
+                disabled={saving}
+                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-bold text-magic-soft hover:bg-white/10 disabled:opacity-50"
               >
                 הקודם
               </button>
@@ -174,8 +197,9 @@ export default function StudentOnboarding({
 
             <button
               type="button"
-              onClick={onSkip}
-              className="mr-auto px-3 py-2 text-sm font-bold text-magic-soft/55 hover:text-white"
+              onClick={() => void saveAndClose(onSkip)}
+              disabled={saving}
+              className="mr-auto px-3 py-2 text-sm font-bold text-magic-soft/55 hover:text-white disabled:opacity-50"
             >
               דלג/י על ההדרכה
             </button>

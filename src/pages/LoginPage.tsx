@@ -5,6 +5,11 @@ import { useGameStore, type StudentState } from '../store/useGameStore';
 import { useSessionStore } from '../store/useSessionStore';
 import { getStudentByLoginName } from '../lib/supabaseStudents';
 import { getTeacherByCredentials, getClassesByTeacherId } from '../lib/supabaseTeachers';
+import {
+  hasSeenOnboardingLocally,
+  markOnboardingSeenLocally,
+  markStudentOnboardingSeen,
+} from '../lib/studentOnboardingPersistence';
 import { DEFAULT_UNLOCKED_THEMES } from '../data/themes';
 import { normalizeCompanionBehaviorMemories } from '../data/companionTraits';
 import { normalizeCompanionFlourishLevelRecord } from '../data/companionFlourishes';
@@ -199,6 +204,22 @@ export default function LoginPage() {
       }
 
       const student = buildStudentFromSupabase(supabaseStudent);
+      const isItemTester =
+        cleanLoginName === 'itemtester' ||
+        student.name === 'בודק חפצים';
+
+      const seenInSupabase = supabaseStudent.onboarding_seen === true;
+      const seenLocally = hasSeenOnboardingLocally(student.id);
+
+      // Migrate students who already completed the old local-only onboarding,
+      // and permanently suppress onboarding for the QA itemtester account.
+      if (!seenInSupabase && (seenLocally || isItemTester)) {
+        await markStudentOnboardingSeen(student.id);
+      }
+
+      if (seenInSupabase || seenLocally || isItemTester) {
+        markOnboardingSeenLocally(student.id);
+      }
 
       useGameStore.setState((state) => ({
         students: {
