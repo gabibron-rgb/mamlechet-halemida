@@ -4,7 +4,7 @@
  * Change this value ONLY when an existing asset is replaced at the same path.
  * Adding a brand-new asset at a brand-new URL does not require a version bump.
  */
-export const ASSET_VERSION = '2026-09-16-1';
+export const ASSET_VERSION = '2026-09-16-2';
 
 export const ASSET_ORIGIN = 'https://assets.learningkingdom.co.il';
 
