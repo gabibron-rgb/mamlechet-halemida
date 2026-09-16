@@ -1054,7 +1054,7 @@ const cosmeticRainbow: ItemSpriteData = {
 };
 
 const animalsCatSleeping: ItemSpriteData = {
-  src: 'https://assets.learningkingdom.co.il/assets/items/animals-cat-sleeping.png',
+  src: '/assets/items/animals-cat-sleeping.png',
   alt: 'חתול ישנוני',
   className:
     'object-contain drop-shadow-[0_6px_10px_rgba(0,0,0,0.28)]',
