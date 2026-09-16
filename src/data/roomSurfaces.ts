@@ -56,9 +56,13 @@ const MAIN_ROOM_ZONE_REGIONS: RoomZoneRegion[] = [
   { zone: 'shelf', xMin: 58, xMax: 86, yMin: 36, yMax: 68, labelHe: 'מדפים' },
   { zone: 'desk', xMin: 10, xMax: 48, yMin: 55, yMax: 68, labelHe: 'שולחן' },
   { zone: 'special', xMin: 38, xMax: 68, yMin: 14, yMax: 42, labelHe: 'מיוחד' },
-  { zone: 'wall', xMin: 4, xMax: 96, yMin: 12, yMax: 66, labelHe: 'קיר' },
-  { zone: 'petarea', xMin: 55, xMax: 90, yMin: 68, yMax: 94, labelHe: 'חיות' },
-  { zone: 'floor', xMin: 12, xMax: 88, yMin: 68, yMax: 90, labelHe: 'רצפה' },
+
+  // גבולות הקיר/רצפה/אזור החיות מכסים את כל טווח ההצבה הפעיל
+  // של החדר הראשי (x=3..97, y=5..95). כך הפונקציה המרכזית כאן
+  // משמרת בדיוק את ההתנהגות שהייתה קודם ב-RoomView.
+  { zone: 'wall', xMin: 3, xMax: 97, yMin: 12, yMax: 66, labelHe: 'קיר' },
+  { zone: 'petarea', xMin: 55, xMax: 90, yMin: 68, yMax: 95, labelHe: 'חיות' },
+  { zone: 'floor', xMin: 3, xMax: 97, yMin: 68, yMax: 95, labelHe: 'רצפה' },
 ];
 
 const TREASURE_GALLERY_ZONE_REGIONS: RoomZoneRegion[] = [];

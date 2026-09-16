@@ -6,7 +6,7 @@ import { useGameStore, type InventoryEntry, type StudentState } from '../../stor
 import { RARITY_LABEL_HE, type Rarity } from '../../data/boxes';
 import RarityBadge from '../shared/RarityBadge';
 import ItemSprite from './ItemSprite';
-import { getRoomSurface, snapItemToRoomSurface } from '../../data/roomSurfaces';
+import { chooseRoomZone, getRoomSurface, snapItemToRoomSurface } from '../../data/roomSurfaces';
 import type { DisplayKind } from '../../data/roomSurfaces';
 import { ITEM_SPRITES } from '../../data/itemSprites';
 import { THEMES, type ThemeId } from '../../data/themes';
@@ -1025,53 +1025,13 @@ function RoomScene({
 }
 
 function chooseZoneFromPoint(item: DisplayItem, x: number, y: number): Zone {
-  const allowedZones = getAllowedZones(item.entry);
-
-  const canUseShelf = allowedZones.includes('shelf');
-  const canUseDesk = allowedZones.includes('desk');
-  const canUseWall = allowedZones.includes('wall');
-  const canUseFloor = allowedZones.includes('floor');
-  const canUsePetArea = allowedZones.includes('petarea');
-  const canUseSpecial = allowedZones.includes('special');
-
-  // מדף — רק תחום המדף עצמו, לא כל הארון
-  if (canUseShelf && x >= 58 && x <= 86 && y >= 36 && y <= 68) {
-    return 'shelf';
-  }
-
-  // שולחן — רק משטח השולחן, לא האוויר מעליו
-  if (canUseDesk && x >= 10 && x <= 48 && y >= 55 && y <= 68) {
-    return 'desk';
-  }
-
-  // אזור מיוחד — כרגע אזור עליון/מרכזי
-  if (canUseSpecial && x >= 38 && x <= 68 && y >= 14 && y <= 42) {
-    return 'special';
-  }
-
-  if (canUseWall && y >= 12 && y <= 66) {
-    return 'wall';
-  }
-
-  if (canUsePetArea && x >= 55 && x <= 90 && y >= 68) {
-    return 'petarea';
-  }
-
-  // רצפה — רק אם באמת נמצאים באזור רצפה
-  if (canUseFloor && y >= 68) {
-    return 'floor';
-  }
-
-  // fallback בטוח:
-  // לא זורקים אוטומטית למדף/שולחן, כי זה מה שגורם לקפיצות.
-  // מחזירים את האזור הנוכחי של החפץ אם הוא עדיין מותר.
-  const currentZone = item.entry.placedZone;
-
-  if (currentZone && allowedZones.includes(currentZone)) {
-    return currentZone;
-  }
-
-  return allowedZones[0] ?? 'floor';
+  return chooseRoomZone(
+    getAllowedZones(item.entry),
+    item.entry.placedZone,
+    x,
+    y,
+    'main',
+  );
 }
 
 function freeRoomZone(item: DisplayItem): Zone {
