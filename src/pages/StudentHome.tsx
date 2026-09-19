@@ -7,6 +7,7 @@ import { useGameStore } from '../store/useGameStore';
 import { xpToNextLevel } from '../logic/leveling';
 import { COMPANION_STAGE_ORDER } from '../data/companionWorlds';
 import { studentTitleDisplayLabel } from '../data/studentTitles';
+import { trackStudentAnalytics } from '../lib/analytics';
 import { getStudentAvatar } from '../data/studentAvatars';
 import {
   COMPANION_FLOURISHES,
@@ -104,6 +105,32 @@ export default function StudentHome() {
   useEffect(() => {
     if (!student?.id) return;
 
+    trackStudentAnalytics(student, 'student_session_started', {
+      level: student.level,
+      points: student.points,
+      inventory_count: student.inventory.length,
+      unique_item_count: new Set(
+        student.inventory
+          .filter(entry => entry.kind !== 'box')
+          .map(entry => entry.itemId)
+      ).size,
+      companion_stage: student.companion.stage,
+      companion_theme: student.companion.theme,
+      companion_unlocked: student.companion.unlocked,
+      unlocked_theme_count: student.unlockedThemes.length,
+      trophy_count: student.trophies.length,
+    });
+  }, [student?.id]);
+
+  useEffect(() => {
+    if (!student?.id) return;
+
+    trackStudentAnalytics(student, 'student_tab_viewed', { tab });
+  }, [student?.id, tab]);
+
+  useEffect(() => {
+    if (!student?.id) return;
+
     const storageKey = `kingdom-student-onboarding-v1:${student.id}`;
 
     try {
@@ -128,6 +155,10 @@ export default function StudentHome() {
       } catch {
         // Storage failure should never block the student.
       }
+    }
+
+    if (student) {
+      trackStudentAnalytics(student, 'student_onboarding_completed');
     }
 
     setOnboardingOpen(false);

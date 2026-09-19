@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties, type PointerEvent, type RefObject } from 'react';
 import { roomAssetUrl } from '../../lib/assetUrls';
+import { trackStudentAnalytics } from '../../lib/analytics';
 import { getItemById, type Zone } from '../../data/items';
 import { COSMETIC_BY_ID } from '../../data/cosmetics';
 import { useGameStore, type InventoryEntry, type StudentState } from '../../store/useGameStore';
@@ -25,8 +26,9 @@ import {
 
 export type RoomViewStudent = Pick<
   StudentState,
-  'id' | 'name' | 'level' | 'inventory' | 'companion'
+  'id' | 'name' | 'classId' | 'level' | 'inventory' | 'companion'
 > & {
+  supabaseId?: StudentState['supabaseId'];
   specialUnlocks?: StudentState['specialUnlocks'];
 };
 
@@ -1508,6 +1510,11 @@ export default function RoomView({ student, readOnly = false }: Props) {
     setIsEditing(false);
   }, [student.id]);
 
+  useEffect(() => {
+    if (readOnly) return;
+    trackStudentAnalytics(student, 'room_viewed', { room_id: activeRoomId });
+  }, [student.id, activeRoomId, readOnly]);
+
   const roomCompanion =
     import.meta.env.DEV && previewCompanionStage
       ? {
@@ -1735,6 +1742,14 @@ export default function RoomView({ student, readOnly = false }: Props) {
     updateStudent(student.id, {
       inventory: nextInventory,
     });
+
+    const addedEntry = student.inventory[inventoryIndex];
+    if (addedEntry) {
+      trackStudentAnalytics(student, 'room_item_added', {
+        room_id: activeRoomId,
+        item_id: addedEntry.itemId,
+      });
+    }
   }
 
   function removeFromRoom(inventoryIndex: number) {
@@ -1756,6 +1771,14 @@ export default function RoomView({ student, readOnly = false }: Props) {
     updateStudent(student.id, {
       inventory: nextInventory,
     });
+
+    const removedEntry = student.inventory[inventoryIndex];
+    if (removedEntry) {
+      trackStudentAnalytics(student, 'room_item_removed', {
+        room_id: activeRoomId,
+        item_id: removedEntry.itemId,
+      });
+    }
 
     setSelectedItem(null);
   }

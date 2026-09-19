@@ -7,6 +7,7 @@ import {
 } from '../../lib/classRoomVisitors';
 import RoomView from './RoomView';
 import { getStudentAvatar } from '../../data/studentAvatars';
+import { trackAnalyticsEvent } from '../../lib/analytics';
 
 const REFRESH_MS = 15_000;
 
@@ -104,6 +105,18 @@ export default function ClassRoomsPanel({
       setSelectedStudentId(null);
     }
   }, [selectedStudentId, selectedVisitor]);
+
+  useEffect(() => {
+    if (!selectedVisitor) return;
+
+    trackAnalyticsEvent({
+      eventName: 'classmate_room_visited',
+      actorRole: 'student',
+      classId,
+      studentId: currentStudentId,
+      metadata: {},
+    });
+  }, [classId, currentStudentId, selectedVisitor?.id]);
 
   function selectRelativeRoom(direction: -1 | 1) {
     if (classmates.length === 0) return;

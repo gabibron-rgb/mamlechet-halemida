@@ -17,6 +17,7 @@ import ClassKingdomSummary from '../components/teacher/ClassKingdomSummary';
 import ClassKingdomManagerModal from '../components/teacher/ClassKingdomManagerModal';
 import StudentManagementModal from '../components/teacher/StudentManagementModal';
 import ClassRosterManagerModal from '../components/teacher/ClassRosterManagerModal';
+import TeacherAnalyticsPanel from '../components/teacher/TeacherAnalyticsPanel';
 
 type TeacherView = 'lesson' | 'management';
 
@@ -355,6 +356,14 @@ export default function TeacherHome() {
               )}
             </div>
 
+            {currentTeacherId && (
+              <TeacherAnalyticsPanel
+                classId={cls.id}
+                teacherId={currentTeacherId}
+                students={students}
+              />
+            )}
+
             <ClassGoalBoard
               classId={cls.id}
               students={students}
@@ -465,6 +474,7 @@ export default function TeacherHome() {
         open={awardOpen}
         onClose={() => setAwardOpen(false)}
         classId={cls.id}
+        teacherId={currentTeacherId}
         students={students}
         preselectedStudentId={preselected}
       />

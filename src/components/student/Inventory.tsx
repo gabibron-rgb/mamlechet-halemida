@@ -13,6 +13,7 @@ import Modal from '../shared/Modal';
 import ItemSprite from './ItemSprite';
 import { getExclusiveAchievementItem, STUDENT_ROOMS } from '../../data/exclusiveAchievementRewards';
 import { playBoxRewardSound } from '../../lib/gameSounds';
+import { trackStudentAnalytics } from '../../lib/analytics';
 
 type Props = {
   student: StudentState;
@@ -347,6 +348,13 @@ export default function Inventory({ student, onGoRoom }: Props) {
       return;
     }
 
+    trackStudentAnalytics(student, 'inventory_item_sold', {
+      item_id: item.id,
+      theme: item.theme,
+      rarity: item.rarity,
+      refund,
+    });
+
     setMessage(`מכרת את ${item.nameHe} (+${refund} נק׳)`);
     setTimeout(() => setMessage(null), 1500);
   }
@@ -419,6 +427,15 @@ export default function Inventory({ student, onGoRoom }: Props) {
     ).length;
 
     playBoxRewardSound(reward.item.rarity);
+
+    trackStudentAnalytics(student, 'box_opened', {
+      tier: entry.boxTier,
+      theme: boxTheme,
+      reward_item_id: reward.item.id,
+      reward_theme: reward.item.theme,
+      reward_rarity: reward.item.rarity,
+      pity_triggered: reward.pityTriggered,
+    });
 
     setOpenedReward({
       itemId: reward.item.id,

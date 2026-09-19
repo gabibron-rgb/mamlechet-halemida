@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { trackAnalyticsEvent } from '../../lib/analytics';
+import { useSessionStore } from '../../store/useSessionStore';
 
 type Props = {
   children: ReactNode;
@@ -25,6 +27,21 @@ export default class GameErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: unknown, info: ErrorInfo) {
     console.error('GameErrorBoundary caught an error:', error, info);
+
+    const session = useSessionStore.getState();
+    if (session.currentClassId && session.role) {
+      trackAnalyticsEvent({
+        eventName: 'client_error',
+        actorRole: session.role,
+        classId: session.currentClassId,
+        studentId: session.currentStudentId,
+        teacherId: session.currentTeacherId,
+        metadata: {
+          source: 'react_error_boundary',
+          error_type: error instanceof Error ? error.name : 'unknown',
+        },
+      });
+    }
   }
 
   private reloadGame = () => {

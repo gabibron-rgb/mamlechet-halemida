@@ -9,6 +9,7 @@ import { levelFromXp } from '../../logic/leveling';
 import RarityBadge from '../shared/RarityBadge';
 import { BOX_TIERS } from '../../data/boxes';
 import type { BoxTier } from '../../data/boxes';
+import { trackStudentAnalytics } from '../../lib/analytics';
 
 type Props = {
   student: StudentState;
@@ -48,6 +49,14 @@ export default function Shop({ student }: Props) {
     }
 
     updateStudent(student.id, out.next);
+
+    trackStudentAnalytics(student, 'shop_item_purchased', {
+      item_id: item.id,
+      theme: item.theme,
+      rarity: item.rarity,
+      price: item.price,
+      level: student.level,
+    });
 
     showMessage(
       out.result.leveledUp
@@ -97,6 +106,13 @@ export default function Shop({ student }: Props) {
           placedSlot: null,
         },
       ],
+    });
+
+    trackStudentAnalytics(student, 'shop_box_purchased', {
+      tier,
+      theme: themeId,
+      price: box.price,
+      level: student.level,
     });
 
     showMessage(

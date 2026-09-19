@@ -5,17 +5,19 @@ import { useGameStore } from '../../store/useGameStore';
 import type { StudentState } from '../../store/useGameStore';
 import { useClassStore } from '../../store/useClassStore';
 import { xpFromSpending } from '../../logic/economy';
+import { trackTeacherAnalytics } from '../../lib/analytics';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   classId: string;
+  teacherId: string | null;
   students: StudentState[];
   preselectedStudentId?: string | null;
 };
 
 export default function AwardModal({
-  open, onClose, classId, students, preselectedStudentId,
+  open, onClose, classId, teacherId, students, preselectedStudentId,
 }: Props) {
   const [selected, setSelected] = useState<Set<string>>(
     new Set(preselectedStudentId ? [preselectedStudentId] : [])
@@ -63,15 +65,31 @@ export default function AwardModal({
       reasonId,
       ...(cleanJournalNote ? { note: cleanJournalNote } : {}),
     });
-    ids.forEach(id =>
+    ids.forEach(id => {
       void awardBehaviorPoints(
         id,
         amount,
         reasonId,
         activityId,
         cleanJournalNote
-      )
-    );
+      );
+
+      if (teacherId) {
+        const targetStudent = students.find(student => student.id === id);
+        trackTeacherAnalytics({
+          teacherId,
+          classId,
+          eventName: 'points_awarded',
+          studentId: targetStudent?.supabaseId ?? id,
+          metadata: {
+            amount,
+            reason_id: reasonId,
+            group_size: ids.length,
+            journal_entry_added: Boolean(cleanJournalNote),
+          },
+        });
+      }
+    });
     reset();
     onClose();
   }

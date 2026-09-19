@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { classKingdomAssetUrl } from '../../lib/assetUrls';
+import { trackAnalyticsEvent } from '../../lib/analytics';
+import { useSessionStore } from '../../store/useSessionStore';
 import './KingdomAmbientEvents.css';
 
 type RealmId = 'main' | 'legendary';
@@ -2419,6 +2421,8 @@ export default function KingdomAmbientEvents({
   sandboxMode = false,
   paused = false,
 }: Props) {
+  const role = useSessionStore(state => state.role);
+  const currentStudentId = useSessionStore(state => state.currentStudentId);
   const [activeEvent, setActiveEvent] = useState<AmbientEventState | null>(null);
   const clearTimerRef = useRef<number | null>(null);
   const scheduleTimerRef = useRef<number | null>(null);
@@ -2499,11 +2503,25 @@ export default function KingdomAmbientEvents({
       startedAt,
     });
 
+    if (!sandboxMode && role === 'student' && currentStudentId) {
+      trackAnalyticsEvent({
+        eventName: 'ambient_event_shown',
+        actorRole: 'student',
+        classId,
+        studentId: currentStudentId,
+        metadata: {
+          event_id: eventId,
+          realm,
+          stars,
+        },
+      });
+    }
+
     clearTimerRef.current = window.setTimeout(() => {
       setActiveEvent(null);
       clearTimerRef.current = null;
     }, EVENT_LIFETIME_MS[eventId]);
-  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowAstralLeviathan, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, clearActiveTimer, paused]);
+  }, [canShowAuroraSky, canShowDragonFlight, canShowFairySwarm, canShowFloatingIsland, canShowLunarEclipse, canShowMagicalFireflies, canShowMagicThunderstorm, canShowCrystalBloom, canShowMagicalWindVortex, canShowEnchantedPetalBloom, canShowInterdimensionalPortal, canShowMagicalWinter, canShowCelestialTide, canShowEnchantedStarNight, canShowAstralLeviathan, canShowMeteorShower, canShowPhoenixRebirth, canShowRainbowStorm, canShowShootingStar, classId, clearActiveTimer, currentStudentId, paused, realm, role, sandboxMode, stars]);
 
   useEffect(() => {
     clearScheduledTimer();

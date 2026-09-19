@@ -41,6 +41,7 @@ import {
   type CompanionTraitChallenge,
 } from '../../data/companionTraitChallenges';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
+import { trackStudentAnalytics } from '../../lib/analytics';
 import CompanionFlourishEffects from './CompanionFlourishEffects';
 import CompanionSkillsPanel from './CompanionSkillsPanel';
 import CompanionBehaviorProfile from './CompanionBehaviorProfile';
@@ -921,6 +922,13 @@ export default function CompanionPanel({ student }: Props) {
                   new Set([...celebratedStages, ceremonyStage])
                 ),
               },
+            });
+
+            trackStudentAnalytics(student, 'companion_stage_reached', {
+              stage: ceremonyStage,
+              theme: companion.theme,
+              bond: companion.bond,
+              level: student.level,
             });
           }}
         />
