@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { TROPHY_THEMES } from '../../data/trophies';
+import TrophyVisual from '../shared/TrophyVisual';
 import { useGameStore } from '../../store/useGameStore';
 import type { StudentState } from '../../store/useGameStore';
 import Modal from '../shared/Modal';
@@ -58,7 +59,11 @@ export default function TrophyAwardModal({ open, onClose, student }: Props) {
             <div className="text-xs font-bold text-yellow-200/70">
               בדיקה לפני שמירה
             </div>
-            <div className="mt-3 text-6xl">{selectedTheme.emoji}</div>
+            <TrophyVisual
+              definition={selectedTheme}
+              className="mx-auto mt-3 h-28 w-24"
+              fallbackClassName="text-6xl"
+            />
             <div className="mt-2 text-xl font-black text-yellow-200">
               {selectedTheme.nameHe}
             </div>
@@ -121,7 +126,11 @@ export default function TrophyAwardModal({ open, onClose, student }: Props) {
                         : 'border-white/10 bg-magic-bg/35 text-white hover:bg-magic-bg/60'
                     }`}
                   >
-                    <div className="text-3xl">{theme.emoji}</div>
+                    <TrophyVisual
+                      definition={theme}
+                      className="mx-auto h-14 w-12"
+                      fallbackClassName="text-3xl"
+                    />
                     <div className="mt-2 text-xs font-black">{theme.nameHe}</div>
                   </button>
                 );

@@ -5,6 +5,7 @@ import type { Rarity } from '../../data/boxes';
 import { ITEMS } from '../../data/items';
 import type { Item } from '../../data/items';
 import { THEMES } from '../../data/themes';
+import { getCollectionCompletionAwardByTheme } from '../../data/collectionCompletionAwards';
 import type { StudentState } from '../../store/useGameStore';
 import RarityBadge from '../shared/RarityBadge';
 import ItemSprite from './ItemSprite';
@@ -115,6 +116,8 @@ export default function CollectionAlbum({ student }: Props) {
     ).length;
     const completionPct = Math.round((ownedInTheme / themeItems.length) * 100);
     const isUnlocked = student.unlockedThemes.includes(selectedTheme.id);
+    const completionAward = getCollectionCompletionAwardByTheme(selectedTheme.id);
+    const isComplete = ownedInTheme === themeItems.length;
 
     return (
       <div>
@@ -193,6 +196,17 @@ export default function CollectionAlbum({ student }: Props) {
             })}
           </div>
         </div>
+
+        {isComplete && completionAward && (
+          <div className="mb-5 rounded-2xl border border-yellow-300/30 bg-yellow-300/10 px-4 py-3 text-center">
+            <div className="text-sm font-black text-yellow-100">
+              🏆 הישג הושלם: {completionAward.achievementTitleHe}
+            </div>
+            <div className="mt-1 text-xs text-yellow-50/70">
+              {completionAward.prizeEmoji} {completionAward.prizeNameHe} נוסף לחדר הפרסים שלך.
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {themeItems.map((item) => {

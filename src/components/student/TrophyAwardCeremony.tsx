@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
-import { TROPHY_THEMES } from '../../data/trophies';
+import { getTrophyDefinition } from '../../data/trophies';
 import type { StudentState } from '../../store/useGameStore';
 import { playGameSound } from '../../lib/gameSounds';
+import TrophyVisual from '../shared/TrophyVisual';
 
 type TrophyEntry = StudentState['trophies'][number];
 
@@ -31,10 +32,7 @@ export function TrophyAwardCeremony({
   remainingCount,
   onComplete,
 }: Props) {
-  const definition = TROPHY_THEMES.find(
-    theme => theme.id === trophy.trophyTheme
-  );
-  const emoji = definition?.emoji ?? '🏆';
+  const definition = getTrophyDefinition(trophy.trophyTheme);
   const name = definition?.nameHe ?? 'גביע מיוחד';
 
   useEffect(() => {
@@ -81,12 +79,14 @@ export function TrophyAwardCeremony({
             כל הכבוד, {studentName}!
           </p>
 
-          <div className="relative mx-auto my-6 flex h-48 w-48 items-center justify-center">
-            <div className="absolute inset-5 animate-ping rounded-full border border-yellow-300/25" />
-            <div className="absolute inset-0 rounded-full bg-yellow-300/10 blur-xl" />
-            <div className="relative animate-bounce text-8xl drop-shadow-[0_0_25px_rgba(250,204,21,0.7)]">
-              {emoji}
-            </div>
+          <div className="relative mx-auto my-6 flex h-72 w-56 max-w-full items-center justify-center">
+            <div className="absolute inset-8 animate-ping rounded-full border border-yellow-300/20" />
+            <div className="absolute inset-2 rounded-full bg-yellow-300/10 blur-2xl" />
+            <TrophyVisual
+              definition={definition}
+              className="relative h-full w-full animate-bounce"
+              fallbackClassName="text-8xl drop-shadow-[0_0_25px_rgba(250,204,21,0.7)]"
+            />
           </div>
 
           <div className="text-2xl font-black text-yellow-200">{name}</div>

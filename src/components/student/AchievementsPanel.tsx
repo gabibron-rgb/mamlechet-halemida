@@ -19,6 +19,7 @@ import SpecialJourneysPanel from './SpecialJourneysPanel';
 import StudentTitlesPanel from './StudentTitlesPanel';
 import { getExclusiveAchievementItem } from '../../data/exclusiveAchievementRewards';
 import { playGameSound } from '../../lib/gameSounds';
+import { getCollectionCompletionAwardByAchievementId } from '../../data/collectionCompletionAwards';
 
 type Props = {
   student: StudentState;
@@ -325,6 +326,8 @@ function AchievementCard({
       ? getExclusiveAchievementItem(reward.itemId) !== null
       : reward.kind === 'specialUnlock' && reward.unlockKind === 'room'
   );
+  const collectionDisplayAward =
+    getCollectionCompletionAwardByAchievementId(definition.id);
 
   return (
     <div
@@ -376,6 +379,22 @@ function AchievementCard({
       {achieved && record && (
         <div className="mt-3 text-xs font-bold text-emerald-200/80">
           ✅ הושג ב־{formatDate(record.achievedAt)}
+        </div>
+      )}
+
+      {collectionDisplayAward && (
+        <div className="mt-4 rounded-xl border border-amber-300/25 bg-amber-300/5 p-3">
+          <div className="text-xs font-black text-amber-100">
+            🏛️ פרס לחדר הפרסים
+          </div>
+          <div className="mt-1 text-sm font-black text-white">
+            {collectionDisplayAward.prizeEmoji} {collectionDisplayAward.prizeNameHe}
+          </div>
+          <div className="mt-1 text-[11px] leading-5 text-magic-soft/65">
+            {achieved
+              ? 'הפרס נוסף אוטומטית לחדר הפרסים שלך.'
+              : 'עם השלמת האוסף הפרס יופיע אוטומטית בחדר הפרסים.'}
+          </div>
         </div>
       )}
 

@@ -4,7 +4,8 @@ import type { StudentClassGoal } from './classGoals';
 import type { StudentMission } from './missions';
 import type { CompanionStage } from './companionWorlds';
 import { COMPANION_STAGE_ORDER } from './companionWorlds';
-import type { ThemeId } from './themes';
+import { THEMES, type ThemeId } from './themes';
+import { COLLECTION_COMPLETION_AWARDS } from './collectionCompletionAwards';
 
 export type AchievementCategory =
   | 'collection'
@@ -56,6 +57,7 @@ export type AchievementReward =
 export type AchievementCondition =
   | { kind: 'uniqueCollectibles'; target: number }
   | { kind: 'completedCollections'; target: number }
+  | { kind: 'completedCollectionTheme'; themeId: ThemeId }
   | { kind: 'unlockedThemes'; target: number }
   | { kind: 'legendaryCollectibles'; target: number }
   | { kind: 'collectibleThemesOwned'; target: number }
@@ -118,6 +120,22 @@ export type AchievementProgress = {
   pct: number;
   complete: boolean;
 };
+
+const COLLECTION_COMPLETION_ACHIEVEMENTS: AchievementDefinition[] =
+  COLLECTION_COMPLETION_AWARDS.map(award => {
+    const theme = THEMES.find(entry => entry.id === award.themeId);
+    const themeName = theme?.nameHe ?? award.themeId;
+
+    return {
+      id: award.achievementId,
+      titleHe: award.achievementTitleHe,
+      descriptionHe: `להשלים את אוסף ${themeName} במלואו.`,
+      emoji: award.prizeEmoji,
+      category: 'collection',
+      difficulty: 'hard',
+      condition: { kind: 'completedCollectionTheme', themeId: award.themeId },
+    };
+  });
 
 export const ACHIEVEMENTS: AchievementDefinition[] = [
   {
@@ -240,6 +258,7 @@ export const ACHIEVEMENTS: AchievementDefinition[] = [
       },
     ],
   },
+  ...COLLECTION_COMPLETION_ACHIEVEMENTS,
   {
     id: 'themes_5',
     titleHe: 'חוקר עולמות',
@@ -479,6 +498,25 @@ function completedCollectionCount(student: AchievementStudentLike): number {
   return completed;
 }
 
+function collectionThemeProgress(
+  student: AchievementStudentLike,
+  themeId: ThemeId
+): { current: number; target: number } {
+  const owned = uniqueOwnedCollectibleIds(student);
+  const themeItemIds = COLLECTIBLE_ITEMS
+    .filter(item => item.theme === themeId)
+    .map(item => item.id);
+
+  if (themeItemIds.length === 0) {
+    return { current: 0, target: 1 };
+  }
+
+  return {
+    current: themeItemIds.filter(id => owned.has(id)).length,
+    target: themeItemIds.length,
+  };
+}
+
 function completedMissionCount(student: AchievementStudentLike): number {
   return (student.missions ?? []).filter(
     mission => mission.completedAt !== null && mission.cancelledAt === null
@@ -533,6 +571,12 @@ export function achievementProgress(
       current = completedCollectionCount(student);
       target = condition.target;
       break;
+    case 'completedCollectionTheme': {
+      const progress = collectionThemeProgress(student, condition.themeId);
+      current = progress.current;
+      target = progress.target;
+      break;
+    }
     case 'unlockedThemes':
       current = new Set(
         (student.unlockedThemes ?? []).filter(themeId => themeId !== 'generic')

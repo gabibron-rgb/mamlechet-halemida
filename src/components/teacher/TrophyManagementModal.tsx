@@ -4,6 +4,7 @@ import { TROPHY_THEMES } from '../../data/trophies';
 import { useGameStore } from '../../store/useGameStore';
 import type { StudentState } from '../../store/useGameStore';
 import Modal from '../shared/Modal';
+import TrophyVisual from '../shared/TrophyVisual';
 
 type Props = {
   open: boolean;
@@ -151,7 +152,11 @@ export default function TrophyManagementModal({ open, onClose, student }: Props)
                                     : 'border-white/10 bg-black/10'
                                 }`}
                               >
-                                <div className="text-2xl">{theme.emoji}</div>
+                                <TrophyVisual
+                                  definition={theme}
+                                  className="mx-auto h-12 w-10"
+                                  fallbackClassName="text-2xl"
+                                />
                                 <div className="mt-1 text-[10px] font-bold text-white">
                                   {theme.nameHe}
                                 </div>
@@ -189,7 +194,11 @@ export default function TrophyManagementModal({ open, onClose, student }: Props)
                     ) : (
                       <>
                         <div className="flex items-start gap-3">
-                          <div className="text-4xl">{definition?.emoji ?? '🏆'}</div>
+                          <TrophyVisual
+                            definition={definition}
+                            className="h-20 w-16 shrink-0"
+                            fallbackClassName="text-4xl"
+                          />
                           <div className="min-w-0 flex-1">
                             <div className="font-black text-yellow-200">
                               {definition?.nameHe ?? 'גביע מיוחד'}

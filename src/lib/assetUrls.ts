@@ -98,6 +98,19 @@ export function roomAssetUrl(pathOrFilename: string): string {
   return resolveR2AssetUrl(pathOrFilename, ROOM_ASSET_BASE_URL, /^\/?rooms\//);
 }
 
+
+
+export const TROPHY_ASSET_BASE_URL = `${ASSET_ORIGIN}/assets/trophies/teacher`;
+
+/** Resolves realistic teacher-trophy assets to the Cloudflare R2 custom domain. */
+export function trophyAssetUrl(pathOrFilename: string): string {
+  return resolveR2AssetUrl(
+    pathOrFilename,
+    TROPHY_ASSET_BASE_URL,
+    /^\/?assets\/trophies\/teacher\//
+  );
+}
+
 export const PERSONAL_GUEST_ASSET_BASE_URL = `${ASSET_ORIGIN}/assets/personal-guests`;
 
 /** Resolves personal-guest image/frame paths to the Cloudflare R2 custom domain. */

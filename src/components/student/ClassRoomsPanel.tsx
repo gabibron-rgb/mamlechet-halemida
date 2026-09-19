@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { TROPHY_THEMES } from '../../data/trophies';
+import TrophyVisual from '../shared/TrophyVisual';
 import {
   fetchClassRoomVisitors,
   type ClassRoomVisitor,
 } from '../../lib/classRoomVisitors';
 import RoomView from './RoomView';
 import { getStudentAvatar } from '../../data/studentAvatars';
-import { trackAnalyticsEvent } from '../../lib/analytics';
 
 const REFRESH_MS = 15_000;
 
@@ -106,18 +106,6 @@ export default function ClassRoomsPanel({
     }
   }, [selectedStudentId, selectedVisitor]);
 
-  useEffect(() => {
-    if (!selectedVisitor) return;
-
-    trackAnalyticsEvent({
-      eventName: 'classmate_room_visited',
-      actorRole: 'student',
-      classId,
-      studentId: currentStudentId,
-      metadata: {},
-    });
-  }, [classId, currentStudentId, selectedVisitor?.id]);
-
   function selectRelativeRoom(direction: -1 | 1) {
     if (classmates.length === 0) return;
 
@@ -213,7 +201,11 @@ export default function ClassRoomsPanel({
                     key={trophy.id}
                     className="rounded-2xl border border-white/10 bg-black/15 p-3 text-center"
                   >
-                    <div className="text-3xl">{definition?.emoji ?? '🏆'}</div>
+                    <TrophyVisual
+                      definition={definition}
+                      className="mx-auto h-20 w-16"
+                      fallbackClassName="text-3xl"
+                    />
                     <div className="mt-1 text-xs font-black text-yellow-100">
                       {definition?.nameHe ?? 'גביע מיוחד'}
                     </div>
