@@ -21,6 +21,7 @@ import { normalizeClassKingdomClaimedRewards } from '../data/classKingdom';
 import { normalizeAchievementRecords, normalizeSpecialUnlocks } from '../data/achievements';
 import { normalizeJourneyRecords } from '../data/specialJourneys';
 import { normalizeStudentAvatarId } from '../data/studentAvatars';
+import { applyPersonalTrophyGrants } from '../data/trophies';
 
 type Mode = 'choose' | 'student' | 'teacher';
 
@@ -203,7 +204,9 @@ export default function LoginPage() {
         return;
       }
 
-      const student = buildStudentFromSupabase(supabaseStudent);
+      const loadedStudent = buildStudentFromSupabase(supabaseStudent);
+      const personalGrantResult = applyPersonalTrophyGrants(loadedStudent);
+      const student = personalGrantResult.student;
       const isItemTester =
         cleanLoginName === 'itemtester' ||
         student.name === 'בודק חפצים';
@@ -227,6 +230,14 @@ export default function LoginPage() {
           [student.id]: student,
         },
       }));
+
+      // Persist any configured personal trophy the first time the student logs in.
+      // We intentionally leave it unseen so the normal trophy ceremony can surprise them.
+      if (personalGrantResult.changed) {
+        useGameStore.getState().updateStudent(student.id, {
+          trophies: student.trophies,
+        });
+      }
 
       loginStudent(student.id, supabaseStudent.class_id);
       navigate('/student');

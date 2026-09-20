@@ -14,7 +14,10 @@ import {
   type TrophyRoomSlotCategory,
 } from '../../data/trophyRoomSlots';
 import { THEMES } from '../../data/themes';
-import { getTrophyDefinition } from '../../data/trophies';
+import {
+  CESARIA_REAL_TROPHY_GRANT,
+  getTrophyDefinition,
+} from '../../data/trophies';
 import { roomAssetUrl } from '../../lib/assetUrls';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import Modal from '../shared/Modal';
@@ -140,9 +143,14 @@ export default function TrophyRoom({ student }: Props) {
   );
 
   const [showLocalPreview, setShowLocalPreview] = useState(false);
+  const [showCesariaPreview, setShowCesariaPreview] = useState(false);
   const [showSlotDebug, setShowSlotDebug] = useState(import.meta.env.DEV);
   const [selectedDisplay, setSelectedDisplay] =
     useState<SelectedDisplay | null>(null);
+
+  const isLocalItemTester =
+    import.meta.env.DEV &&
+    (student.loginName === 'itemtester' || student.name === 'בודק חפצים');
 
   const collectionSignature = useMemo(
     () =>
@@ -158,7 +166,19 @@ export default function TrophyRoom({ student }: Props) {
     void reconcileAchievements(student.id);
   }, [collectionSignature, reconcileAchievements, student.id]);
 
-  const trophies = showLocalPreview ? SAMPLE_TROPHIES : student.trophies;
+  const trophies = showLocalPreview
+    ? SAMPLE_TROPHIES
+    : showCesariaPreview
+      ? [
+          ...student.trophies.filter(
+            trophy => trophy.id !== CESARIA_REAL_TROPHY_GRANT.trophy.id
+          ),
+          {
+            ...CESARIA_REAL_TROPHY_GRANT.trophy,
+            awardedAt: Date.now(),
+          },
+        ]
+      : student.trophies;
 
   /**
    * Trophy placement is chronological:
@@ -231,6 +251,7 @@ export default function TrophyRoom({ student }: Props) {
             type="button"
             onClick={() => {
               setSelectedDisplay(null);
+              setShowCesariaPreview(false);
               setShowLocalPreview(value => !value);
             }}
             className="rounded-xl border border-fuchsia-300/30 bg-fuchsia-500/10 px-4 py-2 text-xs font-black text-fuchsia-100 hover:bg-fuchsia-500/20"
@@ -239,6 +260,22 @@ export default function TrophyRoom({ student }: Props) {
               ? 'חזרה לפרסים האמיתיים'
               : 'הצג כמה פרסי דוגמה'}
           </button>
+
+          {isLocalItemTester && (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedDisplay(null);
+                setShowLocalPreview(false);
+                setShowCesariaPreview(value => !value);
+              }}
+              className="rounded-xl border border-yellow-300/35 bg-yellow-400/10 px-4 py-2 text-xs font-black text-yellow-100 hover:bg-yellow-400/20"
+            >
+              {showCesariaPreview
+                ? 'הסתר את גביע קיסריה'
+                : 'הצג את גביע קיסריה'}
+            </button>
+          )}
         </div>
       )}
 
@@ -447,7 +484,7 @@ function AwardDetailsModal({
 
           <div className="mx-auto rounded-3xl border border-yellow-300/25 bg-gradient-to-b from-yellow-300/12 to-yellow-300/5 px-5 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_28px_rgba(0,0,0,0.14)]">
             <div className="text-[11px] font-black tracking-[0.22em] text-yellow-100/60">
-              הקדשת המורה
+              {definition?.realWorld ? 'הישג מהעולם האמיתי' : 'הקדשת המורה'}
             </div>
             <div className="mt-2 text-lg font-bold leading-8 text-white">
               {selected.trophy.caption?.trim() || 'פרס מיוחד מהמורה'}
@@ -455,7 +492,9 @@ function AwardDetailsModal({
           </div>
 
           <div className="mt-3 text-sm font-black text-yellow-100/75">
-            הוענק ב־{formatAwardDate(selected.trophy.awardedAt)}
+            {definition?.detailLineHe
+              ? definition.detailLineHe
+              : `הוענק ב־${formatAwardDate(selected.trophy.awardedAt)}`}
           </div>
         </div>
       </Modal>

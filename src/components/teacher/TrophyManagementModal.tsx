@@ -1,6 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { TROPHY_THEMES } from '../../data/trophies';
+import {
+  TROPHY_THEMES,
+  getTrophyDefinition,
+  isPersonalTrophyTheme,
+} from '../../data/trophies';
 import { useGameStore } from '../../store/useGameStore';
 import type { StudentState } from '../../store/useGameStore';
 import Modal from '../shared/Modal';
@@ -14,9 +18,6 @@ type Props = {
 
 type TrophyEntry = StudentState['trophies'][number];
 
-function trophyDefinition(themeId: string) {
-  return TROPHY_THEMES.find(theme => theme.id === themeId);
-}
 
 function formatDate(timestamp: number): string {
   const date = new Date(timestamp);
@@ -117,7 +118,8 @@ export default function TrophyManagementModal({ open, onClose, student }: Props)
           ) : (
             <div className="flex max-h-[62vh] flex-col gap-3 overflow-y-auto pl-1">
               {trophies.map(trophy => {
-                const definition = trophyDefinition(trophy.trophyTheme);
+                const definition = getTrophyDefinition(trophy.trophyTheme);
+                const isPersonal = isPersonalTrophyTheme(trophy.trophyTheme);
                 const isEditing = editingId === trophy.id;
                 const isRemoving = removingId === trophy.id;
                 const cleanEditCaption = editCaption.trim();
@@ -207,12 +209,16 @@ export default function TrophyManagementModal({ open, onClose, student }: Props)
                               {trophy.caption?.trim() || 'ללא הקדשה'}
                             </div>
                             <div className="mt-2 text-[10px] text-magic-soft/40">
-                              {formatDate(trophy.awardedAt)}
+                              {definition?.detailLineHe ?? formatDate(trophy.awardedAt)}
                             </div>
                           </div>
                         </div>
 
-                        {isRemoving ? (
+                        {isPersonal ? (
+                          <div className="mt-4 rounded-xl border border-yellow-300/20 bg-yellow-300/5 px-3 py-2 text-center text-[11px] font-bold text-yellow-100/70">
+                            גביע אישי מהעולם האמיתי · מנוהל אוטומטית
+                          </div>
+                        ) : isRemoving ? (
                           <div className="mt-4 rounded-xl border border-red-300/25 bg-red-500/10 p-3">
                             <div className="mb-3 text-center text-xs font-bold text-red-100">
                               להסיר את הגביע מהחשבון של {student.name}?

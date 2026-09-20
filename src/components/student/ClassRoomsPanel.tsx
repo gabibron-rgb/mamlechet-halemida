@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { TROPHY_THEMES } from '../../data/trophies';
+import { getTrophyDefinition } from '../../data/trophies';
 import TrophyVisual from '../shared/TrophyVisual';
 import {
   fetchClassRoomVisitors,
@@ -21,9 +21,6 @@ function placedItemCount(visitor: ClassRoomVisitor): number {
   ).length;
 }
 
-function trophyDefinition(themeId: string) {
-  return TROPHY_THEMES.find(theme => theme.id === themeId);
-}
 
 function trophyDate(timestamp: number): string {
   const date = new Date(timestamp);
@@ -194,7 +191,7 @@ export default function ClassRoomsPanel({
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {trophies.map(trophy => {
-                const definition = trophyDefinition(trophy.trophyTheme);
+                const definition = getTrophyDefinition(trophy.trophyTheme);
 
                 return (
                   <div
@@ -213,7 +210,7 @@ export default function ClassRoomsPanel({
                       {trophy.caption?.trim() || 'פרס מיוחד מהמורה'}
                     </div>
                     <div className="mt-2 text-[9px] font-bold text-magic-soft/35">
-                      {trophyDate(trophy.awardedAt)}
+                      {definition?.detailLineHe ?? trophyDate(trophy.awardedAt)}
                     </div>
                   </div>
                 );

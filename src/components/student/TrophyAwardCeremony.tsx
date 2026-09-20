@@ -68,11 +68,13 @@ export function TrophyAwardCeremony({
 
         <div className="relative">
           <div className="text-xs font-black uppercase tracking-[0.3em] text-yellow-200/75">
-            פרס מיוחד מהמורה
+            {definition?.realWorld ? 'הישג מהעולם האמיתי' : 'פרס מיוחד מהמורה'}
           </div>
 
           <h2 className="mt-3 text-3xl font-black text-yellow-300 drop-shadow sm:text-4xl">
-            הוענק לך גביע חדש!
+            {definition?.realWorld
+              ? 'הגביע שלך הגיע לממלכה!'
+              : 'הוענק לך גביע חדש!'}
           </h2>
 
           <p className="mt-2 text-sm text-purple-200/80">
@@ -93,12 +95,18 @@ export function TrophyAwardCeremony({
 
           <div className="mx-auto mt-4 max-w-md rounded-2xl border border-white/15 bg-white/5 px-5 py-4">
             <div className="mb-2 text-[10px] font-bold uppercase tracking-widest text-purple-200/55">
-              ההקדשה שלך
+              {definition?.realWorld ? 'ההישג' : 'ההקדשה שלך'}
             </div>
             <div className="text-base font-bold leading-7 text-white sm:text-lg">
               {trophy.caption?.trim() || 'פרס מיוחד על הישג נפלא'}
             </div>
           </div>
+
+          {definition?.detailLineHe && (
+            <div className="mt-3 text-sm font-black text-yellow-100/70">
+              {definition.detailLineHe}
+            </div>
+          )}
 
           {remainingCount > 0 && (
             <div className="mt-4 text-xs font-bold text-fuchsia-200">

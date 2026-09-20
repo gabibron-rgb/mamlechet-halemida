@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { getTrophyDefinition, type TrophyDef } from '../../data/trophies';
-import { trophyAssetUrl } from '../../lib/assetUrls';
+import { personalTrophyAssetUrl, trophyAssetUrl } from '../../lib/assetUrls';
 
 type Props = {
   themeId?: string;
@@ -26,7 +26,9 @@ export default function TrophyVisual({
   );
 
   const src = definition?.imageFilename
-    ? trophyAssetUrl(definition.imageFilename)
+    ? definition.assetKind === 'personal'
+      ? personalTrophyAssetUrl(definition.imageFilename)
+      : trophyAssetUrl(definition.imageFilename)
     : null;
 
   const [imageFailed, setImageFailed] = useState(false);

@@ -111,6 +111,18 @@ export function trophyAssetUrl(pathOrFilename: string): string {
   );
 }
 
+
+export const PERSONAL_TROPHY_ASSET_BASE_URL = `${ASSET_ORIGIN}/assets/trophies/personal`;
+
+/** Resolves one-off personal/real-world trophy assets from R2. */
+export function personalTrophyAssetUrl(pathOrFilename: string): string {
+  return resolveR2AssetUrl(
+    pathOrFilename,
+    PERSONAL_TROPHY_ASSET_BASE_URL,
+    /^\/?assets\/trophies\/personal\//
+  );
+}
+
 export const PERSONAL_GUEST_ASSET_BASE_URL = `${ASSET_ORIGIN}/assets/personal-guests`;
 
 /** Resolves personal-guest image/frame paths to the Cloudflare R2 custom domain. */
