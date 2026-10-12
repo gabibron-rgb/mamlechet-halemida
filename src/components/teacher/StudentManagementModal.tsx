@@ -11,6 +11,13 @@ import {
   type StudentCredentialRow,
 } from '../../lib/teacherManagement';
 import { transferStudentWithinTeacherClasses } from '../../lib/studentTransfers';
+import { getStudentByLoginName } from '../../lib/supabaseStudents';
+import {
+  getLichessRapidStatus,
+  linkLichessAccount,
+  unlinkLichessAccount,
+  type LichessRapidStatus,
+} from '../../lib/lichessIntegration';
 import type { ClassDef } from '../../store/useClassStore';
 import { useGameStore, type StudentState } from '../../store/useGameStore';
 import Modal from '../shared/Modal';
@@ -68,6 +75,12 @@ export default function StudentManagementModal({
   const [restoringSaleId, setRestoringSaleId] = useState<string | null>(null);
   const [archiveConfirming, setArchiveConfirming] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [lichessStatus, setLichessStatus] = useState<LichessRapidStatus | null>(null);
+  const [lichessUsernameDraft, setLichessUsernameDraft] = useState('');
+  const [lichessLoading, setLichessLoading] = useState(false);
+  const [lichessSaving, setLichessSaving] = useState(false);
+  const [lichessMessage, setLichessMessage] = useState<string | null>(null);
+  const [lichessError, setLichessError] = useState<string | null>(null);
 
   const setStudentGender = useGameStore(state => state.setStudentGender);
 
@@ -81,6 +94,20 @@ export default function StudentManagementModal({
 
   const targetClass =
     targetClasses.find(cls => cls.id === targetClassId) ?? null;
+
+  async function resolveLichessStudentId(): Promise<string | null> {
+    if (!student) return null;
+
+    const loginName =
+      typeof student.loginName === 'string'
+        ? student.loginName.trim().toLowerCase()
+        : '';
+
+    if (!loginName) return student.id;
+
+    const supabaseStudent = await getStudentByLoginName(loginName);
+    return supabaseStudent?.id ?? student.id;
+  }
 
   async function loadTeacherData() {
     if (!teacherId || !student) return;
@@ -113,6 +140,89 @@ export default function StudentManagementModal({
     setSalesLoading(false);
   }
 
+  async function loadLichessStatus() {
+    if (!student) return;
+
+    setLichessLoading(true);
+    setLichessError(null);
+
+    try {
+      const lichessStudentId = await resolveLichessStudentId();
+      if (!lichessStudentId) throw new Error('לא נמצא מזהה תלמיד ב־Supabase.');
+      const nextStatus = await getLichessRapidStatus(lichessStudentId);
+      setLichessStatus(nextStatus);
+      setLichessUsernameDraft(nextStatus.username ?? '');
+    } catch (err) {
+      setLichessError(
+        err instanceof Error ? err.message : 'לא הצלחנו לטעון את חיבור ליצ׳ס.'
+      );
+    } finally {
+      setLichessLoading(false);
+    }
+  }
+
+  async function saveLichessLink() {
+    if (!student || !teacherId || lichessSaving) return;
+
+    const cleanUsername = lichessUsernameDraft.trim();
+    if (!cleanUsername) {
+      setLichessError('יש להזין שם משתמש בליצ׳ס.');
+      return;
+    }
+
+    setLichessSaving(true);
+    setLichessMessage(null);
+    setLichessError(null);
+
+    try {
+      const lichessStudentId = await resolveLichessStudentId();
+      if (!lichessStudentId) throw new Error('לא נמצא מזהה תלמיד ב־Supabase.');
+      const nextStatus = await linkLichessAccount({
+        studentId: lichessStudentId,
+        teacherId,
+        username: cleanUsername,
+      });
+      setLichessStatus(nextStatus);
+      setLichessUsernameDraft(nextStatus.username ?? cleanUsername);
+      setLichessMessage(
+        'חשבון ליצ׳ס חובר. משימות Rapid יוצרים מעכשיו בחלון „משימה חדשה”.'
+      );
+    } catch (err) {
+      setLichessError(
+        err instanceof Error ? err.message : 'לא הצלחנו לחבר את חשבון ליצ׳ס.'
+      );
+    } finally {
+      setLichessSaving(false);
+    }
+  }
+
+  async function disconnectLichess() {
+    if (!student || !teacherId || lichessSaving) return;
+
+    setLichessSaving(true);
+    setLichessMessage(null);
+    setLichessError(null);
+
+    try {
+      const lichessStudentId = await resolveLichessStudentId();
+      if (!lichessStudentId) throw new Error('לא נמצא מזהה תלמיד ב־Supabase.');
+      const nextStatus = await unlinkLichessAccount({
+        studentId: lichessStudentId,
+        teacherId,
+      });
+      setLichessStatus(nextStatus);
+      setLichessUsernameDraft('');
+      setLichessMessage('חשבון ליצ׳ס נותק.');
+    } catch (err) {
+      setLichessError(
+        err instanceof Error ? err.message : 'לא הצלחנו לנתק את חשבון ליצ׳ס.'
+      );
+    } finally {
+      setLichessSaving(false);
+    }
+  }
+
+
   useEffect(() => {
     if (!open) return;
     setTargetClassId('');
@@ -133,11 +243,18 @@ export default function StudentManagementModal({
     setRestoringSaleId(null);
     setArchiveConfirming(false);
     setArchiving(false);
+    setLichessStatus(null);
+    setLichessUsernameDraft('');
+    setLichessLoading(false);
+    setLichessSaving(false);
+    setLichessMessage(null);
+    setLichessError(null);
     void loadTeacherData();
+    void loadLichessStatus();
   }, [open, student?.id, teacherId, currentClass.id]);
 
   function close() {
-    if (saving || genderSaving || pinResetting || credentialSaving || archiving || restoringSaleId) return;
+    if (saving || genderSaving || pinResetting || credentialSaving || archiving || restoringSaleId || lichessSaving) return;
     setTargetClassId('');
     setConfirming(false);
     setArchiveConfirming(false);
@@ -464,6 +581,109 @@ export default function StudentManagementModal({
             )}
           </section>
 
+          <section className="rounded-2xl border border-cyan-300/15 bg-cyan-500/5 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <div className="text-sm font-black text-white">♟️ חשבון Lichess</div>
+                <p className="mt-1 text-xs leading-5 text-magic-soft/55">
+                  מחברים כאן פעם אחת את שם המשתמש של התלמיד/ה בליצ׳ס. את משימות ה־Rapid עצמן יוצרים יחד עם שאר המשימות דרך „משימה חדשה”.
+                </p>
+              </div>
+              {lichessStatus?.linked && (
+                <div className="shrink-0 rounded-full border border-cyan-300/20 bg-cyan-500/10 px-3 py-1 text-[10px] font-black text-cyan-100">
+                  מחובר
+                </div>
+              )}
+            </div>
+
+            {lichessLoading ? (
+              <div className="mt-4 text-center text-xs font-bold text-magic-soft/55">טוען...</div>
+            ) : (
+              <>
+                <label className="mt-4 block">
+                  <span className="text-[10px] font-bold text-magic-soft/55">שם משתמש בליצ׳ס</span>
+                  <input
+                    value={lichessUsernameDraft}
+                    onChange={event => {
+                      setLichessUsernameDraft(event.target.value);
+                      setLichessError(null);
+                      setLichessMessage(null);
+                    }}
+                    placeholder="לדוגמה CesariaT"
+                    autoComplete="off"
+                    className="mt-1 w-full rounded-lg border border-white/15 bg-magic-bg/70 px-3 py-2 font-bold text-white outline-none focus:border-cyan-300/50"
+                    dir="ltr"
+                  />
+                </label>
+
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    disabled={lichessSaving || !lichessUsernameDraft.trim() || !teacherId}
+                    onClick={() => void saveLichessLink()}
+                    className="rounded-xl bg-cyan-200 px-3 py-2.5 text-xs font-black text-cyan-950 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {lichessSaving ? 'שומר...' : lichessStatus?.linked ? 'עדכון חשבון' : 'אמת ושמור חשבון'}
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={
+                      lichessSaving ||
+                      !lichessStatus?.linked ||
+                      !teacherId ||
+                      Boolean(lichessStatus?.activeTask)
+                    }
+                    onClick={() => void disconnectLichess()}
+                    className="rounded-xl border border-white/10 bg-magic-bg/45 px-3 py-2.5 text-xs font-black text-magic-soft disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    ניתוק חשבון
+                  </button>
+                </div>
+
+                {lichessStatus?.activeTask && (
+                  <div className="mt-4 rounded-2xl border border-cyan-300/20 bg-magic-bg/45 p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-xs font-black text-cyan-100">משימת Rapid פעילה</div>
+                        <div className="mt-1 text-xs text-magic-soft/60">
+                          ניהול וביטול המשימה נעשים באזור „משימות תלמידים”.
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-cyan-300/20 bg-cyan-500/10 px-3 py-2 font-black text-cyan-100" dir="ltr">
+                        {lichessStatus.activeTask.progressGames} / {lichessStatus.activeTask.requiredGames}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {lichessStatus?.linked && !lichessStatus.activeTask && (
+                  <div className="mt-3 rounded-xl border border-white/8 bg-magic-bg/35 px-3 py-2 text-[11px] leading-5 text-magic-soft/55">
+                    ✓ החשבון מוכן. אפשר לבחור „♟️ משימת Lichess Rapid” בחלון יצירת המשימה.
+                  </div>
+                )}
+
+                {lichessStatus?.activeTask && (
+                  <div className="mt-2 text-[11px] leading-5 text-amber-100/65">
+                    כדי לנתק את חשבון ליצ׳ס, יש לבטל קודם את משימת ה־Rapid הפעילה.
+                  </div>
+                )}
+
+                {lichessMessage && (
+                  <div className="mt-3 rounded-xl border border-emerald-300/20 bg-emerald-500/8 px-3 py-2 text-center text-xs font-bold text-emerald-100/85">
+                    ✓ {lichessMessage}
+                  </div>
+                )}
+
+                {lichessError && (
+                  <div className="mt-3 rounded-xl border border-red-400/25 bg-red-500/8 px-3 py-2 text-center text-xs font-bold text-red-200">
+                    {lichessError}
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+
           <section className="rounded-2xl border border-sky-300/15 bg-sky-500/5 p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
@@ -737,7 +957,7 @@ export default function StudentManagementModal({
           <button
             type="button"
             onClick={close}
-            disabled={saving || archiving || pinResetting || credentialSaving || restoringSaleId !== null}
+            disabled={saving || archiving || pinResetting || credentialSaving || restoringSaleId !== null || lichessSaving}
             className="rounded-xl bg-magic-bg/60 py-3 font-bold text-magic-soft disabled:opacity-40"
           >
             סגירה

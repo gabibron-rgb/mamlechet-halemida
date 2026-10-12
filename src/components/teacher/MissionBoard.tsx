@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  isLichessRapidMission,
   isMissionActive,
   isMissionCompleted,
   isMissionOverdue,
@@ -8,6 +9,8 @@ import {
 import type { StudentMission } from '../../data/missions';
 import { useGameStore } from '../../store/useGameStore';
 import type { StudentState } from '../../store/useGameStore';
+import { useSessionStore } from '../../store/useSessionStore';
+import { cancelLichessRapidTask } from '../../lib/lichessIntegration';
 
 type Props = {
   students: StudentState[];
@@ -28,8 +31,11 @@ type MissionGroup = {
 export default function MissionBoard({ students, onCreateMission }: Props) {
   const [expanded, setExpanded] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const completeMission = useGameStore(s => s.completeMission);
   const cancelMission = useGameStore(s => s.cancelMission);
+  const loadStudentFromSupabase = useGameStore(s => s.loadStudentFromSupabase);
+  const teacherId = useSessionStore(s => s.currentTeacherId);
 
   const groups = useMemo(() => groupMissions(students), [students]);
   const activeGroups = groups
@@ -48,15 +54,37 @@ export default function MissionBoard({ students, onCreateMission }: Props) {
   async function handleComplete(studentId: string, missionId: string) {
     const key = `${studentId}:${missionId}:complete`;
     setBusyKey(key);
+    setError(null);
     await completeMission(studentId, missionId);
     setBusyKey(null);
   }
 
-  async function handleCancel(studentId: string, missionId: string) {
-    const key = `${studentId}:${missionId}:cancel`;
+  async function handleCancel(student: StudentState, mission: StudentMission) {
+    const key = `${student.id}:${mission.id}:cancel`;
     setBusyKey(key);
-    await cancelMission(studentId, missionId);
-    setBusyKey(null);
+    setError(null);
+
+    try {
+      if (isLichessRapidMission(mission)) {
+        if (!teacherId) throw new Error('לא נמצא חשבון המורה המחובר.');
+
+        const canonicalStudentId = student.supabaseId ?? student.id;
+        await cancelLichessRapidTask({
+          studentId: canonicalStudentId,
+          teacherId,
+          missionId: mission.id,
+        });
+        await loadStudentFromSupabase(canonicalStudentId);
+      } else {
+        await cancelMission(student.id, mission.id);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'לא הצלחנו לבטל את המשימה.'
+      );
+    } finally {
+      setBusyKey(null);
+    }
   }
 
   return (
@@ -87,10 +115,16 @@ export default function MissionBoard({ students, onCreateMission }: Props) {
 
       {expanded && (
         <div className="mt-5">
+          {error && (
+            <div className="mb-3 rounded-xl border border-red-400/25 bg-red-500/10 px-3 py-2 text-center text-xs font-bold text-red-200">
+              {error}
+            </div>
+          )}
+
           {activeGroups.length === 0 ? (
             <div className="rounded-2xl border border-white/10 bg-magic-bg/30 p-5 text-center text-sm text-magic-soft/65">
-              צרו משימה קצרה, בחרו למי היא מיועדת, וסמנו השלמה כשהתלמיד/ה
-              מסיים/ת. הפרסים קטנים וקבועים מראש.
+              צרו משימה רגילה או משימת Lichess Rapid. משימות רגילות מסומנות
+              ידנית; משימות Lichess מושלמות אוטומטית כשהמערכת מזהה את המשחקים.
             </div>
           ) : (
             <div className="flex flex-col gap-3">
@@ -117,7 +151,9 @@ export default function MissionBoard({ students, onCreateMission }: Props) {
                     key={group.id}
                     className="flex flex-col gap-1 rounded-2xl bg-magic-bg/25 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <span className="font-bold text-white">✓ {group.sample.title}</span>
+                    <span className="font-bold text-white">
+                      ✓ {isLichessRapidMission(group.sample) ? '♟️ ' : ''}{group.sample.title}
+                    </span>
                     <span className="text-xs text-magic-soft/50">
                       {group.recipients.filter(item => isMissionCompleted(item.mission)).length}
                       {' '}תלמידים השלימו
@@ -142,8 +178,9 @@ function MissionGroupCard({
   group: MissionGroup;
   busyKey: string | null;
   onComplete: (studentId: string, missionId: string) => Promise<void>;
-  onCancel: (studentId: string, missionId: string) => Promise<void>;
+  onCancel: (student: StudentState, mission: StudentMission) => Promise<void>;
 }) {
+  const lichess = isLichessRapidMission(group.sample);
   const preset = missionRewardPreset(group.sample.rewardTier);
   const activeRecipients = group.recipients.filter(item =>
     isMissionActive(item.mission)
@@ -158,20 +195,29 @@ function MissionGroupCard({
       className={`rounded-2xl border p-4 ${
         overdue
           ? 'border-rose-300/25 bg-rose-500/8'
-          : 'border-white/10 bg-magic-bg/35'
+          : lichess
+            ? 'border-cyan-300/20 bg-cyan-500/5'
+            : 'border-white/10 bg-magic-bg/35'
       }`}
     >
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <div className="font-black text-white">{group.sample.title}</div>
+          <div className="font-black text-white">
+            {lichess ? '♟️ ' : ''}{group.sample.title}
+          </div>
           {group.sample.description && (
             <p className="mt-1 max-w-xl whitespace-pre-wrap text-xs leading-5 text-magic-soft/65">
               {group.sample.description}
             </p>
           )}
+          {lichess && (
+            <p className="mt-1 text-[11px] font-bold text-cyan-100/65">
+              🤖 ההשלמה מתבצעת אוטומטית דרך Lichess
+            </p>
+          )}
         </div>
-        <div className="shrink-0 text-xs font-black text-magic-accent">
-          {preset.emoji} +{group.sample.rewardPoints} נק׳
+        <div className={`shrink-0 text-xs font-black ${lichess ? 'text-yellow-200' : 'text-magic-accent'}`}>
+          {lichess ? '♟️' : preset.emoji} +{group.sample.rewardPoints} נק׳
         </div>
       </div>
 
@@ -195,15 +241,29 @@ function MissionGroupCard({
           const cancelKey = `${student.id}:${mission.id}:cancel`;
           const active = isMissionActive(mission);
           const completed = isMissionCompleted(mission);
+          const isLichess = isLichessRapidMission(mission);
+          const requiredGames = Math.max(1, mission.lichessRequiredGames ?? 1);
+          const progressGames = Math.min(
+            requiredGames,
+            Math.max(0, mission.lichessProgressGames ?? 0)
+          );
 
           return (
             <div
               key={`${student.id}:${mission.id}`}
               className="flex flex-col gap-2 rounded-xl border border-white/7 bg-black/10 px-3 py-2 sm:flex-row sm:items-center sm:justify-between"
             >
-              <div className="font-bold text-white">{student.name}</div>
+              <div className="min-w-0">
+                <div className="font-bold text-white">{student.name}</div>
+                {isLichess && active && (
+                  <div className="mt-1 flex items-center gap-2 text-[11px] font-bold text-cyan-100/75">
+                    <span dir="ltr">{progressGames} / {requiredGames}</span>
+                    <span>משחקי Rapid תקינים</span>
+                  </div>
+                )}
+              </div>
 
-              {active && (
+              {active && !isLichess && (
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -215,7 +275,23 @@ function MissionGroupCard({
                   </button>
                   <button
                     type="button"
-                    onClick={() => void onCancel(student.id, mission.id)}
+                    onClick={() => void onCancel(student, mission)}
+                    disabled={busyKey !== null}
+                    className="rounded-lg border border-white/10 bg-magic-bg/50 px-3 py-1.5 text-xs font-bold text-magic-soft/65 disabled:opacity-40"
+                  >
+                    {busyKey === cancelKey ? '...' : 'בטל'}
+                  </button>
+                </div>
+              )}
+
+              {active && isLichess && (
+                <div className="flex items-center gap-2">
+                  <span className="rounded-lg border border-cyan-300/15 bg-cyan-500/8 px-3 py-1.5 text-[11px] font-black text-cyan-100/75">
+                    ממתין אוטומטית
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void onCancel(student, mission)}
                     disabled={busyKey !== null}
                     className="rounded-lg border border-white/10 bg-magic-bg/50 px-3 py-1.5 text-xs font-bold text-magic-soft/65 disabled:opacity-40"
                   >
@@ -226,7 +302,7 @@ function MissionGroupCard({
 
               {completed && (
                 <span className="text-xs font-black text-emerald-200">
-                  ✓ הושלם · הפרס ניתן
+                  ✓ {isLichess ? 'הושלם אוטומטית' : 'הושלם'} · הפרס ניתן
                 </span>
               )}
 

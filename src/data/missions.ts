@@ -1,4 +1,5 @@
 export type MissionRewardTier = 'small' | 'medium' | 'weekly';
+export type MissionKind = 'manual' | 'lichess_rapid';
 
 export type MissionRewardPreset = {
   id: MissionRewardTier;
@@ -48,12 +49,27 @@ export type StudentMission = {
   dueAt: number | null;
   completedAt: number | null;
   cancelledAt: number | null;
+
+  // Old missions do not have this field; missing means a normal/manual mission.
+  kind?: MissionKind;
+
+  // Present only for Lichess Rapid missions.
+  lichessRequiredGames?: number;
+  lichessProgressGames?: number;
 };
 
 export function missionRewardPreset(
   tier: MissionRewardTier
 ): MissionRewardPreset {
   return MISSION_REWARD_PRESETS[tier];
+}
+
+export function missionKind(mission: StudentMission): MissionKind {
+  return mission.kind === 'lichess_rapid' ? 'lichess_rapid' : 'manual';
+}
+
+export function isLichessRapidMission(mission: StudentMission): boolean {
+  return missionKind(mission) === 'lichess_rapid';
 }
 
 export function normalizeStudentMissions(value: unknown): StudentMission[] {
@@ -82,8 +98,13 @@ export function normalizeStudentMissions(value: unknown): StudentMission[] {
     const dueAt = nullableTimestamp(raw.dueAt);
     const completedAt = nullableTimestamp(raw.completedAt);
     const cancelledAt = nullableTimestamp(raw.cancelledAt);
+    const kind: MissionKind =
+      raw.kind === 'lichess_rapid' ? 'lichess_rapid' : 'manual';
+    const lichessRequiredGames = positiveInt(raw.lichessRequiredGames);
+    const lichessProgressGames = nonNegativeInt(raw.lichessProgressGames);
 
     if (!id || !title) return [];
+    if (kind === 'lichess_rapid' && !lichessRequiredGames) return [];
 
     return [
       {
@@ -96,6 +117,16 @@ export function normalizeStudentMissions(value: unknown): StudentMission[] {
         dueAt,
         completedAt,
         cancelledAt,
+        kind,
+        ...(kind === 'lichess_rapid'
+          ? {
+              lichessRequiredGames,
+              lichessProgressGames: Math.min(
+                lichessRequiredGames ?? 1,
+                lichessProgressGames ?? 0
+              ),
+            }
+          : {}),
       },
     ];
   });
@@ -126,4 +157,16 @@ function isMissionRewardTier(value: unknown): value is MissionRewardTier {
 
 function nullableTimestamp(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function positiveInt(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0
+    ? Math.round(value)
+    : undefined;
+}
+
+function nonNegativeInt(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0
+    ? Math.round(value)
+    : undefined;
 }

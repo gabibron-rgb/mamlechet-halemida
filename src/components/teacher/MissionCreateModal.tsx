@@ -7,6 +7,12 @@ import {
 import type { MissionRewardTier } from '../../data/missions';
 import { useGameStore } from '../../store/useGameStore';
 import type { StudentState } from '../../store/useGameStore';
+import { useSessionStore } from '../../store/useSessionStore';
+import { genId } from '../../utils/storage';
+import {
+  createLichessRapidTask,
+  getLichessRapidStatus,
+} from '../../lib/lichessIntegration';
 
 type Props = {
   open: boolean;
@@ -14,14 +20,23 @@ type Props = {
   students: StudentState[];
 };
 
+type MissionKind = 'manual' | 'lichess_rapid';
+
 export default function MissionCreateModal({ open, onClose, students }: Props) {
+  const [missionKind, setMissionKind] = useState<MissionKind>('manual');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [rewardTier, setRewardTier] = useState<MissionRewardTier>('small');
   const [dueDate, setDueDate] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lichessGames, setLichessGames] = useState('5');
+  const [lichessPoints, setLichessPoints] = useState('3');
+
   const assignMissionToStudents = useGameStore(s => s.assignMissionToStudents);
+  const loadStudentFromSupabase = useGameStore(s => s.loadStudentFromSupabase);
+  const teacherId = useSessionStore(s => s.currentTeacherId);
 
   useEffect(() => {
     if (!open) return;
@@ -37,18 +52,40 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
     [selected, students.length]
   );
 
+  const selectedStudents = useMemo(
+    () => students.filter(student => selected.has(student.id)),
+    [selected, students]
+  );
+
   function reset() {
+    setMissionKind('manual');
     setTitle('');
     setDescription('');
     setRewardTier('small');
     setDueDate('');
     setSelected(new Set());
     setSaving(false);
+    setError(null);
+    setLichessGames('5');
+    setLichessPoints('3');
   }
 
   function close() {
+    if (saving) return;
     reset();
     onClose();
+  }
+
+  function chooseMissionKind(nextKind: MissionKind) {
+    setMissionKind(nextKind);
+    setError(null);
+
+    if (nextKind === 'lichess_rapid' && !title.trim()) {
+      setTitle('אתגר Rapid בליצ׳ס');
+    }
+    if (nextKind === 'manual' && title.trim() === 'אתגר Rapid בליצ׳ס') {
+      setTitle('');
+    }
   }
 
   function toggleStudent(studentId: string) {
@@ -58,35 +95,132 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
       else next.add(studentId);
       return next;
     });
+    setError(null);
   }
 
   function toggleAll() {
     setSelected(
       allSelected ? new Set() : new Set(students.map(student => student.id))
     );
+    setError(null);
   }
 
-  async function confirm() {
-    const cleanTitle = title.trim();
-    if (!cleanTitle || selected.size === 0 || saving) return;
+  function dueAtFromInput(): number | null {
+    if (!dueDate) return null;
+    const value = new Date(`${dueDate}T23:59:59`).getTime();
+    return Number.isFinite(value) ? value : null;
+  }
 
-    setSaving(true);
-    const dueAt = dueDate
-      ? new Date(`${dueDate}T23:59:59`).getTime()
-      : null;
-    const success = await assignMissionToStudents(Array.from(selected), {
+  async function confirmManualMission() {
+    const cleanTitle = title.trim();
+    if (!cleanTitle || selected.size === 0) return false;
+
+    return assignMissionToStudents(Array.from(selected), {
       title: cleanTitle,
       description: description.trim(),
       rewardTier,
-      dueAt: Number.isFinite(dueAt) ? dueAt : null,
+      dueAt: dueAtFromInput(),
     });
+  }
 
-    if (success) {
-      close();
-      return;
+  async function confirmLichessMission() {
+    if (!teacherId) {
+      throw new Error('לא נמצא חשבון המורה המחובר.');
     }
 
-    setSaving(false);
+    const cleanTitle = title.trim();
+    const requiredGames = Number(lichessGames);
+    const rewardPoints = Number(lichessPoints);
+
+    if (!cleanTitle) throw new Error('יש להזין שם למשימה.');
+    if (!Number.isInteger(requiredGames) || requiredGames < 1 || requiredGames > 100) {
+      throw new Error('מספר משחקי ה־Rapid צריך להיות בין 1 ל־100.');
+    }
+    if (!Number.isInteger(rewardPoints) || rewardPoints < 1 || rewardPoints > 1000) {
+      throw new Error('מספר הנקודות צריך להיות בין 1 ל־1000.');
+    }
+    if (selectedStudents.length === 0) {
+      throw new Error('יש לבחור לפחות תלמיד/ה אחד/ת.');
+    }
+
+    // Preflight first, so we do not knowingly create a group mission for only
+    // part of the selected students.
+    const statuses = await Promise.all(
+      selectedStudents.map(async student => ({
+        student,
+        status: await getLichessRapidStatus(student.supabaseId ?? student.id),
+      }))
+    );
+
+    const notLinked = statuses
+      .filter(item => !item.status.linked)
+      .map(item => item.student.name);
+    if (notLinked.length > 0) {
+      throw new Error(
+        `אין חשבון Lichess מחובר עבור: ${notLinked.join(', ')}. יש לחבר אותו קודם בפרטי התלמיד/ה.`
+      );
+    }
+
+    const alreadyActive = statuses
+      .filter(item => Boolean(item.status.activeTask))
+      .map(item => item.student.name);
+    if (alreadyActive.length > 0) {
+      throw new Error(
+        `כבר קיימת משימת Rapid פעילה עבור: ${alreadyActive.join(', ')}.`
+      );
+    }
+
+    const missionId = genId('mission');
+    const dueAt = dueAtFromInput();
+
+    for (const student of selectedStudents) {
+      await createLichessRapidTask({
+        studentId: student.supabaseId ?? student.id,
+        teacherId,
+        missionId,
+        title: cleanTitle,
+        description: description.trim(),
+        requiredGames,
+        rewardPoints,
+        dueAt,
+      });
+    }
+
+    await Promise.all(
+      selectedStudents.map(student =>
+        loadStudentFromSupabase(student.supabaseId ?? student.id)
+      )
+    );
+
+    return true;
+  }
+
+  async function confirm() {
+    if (!title.trim() || selected.size === 0 || saving) return;
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const success =
+        missionKind === 'lichess_rapid'
+          ? await confirmLichessMission()
+          : await confirmManualMission();
+
+      if (success) {
+        reset();
+        onClose();
+        return;
+      }
+
+      setError('לא הצלחנו ליצור את המשימה. כדאי לנסות שוב.');
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'לא הצלחנו ליצור את המשימה.'
+      );
+    } finally {
+      setSaving(false);
+    }
   }
 
   const reward = MISSION_REWARD_PRESETS[rewardTier];
@@ -95,6 +229,34 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
     <Modal open={open} onClose={close} title="📋 משימה חדשה">
       <div className="flex flex-col gap-5 text-right">
         <div>
+          <div className="mb-2 text-sm font-bold text-magic-soft">סוג המשימה</div>
+          <div className="grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-magic-bg/25 p-2">
+            <button
+              type="button"
+              onClick={() => chooseMissionKind('manual')}
+              className={`rounded-xl px-3 py-3 text-sm font-black transition-colors ${
+                missionKind === 'manual'
+                  ? 'bg-magic-accent text-magic-bg'
+                  : 'text-magic-soft hover:bg-white/5'
+              }`}
+            >
+              📋 משימה רגילה
+            </button>
+            <button
+              type="button"
+              onClick={() => chooseMissionKind('lichess_rapid')}
+              className={`rounded-xl px-3 py-3 text-sm font-black transition-colors ${
+                missionKind === 'lichess_rapid'
+                  ? 'bg-cyan-200 text-cyan-950'
+                  : 'text-magic-soft hover:bg-white/5'
+              }`}
+            >
+              ♟️ משימת Lichess Rapid
+            </button>
+          </div>
+        </div>
+
+        <div>
           <label className="mb-1 block text-sm font-bold text-magic-soft">
             שם המשימה
           </label>
@@ -102,7 +264,11 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
             value={title}
             onChange={event => setTitle(event.target.value)}
             maxLength={80}
-            placeholder="למשל: אתגר החשיבה של השבוע"
+            placeholder={
+              missionKind === 'lichess_rapid'
+                ? 'למשל: אתגר Rapid של השבוע'
+                : 'למשל: אתגר החשיבה של השבוע'
+            }
             className="w-full rounded-xl border border-white/15 bg-magic-bg/55 px-3 py-2 text-white outline-none placeholder:text-magic-soft/35 focus:border-magic-accent/60"
           />
         </div>
@@ -119,43 +285,85 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
             onChange={event => setDescription(event.target.value)}
             maxLength={240}
             rows={3}
-            placeholder="תיאור קצר וברור לילדים..."
+            placeholder={
+              missionKind === 'lichess_rapid'
+                ? 'הערה אופציונלית לתלמידים...'
+                : 'תיאור קצר וברור לילדים...'
+            }
             className="w-full resize-none rounded-xl border border-white/15 bg-magic-bg/55 px-3 py-2 text-white outline-none placeholder:text-magic-soft/35 focus:border-magic-accent/60"
           />
         </div>
 
-        <div>
-          <div className="mb-2 text-sm font-bold text-magic-soft">גודל המשימה והפרס</div>
-          <div className="grid gap-2 sm:grid-cols-3">
-            {MISSION_REWARD_TIERS.map(tier => {
-              const preset = MISSION_REWARD_PRESETS[tier];
-              const active = rewardTier === tier;
-              return (
-                <button
-                  type="button"
-                  key={tier}
-                  onClick={() => setRewardTier(tier)}
-                  className={`rounded-2xl border p-3 text-right transition-colors ${
-                    active
-                      ? 'border-magic-accent/60 bg-magic-accent/15'
-                      : 'border-white/10 bg-magic-bg/35 hover:bg-magic-bg/55'
-                  }`}
-                >
-                  <div className="font-black text-white">
-                    {preset.emoji} {preset.labelHe}
-                  </div>
-                  <div className="mt-1 text-lg font-black text-magic-accent">
-                    +{preset.points} נקודות
-                  </div>
-                </button>
-              );
-            })}
+        {missionKind === 'manual' ? (
+          <div>
+            <div className="mb-2 text-sm font-bold text-magic-soft">גודל המשימה והפרס</div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {MISSION_REWARD_TIERS.map(tier => {
+                const preset = MISSION_REWARD_PRESETS[tier];
+                const active = rewardTier === tier;
+                return (
+                  <button
+                    type="button"
+                    key={tier}
+                    onClick={() => setRewardTier(tier)}
+                    className={`rounded-2xl border p-3 text-right transition-colors ${
+                      active
+                        ? 'border-magic-accent/60 bg-magic-accent/15'
+                        : 'border-white/10 bg-magic-bg/35 hover:bg-magic-bg/55'
+                    }`}
+                  >
+                    <div className="font-black text-white">
+                      {preset.emoji} {preset.labelHe}
+                    </div>
+                    <div className="mt-1 text-lg font-black text-magic-accent">
+                      +{preset.points} נקודות
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2 text-xs leading-5 text-magic-soft/55">
+              במשימה רגילה המורה מסמן ידנית כשהיא הושלמה.
+            </p>
           </div>
-          <p className="mt-2 text-xs leading-5 text-magic-soft/55">
-            הפרסים קבועים בכוונה כדי שמשימות לא יאיצו מדי את קצב ההתקדמות.
-            המשימה לא מעניקה XP ישירות.
-          </p>
-        </div>
+        ) : (
+          <div className="rounded-2xl border border-cyan-300/20 bg-cyan-500/5 p-4">
+            <div className="text-sm font-black text-cyan-100">♟️ תנאי משימת Rapid</div>
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-xs font-bold text-magic-soft">מספר משחקים</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={lichessGames}
+                  onChange={event => {
+                    setLichessGames(event.target.value);
+                    setError(null);
+                  }}
+                  className="mt-1 w-full rounded-xl border border-white/15 bg-magic-bg/60 px-3 py-2 text-center text-lg font-black text-white outline-none focus:border-cyan-300/60"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-magic-soft">נקודות בסיום</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={1000}
+                  value={lichessPoints}
+                  onChange={event => {
+                    setLichessPoints(event.target.value);
+                    setError(null);
+                  }}
+                  className="mt-1 w-full rounded-xl border border-white/15 bg-magic-bg/60 px-3 py-2 text-center text-lg font-black text-yellow-200 outline-none focus:border-yellow-300/60"
+                />
+              </label>
+            </div>
+            <div className="mt-3 text-xs leading-5 text-cyan-50/70">
+              ההשלמה אוטומטית. משחק Rapid נספר אם התלמיד/ה ניצח/ה, או אם שני הצדדים השלימו לפחות 15 מסעים. כשהיעד מושלם, הנקודות ניתנות אוטומטית והמשימה נספרת גם ביעד הכיתתי של השלמת משימות.
+            </div>
+          </div>
+        )}
 
         <div>
           <label className="mb-1 block text-sm font-bold text-magic-soft">
@@ -204,16 +412,32 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
         </div>
 
         <div className="rounded-2xl border border-emerald-300/15 bg-emerald-500/8 p-3 text-xs leading-5 text-emerald-100/75">
-          <strong>הפרס שנבחר:</strong> {reward.emoji} +{reward.points} נקודות לכל
-          תלמיד/ה שהמורה יסמן כהושלם. נקודות המשימה יכולות לשמש במשחק ובחיה,
-          אבל אינן נחשבות כהוכחת התנהגות לצורך התפתחות החיה.
+          {missionKind === 'manual' ? (
+            <>
+              <strong>הפרס שנבחר:</strong> {reward.emoji} +{reward.points} נקודות לכל
+              תלמיד/ה שהמורה יסמן כהושלם. נקודות המשימה יכולות לשמש במשחק ובחיה,
+              אבל אינן נחשבות כהוכחת התנהגות לצורך התפתחות החיה.
+            </>
+          ) : (
+            <>
+              <strong>השלמה אוטומטית:</strong> כשהמערכת מזהה את מספר משחקי ה־Rapid שנקבע,
+              היא מסמנת את המשימה כהושלמה ומעניקה את הנקודות בלי פעולה נוספת של המורה.
+            </>
+          )}
         </div>
+
+        {error && (
+          <div className="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-center text-xs font-bold text-red-200">
+            {error}
+          </div>
+        )}
 
         <div className="flex gap-2">
           <button
             type="button"
             onClick={close}
-            className="flex-1 rounded-xl bg-magic-bg/60 py-3 font-bold text-magic-soft"
+            disabled={saving}
+            className="flex-1 rounded-xl bg-magic-bg/60 py-3 font-bold text-magic-soft disabled:opacity-40"
           >
             ביטול
           </button>
