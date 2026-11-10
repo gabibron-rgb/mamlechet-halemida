@@ -13,6 +13,7 @@ import {
   createLichessRapidTask,
   getLichessRapidStatus,
 } from '../../lib/lichessIntegration';
+import type { LichessRecurrenceMode } from '../../lib/lichessIntegration';
 
 type Props = {
   open: boolean;
@@ -33,6 +34,9 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [lichessGames, setLichessGames] = useState('5');
   const [lichessPoints, setLichessPoints] = useState('3');
+  const [lichessRecurrenceMode, setLichessRecurrenceMode] =
+    useState<LichessRecurrenceMode>('none');
+  const [lichessAdditionalRepeats, setLichessAdditionalRepeats] = useState('3');
 
   const assignMissionToStudents = useGameStore(s => s.assignMissionToStudents);
   const loadStudentFromSupabase = useGameStore(s => s.loadStudentFromSupabase);
@@ -68,6 +72,8 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
     setError(null);
     setLichessGames('5');
     setLichessPoints('3');
+    setLichessRecurrenceMode('none');
+    setLichessAdditionalRepeats('3');
   }
 
   function close() {
@@ -85,6 +91,9 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
     }
     if (nextKind === 'manual' && title.trim() === 'אתגר Rapid בליצ׳ס') {
       setTitle('');
+    }
+    if (nextKind === 'manual') {
+      setLichessRecurrenceMode('none');
     }
   }
 
@@ -131,6 +140,7 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
     const cleanTitle = title.trim();
     const requiredGames = Number(lichessGames);
     const rewardPoints = Number(lichessPoints);
+    const additionalRepeats = Number(lichessAdditionalRepeats);
 
     if (!cleanTitle) throw new Error('יש להזין שם למשימה.');
     if (!Number.isInteger(requiredGames) || requiredGames < 1 || requiredGames > 100) {
@@ -141,6 +151,14 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
     }
     if (selectedStudents.length === 0) {
       throw new Error('יש לבחור לפחות תלמיד/ה אחד/ת.');
+    }
+    if (
+      lichessRecurrenceMode === 'finite' &&
+      (!Number.isInteger(additionalRepeats) ||
+        additionalRepeats < 1 ||
+        additionalRepeats > 99)
+    ) {
+      throw new Error('מספר החזרות הנוספות צריך להיות בין 1 ל־99.');
     }
 
     // Preflight first, so we do not knowingly create a group mission for only
@@ -171,7 +189,10 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
     }
 
     const missionId = genId('mission');
-    const dueAt = dueAtFromInput();
+    const dueAt =
+      lichessRecurrenceMode === 'none' ? dueAtFromInput() : null;
+    const recurrenceTotalRounds =
+      lichessRecurrenceMode === 'finite' ? additionalRepeats + 1 : null;
 
     for (const student of selectedStudents) {
       await createLichessRapidTask({
@@ -183,6 +204,8 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
         requiredGames,
         rewardPoints,
         dueAt,
+        recurrenceMode: lichessRecurrenceMode,
+        recurrenceTotalRounds,
       });
     }
 
@@ -359,23 +382,105 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
                 />
               </label>
             </div>
+
+            <div className="mt-4 rounded-2xl border border-white/10 bg-magic-bg/30 p-3">
+              <label className="flex cursor-pointer items-center justify-between gap-3">
+                <div>
+                  <div className="text-sm font-black text-white">🔁 משימה חוזרת אוטומטית</div>
+                  <div className="mt-1 text-[11px] leading-5 text-magic-soft/55">
+                    בכל פעם שהיעד מושלם, הפרס ניתן והמשימה מתחילה מחדש עם אותם מספר משחקים ונקודות.
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={lichessRecurrenceMode !== 'none'}
+                  onChange={event => {
+                    setLichessRecurrenceMode(event.target.checked ? 'finite' : 'none');
+                    setError(null);
+                  }}
+                  className="h-5 w-5 shrink-0 accent-cyan-300"
+                />
+              </label>
+
+              {lichessRecurrenceMode !== 'none' && (
+                <div className="mt-3 border-t border-white/8 pt-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setLichessRecurrenceMode('finite')}
+                      className={`rounded-xl border px-3 py-2 text-xs font-black ${
+                        lichessRecurrenceMode === 'finite'
+                          ? 'border-cyan-300/50 bg-cyan-300/15 text-cyan-100'
+                          : 'border-white/10 bg-magic-bg/40 text-magic-soft/65'
+                      }`}
+                    >
+                      מספר חזרות מוגדר
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLichessRecurrenceMode('until_stopped')}
+                      className={`rounded-xl border px-3 py-2 text-xs font-black ${
+                        lichessRecurrenceMode === 'until_stopped'
+                          ? 'border-cyan-300/50 bg-cyan-300/15 text-cyan-100'
+                          : 'border-white/10 bg-magic-bg/40 text-magic-soft/65'
+                      }`}
+                    >
+                      עד שאעצור אותה
+                    </button>
+                  </div>
+
+                  {lichessRecurrenceMode === 'finite' && (
+                    <label className="mt-3 block">
+                      <span className="text-xs font-bold text-magic-soft">מספר חזרות נוספות</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={99}
+                        value={lichessAdditionalRepeats}
+                        onChange={event => {
+                          setLichessAdditionalRepeats(event.target.value);
+                          setError(null);
+                        }}
+                        className="mt-1 w-full rounded-xl border border-white/15 bg-magic-bg/60 px-3 py-2 text-center text-lg font-black text-white outline-none focus:border-cyan-300/60"
+                      />
+                      <span className="mt-1 block text-[10px] leading-4 text-magic-soft/45">
+                        לדוגמה: 4 חזרות נוספות = 5 השלמות ו־5 פרסים בסך הכול.
+                      </span>
+                    </label>
+                  )}
+
+                  {lichessRecurrenceMode === 'until_stopped' && (
+                    <div className="mt-3 rounded-xl border border-cyan-300/15 bg-cyan-500/5 px-3 py-2 text-[11px] leading-5 text-cyan-50/70">
+                      אחרי כל השלמה יתחיל סבב חדש אוטומטית, עד שתעצור/י את הסדרה ממסך המשימות.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div className="mt-3 text-xs leading-5 text-cyan-50/70">
               ההשלמה אוטומטית. משחק Rapid נספר אם התלמיד/ה ניצח/ה, או אם שני הצדדים השלימו לפחות 15 מסעים. כשהיעד מושלם, הנקודות ניתנות אוטומטית והמשימה נספרת גם ביעד הכיתתי של השלמת משימות.
             </div>
           </div>
         )}
 
-        <div>
-          <label className="mb-1 block text-sm font-bold text-magic-soft">
-            תאריך יעד (אופציונלי)
-          </label>
-          <input
-            type="date"
-            value={dueDate}
-            onChange={event => setDueDate(event.target.value)}
-            className="w-full rounded-xl border border-white/15 bg-magic-bg/55 px-3 py-2 text-white outline-none focus:border-magic-accent/60"
-          />
-        </div>
+        {missionKind !== 'lichess_rapid' || lichessRecurrenceMode === 'none' ? (
+          <div>
+            <label className="mb-1 block text-sm font-bold text-magic-soft">
+              תאריך יעד (אופציונלי)
+            </label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={event => setDueDate(event.target.value)}
+              className="w-full rounded-xl border border-white/15 bg-magic-bg/55 px-3 py-2 text-white outline-none focus:border-magic-accent/60"
+            />
+          </div>
+        ) : (
+          <div className="rounded-xl border border-white/8 bg-magic-bg/30 px-3 py-2 text-xs leading-5 text-magic-soft/55">
+            למשימה חוזרת אין תאריך יעד קבוע: כל סבב מתחיל מיד כשהסבב הקודם מושלם.
+          </div>
+        )}
 
         <div>
           <div className="mb-2 flex items-center justify-between gap-2">
@@ -421,7 +526,8 @@ export default function MissionCreateModal({ open, onClose, students }: Props) {
           ) : (
             <>
               <strong>השלמה אוטומטית:</strong> כשהמערכת מזהה את מספר משחקי ה־Rapid שנקבע,
-              היא מסמנת את המשימה כהושלמה ומעניקה את הנקודות בלי פעולה נוספת של המורה.
+              היא מעניקה את הנקודות בלי פעולה נוספת של המורה.
+              {lichessRecurrenceMode !== 'none' && ' בסדרה חוזרת, סבב חדש נפתח מיד עם אותם תנאים.'}
             </>
           )}
         </div>

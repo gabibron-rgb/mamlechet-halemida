@@ -28,6 +28,14 @@ type MissionGroup = {
   recipients: MissionRecipient[];
 };
 
+function isRecurringLichessMission(mission: StudentMission): boolean {
+  return (
+    isLichessRapidMission(mission) &&
+    mission.lichessRecurrenceMode !== undefined &&
+    mission.lichessRecurrenceMode !== 'none'
+  );
+}
+
 export default function MissionBoard({ students, onCreateMission }: Props) {
   const [expanded, setExpanded] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -213,6 +221,7 @@ function MissionGroupCard({
           {lichess && (
             <p className="mt-1 text-[11px] font-bold text-cyan-100/65">
               🤖 ההשלמה מתבצעת אוטומטית דרך Lichess
+              {isRecurringLichessMission(group.sample) && ' · 🔁 סדרה חוזרת'}
             </p>
           )}
         </div>
@@ -242,6 +251,9 @@ function MissionGroupCard({
           const active = isMissionActive(mission);
           const completed = isMissionCompleted(mission);
           const isLichess = isLichessRapidMission(mission);
+          const recurring = isRecurringLichessMission(mission);
+          const recurrenceRound = Math.max(1, mission.lichessSeriesRound ?? 1);
+          const recurrenceTotal = mission.lichessSeriesTotalRounds ?? null;
           const requiredGames = Math.max(1, mission.lichessRequiredGames ?? 1);
           const progressGames = Math.min(
             requiredGames,
@@ -256,10 +268,19 @@ function MissionGroupCard({
               <div className="min-w-0">
                 <div className="font-bold text-white">{student.name}</div>
                 {isLichess && active && (
-                  <div className="mt-1 flex items-center gap-2 text-[11px] font-bold text-cyan-100/75">
-                    <span dir="ltr">{progressGames} / {requiredGames}</span>
-                    <span>משחקי Rapid תקינים</span>
-                  </div>
+                  <>
+                    <div className="mt-1 flex items-center gap-2 text-[11px] font-bold text-cyan-100/75">
+                      <span dir="ltr">{progressGames} / {requiredGames}</span>
+                      <span>משחקי Rapid תקינים</span>
+                    </div>
+                    {recurring && (
+                      <div className="mt-1 text-[10px] font-bold text-cyan-100/55">
+                        🔁 {recurrenceTotal !== null
+                          ? `סבב ${recurrenceRound} מתוך ${recurrenceTotal}`
+                          : `סבב ${recurrenceRound} · ממשיך עד עצירה`}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -295,14 +316,15 @@ function MissionGroupCard({
                     disabled={busyKey !== null}
                     className="rounded-lg border border-white/10 bg-magic-bg/50 px-3 py-1.5 text-xs font-bold text-magic-soft/65 disabled:opacity-40"
                   >
-                    {busyKey === cancelKey ? '...' : 'בטל'}
+                    {busyKey === cancelKey ? '...' : recurring ? 'עצור סדרה' : 'בטל'}
                   </button>
                 </div>
               )}
 
               {completed && (
                 <span className="text-xs font-black text-emerald-200">
-                  ✓ {isLichess ? 'הושלם אוטומטית' : 'הושלם'} · הפרס ניתן
+                  ✓ {isLichess ? 'הושלם אוטומטית' : 'הושלם'}
+                  {recurring && ` · סבב ${recurrenceRound}`} · הפרס ניתן
                 </span>
               )}
 

@@ -49,9 +49,14 @@ export default function MissionsPanel({ student }: Props) {
     try {
       const result = await syncLichessRapid(student.supabaseId ?? student.id);
       const awardedPoints = Math.max(0, result.awardedPoints ?? 0);
+      const roundsCompleted = Math.max(0, result.roundsCompletedAdded ?? 0);
 
       if (awardedPoints > 0) {
-        setAwardMessage(`🎉 משימת ה־Rapid הושלמה! קיבלת ${awardedPoints} נקודות.`);
+        setAwardMessage(
+          roundsCompleted > 1
+            ? `🎉 השלמת ${roundsCompleted} סבבי Rapid! קיבלת ${awardedPoints} נקודות.`
+            : `🎉 סבב ה־Rapid הושלם! קיבלת ${awardedPoints} נקודות.`
+        );
       }
 
       await loadStudentFromSupabase(student.supabaseId ?? student.id);
@@ -179,6 +184,9 @@ export default function MissionsPanel({ student }: Props) {
                     <div className="mt-0.5 text-xs text-magic-soft/50">
                       {lichess ? 'הושלמה אוטומטית ' : 'הושלמה '}
                       {formatRelativeDate(mission.completedAt ?? Date.now())}
+                      {lichess && mission.lichessRecurrenceMode !== 'none' && mission.lichessSeriesRound
+                        ? ` · סבב ${mission.lichessSeriesRound}`
+                        : ''}
                     </div>
                   </div>
                   <div className="text-sm font-black text-emerald-200">
@@ -246,6 +254,10 @@ function LichessMissionCard({
   const progress = Math.min(required, Math.max(0, mission.lichessProgressGames ?? 0));
   const remaining = Math.max(0, required - progress);
   const pct = Math.round((progress / required) * 100);
+  const recurrenceMode = mission.lichessRecurrenceMode ?? 'none';
+  const recurrenceRound = Math.max(1, mission.lichessSeriesRound ?? 1);
+  const recurrenceTotal = mission.lichessSeriesTotalRounds ?? null;
+  const recurring = recurrenceMode !== 'none';
 
   return (
     <article
@@ -259,7 +271,7 @@ function LichessMissionCard({
         <div>
           <div className="text-lg font-black text-white">♟️ {mission.title}</div>
           <div className="mt-1 text-xs font-bold text-cyan-100/65">
-            Lichess Rapid · השלמה אוטומטית
+            Lichess Rapid · השלמה אוטומטית{recurring ? ' · 🔁 חוזרת' : ''}
           </div>
         </div>
         <RewardBadge points={mission.rewardPoints} />
@@ -269,6 +281,14 @@ function LichessMissionCard({
         <p className="mb-4 whitespace-pre-wrap text-sm leading-6 text-magic-soft/80">
           {mission.description}
         </p>
+      )}
+
+      {recurring && (
+        <div className="mb-3 rounded-xl border border-cyan-300/15 bg-cyan-500/5 px-3 py-2 text-xs font-bold text-cyan-50/75">
+          🔁 {recurrenceTotal !== null
+            ? `סבב ${recurrenceRound} מתוך ${recurrenceTotal}`
+            : `סבב ${recurrenceRound} · המשימה תתחיל מחדש אחרי כל השלמה עד שהמורה יעצור אותה`}
+        </div>
       )}
 
       <div className="rounded-2xl bg-magic-bg/45 p-4">
@@ -316,7 +336,9 @@ function LichessMissionCard({
       </div>
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-white/8 pt-3 text-xs">
-        <span className="font-bold text-cyan-100/75">🤖 המערכת מסיימת את המשימה אוטומטית</span>
+        <span className="font-bold text-cyan-100/75">
+          🤖 {recurring ? 'בסיום הסבב הפרס ניתן והסבב הבא מתחיל אוטומטית' : 'המערכת מסיימת את המשימה אוטומטית'}
+        </span>
         <DueDate mission={mission} overdue={overdue} />
       </div>
     </article>

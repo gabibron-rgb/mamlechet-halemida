@@ -1,5 +1,7 @@
 import { supabase } from './supabaseClient';
 
+export type LichessRecurrenceMode = 'none' | 'finite' | 'until_stopped';
+
 export type LichessRapidTask = {
   id: string;
   missionId: string | null;
@@ -12,6 +14,10 @@ export type LichessRapidTask = {
   completedAt: string | null;
   cancelledAt: string | null;
   lastCheckedAt: string | null;
+  recurrenceMode?: LichessRecurrenceMode;
+  recurrenceTotalRounds?: number | null;
+  recurrenceCompletedRounds?: number;
+  currentRound?: number;
 };
 
 export type LichessRapidStatus = {
@@ -24,6 +30,7 @@ export type LichessRapidStatus = {
   countedGamesAdded?: number;
   completedTask?: LichessRapidTask | null;
   skipped?: boolean;
+  roundsCompletedAdded?: number;
 };
 
 type LichessFunctionResponse = LichessRapidStatus & {
@@ -123,6 +130,8 @@ export async function createLichessRapidTask(input: {
   requiredGames: number;
   rewardPoints: number;
   dueAt: number | null;
+  recurrenceMode?: LichessRecurrenceMode;
+  recurrenceTotalRounds?: number | null;
 }): Promise<LichessRapidStatus> {
   return invokeLichessFunction({
     action: 'create_task',
@@ -134,6 +143,8 @@ export async function createLichessRapidTask(input: {
     requiredGames: input.requiredGames,
     rewardPoints: input.rewardPoints,
     dueAt: input.dueAt,
+    recurrenceMode: input.recurrenceMode ?? 'none',
+    recurrenceTotalRounds: input.recurrenceTotalRounds ?? null,
   });
 }
 

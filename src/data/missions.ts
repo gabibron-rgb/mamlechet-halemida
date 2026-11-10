@@ -1,5 +1,6 @@
 export type MissionRewardTier = 'small' | 'medium' | 'weekly';
 export type MissionKind = 'manual' | 'lichess_rapid';
+export type LichessMissionRecurrenceMode = 'none' | 'finite' | 'until_stopped';
 
 export type MissionRewardPreset = {
   id: MissionRewardTier;
@@ -56,6 +57,10 @@ export type StudentMission = {
   // Present only for Lichess Rapid missions.
   lichessRequiredGames?: number;
   lichessProgressGames?: number;
+  lichessRecurrenceMode?: LichessMissionRecurrenceMode;
+  lichessSeriesId?: string;
+  lichessSeriesRound?: number;
+  lichessSeriesTotalRounds?: number | null;
 };
 
 export function missionRewardPreset(
@@ -102,6 +107,19 @@ export function normalizeStudentMissions(value: unknown): StudentMission[] {
       raw.kind === 'lichess_rapid' ? 'lichess_rapid' : 'manual';
     const lichessRequiredGames = positiveInt(raw.lichessRequiredGames);
     const lichessProgressGames = nonNegativeInt(raw.lichessProgressGames);
+    const lichessRecurrenceMode: LichessMissionRecurrenceMode =
+      raw.lichessRecurrenceMode === 'finite' || raw.lichessRecurrenceMode === 'until_stopped'
+        ? raw.lichessRecurrenceMode
+        : 'none';
+    const lichessSeriesId =
+      typeof raw.lichessSeriesId === 'string' && raw.lichessSeriesId.trim()
+        ? raw.lichessSeriesId.trim()
+        : undefined;
+    const lichessSeriesRound = positiveInt(raw.lichessSeriesRound);
+    const lichessSeriesTotalRounds =
+      raw.lichessSeriesTotalRounds === null
+        ? null
+        : positiveInt(raw.lichessSeriesTotalRounds);
 
     if (!id || !title) return [];
     if (kind === 'lichess_rapid' && !lichessRequiredGames) return [];
@@ -125,6 +143,10 @@ export function normalizeStudentMissions(value: unknown): StudentMission[] {
                 lichessRequiredGames ?? 1,
                 lichessProgressGames ?? 0
               ),
+              lichessRecurrenceMode,
+              ...(lichessSeriesId ? { lichessSeriesId } : {}),
+              ...(lichessSeriesRound ? { lichessSeriesRound } : {}),
+              lichessSeriesTotalRounds,
             }
           : {}),
       },
